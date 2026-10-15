@@ -1,0 +1,13 @@
+{
+  "loading": "Sebentar ya...",
+  "retry": "Coba lagi",
+  "back": "Kembali",
+  "empty.title": "Belum ada isinya",
+  "empty.hint": "Nanti kalau sudah ada, akan muncul di sini.",
+  "error.title": "Ada yang belum berjalan",
+  "error.hint": "Coba sekali lagi, ya.",
+  "notFound.title": "Halaman ini tidak ketemu",
+  "notFound.hint": "Ayo kembali ke halaman awal.",
+  "notFound.home": "Ke halaman awal",
+  "menu": "Menu"
+}

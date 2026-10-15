@@ -1,0 +1,334 @@
+import { z } from 'zod';
+import {
+  emailSchema,
+  levelStatusSchema,
+  masteryStatusSchema,
+  momoColorSchema,
+  nicknameSchema,
+  passwordSchema,
+  pinSchema,
+  questionSourceSchema,
+  questionStatusSchema,
+  questionTypeSchema,
+  roleSchema,
+  stageSchema,
+  visualSchema,
+} from './domain.js';
+
+// Kontrak API: satu-satunya tempat bentuk permintaan dan respons ditulis.
+// Mock di web dan API NestJS memakai skema yang sama.
+
+export const API_ERROR_CODES = [
+  'VALIDATION',
+  'UNAUTHENTICATED',
+  'INVALID_CREDENTIALS',
+  'WRONG_PIN',
+  'FORBIDDEN',
+  'LEVEL_LOCKED',
+  'PREMIUM_REQUIRED',
+  'NOT_FOUND',
+  'CONFLICT',
+  'NOT_ENOUGH_QUESTIONS',
+  'TEMPORARILY_LOCKED',
+  'RATE_LIMITED',
+] as const;
+
+export const apiErrorSchema = z.object({
+  error: z.object({
+    code: z.enum(API_ERROR_CODES),
+    message: z.string(),
+    attemptsLeft: z.number().int().optional(),
+    lockedUntil: z.string().optional(),
+  }),
+});
+export type ApiErrorBody = z.infer<typeof apiErrorSchema>;
+
+// ---- Akun ----
+
+export const authUserSchema = z.object({
+  id: z.string(),
+  role: roleSchema,
+  name: z.string(),
+  familyCode: z.string().nullable(),
+});
+export const authResultSchema = z.object({ token: z.string(), user: authUserSchema });
+export type AuthResult = z.infer<typeof authResultSchema>;
+
+export const registerParentBodySchema = z.object({
+  name: z.string().trim().min(1).max(60),
+  email: emailSchema,
+  password: passwordSchema,
+  consent: z.literal(true),
+});
+export type RegisterParentBody = z.infer<typeof registerParentBodySchema>;
+
+export const loginBodySchema = z.object({ email: emailSchema, password: z.string().min(1) });
+export type LoginBody = z.infer<typeof loginBodySchema>;
+
+export const familyProfilesSchema = z.object({
+  profiles: z.array(
+    z.object({
+      id: z.string(),
+      nickname: z.string(),
+      momoColor: momoColorSchema,
+      hasPin: z.boolean(),
+    }),
+  ),
+});
+export type FamilyProfiles = z.infer<typeof familyProfilesSchema>;
+
+export const childLoginBodySchema = z.object({ childId: z.string(), pin: pinSchema });
+export type ChildLoginBody = z.infer<typeof childLoginBodySchema>;
+
+export const childLoginResultSchema = z.object({
+  token: z.string(),
+  child: z.object({ id: z.string(), nickname: z.string(), momoColor: momoColorSchema }),
+});
+export type ChildLoginResult = z.infer<typeof childLoginResultSchema>;
+
+// ---- Katalog dan ronde (anak) ----
+
+export const childQuestionSchema = z.object({
+  id: z.string(),
+  type: questionTypeSchema,
+  prompt: z.string(),
+  visual: visualSchema,
+  options: z.array(z.string()).nullable(),
+  audioUrl: z.string().nullable(),
+});
+export type ChildQuestion = z.infer<typeof childQuestionSchema>;
+
+export const startRoundBodySchema = z.object({ levelId: z.string() });
+export const startRoundResultSchema = z.object({
+  roundId: z.string(),
+  questions: z.array(childQuestionSchema),
+});
+export type StartRoundResult = z.infer<typeof startRoundResultSchema>;
+
+export const answerBodySchema = z.object({
+  questionId: z.string(),
+  answer: z.string().trim().min(1).max(60),
+});
+export type AnswerBody = z.infer<typeof answerBodySchema>;
+export const answerResultSchema = z.object({
+  isCorrect: z.boolean(),
+  hint: z.string().nullable(),
+  correctAnswer: z.string().nullable(),
+});
+export type AnswerResult = z.infer<typeof answerResultSchema>;
+
+export const roundResultSchema = z.object({
+  roundId: z.string(),
+  levelId: z.string(),
+  score: z.number().int(),
+  correct: z.number().int(),
+  wrong: z.number().int(),
+  durationMs: z.number().int(),
+  passed: z.boolean(),
+  nextLevel: z
+    .object({ id: z.string(), number: z.number().int(), status: levelStatusSchema })
+    .nullable(),
+  plant: z.object({
+    topicId: z.string(),
+    title: z.string(),
+    stageBefore: stageSchema,
+    stageAfter: stageSchema,
+  }),
+});
+export type RoundResult = z.infer<typeof roundResultSchema>;
+
+export const catalogHomeSchema = z.object({
+  books: z.array(
+    z.object({
+      slug: z.string(),
+      title: z.string(),
+      subject: z.enum(['math', 'science']),
+      topicsTotal: z.number().int(),
+      topicsStarted: z.number().int(),
+    }),
+  ),
+  continue: z.object({ levelId: z.string(), topicId: z.string(), title: z.string() }).nullable(),
+});
+export type CatalogHome = z.infer<typeof catalogHomeSchema>;
+
+export const bookDetailSchema = z.object({
+  book: z.object({ slug: z.string(), title: z.string(), subject: z.enum(['math', 'science']) }),
+  topics: z.array(
+    z.object({
+      id: z.string(),
+      code: z.string(),
+      title: z.string(),
+      stage: stageSchema,
+      levelsPassed: z.number().int(),
+      levelsTotal: z.number().int(),
+    }),
+  ),
+});
+export type BookDetail = z.infer<typeof bookDetailSchema>;
+
+export const topicDetailSchema = z.object({
+  topic: z.object({
+    id: z.string(),
+    code: z.string(),
+    title: z.string(),
+    lesson: z.string(),
+    lessonAudioUrl: z.string().nullable(),
+    bookSlug: z.string(),
+  }),
+  levels: z.array(
+    z.object({
+      id: z.string(),
+      number: z.number().int(),
+      title: z.string(),
+      status: levelStatusSchema,
+      bestScore: z.number().int().nullable(),
+    }),
+  ),
+});
+export type TopicDetail = z.infer<typeof topicDetailSchema>;
+
+export const childProfileSchema = z.object({
+  nickname: z.string(),
+  momoColor: momoColorSchema,
+  plants: z.array(
+    z.object({ topicId: z.string(), title: z.string(), bookSlug: z.string(), stage: stageSchema }),
+  ),
+  history: z.array(
+    z.object({
+      roundId: z.string(),
+      levelTitle: z.string(),
+      score: z.number().int(),
+      passed: z.boolean(),
+      finishedAt: z.string(),
+    }),
+  ),
+});
+export type ChildProfile = z.infer<typeof childProfileSchema>;
+
+export const setMomoBodySchema = z.object({ momoColor: momoColorSchema });
+
+// ---- Papan peringkat ----
+
+export const leaderboardEntrySchema = z.object({
+  rank: z.number().int(),
+  nickname: z.string(),
+  momoColor: momoColorSchema,
+  score: z.number().int(),
+  isMe: z.boolean().optional(),
+});
+export const leaderboardSchema = z.object({
+  entries: z.array(leaderboardEntrySchema),
+  me: z.object({ rank: z.number().int(), score: z.number().int() }).nullable(),
+});
+export type Leaderboard = z.infer<typeof leaderboardSchema>;
+export const leaderboardTopSchema = z.object({ entries: z.array(leaderboardEntrySchema) });
+export type LeaderboardTop = z.infer<typeof leaderboardTopSchema>;
+
+// ---- Orang tua ----
+
+export const childSummarySchema = z.object({
+  id: z.string(),
+  nickname: z.string(),
+  momoColor: momoColorSchema,
+  hasPin: z.boolean(),
+  totalScore: z.number().int(),
+  levelsPassed: z.number().int(),
+  rounds: z.number().int(),
+  minutes: z.number().int(),
+  premiumUntil: z.string().nullable(),
+});
+export const parentOverviewSchema = z.object({
+  familyCode: z.string(),
+  week: z.object({
+    rounds: z.number().int(),
+    levelsPassed: z.number().int(),
+    minutes: z.number().int(),
+    activeChildren: z.number().int(),
+  }),
+  children: z.array(childSummarySchema),
+});
+export type ParentOverview = z.infer<typeof parentOverviewSchema>;
+
+export const createChildBodySchema = z.object({
+  nickname: nicknameSchema,
+  momoColor: momoColorSchema,
+});
+export type CreateChildBody = z.infer<typeof createChildBodySchema>;
+export const patchChildBodySchema = createChildBodySchema.partial();
+export const setPinBodySchema = z.object({ pin: pinSchema });
+
+export const childReportSchema = z.object({
+  child: z.object({ id: z.string(), nickname: z.string(), momoColor: momoColorSchema }),
+  topics: z.array(
+    z.object({
+      topicId: z.string(),
+      title: z.string(),
+      bookTitle: z.string(),
+      mastery: z.number().int(),
+      status: masteryStatusSchema,
+      stage: stageSchema,
+    }),
+  ),
+  weekAccuracy: z.number().nullable(),
+  recentRounds: z.array(
+    z.object({
+      roundId: z.string(),
+      levelTitle: z.string(),
+      score: z.number().int(),
+      passed: z.boolean(),
+      finishedAt: z.string(),
+      durationMs: z.number().int(),
+    }),
+  ),
+  suggestions: z.array(z.object({ topicId: z.string(), title: z.string() })).max(3),
+});
+export type ChildReport = z.infer<typeof childReportSchema>;
+
+export const parentPlanSchema = z.object({
+  adminWhatsapp: z.string(),
+  children: z.array(
+    z.object({
+      id: z.string(),
+      nickname: z.string(),
+      plan: z.enum(['free', 'premium']),
+      until: z.string().nullable(),
+    }),
+  ),
+});
+export type ParentPlan = z.infer<typeof parentPlanSchema>;
+
+// ---- Admin ----
+
+export const adminQuestionSchema = childQuestionSchema.extend({
+  levelId: z.string(),
+  answer: z.string(),
+  explanation: z.string().nullable(),
+  status: questionStatusSchema,
+  source: questionSourceSchema,
+  createdAt: z.string(),
+});
+export type AdminQuestion = z.infer<typeof adminQuestionSchema>;
+
+export const createQuestionBodySchema = z.object({
+  levelId: z.string(),
+  type: questionTypeSchema,
+  prompt: z.string().trim().min(1).max(200),
+  visual: visualSchema.optional(),
+  options: z.array(z.string()).nullable().optional(),
+  answer: z.string().trim().min(1).max(60),
+  explanation: z.string().trim().max(300).nullable().optional(),
+});
+export type CreateQuestionBody = z.infer<typeof createQuestionBodySchema>;
+export const patchQuestionBodySchema = createQuestionBodySchema.partial();
+
+export const approveQuestionsBodySchema = z.object({ ids: z.array(z.string()).min(1).max(50) });
+export const aiQuestionsBodySchema = z.object({
+  levelId: z.string(),
+  count: z.number().int().min(5).max(20),
+  types: z.array(questionTypeSchema).optional(),
+  note: z.string().trim().max(300).optional(),
+});
+export type AiQuestionsBody = z.infer<typeof aiQuestionsBodySchema>;
+
+export const premiumBodySchema = z.object({ until: z.iso.datetime() });
+export type PremiumBody = z.infer<typeof premiumBodySchema>;
