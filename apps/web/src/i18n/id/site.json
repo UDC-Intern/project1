@@ -1,5 +1,8 @@
 {
   "landing.tagline": "Belajar Matematika dan Sains bersama Momo.",
   "style.title": "Katalog gaya",
-  "style.intro": "Halaman ini hanya ada saat pengembangan. Isinya token dan komponen yang dipakai di seluruh aplikasi."
+  "style.intro": "Halaman ini hanya ada saat pengembangan. Isinya token dan komponen yang dipakai di seluruh aplikasi.",
+  "landing.child": "Anak masuk",
+  "landing.parent": "Orang tua",
+  "landing.register": "Daftar sebagai orang tua"
 }

@@ -9,3 +9,4 @@ export * from './generator/index.js';
 export * from './scoring/round.js';
 export * from './scoring/jago.js';
 export * from './scoring/leaderboard.js';
+export * from './scoring/report.js';
