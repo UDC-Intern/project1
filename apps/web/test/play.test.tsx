@@ -7,6 +7,7 @@ import { book, home, topic } from '../src/api/catalog';
 import { readDb, resetMockDb, writeDb } from '../src/api/mock/db';
 import { useSession } from '../src/auth/store';
 import { ChildLogin } from '../src/play/ChildLogin';
+import { PlayHome } from '../src/play/PlayHome';
 import { TopicPage } from '../src/play/TopicPage';
 
 const AYU = 'c-ayu';
@@ -179,5 +180,31 @@ describe('halaman anak', () => {
     expect(screen.getByRole('link', { name: 'Mulai level 1' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Level 1: Membilang/ })).toBeInTheDocument();
     expect(screen.getAllByText('Selesaikan level sebelumnya dulu')).toHaveLength(2);
+  });
+
+  it('beranda menampilkan Peta Belajar dengan pilihan Kelas 1 sampai 4', async () => {
+    useSession.setState({ session: { token: 'mock-child:' + AYU, role: 'child', name: 'Ayu' } });
+    try {
+      localStorage.clear();
+    } catch {
+      /* abaikan */
+    }
+    render(
+      <MemoryRouter initialEntries={['/play']}>
+        <Routes>
+          <Route path="/play" element={<PlayHome />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    const chips = await screen.findByRole('navigation', { name: 'Pilih kelas' });
+    for (const label of ['Kelas 1', 'Kelas 2', 'Kelas 3', 'Kelas 4'])
+      expect(chips).toHaveTextContent(label);
+    expect(await screen.findByText(/topik lulus/)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Kelas 4' }));
+    expect(
+      await screen.findByRole('button', { name: /Nilai tempat sampai 100.000/ }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Mulai belajar' })).toBeInTheDocument();
   });
 });
