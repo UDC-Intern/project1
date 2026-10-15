@@ -62,3 +62,40 @@ export const LockIcon = (p: IconProps) => (
     <path d="M8 11V8a4 4 0 0 1 8 0v3" />
   </Svg>
 );
+export const BackIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M15 5l-7 7 7 7" />
+  </Svg>
+);
+export const DoorIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M6 21V4a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v17" />
+    <path d="M3 21h18M12 12h.01" />
+  </Svg>
+);
+export const PlayIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M7 4l13 8-13 8z" fill="currentColor" />
+  </Svg>
+);
+export const ClockIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 7v5l3 2" />
+  </Svg>
+);
+
+/** Bintang isi untuk poin: kunyit, dengan garis supaya tetap terlihat di latar terang. */
+export function StarIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"
+        fill="var(--kunyit)"
+        stroke="var(--kunyit-tekan)"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}

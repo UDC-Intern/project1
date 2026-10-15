@@ -5,7 +5,6 @@ import { childLogin, familyProfiles } from '../api/auth';
 import { ApiError } from '../api/client';
 import { useSession } from '../auth/store';
 import { BigButton } from '../components/BigButton';
-import { BigCard } from '../components/BigCard';
 import { Momo } from '../components/Momo';
 import { PicturePin } from '../components/PicturePin';
 import { useT } from '../i18n';
@@ -24,6 +23,7 @@ export function ChildLogin() {
   const [chosen, setChosen] = useState<Profile | null>(null);
   const [pin, setPin] = useState<PinPicture[]>([]);
   const [message, setMessage] = useState<string | null>(null);
+  const [shake, setShake] = useState(false);
   const [busy, setBusy] = useState(false);
 
   if (session?.role === 'child') return <Navigate to="/play" replace />;
@@ -57,15 +57,14 @@ export function ChildLogin() {
     setBusy(true);
     setMessage(null);
     try {
-      const res = await childLogin({
-        childId: chosen.id,
-        pin: [next[0]!, next[1]!, next[2]!],
-      });
+      const res = await childLogin({ childId: chosen.id, pin: [next[0]!, next[1]!, next[2]!] });
       signIn({ token: res.token, role: 'child', name: res.child.nickname });
       navigate('/play', { replace: true });
     } catch (err) {
       setMessage(explain(err));
       setPin([]);
+      setShake(true);
+      window.setTimeout(() => setShake(false), 500);
     } finally {
       setBusy(false);
     }
@@ -77,78 +76,75 @@ export function ChildLogin() {
   };
 
   return (
-    <main className="uk-child-main" style={{ minHeight: '100vh' }}>
-      <div className="uk-row" style={{ marginBottom: 'var(--uk-space-4)' }}>
-        <Momo mood={message ? 'encourage' : 'happy'} size={80} />
-        <h1 style={{ margin: 0 }}>{t('login.title')}</h1>
-      </div>
+    <main className="kid-screen">
+      <Momo mood={message ? 'encourage' : 'happy'} size={120} />
+      <h1 className="kid-say" style={{ margin: 0 }}>
+        {t('login.title')}
+      </h1>
 
       {message && (
-        <div className="uk-feedback uk-feedback--retry" role="alert" aria-live="polite">
+        <p className="kid-note" role="alert">
           {message}
-        </div>
+        </p>
       )}
 
       {!profiles && (
         <form
-          className="uk-stack"
-          style={{ marginTop: 'var(--uk-space-4)' }}
+          className="code-form"
           onSubmit={(e) => {
             e.preventDefault();
             if (code.length === CODE_LENGTH) void findFamily();
           }}
         >
-          <label className="uk-field" style={{ fontSize: 'var(--uk-text-child)' }}>
-            {t('login.code.label')}
-            <input
-              value={code}
-              maxLength={CODE_LENGTH}
-              autoComplete="off"
-              autoCapitalize="characters"
-              inputMode="text"
-              onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z]/g, ''))}
-              style={{
-                minHeight: 'var(--uk-touch)',
-                fontSize: 'var(--uk-text-question)',
-                letterSpacing: '0.2em',
-                textAlign: 'center',
-              }}
-            />
-          </label>
+          <label htmlFor="family-code">{t('login.code.label')}</label>
+          <input
+            id="family-code"
+            value={code}
+            maxLength={CODE_LENGTH}
+            autoComplete="off"
+            autoCapitalize="characters"
+            onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z]/g, ''))}
+          />
           <p style={{ margin: 0 }}>{t('login.code.hint')}</p>
-          <BigButton type="submit" disabled={code.length !== CODE_LENGTH || busy}>
+          <BigButton type="submit" variant="play" disabled={code.length !== CODE_LENGTH || busy}>
             {busy ? t('login.checking') : t('login.next')}
           </BigButton>
         </form>
       )}
 
       {profiles && !chosen && (
-        <div className="uk-stack" style={{ marginTop: 'var(--uk-space-4)' }}>
-          <h2>{t('login.who')}</h2>
-          <div className="uk-grid">
+        <>
+          <p className="kid-say" style={{ margin: 0 }}>
+            {t('login.who')}
+          </p>
+          <div className="profiles">
             {profiles.map((p) => (
-              <BigCard key={p.id} onClick={() => setChosen(p)} disabled={!p.hasPin}>
-                <div className="uk-row">
-                  <Momo color={p.momoColor} size={56} />
-                  <strong>{p.nickname}</strong>
-                </div>
-                {!p.hasPin && <p style={{ margin: 0 }}>{t('login.nopin')}</p>}
-              </BigCard>
+              <button
+                key={p.id}
+                type="button"
+                className="profile-card"
+                aria-disabled={!p.hasPin || undefined}
+                onClick={() => p.hasPin && setChosen(p)}
+              >
+                <Momo color={p.momoColor} size={72} />
+                <span>{p.nickname}</span>
+                {!p.hasPin && <small>{t('login.nopin')}</small>}
+              </button>
             ))}
           </div>
           <BigButton variant="ghost" onClick={() => setProfiles(null)}>
             {t('login.change')}
           </BigButton>
-        </div>
+        </>
       )}
 
       {chosen && (
-        <div className="uk-stack" style={{ marginTop: 'var(--uk-space-4)' }}>
-          <div className="uk-row">
-            <Momo color={chosen.momoColor} size={64} />
-            <strong>{chosen.nickname}</strong>
+        <>
+          <div className="kid-row" style={{ alignItems: 'center' }}>
+            <Momo color={chosen.momoColor} size={72} />
+            <strong style={{ fontSize: '1.6rem' }}>{chosen.nickname}</strong>
           </div>
-          <PicturePin value={pin} onChange={onPinChange} />
+          <PicturePin value={pin} onChange={onPinChange} shake={shake} />
           <BigButton
             variant="ghost"
             onClick={() => {
@@ -159,7 +155,7 @@ export function ChildLogin() {
           >
             {t('login.change')}
           </BigButton>
-        </div>
+        </>
       )}
     </main>
   );

@@ -52,7 +52,7 @@ export function StaffLogin() {
           autoComplete="current-password"
         />
         {error && (
-          <p role="alert" style={{ color: 'var(--uk-danger)', margin: 0 }}>
+          <p role="alert" style={{ color: 'var(--bahaya)', margin: 0 }}>
             {error}
           </p>
         )}

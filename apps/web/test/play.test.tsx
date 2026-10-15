@@ -169,7 +169,8 @@ describe('halaman anak', () => {
     );
     expect(await screen.findByText('Bilangan sampai 100')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Dengarkan soal' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Ayo main' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Mulai level 1' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Level 1: Membilang/ })).toBeInTheDocument();
     expect(screen.getAllByText('Selesaikan level sebelumnya dulu')).toHaveLength(2);
   });
 });

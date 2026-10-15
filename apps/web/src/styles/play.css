@@ -1,0 +1,1370 @@
+/* Area anak (/play). Warna lewat token di uk-tokens.css. Tombol berbentuk anak tangga: bayangan padat 5 px. */
+
+/* ── Dasar ── */
+.kid-app,
+.kid-screen,
+.library,
+.practice {
+  --kid-bg: var(--awan);
+  --kid-ink: var(--malam);
+  --kid-primary: var(--gonjong);
+  --kid-card: var(--kertas);
+  --kid-line: var(--garis-tegas);
+  --kid-soft: var(--gonjong-soft);
+  --kid-good: var(--sawah);
+  --kid-bad: var(--kunyit);
+  --kid-sun: var(--kunyit);
+  --kid-touch: var(--touch-anak);
+  color: var(--kid-ink);
+  font-family: var(--font-body);
+}
+.kid-app,
+.kid-screen,
+.practice {
+  background: var(--kid-bg);
+  min-height: 100vh;
+}
+:where(.kid-screen, .library, .practice) :where(button, input, select, textarea) {
+  color: inherit;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Layar terpusat: memuat, galat, hasil, masuk */
+.kid-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 24px 16px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+/* ── Tombol anak ── */
+.kid-btn {
+  min-height: var(--kid-touch, 64px);
+  min-width: 140px;
+  padding: 0 28px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--gonjong);
+  color: var(--on-gonjong);
+  font: inherit;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-decoration: none;
+  box-shadow: var(--shadow-tekan) var(--gonjong-tekan);
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.08s ease;
+  box-sizing: border-box;
+  max-width: 100%;
+}
+.kid-btn.secondary {
+  background: var(--kertas);
+  color: var(--malam);
+  box-shadow:
+    inset 0 0 0 2px var(--garis-tegas),
+    var(--shadow-tekan) var(--garis-tegas);
+}
+.kid-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.kid-btn:active:not(:disabled) {
+  transform: translateY(5px);
+  box-shadow: none;
+}
+.kid-btn.big-play {
+  min-height: 76px;
+  font-size: clamp(1.25rem, 1.05rem + 0.8vw, 1.5rem);
+  padding: 0 clamp(18px, 4vw, 32px);
+  background: var(--sawah);
+  color: var(--on-sawah);
+  box-shadow: var(--shadow-tekan) var(--sawah-tekan);
+}
+.kid-link {
+  min-height: var(--kid-touch, 64px);
+  min-width: var(--kid-touch, 64px);
+  padding: 0 16px;
+  border: none;
+  background: none;
+  color: var(--gonjong);
+  font: inherit;
+  font-weight: 800;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+.kid-say {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: clamp(1.1rem, 0.95rem + 0.8vw, 1.4rem);
+  font-weight: 700;
+}
+.kid-say p {
+  margin: 0;
+}
+.kid-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.kid-note {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--gonjong);
+  margin: 0;
+}
+.kid-card {
+  background: var(--kertas);
+  border: 4px solid var(--garis-tegas);
+  border-radius: 28px;
+  padding: 16px 20px;
+  box-sizing: border-box;
+}
+button.kid-card {
+  font: inherit;
+  font-size: 1.4rem;
+  font-weight: 800;
+  cursor: pointer;
+  text-align: center;
+  box-shadow: 0 5px 0 var(--garis-tegas);
+}
+button.kid-card[aria-disabled='true'] {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+.speak-btn {
+  flex: none;
+  width: var(--kid-touch, 64px);
+  height: var(--kid-touch, 64px);
+  display: inline-grid;
+  place-items: center;
+  border: 3px solid var(--garis-tegas);
+  border-radius: 50%;
+  background: var(--kertas);
+  color: var(--malam);
+  cursor: pointer;
+  box-shadow: 0 4px 0 var(--garis-tegas);
+}
+.speak-btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--garis-tegas);
+}
+
+/* ── Masuk anak: kode keluarga, profil, sandi gambar ── */
+.code-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+.code-form label {
+  font-weight: 800;
+  font-size: 1.2rem;
+}
+.code-form input {
+  font: inherit;
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  text-align: center;
+  width: 10ch;
+  max-width: 100%;
+  padding: 10px 16px;
+  border: 4px solid var(--garis-tegas);
+  border-radius: 20px;
+  text-transform: uppercase;
+  background: var(--kertas);
+}
+.profiles {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.profile-card {
+  background: var(--kertas);
+  border: 4px solid var(--garis-tegas);
+  border-radius: 28px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font: inherit;
+  font-size: 1.4rem;
+  font-weight: 800;
+  cursor: pointer;
+  min-width: 160px;
+  box-shadow: 0 5px 0 var(--garis-tegas);
+}
+.profile-card:active:not([aria-disabled='true']) {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 var(--garis-tegas);
+}
+.profile-card[aria-disabled='true'] {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+.profile-card small {
+  font-size: 0.95rem;
+  font-weight: 700;
+  max-width: 18ch;
+}
+.pin-slots {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+}
+.pin-slot {
+  width: 84px;
+  height: 84px;
+  border: 4px dashed var(--garis-tegas);
+  border-radius: 20px;
+  display: grid;
+  place-items: center;
+  background: var(--kertas);
+}
+.pin-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 104px);
+  gap: 14px;
+}
+.pin-key {
+  width: 104px;
+  height: 104px;
+  border: 4px solid var(--garis-tegas);
+  border-radius: 24px;
+  background: var(--kertas);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  padding: 0;
+  box-shadow: 0 5px 0 var(--garis-tegas);
+}
+.pin-key:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 var(--garis-tegas);
+}
+.pin-key[aria-pressed='true'] {
+  border-color: var(--gonjong);
+  background: var(--gonjong-soft);
+  box-shadow: 0 5px 0 var(--gonjong);
+}
+@media (max-width: 600px) {
+  .pin-grid {
+    grid-template-columns: repeat(3, 88px);
+  }
+  .pin-key {
+    width: 88px;
+    height: 88px;
+  }
+  .pin-slot {
+    width: 72px;
+    height: 72px;
+  }
+}
+.shake {
+  animation: kid-shake 0.45s;
+}
+@keyframes kid-shake {
+  25% {
+    transform: translateX(-8px);
+  }
+  75% {
+    transform: translateX(8px);
+  }
+}
+
+/* ── Kepala halaman anak ── */
+.kid-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.me-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: var(--kid-touch, 64px);
+  padding: 4px 16px 4px 6px;
+  border: 3px solid var(--garis-tegas);
+  border-radius: var(--radius-pill);
+  background: var(--kertas);
+  color: inherit;
+  text-decoration: none;
+  font-weight: 800;
+}
+.me-points {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--kunyit-soft);
+  color: var(--kunyit-teks);
+}
+.top-actions {
+  display: flex;
+  gap: 8px;
+}
+.icon-btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: var(--kid-touch, 64px);
+  min-height: var(--kid-touch, 64px);
+  padding: 4px 8px;
+  border: 3px solid var(--garis-tegas);
+  border-radius: 20px;
+  background: var(--kertas);
+  color: var(--malam);
+  text-decoration: none;
+  font: inherit;
+  font-weight: 800;
+  font-size: 0.8rem;
+  cursor: pointer;
+  box-shadow: 0 4px 0 var(--garis-tegas);
+}
+.icon-btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--garis-tegas);
+}
+@media (max-width: 640px) {
+  .icon-btn span {
+    display: none;
+  }
+  .me-points {
+    display: none;
+  }
+}
+
+/* ── Beranda belajar ── */
+.home,
+.library {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 16px 20px 40px;
+  box-sizing: border-box;
+}
+.home {
+  color: var(--malam);
+  font-family: var(--font-body);
+}
+.home-h2 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  margin: 18px 0 10px;
+}
+
+.cat-chips {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 8px 2px;
+  scrollbar-width: thin;
+  margin-bottom: 8px;
+}
+.chip {
+  flex: none;
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: var(--radius-pill);
+  border: 3px solid var(--garis-tegas);
+  background: var(--kertas);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  color: var(--malam);
+}
+.chip.is-on {
+  background: var(--gonjong);
+  border-color: var(--gonjong);
+  color: var(--on-gonjong);
+}
+
+.continue-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border: 4px solid var(--garis-tegas);
+  border-radius: 28px;
+  background: linear-gradient(120deg, var(--gonjong-soft), var(--kunyit-soft));
+  box-shadow: 0 6px 0 var(--garis-tegas);
+  margin-bottom: 18px;
+}
+.continue-body {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+.continue-body .kid-say {
+  font-size: 1.3rem;
+}
+.continue-what {
+  display: flex;
+  flex-direction: column;
+  margin: 6px 0 0;
+}
+.continue-what strong {
+  font-size: 1.25rem;
+}
+.continue-what span {
+  font-weight: 700;
+  color: var(--malam-muted);
+}
+.continue-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 0 1 300px;
+  max-width: 100%;
+  min-width: 0;
+  text-align: center;
+}
+@media (max-width: 640px) {
+  .continue-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 16px;
+  }
+  .continue-body .kid-say {
+    justify-content: center;
+  }
+  .continue-actions,
+  .continue-actions .big-play {
+    width: 100%;
+  }
+}
+
+/* Kartu topik */
+.topic-grid {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+.topic-card {
+  height: 100%;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: 1fr auto;
+  column-gap: 10px;
+  row-gap: 8px;
+  padding: 12px 14px;
+  border: 3px solid var(--garis-tegas);
+  border-radius: 22px;
+  background: var(--kertas);
+  color: inherit;
+  text-decoration: none;
+  box-shadow: 0 4px 0 var(--garis-tegas);
+  min-height: 96px;
+  cursor: pointer;
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.08s ease;
+}
+.topic-card:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--garis-tegas);
+}
+.topic-num {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--gonjong-soft);
+  font-weight: 900;
+}
+.topic-title {
+  font-weight: 800;
+  line-height: 1.25;
+  align-self: center;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+.topic-foot {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+.topic-bar {
+  flex: 1;
+  height: 10px;
+  border-radius: var(--radius-pill);
+  background: var(--garis);
+  overflow: hidden;
+}
+.topic-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--sawah);
+  border-radius: inherit;
+}
+.topic-count {
+  font-variant-numeric: tabular-nums;
+}
+.topic-plant {
+  grid-row: 1 / span 1;
+}
+.topic-card.is-next {
+  border-color: var(--gonjong);
+  box-shadow: 0 4px 0 var(--gonjong);
+  background: var(--gonjong-soft);
+}
+.topic-card.is-next .topic-num {
+  background: var(--gonjong);
+  color: var(--on-gonjong);
+}
+.topic-card.is-done {
+  background: var(--sawah-soft);
+  border-color: var(--sawah);
+  box-shadow: 0 4px 0 var(--sawah);
+}
+@media (max-width: 640px) {
+  .topic-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+}
+@media (max-width: 360px) {
+  .topic-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Halaman topik: materi dan level ── */
+.topic-page {
+  max-width: 900px;
+  padding-bottom: 120px;
+}
+.lesson {
+  padding: 16px 20px 20px;
+  border: 4px solid var(--garis-tegas);
+  border-radius: 28px;
+  background: var(--kertas);
+  margin: 8px 0 20px;
+}
+.lesson-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.lesson-head h2 {
+  flex: 1;
+  margin: 0;
+  font-size: 1.4rem;
+}
+.lesson-intro {
+  font-size: 1.25rem;
+  line-height: 1.55;
+  font-weight: 600;
+  margin: 12px 0;
+}
+.levels-head h2 {
+  margin: 0 0 4px;
+  font-size: 1.4rem;
+}
+.levels-rule {
+  margin: 0;
+  color: var(--malam-muted);
+  font-weight: 700;
+}
+.level-path {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+.level-card {
+  min-height: 118px;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 14px 16px;
+  border: 4px solid var(--garis-tegas);
+  border-radius: 24px;
+  background: var(--kertas);
+  color: inherit;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: 0 5px 0 var(--garis-tegas);
+  cursor: pointer;
+}
+.level-num {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--gonjong-soft);
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+.level-title {
+  font-weight: 700;
+  line-height: 1.25;
+  flex: 1;
+  font-size: 0.95rem;
+}
+.level-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  min-height: 34px;
+  font-size: 0.95rem;
+}
+.level-card.is-open {
+  background: var(--kunyit-soft);
+}
+.level-card.is-next {
+  border-color: var(--gonjong);
+  box-shadow: 0 5px 0 var(--gonjong);
+}
+.level-card.is-next .level-num {
+  background: var(--gonjong);
+  color: var(--on-gonjong);
+}
+.level-card.is-passed {
+  background: var(--sawah-soft);
+  border-color: var(--sawah);
+  box-shadow: 0 5px 0 var(--sawah);
+}
+.level-card.is-passed .level-num {
+  background: var(--sawah);
+  color: var(--on-sawah);
+}
+.level-card.is-locked {
+  background: var(--awan-2);
+  color: var(--malam-muted);
+  border-color: var(--garis);
+  box-shadow: 0 5px 0 var(--garis);
+  cursor: not-allowed;
+}
+.topic-cta {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  background: linear-gradient(transparent, var(--awan) 30%);
+}
+@media (max-width: 640px) {
+  ol.level-path {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ── Ronde soal ── */
+.practice {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 12px 16px 160px;
+  box-sizing: border-box;
+}
+.practice-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, auto) minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding-top: 4px;
+}
+.practice-head > :first-child {
+  justify-self: start;
+}
+.practice-head > :last-child {
+  justify-self: end;
+}
+.practice-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+  min-width: 0;
+  max-width: 560px;
+}
+.practice-title strong {
+  font-size: 1.2rem;
+}
+.practice-title span {
+  color: var(--malam-muted);
+  font-weight: 700;
+}
+.practice-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.quiz-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 14px 0 6px;
+  padding: 0;
+  list-style: none;
+}
+.quiz-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 3px solid var(--garis-tegas);
+  background: var(--kertas);
+}
+.quiz-dot.is-current {
+  background: var(--kunyit);
+}
+.quiz-dot.is-right {
+  background: var(--sawah);
+  border-color: var(--sawah);
+}
+.quiz-dot.is-wrong {
+  background: var(--kunyit);
+  border-color: var(--kunyit-tekan);
+}
+.quiz-count {
+  text-align: center;
+  font-weight: 800;
+  margin: 0 0 14px;
+}
+.item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+}
+.item-prompt {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 1.5rem;
+  font-weight: 800;
+  justify-content: center;
+  text-align: center;
+}
+.item-prompt p {
+  margin: 0;
+}
+.choices {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.choice {
+  position: relative;
+  min-width: 96px;
+  min-height: 96px;
+  padding: 10px;
+  border: 4px solid var(--garis-tegas);
+  border-radius: 24px;
+  background: var(--kertas);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 5px 0 var(--garis-tegas);
+  transition: transform 0.12s;
+  color: var(--malam);
+  font: inherit;
+}
+.choice:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 var(--garis-tegas);
+}
+.choice:disabled {
+  cursor: default;
+  opacity: 1;
+}
+.choice.is-selected {
+  background: var(--gonjong-soft);
+  border-color: var(--gonjong);
+  box-shadow: 0 5px 0 var(--gonjong);
+}
+.choice.is-right,
+.choice.is-answer {
+  background: var(--sawah-soft);
+  border-color: var(--sawah);
+  box-shadow: 0 5px 0 var(--sawah);
+}
+.choice.is-wrong {
+  background: var(--kunyit-soft);
+  border-color: var(--kunyit);
+  box-shadow: 0 5px 0 var(--kunyit-tekan);
+}
+.choice-text {
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1.25;
+  text-align: center;
+  padding: 6px 8px;
+  overflow-wrap: break-word;
+}
+.check-btn {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  border: 4px solid var(--garis-tegas);
+  background: var(--sawah);
+  color: var(--on-sawah);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 5px 0 var(--garis-tegas);
+}
+.check-btn:disabled {
+  background: var(--awan-2);
+  color: var(--malam-muted);
+  cursor: not-allowed;
+}
+
+.keypad-wrap {
+  display: grid;
+  gap: 12px;
+  width: min(360px, 100%);
+}
+.keypad-display {
+  display: block;
+  min-height: var(--kid-touch, 64px);
+  padding: 8px 16px;
+  border: 4px solid var(--garis-tegas);
+  border-radius: 20px;
+  background: var(--kertas);
+  font-family: var(--font-display);
+  font-size: 2rem;
+  text-align: center;
+  white-space: pre;
+}
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.key {
+  min-height: var(--kid-touch, 64px);
+  border: 3px solid var(--garis-tegas);
+  border-radius: 18px;
+  background: var(--kertas);
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 0 var(--garis-tegas);
+}
+.key:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--garis-tegas);
+}
+.key:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.feedback {
+  position: fixed;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  bottom: 16px;
+  width: min(1000px, calc(100% - 32px));
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  background: var(--kertas);
+  border: 4px solid var(--garis-tegas);
+  border-radius: 28px;
+  box-shadow: 0 8px 0 var(--garis-tegas);
+  z-index: 10;
+  flex-wrap: wrap;
+}
+.feedback.is-right {
+  background: var(--sawah-soft);
+  border-color: var(--sawah);
+  box-shadow: 0 8px 0 var(--sawah);
+}
+.feedback.is-wrong {
+  background: var(--kunyit-soft);
+  border-color: var(--kunyit);
+  box-shadow: 0 8px 0 var(--kunyit-tekan);
+}
+.feedback.is-wrong .kid-say p {
+  color: var(--kunyit-teks);
+}
+.feedback-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 240px;
+}
+.feedback-show {
+  font-weight: 700;
+}
+.next-btn {
+  margin-left: auto;
+}
+.stopwatch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 800;
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
+  background: var(--jeruk-soft);
+  color: var(--jeruk-teks);
+  border: 3px solid var(--jeruk);
+  border-radius: var(--radius-pill);
+  padding: 4px 14px 4px 8px;
+}
+@media (max-width: 560px) {
+  .practice-head {
+    grid-template-columns: auto 1fr;
+    row-gap: 6px;
+  }
+  .practice-meta {
+    grid-column: 1 / -1;
+    justify-content: center;
+  }
+}
+
+/* ── Hasil ronde ── */
+.result-card {
+  margin: 24px auto;
+  width: min(640px, 100%);
+  box-sizing: border-box;
+  padding: 24px;
+  border: 4px solid var(--garis-tegas);
+  border-radius: 32px;
+  background: var(--kertas);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+.result-card.is-passed {
+  border-color: var(--sawah);
+  background: var(--sawah-soft);
+}
+.result-card.is-failed {
+  border-color: var(--kunyit);
+  background: var(--kunyit-soft);
+}
+.result-score {
+  font-family: var(--font-display);
+  font-size: 3.5rem;
+  line-height: 1;
+  margin: 0;
+}
+.result-summary,
+.result-message {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0;
+}
+.result-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: var(--jeruk-teks);
+  background: var(--jeruk-soft);
+  border-radius: var(--radius-pill);
+  padding: 6px 16px;
+  margin: 0;
+}
+.result-plant {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+}
+.result-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-top: 6px;
+}
+.result-more {
+  display: flex;
+  gap: 8px 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* ── Profil anak ── */
+.profile-hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: var(--kertas);
+  border: 4px solid var(--garis-tegas);
+  border-radius: 28px;
+  padding: 12px 18px;
+  margin: 8px 0 16px;
+}
+.profile-id h1 {
+  margin: 0;
+  font-family: var(--font-display);
+}
+.profile-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.profile-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.profile-stat {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  border-radius: 20px;
+  padding: 10px 12px;
+  border: 3px solid var(--garis);
+  background: var(--kertas);
+}
+.profile-stat.is-points {
+  background: var(--kunyit-soft);
+}
+.profile-stat.is-passed {
+  background: var(--sawah-soft);
+}
+.profile-value {
+  font-size: 2rem;
+  font-weight: 900;
+  font-family: var(--font-display);
+}
+.profile-label {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.history h2,
+.plants h2,
+.swatches-box h2,
+.certs h2 {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  margin: 16px 0 8px;
+}
+.history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.history-row {
+  display: grid;
+  grid-template-columns: 72px 1fr auto;
+  align-items: center;
+  gap: 14px;
+  background: var(--kertas);
+  border: 3px solid var(--garis-tegas);
+  border-radius: 20px;
+  padding: 10px 14px;
+}
+.history-score {
+  font-size: 1.8rem;
+  font-weight: 900;
+  text-align: center;
+  border-radius: 14px;
+  padding: 4px 0;
+}
+.history-row.is-passed .history-score {
+  background: var(--sawah-soft);
+  color: var(--sawah);
+}
+.history-row.is-failed .history-score {
+  background: var(--kunyit-soft);
+  color: var(--kunyit-teks);
+}
+.history-main {
+  display: flex;
+  flex-direction: column;
+}
+.history-badge {
+  font-weight: 800;
+}
+.plant-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+.plant-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  padding: 10px;
+  border: 3px solid var(--garis-tegas);
+  border-radius: 20px;
+  background: var(--kertas);
+  font-weight: 700;
+}
+.swatch-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.swatch-btn {
+  width: var(--kid-touch, 64px);
+  height: var(--kid-touch, 64px);
+  display: grid;
+  place-items: center;
+  border: 3px solid var(--garis-tegas);
+  border-radius: 20px;
+  background: var(--kertas);
+  cursor: pointer;
+  padding: 0;
+  box-shadow: 0 4px 0 var(--garis-tegas);
+}
+.swatch-btn[aria-pressed='true'] {
+  border-color: var(--gonjong);
+  background: var(--gonjong-soft);
+  box-shadow: 0 4px 0 var(--gonjong);
+}
+
+/* ── Papan peringkat ── */
+.board-page {
+  max-width: 960px;
+  margin: 0 auto;
+}
+.podium {
+  list-style: none;
+  margin: 12px auto 20px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+  gap: 10px;
+  max-width: 620px;
+}
+.podium-spot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  min-width: 0;
+}
+.podium-spot.place-1 {
+  order: 2;
+}
+.podium-spot.place-2 {
+  order: 1;
+}
+.podium-spot.place-3 {
+  order: 3;
+}
+.podium-name {
+  font-weight: 800;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.podium-block {
+  width: 100%;
+  display: grid;
+  place-items: center;
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: var(--malam);
+  border: 4px solid var(--garis-tegas);
+  border-bottom: 0;
+  border-radius: 18px 18px 0 0;
+}
+.podium-spot.place-1 .podium-block {
+  height: 130px;
+  background: linear-gradient(var(--kunyit), var(--kunyit-tekan));
+  color: var(--on-kunyit);
+}
+.podium-spot.place-2 .podium-block {
+  height: 96px;
+  background: linear-gradient(
+    color-mix(in srgb, var(--garis-tegas) 35%, var(--kertas)),
+    color-mix(in srgb, var(--garis-tegas) 60%, var(--kertas))
+  );
+}
+.podium-spot.place-3 .podium-block {
+  height: 72px;
+  background: linear-gradient(
+    color-mix(in srgb, var(--jeruk) 40%, var(--kertas)),
+    color-mix(in srgb, var(--jeruk) 65%, var(--kertas))
+  );
+}
+.podium-points {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 800;
+  color: var(--kunyit-teks);
+}
+.board-table {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.board-row {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  background: var(--kertas);
+  border: 3px solid var(--garis-tegas);
+  border-radius: 20px;
+  padding: 8px 14px;
+  font-weight: 700;
+}
+.board-row.is-me {
+  background: var(--gonjong-soft);
+  border-color: var(--gonjong);
+}
+.board-pos {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 1.3rem;
+  font-weight: 900;
+  background: var(--gonjong-soft);
+}
+.board-row.place-1 .board-pos {
+  background: var(--kunyit);
+  color: var(--on-kunyit);
+}
+.board-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.board-name strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 1.1rem;
+}
+.board-points {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-variant-numeric: tabular-nums;
+  font-size: 1.1rem;
+}
+.me-tag {
+  background: var(--gonjong);
+  color: var(--on-gonjong);
+  border-radius: var(--radius-pill);
+  padding: 0 10px;
+  font-size: 0.85rem;
+}
+
+/* ── Sertifikat Juara Digital ── */
+.uk-certificate {
+  margin: 0 auto;
+  max-width: 640px;
+  padding: 40px;
+  border: 6px solid var(--kunyit);
+  border-radius: 32px;
+  background: linear-gradient(135deg, var(--gonjong-soft), var(--kunyit-soft));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  box-sizing: border-box;
+}
+.uk-certificate h1 {
+  font-size: 2.4rem;
+  margin: 0;
+  color: var(--gonjong);
+}
+@media print {
+  .uk-no-print,
+  .kid-top,
+  .practice-head {
+    display: none !important;
+  }
+  html,
+  body,
+  .kid-app,
+  .library {
+    background: #ffffff;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shake {
+    animation: none;
+  }
+  .kid-btn,
+  .choice,
+  .topic-card {
+    transition: none;
+  }
+}

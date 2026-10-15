@@ -1,16 +1,18 @@
 import type { StartRoundResult } from '@udakids/engine';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { answer as sendAnswer, finish, startRound } from '../api/practice';
+import { topic as loadTopic } from '../api/catalog';
 import { ApiError } from '../api/client';
+import { answer as sendAnswer, finish, startRound } from '../api/practice';
 import { AnswerOptions } from '../components/AnswerOptions';
-import { BigButton } from '../components/BigButton';
 import { CountObjects } from '../components/CountObjects';
+import { BackIcon, CheckIcon } from '../components/Icons';
 import { Keypad } from '../components/Keypad';
 import { ListenButton } from '../components/ListenButton';
 import { Momo } from '../components/Momo';
 import { RoundProgress } from '../components/RoundProgress';
 import { Stopwatch } from '../components/Stopwatch';
+import { useAsync } from '../hooks/useAsync';
 import { useT } from '../i18n';
 import { ErrorState, LoadingState } from '../ui/states';
 
@@ -27,11 +29,16 @@ export function RoundPage() {
   const { levelId = '' } = useParams();
   const topicId = levelId.split(':').slice(0, 2).join(':');
 
+  const loadMeta = useCallback(() => loadTopic(topicId), [topicId]);
+  const meta = useAsync(loadMeta);
+  const level = meta.data?.levels.find((l) => l.id === levelId);
+
   const [round, setRound] = useState<StartRoundResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [index, setIndex] = useState(0);
   const [results, setResults] = useState<boolean[]>([]);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const [selected, setSelected] = useState<string | null>(null);
   const [value, setValue] = useState('');
   const [busy, setBusy] = useState(false);
   const started = useRef(false);
@@ -46,25 +53,34 @@ export function RoundPage() {
 
   if (error)
     return (
-      <div className="uk-stack">
+      <main className="kid-screen">
         <ErrorState message={error} />
-        <Link className="uk-btn uk-btn--big uk-btn--ghost" to={`/play/topik/${topicId}`}>
+        <Link className="kid-btn" to={`/play/topik/${topicId}`}>
           {t('result.back')}
         </Link>
-      </div>
+      </main>
     );
-  if (!round) return <LoadingState />;
+  if (!round)
+    return (
+      <main className="kid-screen">
+        <Momo mood="happy" size={140} />
+        <p className="kid-note">{t('round.loading')}</p>
+        <LoadingState />
+      </main>
+    );
 
   const total = round.questions.length;
   const question = round.questions[index]!;
   const isLast = index === total - 1;
+  const isNumber = question.type === 'number';
+  const draft = isNumber ? value : (selected ?? '');
 
-  async function submit(chosen: string) {
-    if (busy || feedback) return;
+  async function check() {
+    if (busy || feedback || draft === '') return;
     setBusy(true);
     try {
-      const res = await sendAnswer(round!.roundId, { questionIndex: index, answer: chosen });
-      setFeedback({ ...res, chosen });
+      const res = await sendAnswer(round!.roundId, { questionIndex: index, answer: draft });
+      setFeedback({ ...res, chosen: draft });
       setResults((r) => [...r, res.isCorrect]);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : t('error.generic'));
@@ -77,6 +93,7 @@ export function RoundPage() {
     if (!isLast) {
       setIndex(index + 1);
       setFeedback(null);
+      setSelected(null);
       setValue('');
       return;
     }
@@ -90,68 +107,88 @@ export function RoundPage() {
     }
   }
 
+  const topicTitle = meta.data?.topic.title;
+
   return (
-    <div className="uk-stack">
-      <div className="uk-round-head">
-        <RoundProgress total={total} current={index} results={results} />
-        <Stopwatch running={!busy || feedback === null} />
-      </div>
-
-      <section className="uk-card uk-question">
-        <p className="uk-question-text">{question.prompt}</p>
-        {question.visual && <CountObjects visual={question.visual} />}
-        <div>
-          <ListenButton />
+    <main className="practice" data-mapel={levelId.startsWith('sains') ? 'sains' : 'matematika'}>
+      <header className="practice-head">
+        <Link to={`/play/topik/${topicId}`} className="kid-link" aria-label={t('round.quit')}>
+          <BackIcon size={30} />
+        </Link>
+        <div className="practice-title">
+          <strong>{level?.title ?? ''}</strong>
+          {topicTitle && (
+            <span>
+              {topicTitle} · {t('level.word', { n: level?.number ?? '' })}
+            </span>
+          )}
         </div>
-      </section>
+        <div className="practice-meta">
+          <Stopwatch running={feedback === null} />
+        </div>
+      </header>
 
-      {question.type === 'number' ? (
-        <Keypad
-          value={value}
-          onChange={setValue}
-          onSubmit={() => void submit(value)}
-          disabled={busy || feedback !== null}
-        />
-      ) : (
-        <AnswerOptions
-          options={question.options ?? []}
-          onPick={(v) => void submit(v)}
-          disabled={busy || feedback !== null}
-          chosen={feedback?.chosen ?? null}
-          correctAnswer={feedback?.correctAnswer ?? null}
-        />
-      )}
+      <RoundProgress total={total} current={index} results={results} />
+
+      <div className="item">
+        <div className="item-prompt">
+          <ListenButton />
+          <p>{question.prompt}</p>
+        </div>
+        {question.visual && <CountObjects visual={question.visual} />}
+
+        {isNumber ? (
+          <Keypad value={value} onChange={setValue} disabled={busy || feedback !== null} />
+        ) : (
+          <AnswerOptions
+            options={question.options ?? []}
+            selected={selected}
+            onSelect={setSelected}
+            disabled={busy || feedback !== null}
+            result={feedback}
+          />
+        )}
+
+        {!feedback && (
+          <button
+            type="button"
+            className="check-btn"
+            aria-label={t('round.check')}
+            disabled={busy || draft === ''}
+            onClick={() => void check()}
+          >
+            <CheckIcon size={44} />
+          </button>
+        )}
+      </div>
 
       {feedback && (
-        <div
-          className={`uk-feedback ${feedback.isCorrect ? 'uk-feedback--correct' : 'uk-feedback--retry'}`}
-          role="status"
-        >
-          <div className="uk-row">
-            <Momo mood={feedback.isCorrect ? 'happy' : 'encourage'} size={64} />
-            <div>
-              <strong>{feedback.isCorrect ? t('feedback.correct') : t('feedback.retry')}</strong>
-              {feedback.hint && (
-                <p style={{ margin: 0 }}>{t('round.hint', { hint: feedback.hint })}</p>
-              )}
-              {feedback.correctAnswer && (
-                <p style={{ margin: 0 }}>{t('round.answer', { answer: feedback.correctAnswer })}</p>
-              )}
+        <div className={`feedback ${feedback.isCorrect ? 'is-right' : 'is-wrong'}`} role="status">
+          <Momo mood={feedback.isCorrect ? 'happy' : 'encourage'} size={72} />
+          <div className="feedback-body">
+            <div className="kid-say">
+              <p>{feedback.isCorrect ? t('feedback.correct') : t('feedback.retry')}</p>
             </div>
+            {feedback.hint && (
+              <div className="feedback-show">{t('round.hint', { hint: feedback.hint })}</div>
+            )}
+            {feedback.correctAnswer && (
+              <div className="feedback-show">
+                {t('round.answer', { answer: feedback.correctAnswer })}
+              </div>
+            )}
           </div>
-          <div style={{ marginTop: 'var(--uk-space-3)' }}>
-            <BigButton onClick={() => void next()} disabled={busy}>
-              {isLast ? t('round.finish') : t('next')}
-            </BigButton>
-          </div>
+          <button
+            type="button"
+            className="kid-btn next-btn"
+            disabled={busy}
+            onClick={() => void next()}
+            autoFocus
+          >
+            {isLast ? t('round.finish') : t('next')}
+          </button>
         </div>
       )}
-
-      <div>
-        <Link className="uk-btn uk-btn--big uk-btn--ghost" to={`/play/topik/${topicId}`}>
-          {t('round.quit')}
-        </Link>
-      </div>
-    </div>
+    </main>
   );
 }

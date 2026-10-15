@@ -21,23 +21,23 @@ import { useT } from '../i18n';
 import { EmptyState, ErrorState, LoadingState } from '../ui/states';
 
 const TOKENS: { name: string; note: string }[] = [
-  { name: '--uk-bg', note: 'Latar halaman' },
-  { name: '--uk-surface', note: 'Kartu dan panel' },
-  { name: '--uk-text', note: 'Teks utama' },
-  { name: '--uk-text-muted', note: 'Teks sekunder' },
-  { name: '--uk-border', note: 'Garis dan bingkai' },
-  { name: '--uk-primary', note: 'Tombol utama dan tautan' },
-  { name: '--uk-primary-soft', note: 'Latar sorotan' },
-  { name: '--uk-correct', note: 'Jawaban tepat' },
-  { name: '--uk-correct-soft', note: 'Latar jawaban tepat' },
-  { name: '--uk-retry', note: 'Jawaban belum tepat' },
-  { name: '--uk-retry-soft', note: 'Latar belum tepat' },
-  { name: '--uk-danger', note: 'Hapus (area dewasa saja)' },
+  { name: '--awan', note: 'Latar halaman' },
+  { name: '--kertas', note: 'Kartu dan panel' },
+  { name: '--malam', note: 'Teks utama' },
+  { name: '--malam-muted', note: 'Teks sekunder' },
+  { name: '--garis-tegas', note: 'Garis tombol dan kartu' },
+  { name: '--gonjong', note: 'Merek, tombol utama' },
+  { name: '--gonjong-soft', note: 'Latar sorotan' },
+  { name: '--sawah', note: 'Jawaban tepat' },
+  { name: '--sawah-soft', note: 'Latar jawaban tepat' },
+  { name: '--kunyit', note: 'Belum tepat, poin' },
+  { name: '--kunyit-soft', note: 'Latar belum tepat' },
+  { name: '--bahaya', note: 'Hapus (area dewasa saja)' },
 ];
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="uk-stack" style={{ marginBottom: 'var(--uk-space-8)' }}>
+    <section className="uk-stack" style={{ marginBottom: 'var(--space-8)' }}>
       <h2>{title}</h2>
       {children}
     </section>
@@ -48,9 +48,7 @@ export function StylePage() {
   const t = useT('site');
   const [pin, setPin] = useState<PinPicture[]>([]);
   return (
-    <main
-      style={{ maxWidth: 1000, margin: '0 auto', padding: 'var(--uk-space-6) var(--uk-space-4)' }}
-    >
+    <main style={{ maxWidth: 1000, margin: '0 auto', padding: 'var(--space-6) var(--space-4)' }}>
       <h1>{t('style.title')}</h1>
       <p>{t('style.intro')}</p>
 
@@ -67,7 +65,7 @@ export function StylePage() {
       </Section>
 
       <Section title="Tipografi">
-        <p style={{ fontFamily: 'var(--uk-font-title)', fontSize: 40, margin: 0 }}>
+        <p style={{ fontFamily: 'var(--font-display)', fontSize: 40, margin: 0 }}>
           Judul memakai Baloo 2
         </p>
         <p style={{ fontSize: 'var(--uk-text-child)', margin: 0 }}>

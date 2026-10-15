@@ -188,6 +188,9 @@ export type TopicDetail = z.infer<typeof topicDetailSchema>;
 export const childProfileSchema = z.object({
   nickname: z.string(),
   momoColor: momoColorSchema,
+  totalScore: z.number().int(),
+  levelsPassed: z.number().int(),
+  rounds: z.number().int(),
   plants: z.array(
     z.object({ topicId: z.string(), title: z.string(), bookSlug: z.string(), stage: stageSchema }),
   ),

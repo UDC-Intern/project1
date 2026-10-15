@@ -162,21 +162,25 @@ Pengalihan: `/play/*` tanpa sesi anak ke `/play/masuk`. `/orang-tua/*` tanpa ses
 - **Kesan:** hangat, jelas, dan tenang. Area anak besar dan bersahabat. Area orang tua dan admin lebih rapat, seperti alat
   kerja. Arah desain bebas dieksplorasi di M1 lewat halaman `/gaya`; setelah dikunci, warna hanya dipakai lewat token.
   Identitas visual ditulis sendiri untuk produk ini.
-- **Tanpa framework UI.** CSS biasa dengan token sendiri: `apps/web/src/styles/uk-tokens.css` dan `uk-components.css`,
-  kelas berawalan `uk-` (contoh `uk-btn`, `uk-card`). Ikon berupa komponen SVG sendiri (tanpa emoji, tanpa pustaka ikon).
-- **Token warna awal** (jangan menaruh hex baru di komponen):
+- **Tanpa framework UI.** CSS biasa dengan token sendiri: `apps/web/src/styles/uk-tokens.css` (token), `uk-components.css`
+  dan `uk-adult.css` (area orang tua, admin, dan landing, kelas berawalan `uk-`), serta `play.css` (area anak: `kid-btn`,
+  `topic-card`, `level-card`, `choice`, `feedback`, dan seterusnya). Ikon berupa komponen SVG sendiri (tanpa emoji, tanpa
+  pustaka ikon).
+- **Token** (jangan menaruh hex baru di komponen). Nama memakai bahasa Indonesia:
 
-  | Token                          | Nilai                 | Dipakai untuk                                                                  |
-  | ------------------------------ | --------------------- | ------------------------------------------------------------------------------ |
-  | `--uk-bg`                      | `#FFF8EE`             | Latar halaman (krem hangat)                                                    |
-  | `--uk-surface`                 | `#FFFFFF`             | Kartu, panel                                                                   |
-  | `--uk-text` / `--uk-text-muted`| `#23302B` / `#5B6B63` | Teks utama dan sekunder                                                        |
-  | `--uk-border`                  | `#E7DCC8`             | Garis dan bingkai                                                              |
-  | `--uk-primary` / `-hover`      | `#1F6FB2` / `#185A91` | Tombol utama, tautan, menu aktif (teks putih, kontras 5,2:1)                   |
-  | `--uk-primary-soft`            | `#E3F0FA`             | Latar sorotan                                                                  |
-  | `--uk-correct` / `-soft`       | `#2F9E63` / `#E2F5EA` | Jawaban tepat: bingkai dan ikon hijau, latar lembut, teks tetap `--uk-text`    |
-  | `--uk-retry` / `-soft`         | `#F2B705` / `#FFF4CC` | Jawaban belum tepat: bingkai dan ikon kuning, latar lembut                     |
-  | `--uk-danger`                  | `#C0392B`             | **Hanya area orang tua dan admin** untuk tindakan hapus. Tidak pernah untuk jawaban anak |
+  | Token                               | Nilai                 | Dipakai untuk                                                              |
+  | ----------------------------------- | --------------------- | -------------------------------------------------------------------------- |
+  | `--awan` / `--kertas`               | `#F6F7F8` / `#FFFFFF` | Latar halaman / kartu dan panel                                            |
+  | `--malam` / `--malam-muted`         | `#1C2430` / `#5A6677` | Teks utama dan sekunder                                                    |
+  | `--garis` / `--garis-tegas`         | `#DDE1E6` / `#7C8696` | Garis halus / batas tombol dan kartu yang bisa diketuk (kontras ≥ 3:1)     |
+  | `--gonjong` (`-tekan`, `-soft`)     | `#C8321F`             | Warna merek: tombol utama, logo, sorotan. Bukan tanda kesalahan             |
+  | `--kunyit` (`-tekan`, `-soft`, `-teks`) | `#F5B301`         | Poin, bintang, dan jawaban belum tepat (bingkai kuning + petunjuk)         |
+  | `--sawah` (`-tekan`, `-soft`)       | `#167A48`             | Jawaban tepat, level lulus, kemajuan                                       |
+  | `--m` (data-mapel)                  | merah / hijau         | Warna mapel aktif: Matematika `#C8321F`, Sains `#2B7A3D`                   |
+  | `--bahaya`                          | `#B3261E`             | **Hanya area orang tua dan admin** untuk tindakan hapus. Tidak pernah untuk jawaban anak |
+
+  Tombol berbentuk anak tangga: bayangan padat 5 px di bawahnya (`--shadow-tekan`) yang hilang saat ditekan, tanpa garis
+  hitam tebal. Radius 8, 16, dan 24 px.
 
   Warna Momo (6 pilihan, tanpa ungu dan tanpa merah): `blue #3B82C4`, `green #3FA66B`, `yellow #F2B705`,
   `orange #F08A24`, `pink #EC7FA8`, `teal #2AA5A0`.
@@ -187,15 +191,17 @@ Pengalihan: `/play/*` tanpa sesi anak ke `/play/masuk`. `/orang-tua/*` tanpa ses
   9 gambar SVG), `CountObjects` (gambar objek untuk soal hitung), `RoundProgress`, `Stopwatch`.
 - **Komponen dewasa:** `DataTable`, `FormField`, `Dialog`, `Tabs`, `Badge`, `Toast`, `StatCard`, `Sidebar`, `ConfirmDelete`.
 - **Tata letak:**
-  - **Anak:** bilah atas tipis (Momo kecil + nama panggilan). Navigasi bawah 3 tombol besar (Belajar, Peringkat, Profil),
-    masing-masing ≥ 64 px. Konten maksimal 960 px, di tengah.
+  - **Anak:** bilah atas tipis di beranda: chip profil (Momo kecil, nama panggilan, poin bintang) dan dua tombol ikon
+    (Peringkat, Selesai), masing-masing ≥ 64 px. Tidak ada navigasi bawah; halaman lain memakai kepala halaman dengan
+    tombol kembali. Konten maksimal sekitar 1000 px, di tengah.
   - **Orang tua dan admin (desktop):** sidebar kiri, konten kanan. Di ponsel sidebar menjadi menu geser. Sidebar admin
-    berlatar `--uk-text` dengan label "Admin" agar jelas beda dari area orang tua.
-- **Halaman ronde:** bilah progres 10 titik indikator ("2 dari 10") dan stopwatch kecil di atas. Kartu soal besar dengan tombol dengar di pojok
-  kanan atas (64 px) dan `CountObjects` bila ada. Pilihan jawaban berupa grid 2 × 2 tombol besar (tinggi ≥ 96 px). Isian
-  angka memakai `Keypad` 0 sampai 9, hapus, dan "Periksa". Setelah menjawab, panel umpan balik naik dari bawah: hijau
-  ("Tepat! Kamu teliti menghitung.") atau kuning ("Belum tepat." + petunjuk), dengan tombol "Lanjut" ≥ 64 px. Momo bereaksi
-  dengan animasi CSS keyframes dan menghormati `prefers-reduced-motion`.
+    berlatar `--malam` dengan label "Admin" agar jelas beda dari area orang tua.
+- **Halaman ronde:** kepala dengan tombol berhenti, judul level, dan stopwatch; di bawahnya 10 titik indikator ("Soal 2
+  dari 10"). Soal berada di tengah dengan tombol dengar (64 px) di sampingnya dan `CountObjects` bila ada. Pilihan jawaban
+  berupa kartu besar (tinggi ≥ 96 px) yang dipilih dulu; isian angka memakai `Keypad` 0 sampai 9. Anak menekan tombol
+  ceklis bulat untuk memeriksa. Panel umpan balik tetap di bawah layar: hijau ("Tepat! Kamu teliti menghitung.") atau
+  kuning ("Belum tepat." + petunjuk + jawaban tepat), dengan tombol "Lanjut" ≥ 64 px. Momo bereaksi dan animasi
+  menghormati `prefers-reduced-motion`.
 - **Aturan UX anak (wajib, diperiksa dengan skill `/child-ux-review`):**
   - Target sentuh minimal 64 × 64 px dan semuanya bisa dioperasikan dengan mouse saja.
   - Setiap soal dan instruksi punya tombol dengar, diputar otomatis saat muncul. Audio gagal: diam, teks tetap tampil.

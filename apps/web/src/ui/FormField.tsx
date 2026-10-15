@@ -10,7 +10,7 @@ export function FormField({ label, error, id, ...rest }: Props) {
       {label}
       <input id={fieldId} aria-invalid={error ? true : undefined} {...rest} />
       {error && (
-        <span role="alert" style={{ color: 'var(--uk-danger)', fontWeight: 400 }}>
+        <span role="alert" style={{ color: 'var(--bahaya)', fontWeight: 400 }}>
           {error}
         </span>
       )}

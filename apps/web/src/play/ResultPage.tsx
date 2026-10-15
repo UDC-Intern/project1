@@ -2,6 +2,7 @@ import { shuffle } from '@udakids/engine';
 import { useCallback } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { result } from '../api/practice';
+import { ClockIcon, PlayIcon } from '../components/Icons';
 import { Momo } from '../components/Momo';
 import { Plant } from '../components/Plant';
 import { useAsync } from '../hooks/useAsync';
@@ -27,49 +28,55 @@ export function ResultPage() {
   const next = data.nextLevel;
 
   return (
-    <div className="uk-stack">
-      <div className="uk-row">
-        <Momo mood={data.passed ? 'happy' : 'encourage'} size={96} />
-        <div>
-          <h1 style={{ margin: 0 }}>{t('result.title')}</h1>
-          <p className="uk-score">{data.score}</p>
-        </div>
-      </div>
-
-      <section className="uk-card uk-card--big">
-        <p style={{ margin: 0 }}>{t('result.correct', { correct: data.correct, total: TOTAL })}</p>
-        <p style={{ margin: 0 }}>{t('result.time', { time: formatDuration(data.durationMs) })}</p>
-        <p style={{ margin: 'var(--uk-space-3) 0 0' }}>
-          <strong>{t(`praise.${group}.${praiseKey}`)}</strong>
+    <main className="kid-screen">
+      <section className={`result-card ${data.passed ? 'is-passed' : 'is-failed'}`}>
+        <Momo mood={data.passed ? 'happy' : 'encourage'} size={120} />
+        <h1 className="sr-only">{t('result.title')}</h1>
+        <p className="result-score">{data.score}</p>
+        <p className="result-summary">
+          {t('result.summary', { correct: data.correct, total: TOTAL })}
         </p>
-      </section>
+        <p className="result-time">
+          <ClockIcon size={24} />
+          {t('result.time', { time: formatDuration(data.durationMs) })}
+        </p>
+        <p className="result-message">{t(`praise.${group}.${praiseKey}`)}</p>
 
-      <section className="uk-card uk-row">
-        <Plant stage={data.plant.stageAfter} size={96} />
-        <div>
-          <strong>{data.plant.title}</strong>
-          <p style={{ margin: 0 }}>{grew ? t('result.grew') : t('result.growing')}</p>
+        <div className="result-plant">
+          <Plant stage={data.plant.stageAfter} size={80} />
+          <span>
+            <strong>{data.plant.title}</strong>
+            <br />
+            {grew ? t('result.grew') : t('result.growing')}
+          </span>
+        </div>
+
+        <div className="result-actions">
+          {data.passed && next && next.status === 'open' && (
+            <Link className="kid-btn big-play" to={`/play/main/${next.id}`}>
+              <PlayIcon size={26} />
+              {t('result.next')}
+            </Link>
+          )}
+          {data.passed && next && next.status === 'premium' && (
+            <p className="kid-note">{t('premium.ask')}</p>
+          )}
+          {!data.passed && (
+            <Link className="kid-btn big-play" to={`/play/main/${data.levelId}`}>
+              <PlayIcon size={26} />
+              {t('result.retry')}
+            </Link>
+          )}
+          <div className="result-more">
+            <Link className="kid-link" to={`/play/topik/${topicId}`}>
+              {t('result.back')}
+            </Link>
+            <Link className="kid-link" to="/play">
+              {t('nav.learn')}
+            </Link>
+          </div>
         </div>
       </section>
-
-      <div className="uk-row">
-        {data.passed && next && next.status === 'open' && (
-          <Link className="uk-btn uk-btn--big" to={`/play/main/${next.id}`}>
-            {t('result.next')}
-          </Link>
-        )}
-        {data.passed && next && next.status === 'premium' && (
-          <p style={{ margin: 0 }}>{t('premium.ask')}</p>
-        )}
-        {!data.passed && (
-          <Link className="uk-btn uk-btn--big" to={`/play/main/${data.levelId}`}>
-            {t('result.retry')}
-          </Link>
-        )}
-        <Link className="uk-btn uk-btn--big uk-btn--ghost" to={`/play/topik/${topicId}`}>
-          {t('result.back')}
-        </Link>
-      </div>
-    </div>
+    </main>
   );
 }
