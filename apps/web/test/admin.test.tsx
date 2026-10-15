@@ -42,7 +42,9 @@ const asAdmin = () =>
 const asAyu = () =>
   useSession.setState({ session: { token: `mock-child:${AYU}`, role: 'child', name: 'Ayu' } });
 const asParent = () =>
-  useSession.setState({ session: { token: 'mock-parent:p-demo', role: 'parent', name: 'Bu Ani' } });
+  useSession.setState({
+    session: { token: 'mock-parent:p-demo', role: 'parent', name: 'Ridho Dwi Syahputra' },
+  });
 
 beforeEach(() => {
   resetMockDb();
@@ -54,7 +56,8 @@ describe('mock admin: akses', () => {
     const res = await staffLogin({ email: 'admin@udakids.local', password: 'admin12345' });
     expect(res.user.role).toBe('admin');
     expect(
-      (await errorOf(staffLogin({ email: 'ani@contoh.id', password: 'rahasia123' }))).body.code,
+      (await errorOf(staffLogin({ email: 'ridhodwi330@gmail.com', password: 'rahasia123' }))).body
+        .code,
     ).toBe('INVALID_CREDENTIALS');
     expect(
       (await errorOf(parentLogin({ email: 'admin@udakids.local', password: 'admin12345' }))).status,

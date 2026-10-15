@@ -45,7 +45,7 @@ export async function parentRegister(body: RegisterParentBody): Promise<AuthResu
       message: 'Periksa lagi isian dan centang persetujuannya.',
     });
   const db = readDb();
-  const { name, email, password } = parsed.data;
+  const { name, email, password, referralCode } = parsed.data;
   if (db.parents.some((p) => p.email === email))
     throw new ApiError(409, { code: 'CONFLICT', message: 'Email ini sudah terdaftar.' });
 
@@ -55,6 +55,11 @@ export async function parentRegister(body: RegisterParentBody): Promise<AuthResu
     email,
     password,
     familyCode: newFamilyCode(new Set(db.parents.map((p) => p.familyCode))),
+    createdAt: new Date().toISOString(),
+    passwordChangedAt: null,
+    pendingEmail: null,
+    referredBy:
+      referralCode && db.parents.some((p) => p.familyCode === referralCode) ? referralCode : null,
   };
   db.parents.push(parent);
   writeDb(db);

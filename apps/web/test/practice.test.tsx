@@ -158,7 +158,8 @@ describe('mock peringkat dan profil', () => {
     await playRound(LEVEL1);
     const math = await leaderboard('matematika-kelas-1');
     const science = await leaderboard('sains-kelas-1');
-    expect(math.me?.score).toBe(100);
+    expect(math.me?.points).toBe(100);
+    expect(math.me?.score).toBe(75);
     expect(science.me).toBeNull();
   });
 

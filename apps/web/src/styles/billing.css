@@ -1,0 +1,364 @@
+/* Paket, pesanan, akun, dan elemen kerangka area orang tua (lencana menu, tombol main, tombol WhatsApp). */
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+  background: var(--awan-2);
+  color: var(--malam-muted);
+}
+.status-badge.is-awaiting_payment {
+  background: var(--kunyit-soft);
+  color: var(--kunyit-teks);
+}
+.status-badge.is-proof_sent {
+  background: var(--langit-soft);
+  color: var(--langit-teks);
+}
+.status-badge.is-rejected {
+  background: var(--jeruk-soft);
+  color: var(--jeruk-teks);
+}
+.status-badge.is-paid {
+  background: var(--sawah-soft);
+  color: var(--sawah-teks);
+}
+.status-badge.is-expired,
+.status-badge.is-cancelled {
+  background: var(--awan-2);
+  color: var(--malam-muted);
+}
+
+/* Kerangka */
+.shell-badge {
+  margin-left: auto;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  background: var(--kunyit);
+  color: var(--on-kunyit);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.shell-tools {
+  display: flex;
+  gap: 4px;
+}
+.shell-play {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px;
+  padding: 12px 14px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--gonjong);
+  color: var(--on-gonjong);
+  text-decoration: none;
+  box-shadow: 0 4px 0 0 var(--gonjong-tekan);
+}
+.shell-play:hover {
+  background: var(--gonjong-tekan);
+}
+.shell-play .shell-label {
+  display: grid;
+  line-height: 1.2;
+}
+.shell-play small {
+  opacity: 0.9;
+}
+.shell.is-collapsed .shell-play {
+  justify-content: center;
+  margin-inline: 8px;
+  padding: 12px 0;
+}
+.fab-wa {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 30;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border-radius: var(--radius-pill);
+  background: var(--sawah);
+  color: var(--on-sawah);
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 6px 20px var(--bayangan);
+}
+.fab-wa:hover {
+  background: var(--sawah-tekan);
+}
+.fab-wa:focus-visible {
+  outline: 3px solid var(--malam);
+  outline-offset: 2px;
+}
+@media (max-width: 520px) {
+  .fab-wa span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .fab-wa {
+    padding: 14px;
+  }
+}
+
+/* Paket */
+.package-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+}
+.package-card {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  padding: 18px;
+  border: 2px solid var(--garis);
+  border-radius: var(--radius-md);
+  background: var(--kertas);
+}
+.package-card.is-on {
+  border-color: var(--gonjong);
+}
+.package-card header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.package-card h3 {
+  margin: 0;
+}
+.package-card dl {
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+.package-card dt {
+  font-size: 0.85rem;
+  color: var(--malam-muted);
+}
+.package-card dd {
+  margin: 0;
+  font-weight: 700;
+}
+.save-badge {
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--sawah-soft);
+  color: var(--sawah-teks);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.package-price {
+  margin: 0;
+  display: grid;
+}
+.package-price s {
+  color: var(--malam-muted);
+}
+.package-price strong {
+  font-size: 1.6rem;
+  font-family: var(--font-display);
+}
+
+/* Pilihan cara bayar */
+.method-option {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 2px solid var(--garis);
+  border-radius: var(--radius-md);
+  background: var(--kertas);
+  cursor: pointer;
+}
+.method-option.is-on {
+  border-color: var(--gonjong);
+  background: var(--gonjong-soft);
+}
+.method-option:has(input:focus-visible) {
+  outline: 3px solid var(--malam);
+  outline-offset: 2px;
+}
+.method-name,
+.method-detail {
+  display: grid;
+}
+.method-detail {
+  text-align: right;
+}
+.method-detail code {
+  font-size: 1rem;
+  font-weight: 700;
+}
+@media (max-width: 520px) {
+  .method-option {
+    grid-template-columns: auto 1fr;
+  }
+  .method-detail {
+    grid-column: 2;
+    text-align: left;
+  }
+}
+
+/* Pesanan */
+.crumbs {
+  font-size: 0.9rem;
+  color: var(--malam-muted);
+}
+.banner {
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  border: 2px solid transparent;
+}
+.banner-ok {
+  background: var(--sawah-soft);
+  color: var(--sawah-teks);
+  border-color: var(--sawah);
+}
+.banner-warn {
+  background: var(--jeruk-soft);
+  color: var(--jeruk-teks);
+  border-color: var(--jeruk);
+}
+.banner-info {
+  background: var(--langit-soft);
+  color: var(--langit-teks);
+  border-color: var(--langit);
+}
+.order-steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+}
+.order-steps li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--malam-muted);
+}
+.order-step-dot {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--awan-2);
+  font-weight: 700;
+}
+.order-steps .is-current,
+.order-steps .is-done {
+  color: var(--malam);
+  font-weight: 700;
+}
+.order-steps .is-current .order-step-dot {
+  background: var(--kunyit);
+  color: var(--on-kunyit);
+}
+.order-steps .is-done .order-step-dot {
+  background: var(--sawah);
+  color: var(--on-sawah);
+}
+.transfer-amount {
+  margin: 4px 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 6vw, 2.6rem);
+  font-weight: 700;
+  line-height: 1.1;
+}
+.transfer-amount mark {
+  padding: 0 6px;
+  border-radius: var(--radius-sm);
+  background: var(--kunyit);
+  color: var(--on-kunyit);
+}
+.order-sum {
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+.order-sum > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--garis);
+}
+.order-sum dt {
+  color: var(--malam-muted);
+}
+.order-sum dd {
+  margin: 0;
+  font-weight: 700;
+}
+.order-sum .is-total {
+  border-bottom: 0;
+  font-size: 1.1rem;
+}
+.method-box {
+  padding: 14px 16px;
+  border: 2px dashed var(--garis-tegas);
+  border-radius: var(--radius-md);
+}
+.method-number {
+  margin: 4px 0 8px;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+/* Akun */
+.account-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.account-avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--gonjong);
+  color: var(--on-gonjong);
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+}
+.account-code {
+  letter-spacing: 0.12em;
+}
+.account-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  align-items: start;
+}
+.stat-number {
+  margin: 4px 0 0;
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 700;
+}

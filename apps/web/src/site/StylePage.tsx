@@ -165,7 +165,7 @@ export function StylePage() {
             Setel ulang data tiruan
           </button>
           <span>
-            Keluarga demo: kode BELAJR, anak Ayu (apel, bintang, ikan) dan Bima (bola, awan, daun).
+            Keluarga demo: kode RWJUVF, anak Ayu (apel, bintang, ikan) dan Bima (bola, awan, daun).
           </span>
         </div>
       </Section>

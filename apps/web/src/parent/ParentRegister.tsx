@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { parentRegister } from '../api/auth';
 import { ApiError } from '../api/client';
 import { useSession } from '../auth/store';
@@ -10,6 +10,9 @@ import { FormField } from '../ui/FormField';
 export function ParentRegister() {
   const t = useT('parent');
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const refParam = params.get('ref') ?? '';
+  const ref = /^[A-Za-z]{6}$/.test(refParam) ? refParam.toUpperCase() : null;
   const session = useSession((s) => s.session);
   const signIn = useSession((s) => s.signIn);
 
@@ -31,7 +34,13 @@ export function ParentRegister() {
     setBusy(true);
     setError(null);
     try {
-      const res = await parentRegister({ name, email, password, consent: true });
+      const res = await parentRegister({
+        name,
+        email,
+        password,
+        consent: true,
+        ...(ref ? { referralCode: ref } : {}),
+      });
       signIn({ token: res.token, role: 'parent', name: res.user.name });
       navigate('/orang-tua', { replace: true });
     } catch (err) {
@@ -44,6 +53,7 @@ export function ParentRegister() {
   return (
     <AuthLayout variant="parent" title={t('register.title')} text={t('auth.text')}>
       <h1>{t('register.title')}</h1>
+      {ref && <p>{t('register.referral', { code: ref })}</p>}
       <form className="uk-stack" onSubmit={(e) => void onSubmit(e)} noValidate>
         <FormField
           label={t('register.name')}

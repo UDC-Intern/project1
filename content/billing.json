@@ -1,0 +1,97 @@
+{
+  "adminWhatsapp": "6285364665287",
+  "packages": [
+    {
+      "id": "tunas",
+      "name": "Tunas",
+      "durationDays": 30,
+      "listPrice": 50000,
+      "price": 17500,
+      "active": true,
+      "sort": 1
+    },
+    {
+      "id": "kumbang",
+      "name": "Kumbang",
+      "durationDays": 90,
+      "listPrice": 150000,
+      "price": 37500,
+      "active": true,
+      "sort": 2
+    },
+    {
+      "id": "tumbuh-bersama",
+      "name": "Tumbuh Bersama",
+      "durationDays": 180,
+      "listPrice": 300000,
+      "price": 63000,
+      "active": true,
+      "sort": 3
+    },
+    {
+      "id": "bintang-kecil",
+      "name": "Bintang Kecil",
+      "durationDays": 365,
+      "listPrice": 600000,
+      "price": 102000,
+      "active": true,
+      "sort": 4
+    },
+    {
+      "id": "teman-setia",
+      "name": "Teman Setia",
+      "durationDays": null,
+      "listPrice": 1000000,
+      "price": 210000,
+      "active": true,
+      "sort": 5
+    }
+  ],
+  "methods": [
+    {
+      "id": "bca",
+      "kind": "bank",
+      "name": "BCA",
+      "number": "5435032076",
+      "holder": "Ridho Dwi Syahputra",
+      "active": true,
+      "sort": 1
+    },
+    {
+      "id": "bni",
+      "kind": "bank",
+      "name": "BNI",
+      "number": "1318976928",
+      "holder": "Ridho Dwi Syahputra",
+      "active": true,
+      "sort": 2
+    },
+    {
+      "id": "cimb",
+      "kind": "bank",
+      "name": "CIMB NIAGA",
+      "number": "762488948200",
+      "holder": "Ridho Dwi Syahputra",
+      "active": true,
+      "sort": 3
+    },
+    {
+      "id": "gopay",
+      "kind": "ewallet",
+      "name": "Gopay",
+      "number": "085364665287",
+      "holder": "Ridho Dwi Syahputra",
+      "active": true,
+      "sort": 4
+    },
+    {
+      "id": "shopeepay",
+      "kind": "ewallet",
+      "name": "ShopeePay",
+      "number": "085364665287",
+      "holder": "Ridho Dwi Syahputra",
+      "active": true,
+      "sort": 5
+    }
+  ]
+}

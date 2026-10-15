@@ -15,7 +15,17 @@ import {
 } from '@udakids/engine';
 import { ApiError } from '../client';
 import { adminFromToken } from './staff';
-import { applyEdits, BOOKS, levelId, newId, readDb, topicId, writeDb, type MockDb } from './db';
+import {
+  applyEdits,
+  BOOKS,
+  levelId,
+  newId,
+  premiumUntilOf,
+  readDb,
+  topicId,
+  writeDb,
+  type MockDb,
+} from './db';
 import { findLevel } from './levels';
 import { buildReport } from './parent';
 
@@ -185,9 +195,8 @@ export async function aiJobs(token: string | null) {
 }
 
 function planOf(db: MockDb, childId: string) {
-  const until = db.premiumUntil[childId];
-  const active = until !== undefined && Date.parse(until) > Date.now();
-  return { plan: active ? ('premium' as const) : ('free' as const), until: active ? until! : null };
+  const until = premiumUntilOf(db, childId);
+  return { plan: until ? ('premium' as const) : ('free' as const), until };
 }
 
 export async function users(token: string | null, query: string): Promise<AdminUsers> {

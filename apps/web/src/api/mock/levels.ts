@@ -4,7 +4,7 @@ import {
   type LevelStatus,
   type TopicContent,
 } from '@udakids/engine';
-import { BOOKS, levelId, readDb, topicId } from './db';
+import { BOOKS, levelId, premiumUntilOf, readDb, topicId } from './db';
 
 export type FoundLevel = {
   bookSlug: string;
@@ -24,8 +24,7 @@ export function findLevel(id: string): FoundLevel | null {
 }
 
 export function hasPremium(childId: string): boolean {
-  const until = readDb().premiumUntil[childId];
-  return until !== undefined && Date.parse(until) > Date.now();
+  return premiumUntilOf(readDb(), childId) !== null;
 }
 
 export function statusFor(childId: string, found: FoundLevel): LevelStatus {

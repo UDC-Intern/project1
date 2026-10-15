@@ -2,6 +2,9 @@ import { Route, Routes } from 'react-router-dom';
 import { AdminAssistantPage } from './admin/AdminAssistantPage';
 import { AdminContentPage } from './admin/AdminContentPage';
 import { AdminLayout } from './admin/AdminLayout';
+import { AdminMethodsPage } from './admin/AdminMethodsPage';
+import { AdminOrdersPage } from './admin/AdminOrdersPage';
+import { AdminPackagesPage } from './admin/AdminPackagesPage';
 import { AdminOverviewPage } from './admin/AdminOverviewPage';
 import { AdminPreviewPage } from './admin/AdminPreviewPage';
 import { AdminReportsPage } from './admin/AdminReportsPage';
@@ -21,7 +24,11 @@ import { ParentHome } from './parent/ParentHome';
 import { ParentLayout } from './parent/ParentLayout';
 import { ParentLogin } from './parent/ParentLogin';
 import { ParentRegister } from './parent/ParentRegister';
-import { PlanPage } from './parent/PlanPage';
+import { AccountPage } from './parent/AccountPage';
+import { AffiliatePage } from './parent/AffiliatePage';
+import { OrderPage } from './parent/OrderPage';
+import { OrdersPage } from './parent/OrdersPage';
+import { PackagesPage } from './parent/PackagesPage';
 import { PlayHome } from './play/PlayHome';
 import { ProfilePage } from './play/ProfilePage';
 import { ResultPage } from './play/ResultPage';
@@ -60,7 +67,11 @@ export function App() {
           <Route path="anak/:id" element={<ChildReportPage />} />
           <Route path="anak/:id/ubah" element={<EditChild />} />
           <Route path="anak/:id/sandi" element={<ChildPin />} />
-          <Route path="paket" element={<PlanPage />} />
+          <Route path="paket" element={<PackagesPage />} />
+          <Route path="transaksi" element={<OrdersPage />} />
+          <Route path="transaksi/:id" element={<OrderPage />} />
+          <Route path="akun" element={<AccountPage />} />
+          <Route path="afiliasi" element={<AffiliatePage />} />
         </Route>
       </Route>
 
@@ -73,6 +84,9 @@ export function App() {
           <Route path="asisten" element={<AdminAssistantPage />} />
           <Route path="pengguna" element={<AdminUsersPage />} />
           <Route path="laporan" element={<AdminReportsPage />} />
+          <Route path="transaksi" element={<AdminOrdersPage />} />
+          <Route path="paket" element={<AdminPackagesPage />} />
+          <Route path="rekening" element={<AdminMethodsPage />} />
         </Route>
       </Route>
 

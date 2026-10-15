@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useT } from '../i18n';
+import { applyTheme, storedTheme, type Theme } from './theme';
 
 /** Ikon menu: garis tebal 2 px di kotak 24, dibuat sendiri. */
 const PATHS = {
@@ -20,6 +21,12 @@ const PATHS = {
   menu: 'M4 6h16M4 12h16M4 18h16',
   close: 'M6 6l12 12M18 6L6 18',
   collapse: 'M4 5h16v14H4zM9 5v14',
+  wallet: 'M4 7h14a2 2 0 012 2v9a2 2 0 01-2 2H4zM4 7V6a2 2 0 012-2h10M16 13h4',
+  receipt: 'M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6',
+  badge: 'M12 12a4 4 0 100-8 4 4 0 000 8zM5 21c0-4 3-6 7-6s7 2 7 6z',
+  moon: 'M20 14.5A8.5 8.5 0 019.5 4 8.5 8.5 0 1020 14.5z',
+  sun: 'M12 16a4 4 0 100-8 4 4 0 000 8zM12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5',
+  chat: 'M4 5h16v11H9l-5 4z',
 } as const;
 export type ShellIcon = keyof typeof PATHS;
 
@@ -41,7 +48,15 @@ export function ShellIconSvg({ name, size = 22 }: { name: ShellIcon; size?: numb
   );
 }
 
-export type ShellNavItem = { to: string; label: string; icon: ShellIcon; end?: boolean };
+export type ShellNavItem = {
+  to: string;
+  label: string;
+  icon: ShellIcon;
+  end?: boolean;
+  /** Angka kecil di menu, mis. pesanan yang perlu tindakan. */
+  badge?: number;
+  badgeLabel?: string;
+};
 export type ShellNav = (ShellNavItem | { group: string })[];
 
 const readCollapsed = (key: string) => {
@@ -63,6 +78,7 @@ export function AppShell({
   nav,
   navLabel,
   extra,
+  floating,
   user,
   onLogout,
   children,
@@ -73,6 +89,8 @@ export function AppShell({
   nav: ShellNav;
   navLabel: string;
   extra?: ReactNode;
+  /** Elemen mengambang di pojok kanan bawah, mis. tombol hubungi admin. */
+  floating?: ReactNode;
   user: { name: string; caption: string };
   onLogout: () => void;
   children: ReactNode;
@@ -82,6 +100,7 @@ export function AppShell({
   const { pathname } = useLocation();
   const [collapsed, setCollapsed] = useState(() => readCollapsed(storeKey));
   const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<Theme>(storedTheme);
   const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => setOpen(false), [pathname]);
@@ -92,6 +111,7 @@ export function AppShell({
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, [open]);
+  useEffect(() => applyTheme(mode, false), [mode]);
 
   const toggle = () => {
     const next = !collapsed;
@@ -101,6 +121,11 @@ export function AppShell({
     } catch {
       /* diabaikan */
     }
+  };
+  const toggleTheme = () => {
+    const next: Theme = mode === 'dark' ? 'light' : 'dark';
+    setMode(next);
+    applyTheme(next);
   };
 
   return (
@@ -150,9 +175,17 @@ export function AppShell({
                 end={item.end}
                 className="shell-link"
                 title={item.label}
+                aria-label={
+                  item.badge ? (item.badgeLabel ?? `${item.label}, ${item.badge}`) : undefined
+                }
               >
                 <ShellIconSvg name={item.icon} />
                 <span className="shell-label">{item.label}</span>
+                {item.badge ? (
+                  <span className="shell-badge" aria-hidden="true">
+                    {item.badge}
+                  </span>
+                ) : null}
               </NavLink>
             ),
           )}
@@ -162,18 +195,30 @@ export function AppShell({
 
         <div className="shell-user">
           <span className="shell-label">
-            <strong>{user.name}</strong>
             <small>{user.caption}</small>
+            <strong>{user.name}</strong>
           </span>
-          <button
-            type="button"
-            className="shell-iconbtn"
-            aria-label={t('logout')}
-            title={t('logout')}
-            onClick={onLogout}
-          >
-            <ShellIconSvg name="logout" />
-          </button>
+          <div className="shell-tools">
+            <button
+              type="button"
+              className="shell-iconbtn"
+              aria-pressed={mode === 'dark'}
+              aria-label={mode === 'dark' ? t('theme.light') : t('theme.dark')}
+              title={mode === 'dark' ? t('theme.light') : t('theme.dark')}
+              onClick={toggleTheme}
+            >
+              <ShellIconSvg name={mode === 'dark' ? 'sun' : 'moon'} />
+            </button>
+            <button
+              type="button"
+              className="shell-iconbtn"
+              aria-label={t('logout')}
+              title={t('logout')}
+              onClick={onLogout}
+            >
+              <ShellIconSvg name="logout" />
+            </button>
+          </div>
         </div>
 
         <button
@@ -189,6 +234,7 @@ export function AppShell({
       </aside>
 
       <div className="shell-main">{children}</div>
+      {floating}
     </div>
   );
 }

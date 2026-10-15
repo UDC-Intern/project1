@@ -57,7 +57,7 @@ describe('navigasi dan kerangka', () => {
           brand={<span>Uji</span>}
           navLabel="Menu uji"
           nav={[{ to: '/', label: 'Beranda', icon: 'home', end: true }]}
-          user={{ name: 'Bu Ani', caption: 'Masuk sebagai' }}
+          user={{ name: 'Ridho Dwi Syahputra', caption: 'Masuk sebagai' }}
           onLogout={() => undefined}
         >
           <p>isi</p>
@@ -75,7 +75,7 @@ describe('navigasi dan kerangka', () => {
 
   it('kerangka orang tua menampilkan menu dan tombol keluar', () => {
     useSession.setState({
-      session: { token: 'mock-parent:p-demo', role: 'parent', name: 'Bu Ani' },
+      session: { token: 'mock-parent:p-demo', role: 'parent', name: 'Ridho Dwi Syahputra' },
     });
     render(
       <MemoryRouter initialEntries={['/orang-tua']}>
@@ -87,7 +87,7 @@ describe('navigasi dan kerangka', () => {
         </Routes>
       </MemoryRouter>,
     );
-    expect(screen.getAllByRole('link', { name: 'Paket' }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('link', { name: 'Paket & Pembayaran' }).length).toBeGreaterThan(0);
     fireEvent.click(screen.getAllByRole('button', { name: 'Keluar' })[0]!);
     expect(screen.getByText('Halaman masuk')).toBeInTheDocument();
     expect(useSession.getState().session).toBeNull();

@@ -99,3 +99,19 @@ export function StarIcon({ size = 20 }: { size?: number }) {
     </svg>
   );
 }
+
+/** Mahkota untuk juara pertama di podium. */
+export function CrownIcon({ size = 44 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M3 8l4.5 4L12 4l4.5 8L21 8l-2 11H5z"
+        fill="var(--kunyit)"
+        stroke="var(--kunyit-tekan)"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <circle cx="12" cy="15" r="1.4" fill="var(--kunyit-tekan)" />
+    </svg>
+  );
+}

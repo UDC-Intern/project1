@@ -63,7 +63,7 @@ describe('penjagaan peran', () => {
   });
 
   it('peran sesuai boleh masuk', () => {
-    useSession.setState({ session: { token: 't', role: 'parent', name: 'Bu Ani' } });
+    useSession.setState({ session: { token: 't', role: 'parent', name: 'Ridho Dwi Syahputra' } });
     render(tree('/orang-tua'));
     expect(screen.getByText('Beranda orang tua')).toBeInTheDocument();
   });
