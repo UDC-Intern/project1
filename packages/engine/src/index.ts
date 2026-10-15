@@ -5,3 +5,7 @@ export * from './schemas/api.js';
 export * from './content/validate-question.js';
 export * from './schemas/content.js';
 export * from './rules/level.js';
+export * from './generator/index.js';
+export * from './scoring/round.js';
+export * from './scoring/jago.js';
+export * from './scoring/leaderboard.js';

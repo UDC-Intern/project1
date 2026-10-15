@@ -1,0 +1,194 @@
+/* ---- Ronde ---- */
+.uk-dots {
+  list-style: none;
+  display: flex;
+  gap: var(--uk-space-2);
+  padding: 0;
+  margin: var(--uk-space-2) 0 0;
+}
+.uk-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 3px solid var(--uk-border);
+  background: var(--uk-surface);
+}
+.uk-dot[data-state='correct'] {
+  background: var(--uk-correct);
+  border-color: var(--uk-correct);
+}
+.uk-dot[data-state='retry'] {
+  background: var(--uk-retry);
+  border-color: var(--uk-retry);
+}
+.uk-dot[data-state='current'] {
+  border-color: var(--uk-primary);
+}
+.uk-stopwatch {
+  font-family: var(--uk-font-title);
+  font-size: var(--uk-text-child);
+  color: var(--uk-text-muted);
+}
+.uk-round-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--uk-space-3);
+}
+.uk-question {
+  display: grid;
+  gap: var(--uk-space-3);
+  padding: var(--uk-space-6);
+}
+.uk-question-text {
+  margin: 0;
+  font-family: var(--uk-font-title);
+  font-size: var(--uk-text-question);
+  line-height: 1.3;
+}
+.uk-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--uk-space-3);
+}
+.uk-option {
+  min-height: var(--uk-answer-height);
+  border: 3px solid var(--uk-border);
+  border-radius: var(--uk-radius-lg);
+  background: var(--uk-surface);
+  color: var(--uk-text);
+  font-family: var(--uk-font-title);
+  font-size: var(--uk-text-question);
+  cursor: pointer;
+}
+.uk-option:hover:not(:disabled) {
+  border-color: var(--uk-primary);
+}
+.uk-option[data-state='correct'] {
+  border-color: var(--uk-correct);
+  background: var(--uk-correct-soft);
+}
+.uk-option[data-state='retry'] {
+  border-color: var(--uk-retry);
+  background: var(--uk-retry-soft);
+}
+.uk-option:disabled {
+  cursor: default;
+}
+.uk-keypad-wrap {
+  display: grid;
+  gap: var(--uk-space-3);
+  max-width: 360px;
+}
+.uk-keypad-display {
+  display: block;
+  min-height: var(--uk-touch);
+  padding: var(--uk-space-2) var(--uk-space-4);
+  border: 3px solid var(--uk-border);
+  border-radius: var(--uk-radius-md);
+  background: var(--uk-surface);
+  font-family: var(--uk-font-title);
+  font-size: var(--uk-text-question);
+  text-align: center;
+  white-space: pre;
+}
+.uk-keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--uk-space-2);
+}
+.uk-key {
+  min-height: var(--uk-touch);
+  border: 2px solid var(--uk-border);
+  border-radius: var(--uk-radius-md);
+  background: var(--uk-surface);
+  color: var(--uk-text);
+  font-family: var(--uk-font-title);
+  font-size: var(--uk-text-child);
+  cursor: pointer;
+}
+.uk-key:hover:not(:disabled) {
+  border-color: var(--uk-primary);
+}
+.uk-key--go {
+  background: var(--uk-primary);
+  border-color: var(--uk-primary);
+  color: var(--uk-on-primary);
+}
+.uk-key:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ---- Hasil, peringkat, profil ---- */
+.uk-score {
+  font-family: var(--uk-font-title);
+  font-size: 4rem;
+  line-height: 1;
+  margin: 0;
+}
+.uk-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--uk-space-2);
+}
+.uk-tab {
+  min-height: var(--uk-touch);
+  padding: 0 var(--uk-space-4);
+  border: 2px solid var(--uk-border);
+  border-radius: var(--uk-radius-md);
+  background: var(--uk-surface);
+  font-family: var(--uk-font-title);
+  font-size: var(--uk-text-child);
+  color: var(--uk-text);
+  cursor: pointer;
+}
+.uk-tab[aria-pressed='true'] {
+  border-color: var(--uk-primary);
+  background: var(--uk-primary-soft);
+  color: var(--uk-primary);
+}
+.uk-rank-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--uk-space-2);
+}
+.uk-rank-row {
+  display: flex;
+  align-items: center;
+  gap: var(--uk-space-3);
+  padding: var(--uk-space-2) var(--uk-space-4);
+  border: 2px solid var(--uk-border);
+  border-radius: var(--uk-radius-md);
+  background: var(--uk-surface);
+}
+.uk-rank-row[data-me='true'] {
+  border-color: var(--uk-primary);
+  background: var(--uk-primary-soft);
+}
+.uk-rank-no {
+  min-width: 2ch;
+  font-family: var(--uk-font-title);
+}
+.uk-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--uk-space-3);
+}
+.uk-swatch-btn {
+  width: var(--uk-touch);
+  height: var(--uk-touch);
+  display: grid;
+  place-items: center;
+  border: 3px solid var(--uk-border);
+  border-radius: var(--uk-radius-md);
+  background: var(--uk-surface);
+  cursor: pointer;
+  padding: 0;
+}
+.uk-swatch-btn[aria-pressed='true'] {
+  border-color: var(--uk-primary);
+  background: var(--uk-primary-soft);
+}

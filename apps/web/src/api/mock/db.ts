@@ -1,4 +1,11 @@
-import { bookContentSchema, type BookContent, type MomoColor, type Pin } from '@udakids/engine';
+import {
+  bookContentSchema,
+  type BookContent,
+  type MasteryState,
+  type MomoColor,
+  type Pin,
+  type Stage,
+} from '@udakids/engine';
 import matematika from '../../../../../content/matematika-kelas-1/book.json';
 import sains from '../../../../../content/sains-kelas-1/book.json';
 
@@ -19,13 +26,34 @@ export type MockChild = {
   lockedUntil: number | null;
 };
 
+export type MockRound = {
+  id: string;
+  childId: string;
+  levelId: string;
+  seed: number;
+  startedAt: number;
+  stageBefore: Stage;
+  answers: Record<number, { chosen: string; isCorrect: boolean }>;
+  finishedAt: number | null;
+  result: {
+    score: number;
+    correct: number;
+    wrong: number;
+    durationMs: number;
+    passed: boolean;
+  } | null;
+};
+
 export type MockDb = {
   parents: MockParent[];
   children: MockChild[];
   /** id level yang pernah lulus, per anak */
   passedLevels: Record<string, string[]>;
-  /** tahap tanaman terlihat per anak per topik (0 sampai 3) */
-  stages: Record<string, Record<string, 0 | 1 | 2 | 3>>;
+  /** penguasaan per anak per topik (id topik) */
+  mastery: Record<string, Record<string, MasteryState>>;
+  /** skor dan waktu terbaik per anak per level */
+  best: Record<string, Record<string, { score: number; ms: number }>>;
+  rounds: Record<string, MockRound>;
   /** Premium sampai tanggal ISO, per anak */
   premiumUntil: Record<string, string>;
   /** level terakhir yang dimainkan, per anak */
@@ -60,7 +88,9 @@ function seed(): MockDb {
       },
     ],
     passedLevels: {},
-    stages: {},
+    mastery: {},
+    best: {},
+    rounds: {},
     premiumUntil: {},
     lastLevel: {},
   };
@@ -73,7 +103,8 @@ export function readDb(): MockDb {
   try {
     const raw = localStorage.getItem(KEY);
     if (raw) {
-      memory = JSON.parse(raw) as MockDb;
+      const parsed = JSON.parse(raw) as Partial<MockDb>;
+      memory = { ...seed(), ...parsed } as MockDb;
       return memory;
     }
   } catch {
