@@ -1,6 +1,9 @@
-import type { Leaderboard, LeaderboardTop } from '@udakids/engine';
+import type { Leaderboard, LeaderboardMode, LeaderboardTop } from '@udakids/engine';
 import { request } from '../client';
 
-export const leaderboard = (bookSlug: string | null) =>
-  request<Leaderboard>(`/leaderboard${bookSlug ? `?book=${encodeURIComponent(bookSlug)}` : ''}`);
+export const leaderboard = (bookSlug: string | null, mode: LeaderboardMode) => {
+  const query = new URLSearchParams({ mode });
+  if (bookSlug) query.set('book', bookSlug);
+  return request<Leaderboard>(`/leaderboard?${query.toString()}`);
+};
 export const leaderboardTop = () => request<LeaderboardTop>('/leaderboard/top');

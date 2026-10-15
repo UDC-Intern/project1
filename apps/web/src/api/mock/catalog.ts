@@ -10,14 +10,13 @@ import {
 } from '@udakids/engine';
 import { ApiError } from '../client';
 import { childIdFromToken } from './auth';
-import { BOOKS, levelId, readDb, topicId, writeDb } from './db';
+import { BOOKS, levelId, premiumUntilOf, readDb, topicId, writeDb } from './db';
 import { findLevel } from './levels';
 
 const notFound = () => new ApiError(404, { code: 'NOT_FOUND', message: 'Tidak ketemu.' });
 
 function hasPremium(childId: string): boolean {
-  const until = readDb().premiumUntil[childId];
-  return until !== undefined && Date.parse(until) > Date.now();
+  return premiumUntilOf(readDb(), childId) !== null;
 }
 
 export async function home(token: string | null): Promise<CatalogHome> {

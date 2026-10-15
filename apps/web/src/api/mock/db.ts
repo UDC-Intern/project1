@@ -5,7 +5,16 @@ import {
   type Pin,
   type Stage,
 } from '@udakids/engine';
+import {
+  ORDER_TTL_MS,
+  orderAmounts,
+  orderNumber,
+  uniqueCodeFor,
+  type Order,
+  type OrderStatus,
+} from '@udakids/engine';
 import { BASE_BOOKS } from '../../content/books';
+import { BILLING } from '../../content/billing';
 
 const BASE: BookContent[] = BASE_BOOKS;
 
@@ -47,6 +56,18 @@ export type MockParent = {
   email: string;
   password: string;
   familyCode: string;
+  createdAt?: string;
+  passwordChangedAt?: string | null;
+  pendingEmail?: string | null;
+  /** kode keluarga orang tua yang mengajaknya mendaftar */
+  referredBy?: string | null;
+};
+
+export type MockOrder = Order & { parentId: string; proofDataUrl: string | null };
+
+export type BillingEdits = {
+  packages: Record<string, { name?: string; listPrice?: number; price?: number; active?: boolean }>;
+  methods: Record<string, { name?: string; number?: string; holder?: string; active?: boolean }>;
 };
 export type MockChild = {
   id: string;
@@ -82,6 +103,10 @@ export type MockDb = {
   admins: MockAdmin[];
   contentEdits: ContentEdits;
   aiJobs: MockAiJob[];
+  orders: Record<string, MockOrder>;
+  /** Premium keluarga dari pembelian paket: berlaku untuk semua anak orang tua itu */
+  familyPremium: Record<string, string>;
+  billingEdits: BillingEdits;
   children: MockChild[];
   /** id level yang pernah lulus, per anak */
   passedLevels: Record<string, string[]>;
@@ -98,15 +123,68 @@ export type MockDb = {
 
 const KEY = 'udakids-mock-v1';
 
+/** Riwayat contoh untuk akun demo: pesanan kedaluwarsa, dibatalkan, dan bukti yang perlu dikirim ulang. */
+function seedOrders(): Record<string, MockOrder> {
+  const make = (
+    id: string,
+    pkgId: string,
+    methodId: string,
+    createdAt: string,
+    status: OrderStatus,
+    extra: Partial<MockOrder> = {},
+  ): MockOrder => {
+    const pkg = BILLING.packages.find((p) => p.id === pkgId)!;
+    const method = BILLING.methods.find((m) => m.id === methodId)!;
+    const amounts = orderAmounts(pkg.listPrice, pkg.price, uniqueCodeFor(id));
+    const created = Date.parse(createdAt);
+    return {
+      id,
+      number: orderNumber(created, id),
+      packageId: pkg.id,
+      packageName: pkg.name,
+      durationDays: pkg.durationDays,
+      ...amounts,
+      methodId: method.id,
+      methodName: method.name,
+      methodNumber: method.number,
+      methodHolder: method.holder,
+      status,
+      createdAt,
+      expiresAt: new Date(created + ORDER_TTL_MS).toISOString(),
+      proofName: null,
+      proofAt: null,
+      rejectNote: null,
+      paidAt: null,
+      parentId: 'p-demo',
+      proofDataUrl: null,
+      ...extra,
+    };
+  };
+  const list = [
+    make('o-demo-1', 'tunas', 'bca', '2026-09-24T09:10:00.000Z', 'expired'),
+    make('o-demo-2', 'kumbang', 'gopay', '2026-10-01T13:30:00.000Z', 'cancelled'),
+    make('o-demo-3', 'tunas', 'bni', '2026-10-06T07:45:00.000Z', 'rejected', {
+      proofName: 'bukti-transfer.png',
+      proofAt: '2026-10-06T08:00:00.000Z',
+      rejectNote: 'Bukti belum terbaca. Mohon kirim ulang foto yang lebih jelas.',
+    }),
+  ];
+  return Object.fromEntries(list.map((o) => [o.id, o]));
+}
+
 function seed(): MockDb {
   return {
     parents: [
       {
         id: 'p-demo',
-        name: 'Bu Ani',
-        email: 'ani@contoh.id',
+        name: 'Ridho Dwi Syahputra',
+        email: 'ridhodwi330@gmail.com',
         password: 'rahasia123',
-        familyCode: 'BELAJR',
+        familyCode: 'RWJUVF',
+        createdAt: '2026-09-18T08:00:00.000Z',
+        passwordChangedAt: null,
+        pendingEmail: null,
+        referredBy: null,
       },
     ],
     children: [
@@ -136,6 +214,9 @@ function seed(): MockDb {
     ],
     contentEdits: { topics: {}, levels: {} },
     aiJobs: [],
+    orders: seedOrders(),
+    familyPremium: {},
+    billingEdits: { packages: {}, methods: {} },
     passedLevels: {},
     mastery: {},
     best: {},
@@ -186,3 +267,18 @@ export const levelId = (bookSlug: string, code: string, n: number) => `${bookSlu
 /** Id unik untuk data tiruan (tanpa crypto.randomUUID yang butuh konteks aman). */
 export const newId = (prefix: string) =>
   `${prefix}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+
+/**
+ * Premium yang berlaku untuk seorang anak: yang paling akhir antara Premium anak (diatur admin) dan Premium
+ * keluarga (dari pembelian paket). Null bila tidak ada yang aktif.
+ */
+export function premiumUntilOf(db: MockDb, childId: string): string | null {
+  const child = db.children.find((c) => c.id === childId);
+  const candidates = [
+    db.premiumUntil[childId],
+    child ? db.familyPremium[child.parentId] : undefined,
+  ]
+    .filter((v): v is string => v !== undefined && Date.parse(v) > Date.now())
+    .sort();
+  return candidates.at(-1) ?? null;
+}

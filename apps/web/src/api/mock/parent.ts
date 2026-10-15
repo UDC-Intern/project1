@@ -15,7 +15,16 @@ import {
 } from '@udakids/engine';
 import { ApiError } from '../client';
 import { parentFromToken } from './accounts';
-import { BOOKS, newId, readDb, topicId, writeDb, type MockChild, type MockDb } from './db';
+import {
+  BOOKS,
+  newId,
+  premiumUntilOf,
+  readDb,
+  topicId,
+  writeDb,
+  type MockChild,
+  type MockDb,
+} from './db';
 import { findLevel } from './levels';
 
 const MAX_CHILDREN = 3;
@@ -39,7 +48,7 @@ function finishedRounds(db: MockDb, childId: string) {
 function summary(db: MockDb, child: MockChild) {
   const best = Object.values(db.best[child.id] ?? {});
   const rounds = finishedRounds(db, child.id);
-  const until = db.premiumUntil[child.id];
+  const until = premiumUntilOf(db, child.id);
   return {
     id: child.id,
     nickname: child.nickname,
@@ -49,7 +58,7 @@ function summary(db: MockDb, child: MockChild) {
     levelsPassed: (db.passedLevels[child.id] ?? []).length,
     rounds: rounds.length,
     minutes: Math.round(rounds.reduce((a, r) => a + r.result!.durationMs, 0) / 60_000),
-    premiumUntil: until && Date.parse(until) > Date.now() ? until : null,
+    premiumUntil: until,
   };
 }
 
@@ -206,8 +215,8 @@ export async function plan(token: string | null): Promise<ParentPlan> {
     children: db.children
       .filter((c) => c.parentId === parent.id)
       .map((c) => {
-        const until = db.premiumUntil[c.id];
-        const active = until !== undefined && Date.parse(until) > Date.now();
+        const until = premiumUntilOf(db, c.id);
+        const active = until !== null;
         return {
           id: c.id,
           nickname: c.nickname,

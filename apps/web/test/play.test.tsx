@@ -27,7 +27,7 @@ beforeEach(() => {
 
 describe('mock auth anak', () => {
   it('mengenali kode keluarga tanpa membedakan huruf besar', async () => {
-    const res = await familyProfiles('belajr');
+    const res = await familyProfiles('rwjuvf');
     expect(res.profiles.map((p) => p.nickname)).toEqual(['Ayu', 'Bima']);
     expect((await errorOf(familyProfiles('ZZZZZZ'))).body.code).toBe('NOT_FOUND');
   });
@@ -130,7 +130,7 @@ describe('halaman anak', () => {
         </Routes>
       </MemoryRouter>,
     );
-    fireEvent.change(screen.getByLabelText('Kode keluarga'), { target: { value: 'belajr' } });
+    fireEvent.change(screen.getByLabelText('Kode keluarga'), { target: { value: 'rwjuvf' } });
     fireEvent.click(screen.getByRole('button', { name: 'Lanjut' }));
     fireEvent.click(await screen.findByRole('button', { name: /Ayu/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Apel' }));
@@ -148,7 +148,7 @@ describe('halaman anak', () => {
         </Routes>
       </MemoryRouter>,
     );
-    fireEvent.change(screen.getByLabelText('Kode keluarga'), { target: { value: 'BELAJR' } });
+    fireEvent.change(screen.getByLabelText('Kode keluarga'), { target: { value: 'RWJUVF' } });
     fireEvent.click(screen.getByRole('button', { name: 'Lanjut' }));
     fireEvent.click(await screen.findByRole('button', { name: /Ayu/ }));
     for (const name of ['Kucing', 'Rumah', 'Awan'])

@@ -1479,3 +1479,77 @@ a.level-card:active {
   overflow-x: auto;
   padding: 4px 2px 8px;
 }
+
+/* ── Peringkat: mode, mahkota, detail, kartu posisi sendiri ── */
+.rank-modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.rank-scopes {
+  margin-bottom: 12px;
+}
+.podium-crown {
+  display: grid;
+  place-items: center;
+  margin-bottom: -6px;
+}
+.podium-points small {
+  font-weight: 700;
+  color: var(--malam-muted);
+}
+.podium-detail,
+.rank-info {
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  border: 2px solid var(--garis-tegas);
+  background: var(--kertas);
+  color: var(--malam);
+  border-radius: var(--radius-pill);
+}
+.podium-detail {
+  padding: 2px 12px;
+  font-size: 0.85rem;
+}
+.rank-info {
+  width: 28px;
+  height: 28px;
+  margin-left: 6px;
+  padding: 0;
+}
+.rank-detail {
+  margin: 0 0 16px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.rank-detail div {
+  padding: 10px 12px;
+  border: 2px solid var(--garis);
+  border-radius: var(--radius-md);
+}
+.rank-detail dt {
+  font-size: 0.9rem;
+  color: var(--malam-muted);
+}
+.rank-detail dd {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+.rank-mine {
+  position: sticky;
+  bottom: 12px;
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  background: var(--gonjong-soft);
+  border: 3px solid var(--gonjong);
+  border-radius: 20px;
+  font-weight: 700;
+}

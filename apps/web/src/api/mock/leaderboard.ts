@@ -1,84 +1,247 @@
 import {
+  rankByRating,
   rankEntries,
   type Leaderboard,
+  type LeaderboardEntry,
+  type LeaderboardMode,
   type LeaderboardTop,
   type MomoColor,
 } from '@udakids/engine';
 import { childIdFromToken } from './auth';
 import { readDb } from './db';
 
+export const BOARD_SIZE = 25;
+
 // Anak tiruan supaya papan terlihat ramai di mode demo.
-const FAKES: { id: string; nickname: string; momoColor: MomoColor; total: number; ms: number }[] = [
-  { id: 'f1', nickname: 'Rara', momoColor: 'pink', total: 520, ms: 410_000 },
-  { id: 'f2', nickname: 'Dimas', momoColor: 'blue', total: 480, ms: 520_000 },
-  { id: 'f3', nickname: 'Siti', momoColor: 'green', total: 450, ms: 380_000 },
-  { id: 'f4', nickname: 'Made', momoColor: 'orange', total: 410, ms: 460_000 },
-  { id: 'f5', nickname: 'Nia', momoColor: 'teal', total: 380, ms: 300_000 },
-  { id: 'f6', nickname: 'Fajar', momoColor: 'yellow', total: 340, ms: 410_000 },
-  { id: 'f7', nickname: 'Putri', momoColor: 'pink', total: 300, ms: 350_000 },
-  { id: 'f8', nickname: 'Rafi', momoColor: 'blue', total: 260, ms: 290_000 },
-  { id: 'f9', nickname: 'Laras', momoColor: 'green', total: 220, ms: 330_000 },
-  { id: 'f10', nickname: 'Komang', momoColor: 'orange', total: 180, ms: 270_000 },
-  { id: 'f11', nickname: 'Tika', momoColor: 'teal', total: 140, ms: 240_000 },
-  { id: 'f12', nickname: 'Yoga', momoColor: 'yellow', total: 90, ms: 180_000 },
+const FAKES: {
+  id: string;
+  nickname: string;
+  momoColor: MomoColor;
+  points: number;
+  rounds: number;
+  average: number;
+  timeMs: number;
+}[] = [
+  {
+    id: 'f1',
+    nickname: 'Rara',
+    momoColor: 'pink',
+    points: 520,
+    rounds: 22,
+    average: 92,
+    timeMs: 1_850_000,
+  },
+  {
+    id: 'f2',
+    nickname: 'Dimas',
+    momoColor: 'blue',
+    points: 480,
+    rounds: 20,
+    average: 90,
+    timeMs: 1_720_000,
+  },
+  {
+    id: 'f3',
+    nickname: 'Siti',
+    momoColor: 'green',
+    points: 450,
+    rounds: 18,
+    average: 91,
+    timeMs: 1_390_000,
+  },
+  {
+    id: 'f4',
+    nickname: 'Made',
+    momoColor: 'orange',
+    points: 410,
+    rounds: 17,
+    average: 86,
+    timeMs: 1_510_000,
+  },
+  {
+    id: 'f5',
+    nickname: 'Nia',
+    momoColor: 'teal',
+    points: 380,
+    rounds: 14,
+    average: 88,
+    timeMs: 1_040_000,
+  },
+  {
+    id: 'f6',
+    nickname: 'Fajar',
+    momoColor: 'yellow',
+    points: 340,
+    rounds: 13,
+    average: 82,
+    timeMs: 1_120_000,
+  },
+  {
+    id: 'f7',
+    nickname: 'Putri',
+    momoColor: 'pink',
+    points: 300,
+    rounds: 11,
+    average: 85,
+    timeMs: 930_000,
+  },
+  {
+    id: 'f8',
+    nickname: 'Rafi',
+    momoColor: 'blue',
+    points: 260,
+    rounds: 9,
+    average: 80,
+    timeMs: 760_000,
+  },
+  {
+    id: 'f9',
+    nickname: 'Laras',
+    momoColor: 'green',
+    points: 220,
+    rounds: 8,
+    average: 78,
+    timeMs: 700_000,
+  },
+  {
+    id: 'f10',
+    nickname: 'Komang',
+    momoColor: 'orange',
+    points: 180,
+    rounds: 6,
+    average: 74,
+    timeMs: 520_000,
+  },
+  {
+    id: 'f11',
+    nickname: 'Tika',
+    momoColor: 'teal',
+    points: 140,
+    rounds: 5,
+    average: 72,
+    timeMs: 410_000,
+  },
+  {
+    id: 'f12',
+    nickname: 'Yoga',
+    momoColor: 'yellow',
+    points: 90,
+    rounds: 3,
+    average: 70,
+    timeMs: 260_000,
+  },
 ];
 
-function entries(bookSlug: string | null) {
+type Row = {
+  id: string;
+  nickname: string;
+  momoColor: MomoColor;
+  points: number;
+  rounds: number;
+  scoreSum: number;
+  timeMs: number;
+  bestMs: number;
+};
+
+function rows(bookSlug: string | null): Row[] {
   const db = readDb();
-  const real = db.children
-    .map((c) => {
-      const rows = Object.entries(db.best[c.id] ?? {}).filter(
-        ([level]) => !bookSlug || level.startsWith(`${bookSlug}:`),
-      );
-      return {
-        id: c.id,
-        nickname: c.nickname,
-        momoColor: c.momoColor,
-        totalScore: rows.reduce((a, [, v]) => a + v.score, 0),
-        totalMs: rows.reduce((a, [, v]) => a + v.ms, 0),
-        played: rows.length > 0,
-      };
-    })
-    .filter((e) => e.played);
-  const fakes = FAKES.map((f) => ({
-    id: f.id,
-    nickname: f.nickname,
-    momoColor: f.momoColor,
-    totalScore: bookSlug ? Math.round(f.total / 2) : f.total,
-    totalMs: f.ms,
-  }));
-  return rankEntries([...real, ...fakes]);
+  const real: Row[] = db.children.map((c) => {
+    const rounds = Object.values(db.rounds).filter(
+      (r) => r.childId === c.id && r.result && (!bookSlug || r.levelId.startsWith(`${bookSlug}:`)),
+    );
+    const best = Object.entries(db.best[c.id] ?? {}).filter(
+      ([level]) => !bookSlug || level.startsWith(`${bookSlug}:`),
+    );
+    return {
+      id: c.id,
+      nickname: c.nickname,
+      momoColor: c.momoColor,
+      points: best.reduce((a, [, v]) => a + v.score, 0),
+      rounds: rounds.length,
+      scoreSum: rounds.reduce((a, r) => a + r.result!.score, 0),
+      timeMs: rounds.reduce((a, r) => a + r.result!.durationMs, 0),
+      bestMs: best.reduce((a, [, v]) => a + v.ms, 0),
+    };
+  });
+  const factor = bookSlug ? 0.5 : 1;
+  const fakes: Row[] = FAKES.map((f) => {
+    const rounds = Math.max(1, Math.round(f.rounds * factor));
+    return {
+      id: f.id,
+      nickname: f.nickname,
+      momoColor: f.momoColor,
+      points: Math.round(f.points * factor),
+      rounds,
+      scoreSum: f.average * rounds,
+      timeMs: Math.round(f.timeMs * factor),
+      bestMs: Math.round(f.timeMs * factor * 0.4),
+    };
+  });
+  return [...real.filter((r) => r.rounds > 0), ...fakes];
 }
 
-/** Respons hanya memuat peringkat, nama panggilan, warna Momo, skor, dan penanda "ini kamu". */
+function build(mode: Exclude<LeaderboardMode, 'mock'>, bookSlug: string | null) {
+  const data = rows(bookSlug);
+  if (mode === 'average') {
+    return rankByRating(data.map((r) => ({ ...r, timeMs: r.timeMs }))).map((r) => ({
+      id: r.id,
+      rank: r.rank,
+      nickname: r.nickname,
+      momoColor: r.momoColor,
+      score: r.rating,
+      points: r.points,
+      average: r.average,
+      rounds: r.rounds,
+      questions: r.rounds * 10,
+      timeMs: r.timeMs,
+    }));
+  }
+  return rankEntries(data.map((r) => ({ ...r, totalScore: r.points, totalMs: r.bestMs }))).map(
+    (r) => ({
+      id: r.id,
+      rank: r.rank,
+      nickname: r.nickname,
+      momoColor: r.momoColor,
+      score: r.points,
+      points: r.points,
+      average: r.rounds > 0 ? Math.round((r.scoreSum / r.rounds) * 100) / 100 : 0,
+      rounds: r.rounds,
+      questions: r.rounds * 10,
+      timeMs: r.bestMs,
+    }),
+  );
+}
+
+const strip = (
+  { id: _id, ...rest }: ReturnType<typeof build>[number],
+  isMe: boolean,
+): LeaderboardEntry => ({
+  ...rest,
+  isMe,
+});
+
+/** Respons hanya memuat peringkat, nama panggilan, warna Momo, angka, dan penanda "ini kamu". Tanpa id. */
 export async function leaderboard(
   token: string | null,
   bookSlug: string | null,
+  mode: LeaderboardMode = 'average',
 ): Promise<Leaderboard> {
   const childId = childIdFromToken(token);
-  const ranked = entries(bookSlug);
+  if (mode === 'mock') return { mode, total: 0, entries: [], me: null };
+  const ranked = build(mode, bookSlug);
   const me = ranked.find((e) => e.id === childId);
   return {
-    entries: ranked.slice(0, 20).map((e) => ({
-      rank: e.rank,
-      nickname: e.nickname,
-      momoColor: e.momoColor,
-      score: e.totalScore,
-      isMe: e.id === childId,
-    })),
-    me: me ? { rank: me.rank, score: me.totalScore } : null,
+    mode,
+    total: ranked.length,
+    entries: ranked.slice(0, BOARD_SIZE).map((e) => strip(e, e.id === childId)),
+    me: me ? strip(me, true) : null,
   };
 }
 
 export async function leaderboardTop(): Promise<LeaderboardTop> {
   return {
-    entries: entries(null)
+    entries: build('total', null)
       .slice(0, 10)
-      .map((e) => ({
-        rank: e.rank,
-        nickname: e.nickname,
-        momoColor: e.momoColor,
-        score: e.totalScore,
-      })),
+      .map((e) => strip(e, false)),
   };
 }

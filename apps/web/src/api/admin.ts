@@ -1,7 +1,8 @@
-import type { UpdateLevelBody, UpdateTopicBody } from '@udakids/engine';
+import type { InsightRange, UpdateLevelBody, UpdateTopicBody } from '@udakids/engine';
 import { useSession } from '../auth/store';
 import * as http from './http/admin';
 import * as mock from './mock/admin';
+import * as insightsMock from './mock/insights';
 import { isMocked } from './mode';
 
 const token = () => useSession.getState().session?.token ?? null;
@@ -26,3 +27,6 @@ export const revokePremium = (childId: string) =>
 export const childReport = (childId: string) =>
   mocked() ? mock.childReport(token(), childId) : http.childReport(childId);
 export const levelStats = () => (mocked() ? mock.levelStats(token()) : http.levelStats());
+
+export const insights = (range: InsightRange = '7d') =>
+  mocked() ? insightsMock.insights(token(), range) : http.insights(range);

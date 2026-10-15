@@ -8,6 +8,7 @@ export function formatDuration(ms: number): string {
 
 /** Tanggal ISO menjadi "31 Desember 2026" (zona waktu perangkat). */
 export function formatDate(iso: string): string {
+  if (new Date(iso).getUTCFullYear() >= 9999) return 'selamanya';
   return new Date(iso).toLocaleDateString('id-ID', {
     day: 'numeric',
     month: 'long',

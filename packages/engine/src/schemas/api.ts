@@ -57,6 +57,12 @@ export const registerParentBodySchema = z.object({
   email: emailSchema,
   password: passwordSchema,
   consent: z.literal(true),
+  referralCode: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .regex(/^[A-Z]{6}$/)
+    .optional(),
 });
 export type RegisterParentBody = z.infer<typeof registerParentBodySchema>;
 
@@ -222,16 +228,30 @@ export const setMomoBodySchema = z.object({ momoColor: momoColorSchema });
 
 // ---- Papan peringkat ----
 
+export const LEADERBOARD_MODES = ['average', 'total', 'mock'] as const;
+export const leaderboardModeSchema = z.enum(LEADERBOARD_MODES);
+export type LeaderboardMode = z.infer<typeof leaderboardModeSchema>;
+
 export const leaderboardEntrySchema = z.object({
   rank: z.number().int(),
   nickname: z.string(),
   momoColor: momoColorSchema,
-  score: z.number().int(),
+  /** Nilai yang diurutkan: rata-rata tertimbang (mode average) atau total skor (mode total). */
+  score: z.number(),
+  /** Total skor terbaik semua level. */
+  points: z.number().int(),
+  average: z.number(),
+  rounds: z.number().int(),
+  questions: z.number().int(),
+  timeMs: z.number().int(),
   isMe: z.boolean().optional(),
 });
+export type LeaderboardEntry = z.infer<typeof leaderboardEntrySchema>;
 export const leaderboardSchema = z.object({
+  mode: leaderboardModeSchema,
+  total: z.number().int(),
   entries: z.array(leaderboardEntrySchema),
-  me: z.object({ rank: z.number().int(), score: z.number().int() }).nullable(),
+  me: leaderboardEntrySchema.nullable(),
 });
 export type Leaderboard = z.infer<typeof leaderboardSchema>;
 export const leaderboardTopSchema = z.object({ entries: z.array(leaderboardEntrySchema) });
@@ -431,3 +451,38 @@ export const levelStatsSchema = z.object({
   ),
 });
 export type LevelStats = z.infer<typeof levelStatsSchema>;
+
+// ---- Admin: wawasan dasbor ----
+
+export const INSIGHT_RANGES = ['7d', '30d', 'month'] as const;
+export const insightRangeSchema = z.enum(INSIGHT_RANGES);
+export type InsightRange = z.infer<typeof insightRangeSchema>;
+
+export const adminInsightsSchema = z.object({
+  range: insightRangeSchema,
+  /** Benar bila angka memakai data contoh karena aktivitas nyata masih sedikit. */
+  sample: z.boolean(),
+  days: z.array(z.string()),
+  kpis: z.object({
+    activeChildren: z.number().int(),
+    answered: z.number().int(),
+    accuracy: z.number().nullable(),
+    revenue: z.number().int(),
+  }),
+  activity: z.array(
+    z.object({ date: z.string(), rounds: z.number().int(), answers: z.number().int() }),
+  ),
+  revenueSeries: z.array(z.object({ date: z.string(), amount: z.number().int() })),
+  funnel: z.array(z.object({ label: z.string(), value: z.number().int() })),
+  subjects: z.array(z.object({ label: z.string(), value: z.number().int() })),
+  /** 7 hari (Senin sampai Minggu) x 16 jam (06 sampai 21) */
+  heatmap: z.array(z.array(z.number().int())),
+  hardestSkills: z.array(
+    z.object({ title: z.string(), accuracy: z.number().int(), answers: z.number().int() }),
+  ),
+  popularDistractors: z.array(
+    z.object({ prompt: z.string(), chosen: z.string(), count: z.number().int() }),
+  ),
+  live: z.array(z.object({ nickname: z.string(), momoColor: momoColorSchema, level: z.string() })),
+});
+export type AdminInsights = z.infer<typeof adminInsightsSchema>;

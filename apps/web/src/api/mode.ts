@@ -1,6 +1,7 @@
 import { MOCK_MODULES } from '../config/app';
 
-export type ApiModule = 'auth' | 'catalog' | 'practice' | 'parent' | 'leaderboard' | 'admin';
+export type ApiModule =
+  'auth' | 'catalog' | 'practice' | 'parent' | 'leaderboard' | 'admin' | 'billing';
 
 /** Modul memakai data tiruan bila VITE_MOCK_MODULES berisi "*" atau nama modulnya. */
 export function isMocked(module: ApiModule, setting: string = MOCK_MODULES): boolean {

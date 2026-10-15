@@ -13,5 +13,7 @@
   "close": "Tutup",
   "logout": "Keluar",
   "sidebar.show": "Tampilkan menu",
-  "sidebar.hide": "Sembunyikan menu"
+  "sidebar.hide": "Sembunyikan menu",
+  "theme.dark": "Mode gelap",
+  "theme.light": "Mode terang"
 }

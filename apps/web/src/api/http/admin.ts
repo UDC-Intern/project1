@@ -1,4 +1,6 @@
 import type {
+  AdminInsights,
+  InsightRange,
   AdminCatalog,
   AdminOverview,
   AdminUsers,
@@ -44,3 +46,6 @@ export const revokePremium = (childId: string) =>
 export const childReport = (childId: string) =>
   request<ChildReport>(`/admin/reports/children/${enc(childId)}`);
 export const levelStats = () => request<LevelStats>('/admin/reports/levels');
+
+export const insights = (range: InsightRange) =>
+  request<AdminInsights>(`/admin/insights?range=${range}`);
