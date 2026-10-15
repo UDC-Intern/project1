@@ -5,3 +5,4 @@ coverage/
 *.log
 backups/
 *.tsbuildinfo
+_ref_src/

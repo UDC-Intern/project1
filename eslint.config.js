@@ -4,7 +4,7 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import globals from 'globals';
 
 export default tseslint.config(
-  { ignores: ['**/dist/**', '**/coverage/**', 'apps/api/drizzle/**'] },
+  { ignores: ['**/dist/**', '**/coverage/**', 'apps/api/drizzle/**', '_ref_src/**'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

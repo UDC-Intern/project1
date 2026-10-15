@@ -142,7 +142,7 @@ export async function uploadProof(
   o.proofDataUrl = parsed.data.dataUrl;
   o.proofAt = new Date().toISOString();
   o.rejectNote = null;
-  o.status = 'proof_sent';
+  o.status = 'awaiting_review';
   writeDb(db);
   return present(o);
 }
@@ -195,7 +195,7 @@ function adminOrder(token: string | null, id: string) {
 
 export async function approveOrder(token: string | null, id: string): Promise<AdminOrder> {
   const { db, o } = adminOrder(token, id);
-  if (effectiveStatus(o, Date.now()) !== 'proof_sent')
+  if (effectiveStatus(o, Date.now()) !== 'awaiting_review')
     throw fail(409, 'CONFLICT', 'Hanya pesanan dengan bukti terkirim yang bisa disetujui.');
   o.status = 'paid';
   o.paidAt = new Date().toISOString();
@@ -216,7 +216,7 @@ export async function rejectOrder(
   const { db, o } = adminOrder(token, id);
   const parsed = rejectOrderBodySchema.safeParse({ note });
   if (!parsed.success) throw fail(400, 'VALIDATION', 'Tulis alasan singkat untuk orang tua.');
-  if (effectiveStatus(o, Date.now()) !== 'proof_sent')
+  if (effectiveStatus(o, Date.now()) !== 'awaiting_review')
     throw fail(409, 'CONFLICT', 'Hanya pesanan dengan bukti terkirim yang bisa ditolak.');
   o.status = 'rejected';
   o.rejectNote = parsed.data.note;

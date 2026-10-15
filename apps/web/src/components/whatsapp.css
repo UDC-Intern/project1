@@ -1,0 +1,46 @@
+/* Tombol "Hubungi admin" WhatsApp — melayang di kanan bawah (D-064). */
+.wa-fab {
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  z-index: 25;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 56px;
+  padding: 0 18px 0 14px;
+  /* Hijau sawah (bukan hijau merek WhatsApp) supaya kontras teks terjaga di tema terang & gelap (D-110). */
+  border-radius: var(--radius-md);
+  background: var(--sawah);
+  color: var(--on-sawah);
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: var(--shadow-kartu);
+  transition: transform 0.15s ease;
+}
+.wa-fab:hover {
+  transform: translateY(-2px);
+}
+.wa-fab:focus-visible {
+  outline: 3px solid var(--kunyit);
+  outline-offset: 3px;
+}
+/* Ruang di bawah konten agar tombol terakhir di halaman tidak tertutup tombol melayang. */
+body:has(.wa-fab) .shell-main,
+body:has(.wa-fab) .auth-main {
+  padding-bottom: 88px;
+}
+@media (max-width: 480px) {
+  .wa-fab {
+    min-height: 52px;
+    padding: 0 14px;
+  }
+  .wa-fab-text {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wa-fab {
+    transition: none;
+  }
+}

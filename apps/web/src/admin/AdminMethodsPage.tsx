@@ -4,7 +4,7 @@ import { adminMethods, updateMethod } from '../api/billing';
 import { ApiError } from '../api/client';
 import { useAsync } from '../hooks/useAsync';
 import { useT } from '../i18n';
-import { PageHeader } from '../ui/AppShell';
+import { PageHeader } from '../ui/ui';
 import { ErrorState, LoadingState } from '../ui/states';
 
 function MethodRow({ method }: { method: PaymentMethod }) {

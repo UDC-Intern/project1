@@ -1,0 +1,321 @@
+/* Kerangka area dewasa (AppShell): sidebar penuh ↔ rel ikon di desktop, laci di tablet/HP. */
+.shell {
+  --shell-w: 264px;
+  --shell-rail: 76px;
+  --shell-bg: var(--kertas);
+  --shell-ink: var(--ui-ink, var(--malam));
+  --shell-muted: var(--ui-muted, var(--malam-muted));
+  --shell-line: var(--ui-line, var(--garis));
+  --shell-hover: var(--awan-2);
+  --shell-active-bg: var(--gonjong-soft);
+  --shell-active: var(--gonjong-teks);
+  display: grid;
+  grid-template-columns: var(--shell-w) minmax(0, 1fr);
+  min-height: 100vh;
+  background: var(--ui-bg, var(--awan));
+  transition: grid-template-columns 0.22s ease;
+}
+/* Sidebar gelap (admin): permukaan --malam di tema terang, sumur --awan-2 di tema gelap (D-110). */
+.shell-dark {
+  --shell-base: var(--malam);
+  --shell-on: var(--kertas);
+  --shell-bg: var(--shell-base);
+  --shell-ink: var(--shell-on);
+  --shell-muted: color-mix(in srgb, var(--shell-on) 72%, var(--shell-base));
+  --shell-line: color-mix(in srgb, var(--shell-on) 14%, transparent);
+  --shell-hover: color-mix(in srgb, var(--shell-on) 8%, transparent);
+  --shell-active-bg: color-mix(in srgb, var(--shell-on) 16%, transparent);
+  --shell-active: var(--kunyit);
+}
+:root[data-theme='dark'] .shell-dark {
+  --shell-base: var(--awan-2);
+  --shell-on: var(--malam);
+}
+.shell.is-rail {
+  grid-template-columns: var(--shell-rail) minmax(0, 1fr);
+}
+/* Latar kolom menu sepanjang halaman: menu sendiri sticky setinggi layar, jadi di halaman panjang kolom di bawahnya
+   tidak lagi kosong (desktop saja; di HP menu berupa laci). */
+@media (min-width: 900px) {
+  .shell::before {
+    content: '';
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: var(--shell-w);
+    background: var(--shell-bg);
+    border-right: 1px solid var(--shell-line);
+    pointer-events: none;
+  }
+  .shell.is-rail::before {
+    width: var(--shell-rail);
+  }
+  .shell-side,
+  .shell-main {
+    position: relative;
+  }
+  .shell-side {
+    position: sticky;
+    z-index: 1;
+  }
+}
+
+.shell-side {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  height: 100vh;
+  /* Tinggi layar yang benar-benar terlihat di HP (tanpa bilah alamat/navigasi), supaya tombol Keluar terlihat. */
+  height: 100dvh;
+  padding: 16px 12px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
+  color: var(--shell-ink);
+  background: var(--shell-bg);
+  border-right: 1px solid var(--shell-line);
+}
+.shell-side-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+}
+.shell-side-head .shell-brand {
+  flex: 1;
+  min-width: 0;
+}
+.shell-brand a,
+.shell-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  color: inherit;
+  text-decoration: none;
+  line-height: 1.2;
+}
+.shell-dark .shell-mobilebar .shell-brand {
+  color: var(--ui-ink, var(--malam));
+}
+
+.shell-iconbtn {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--shell-line);
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.shell-iconbtn:hover {
+  background: var(--shell-hover);
+}
+
+.shell-nav {
+  display: grid;
+  gap: 2px;
+}
+.shell-nav a,
+.shell-logout {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 46px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.shell-nav a svg,
+.shell-logout svg {
+  flex: none;
+  color: var(--shell-muted);
+}
+.shell-nav a:hover,
+.shell-logout:hover {
+  background: var(--shell-hover);
+}
+.shell-nav a.active {
+  background: var(--shell-active-bg);
+  color: var(--shell-active);
+}
+.shell-nav a.active svg {
+  color: var(--shell-active);
+}
+.shell-group {
+  margin: 12px 12px 4px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--shell-muted);
+  white-space: nowrap;
+}
+.shell-badge {
+  margin-left: auto;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  box-sizing: border-box;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--on-kunyit);
+  background: var(--kunyit);
+}
+.shell-extra {
+  display: grid;
+}
+.shell-foot {
+  margin-top: auto;
+  display: grid;
+  gap: 6px;
+  padding-top: 12px;
+  border-top: 1px solid var(--shell-line);
+}
+.shell-user {
+  display: grid;
+  padding: 0 12px;
+}
+.shell-user small {
+  color: var(--shell-muted);
+}
+.shell-nav a:focus-visible,
+.shell-logout:focus-visible,
+.shell-iconbtn:focus-visible,
+.shell-brand a:focus-visible,
+.shell-extra a:focus-visible {
+  outline: 3px solid var(--kunyit);
+  outline-offset: 2px;
+}
+.shell-main {
+  min-width: 0;
+}
+.shell-mobilebar,
+.shell-iconbtn.shell-close,
+.shell-backdrop {
+  display: none;
+}
+
+/* Rel ikon: label tersembunyi secara visual (tetap terbaca pembaca layar). */
+.shell.is-rail .shell-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.shell.is-rail .shell-side-head {
+  flex-direction: column;
+}
+.shell.is-rail .shell-side-head .shell-brand span {
+  display: none;
+}
+.shell.is-rail .shell-nav a,
+.shell.is-rail .shell-logout {
+  justify-content: center;
+  padding: 0;
+}
+.shell.is-rail .shell-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  font-size: 11px;
+}
+.shell.is-rail .shell-group {
+  height: 1px;
+  margin: 10px 8px;
+  background: var(--shell-line);
+}
+.shell.is-rail .shell-group span {
+  display: none;
+}
+.shell.is-rail .shell-user {
+  display: none;
+}
+
+/* Tablet & HP: laci. */
+@media (max-width: 899px) {
+  .shell,
+  .shell.is-rail {
+    grid-template-columns: 1fr;
+  }
+  .shell-mobilebar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: var(--ui-surface, var(--kertas));
+    border-bottom: 1px solid var(--ui-line, var(--garis));
+  }
+  .shell-mobilebar .shell-iconbtn {
+    border-color: var(--ui-line, var(--garis));
+    color: var(--ui-ink, var(--malam));
+  }
+  .shell-iconbtn.shell-close {
+    display: inline-grid;
+  }
+  .shell-iconbtn.shell-collapse {
+    display: none;
+  }
+  .shell-side {
+    position: fixed;
+    inset: 0 auto 0 0;
+    height: auto;
+    max-height: 100dvh;
+    overscroll-behavior: contain;
+    z-index: 40;
+    width: min(300px, 86vw);
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition:
+      transform 0.25s ease,
+      visibility 0s linear 0.25s;
+    box-shadow: 0 10px 40px var(--bayangan);
+  }
+  .shell.is-open .shell-side {
+    transform: none;
+    visibility: visible;
+    transition: transform 0.25s ease;
+  }
+  .shell-backdrop:not([hidden]) {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    background: var(--overlay);
+  }
+}
+body.shell-no-scroll {
+  overflow: hidden;
+}
+@media (prefers-reduced-motion: reduce) {
+  .shell,
+  .shell-side,
+  .shell.is-open .shell-side {
+    transition: none;
+  }
+}

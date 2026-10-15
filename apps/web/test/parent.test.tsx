@@ -16,9 +16,8 @@ import {
 } from '../src/api/parent';
 import { answer, finish, startRound } from '../src/api/practice';
 import { useSession } from '../src/auth/store';
-import { ChildPin } from '../src/parent/ChildPin';
-import { EditChild } from '../src/parent/EditChild';
-import { ParentHome } from '../src/parent/ParentHome';
+import { ChildForm } from '../src/parent/ChildForm';
+import { Dashboard } from '../src/parent/Dashboard';
 import { ParentRegister } from '../src/parent/ParentRegister';
 
 const PIN: Pin = ['cat', 'house', 'leaf'];
@@ -171,59 +170,76 @@ describe('halaman orang tua', () => {
     expect(readDb().parents).toHaveLength(1);
   });
 
-  it('beranda menampilkan kode keluarga dan kartu anak', async () => {
+  it('dasbor menampilkan kode keluarga dan profil anak', async () => {
     const parent = await registerAs('sari@contoh.id');
     await createChild({ nickname: 'Citra', momoColor: 'teal' });
     render(
       <MemoryRouter>
-        <ParentHome />
+        <Dashboard />
       </MemoryRouter>,
     );
     expect(await screen.findByText(parent.user.familyCode!)).toBeInTheDocument();
-    expect(screen.getByText('Citra')).toBeInTheDocument();
-    expect(screen.getByText('Sandi gambar belum diatur')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Citra' })).toBeInTheDocument();
+    expect(screen.getByText('1 dari 3 anak terdaftar')).toBeInTheDocument();
   });
 
-  it('atur sandi: urutan ulangan harus sama', async () => {
+  it('atur sandi: urutan ulangan harus sama lalu disimpan', async () => {
     await registerAs('sari@contoh.id');
     const c = await createChild({ nickname: 'Citra', momoColor: 'teal' });
     render(
       <MemoryRouter initialEntries={[`/orang-tua/anak/${c.id}/sandi`]}>
         <Routes>
-          <Route path="/orang-tua/anak/:id/sandi" element={<ChildPin />} />
+          <Route path="/orang-tua/anak/:id/sandi" element={<ChildForm mode="pin" />} />
+          <Route path="/orang-tua" element={<p>Beranda</p>} />
         </Routes>
       </MemoryRouter>,
     );
     const tap = async (...names: string[]) => {
       for (const n of names) fireEvent.click(await screen.findByRole('button', { name: n }));
     };
-    await tap('Kucing', 'Rumah', 'Daun');
-    expect(await screen.findByText('Ulangi 3 gambar yang sama.')).toBeInTheDocument();
-    await tap('Kucing', 'Daun', 'Rumah');
+    await tap('Pilih kucing', 'Pilih rumah', 'Pilih daun');
+    fireEvent.click(screen.getByRole('button', { name: 'Lanjut ke konfirmasi' }));
+    await tap('Pilih kucing', 'Pilih daun', 'Pilih rumah');
     expect(await screen.findByText(/belum sama/)).toBeInTheDocument();
-    await tap('Kucing', 'Rumah', 'Daun');
-    await tap('Kucing', 'Rumah', 'Daun');
-    await waitFor(() => expect(screen.getByText(/Sandi gambar sudah diatur/)).toBeInTheDocument());
+    await tap('Pilih kucing', 'Pilih rumah', 'Pilih daun');
+    expect(await screen.findByText(/Sandi gambar cocok/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Simpan sandi gambar' }));
+    await waitFor(() => expect(screen.getByText('Beranda')).toBeInTheDocument());
     expect(readDb().children.find((x) => x.id === c.id)!.pin).toEqual(PIN);
   });
 
-  it('hapus anak butuh mengetik nama panggilan', async () => {
+  it('tambah profil anak lewat formulir lengkap', async () => {
     await registerAs('sari@contoh.id');
-    const c = await createChild({ nickname: 'Citra', momoColor: 'teal' });
     render(
-      <MemoryRouter initialEntries={[`/orang-tua/anak/${c.id}/ubah`]}>
+      <MemoryRouter initialEntries={['/orang-tua/anak/baru']}>
         <Routes>
-          <Route path="/orang-tua/anak/:id/ubah" element={<EditChild />} />
+          <Route path="/orang-tua/anak/baru" element={<ChildForm mode="new" />} />
           <Route path="/orang-tua" element={<p>Beranda</p>} />
         </Routes>
       </MemoryRouter>,
     );
-    const del = await screen.findByRole('button', { name: 'Hapus anak ini' });
-    expect(del).toBeDisabled();
-    fireEvent.change(screen.getByLabelText('Citra'), { target: { value: 'Citra' } });
-    expect(del).toBeEnabled();
-    fireEvent.click(del);
+    fireEvent.change(await screen.findByLabelText(/Nama panggilan/), { target: { value: 'Dodi' } });
+    for (const n of ['Pilih apel', 'Pilih bola', 'Pilih bintang'])
+      fireEvent.click(screen.getByRole('button', { name: n }));
+    fireEvent.click(screen.getByRole('button', { name: 'Lanjut ke konfirmasi' }));
+    for (const n of ['Pilih apel', 'Pilih bola', 'Pilih bintang'])
+      fireEvent.click(screen.getByRole('button', { name: n }));
+    fireEvent.click(screen.getByRole('button', { name: 'Simpan profil' }));
     await waitFor(() => expect(screen.getByText('Beranda')).toBeInTheDocument());
-    expect(readDb().children.some((x) => x.id === c.id)).toBe(false);
+    const made = readDb().children.find((x) => x.nickname === 'Dodi')!;
+    expect(made.pin).toEqual(['apple', 'ball', 'star']);
+  });
+
+  it('hapus anak dari dasbor meminta konfirmasi', async () => {
+    await registerAs('sari@contoh.id');
+    const c = await createChild({ nickname: 'Citra', momoColor: 'teal' });
+    render(
+      <MemoryRouter>
+        <Dashboard />
+      </MemoryRouter>,
+    );
+    fireEvent.click(await screen.findByRole('button', { name: 'Hapus' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Ya, hapus semua data Citra' }));
+    await waitFor(() => expect(readDb().children.some((x) => x.id === c.id)).toBe(false));
   });
 });

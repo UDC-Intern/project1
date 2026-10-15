@@ -32,7 +32,7 @@ import { readDb, resetMockDb, writeDb } from '../src/api/mock/db';
 import { plan } from '../src/api/parent';
 import { startRound } from '../src/api/practice';
 import { useSession } from '../src/auth/store';
-import { OrderPage } from '../src/parent/OrderPage';
+import { OrderPage } from '../src/parent/Orders';
 import { PackagesPage } from '../src/parent/PackagesPage';
 import { PasswordField } from '../src/ui/FormField';
 
@@ -110,7 +110,7 @@ describe('mock billing: pesanan', () => {
     expect(o.status).toBe('awaiting_payment');
 
     const sent = await uploadProof(o.id, PROOF);
-    expect(sent.status).toBe('proof_sent');
+    expect(sent.status).toBe('awaiting_review');
 
     asAyu();
     expect((await errorOf(startRound('matematika-kelas-1:A:2'))).body.code).toBe(
@@ -118,7 +118,7 @@ describe('mock billing: pesanan', () => {
     );
 
     asAdmin();
-    expect((await adminOrders('proof_sent')).map((x) => x.id)).toContain(o.id);
+    expect((await adminOrders('awaiting_review')).map((x) => x.id)).toContain(o.id);
     expect((await approveOrder(o.id)).status).toBe('paid');
 
     asAyu();
@@ -229,8 +229,8 @@ describe('halaman paket dan pesanan', () => {
       </MemoryRouter>,
     );
     await waitFor(() => expect(screen.getByText('5435032076')).toBeInTheDocument());
-    expect(screen.getByText('Ridho Dwi Syahputra')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Salin jumlah' })).toBeInTheDocument();
+    expect(screen.getByText(/Ridho Dwi Syahputra/)).toBeInTheDocument();
+    expect(screen.getByText('Jumlah yang ditransfer')).toBeInTheDocument();
   });
   it('Beli melebarkan kartu di tempat dan menggantinya dengan pilihan cara bayar', async () => {
     render(
@@ -243,11 +243,11 @@ describe('halaman paket dan pesanan', () => {
     );
     fireEvent.click(await screen.findByRole('button', { name: 'Beli Tumbuh Bersama' }));
     const card = screen.getByRole('article', { name: 'Tumbuh Bersama' });
-    expect(card).toHaveClass('is-on');
+    expect(card).toHaveClass('selected');
     expect(within(card).queryByRole('button', { name: /^Beli/ })).toBeNull();
     expect(within(card).getAllByRole('radio')).toHaveLength(5);
     expect(screen.getByText('wajib diisi')).toBeInTheDocument();
-    expect(screen.getByRole('article', { name: 'Tunas' })).not.toHaveClass('is-on');
+    expect(screen.getByRole('article', { name: 'Tunas' })).not.toHaveClass('selected');
 
     fireEvent.click(within(card).getByRole('button', { name: 'Buat pesanan' }));
     expect(await within(card).findByRole('alert')).toHaveTextContent('Pilih salah satu cara bayar');

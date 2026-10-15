@@ -4,7 +4,7 @@ import { adminPackages, updatePackage } from '../api/billing';
 import { ApiError } from '../api/client';
 import { useAsync } from '../hooks/useAsync';
 import { useT } from '../i18n';
-import { PageHeader } from '../ui/AppShell';
+import { PageHeader } from '../ui/ui';
 import { ErrorState, LoadingState } from '../ui/states';
 
 function PackageRow({ pkg, onSaved }: { pkg: BillingPackage; onSaved: () => void }) {

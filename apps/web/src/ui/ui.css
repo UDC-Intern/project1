@@ -1,0 +1,455 @@
+/* Area orang dewasa: rapi, kontras tinggi, bisa dipakai dengan mouse saja. Token UdaKids (D-107). */
+.ui-shell {
+  --ui-bg: var(--awan);
+  --ui-surface: var(--kertas);
+  --ui-ink: var(--malam);
+  --ui-muted: var(--malam-muted);
+  --ui-line: var(--garis);
+  --ui-primary: var(--gonjong);
+  --ui-primary-ink: var(--on-gonjong);
+  --ui-success: var(--sawah);
+  --ui-warning: var(--kunyit-teks);
+  /* Bahaya & info ikut tema (D-110): teks gonjong/langit, kontras ≥ 4,5:1 di terang & gelap. */
+  --ui-danger: var(--gonjong-teks);
+  --ui-info: var(--langit-teks);
+  min-height: 100vh;
+  background: var(--ui-bg);
+  color: var(--ui-ink);
+  font-size: 15px;
+  font-family: var(--font-body);
+}
+
+/* Tautan teks biasa ikut tema (bukan biru/ungu bawaan peramban). Spesifisitas rendah lewat :where(), jadi
+   tautan berkelas (tombol, menu) tetap memakai warnanya sendiri. */
+:where(.ui-shell) a:where(:link, :visited) {
+  color: var(--langit-teks);
+}
+
+.ui-btn {
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+.ui-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.ui-btn:focus-visible,
+.ui-field input:focus-visible,
+.ui-field select:focus-visible,
+.ui-field textarea:focus-visible {
+  outline: 3px solid var(--kunyit);
+  outline-offset: 2px;
+}
+.ui-btn-primary {
+  background: var(--ui-primary);
+  color: var(--ui-primary-ink);
+}
+.ui-btn-secondary {
+  background: var(--ui-surface);
+  color: var(--ui-primary);
+  border-color: var(--ui-primary);
+}
+.ui-btn-ghost {
+  background: transparent;
+  color: var(--ui-ink);
+  border-color: var(--ui-line);
+}
+.ui-btn-danger {
+  background: var(--ui-surface);
+  color: var(--ui-danger);
+  border-color: var(--ui-danger);
+}
+
+.ui-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.ui-field label {
+  font-weight: 600;
+}
+.ui-field input,
+.ui-field select,
+.ui-field textarea {
+  font: inherit;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--ui-line);
+  background: var(--ui-surface);
+  color: var(--ui-ink);
+}
+.ui-field textarea {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  min-height: 160px;
+}
+.ui-field [aria-invalid='true'] {
+  border-color: var(--ui-danger);
+}
+.ui-hint {
+  color: var(--ui-muted);
+}
+.ui-error {
+  color: var(--ui-danger);
+}
+.ui-check {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+.ui-check input {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+}
+
+.ui-card {
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-line);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.ui-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.ui-card-head h2 {
+  font-size: 17px;
+  margin: 0;
+}
+.ui-page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.ui-page-head h1 {
+  font-size: 24px;
+  margin: 0 0 4px;
+}
+.ui-muted {
+  color: var(--ui-muted);
+  margin: 0;
+}
+.ui-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.ui-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+.ui-notice {
+  padding: 12px 14px;
+  border-radius: 12px;
+  margin-bottom: 14px;
+  border: 1px solid;
+}
+.ui-notice-info {
+  background: var(--langit-soft);
+  border-color: color-mix(in srgb, var(--langit) 35%, var(--kertas));
+  color: var(--ui-info);
+}
+.ui-notice-success {
+  background: var(--sawah-soft);
+  border-color: color-mix(in srgb, var(--sawah) 35%, var(--kertas));
+  color: var(--ui-success);
+}
+.ui-notice-warning {
+  background: var(--kunyit-soft);
+  border-color: color-mix(in srgb, var(--kunyit) 50%, var(--kertas));
+  color: var(--ui-warning);
+}
+.ui-notice-error {
+  background: var(--gonjong-soft);
+  border-color: color-mix(in srgb, var(--gonjong) 35%, var(--kertas));
+  color: var(--ui-danger);
+}
+
+.ui-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--awan-2);
+  color: var(--ui-ink);
+}
+.ui-badge-success {
+  background: var(--sawah-soft);
+  color: var(--ui-success);
+}
+.ui-badge-warning {
+  background: var(--kunyit-soft);
+  color: var(--ui-warning);
+}
+.ui-badge-info {
+  background: var(--langit-soft);
+  color: var(--ui-info);
+}
+.ui-badge-muted {
+  background: var(--awan-2);
+  color: var(--ui-muted);
+}
+
+.ui-table-wrap {
+  overflow-x: auto;
+}
+.ui-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.ui-table th,
+.ui-table td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--ui-line);
+  vertical-align: top;
+}
+.ui-table th {
+  font-size: 13px;
+  color: var(--ui-muted);
+  font-weight: 700;
+}
+.ui-empty {
+  color: var(--ui-muted);
+  padding: 16px 0;
+}
+.ui-spinner {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: var(--ui-muted);
+  padding: 16px 0;
+}
+.ui-spinner-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 3px solid var(--ui-line);
+  border-top-color: var(--ui-primary);
+  animation: ui-spin 0.8s linear infinite;
+}
+@keyframes ui-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ui-spinner-dot {
+    animation: none;
+  }
+}
+.ui-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-line);
+  border-radius: 16px;
+  padding: 16px;
+}
+.ui-stat-value {
+  font-size: 28px;
+  font-weight: 800;
+}
+.ui-stat-label {
+  color: var(--ui-muted);
+  font-weight: 600;
+}
+
+/* Tata letak dengan sidebar (admin). */
+.ui-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+}
+.ui-sidebar {
+  /* Sidebar gelap: --malam di tema terang; di tema gelap jadi sumur --awan-2 (lihat bawah). */
+  --ui-sidebar-bg: var(--malam);
+  --ui-sidebar-ink: var(--kertas);
+  background: var(--ui-sidebar-bg);
+  color: var(--ui-sidebar-ink);
+  padding: 20px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+:root[data-theme='dark'] .ui-sidebar {
+  --ui-sidebar-bg: var(--awan-2);
+  --ui-sidebar-ink: var(--malam);
+  border-right: 1px solid var(--garis);
+}
+.ui-sidebar a {
+  color: inherit;
+  text-decoration: none;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+.ui-sidebar a.active,
+.ui-sidebar a:hover {
+  background: color-mix(in srgb, var(--ui-sidebar-ink) 12%, transparent);
+}
+.ui-sidebar .ui-brand {
+  font-size: 18px;
+  font-weight: 800;
+  padding: 0 12px 16px;
+}
+.ui-main {
+  padding: 28px;
+  max-width: 1200px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.ui-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px;
+  background: var(--ui-surface);
+  border-bottom: 1px solid var(--ui-line);
+}
+.ui-narrow {
+  max-width: 440px;
+  margin: 48px auto;
+  padding: 0 16px;
+}
+@media (max-width: 800px) {
+  .ui-layout {
+    grid-template-columns: 1fr;
+  }
+  .ui-sidebar {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .ui-main {
+    padding: 16px;
+  }
+}
+
+/* Tanda wajib & password */
+.ui-label-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.ui-req {
+  color: var(--ui-danger, var(--gonjong-teks));
+  font-weight: 800;
+}
+.ui-req-note {
+  margin: 0 0 12px;
+  font-size: 0.9em;
+  color: var(--ui-muted, var(--malam-muted));
+}
+.ui-check-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+.ui-input-wrap {
+  position: relative;
+  display: flex;
+}
+.ui-input-wrap input {
+  flex: 1;
+  min-width: 0;
+  padding-right: 104px;
+}
+.ui-eye {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  translate: 0 -50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ui-primary, var(--gonjong));
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.9em;
+  cursor: pointer;
+}
+.ui-eye:hover {
+  background: var(--ui-bg, var(--awan));
+}
+.ui-eye:focus-visible {
+  outline: 3px solid var(--kunyit);
+}
+@media (max-width: 380px) {
+  .ui-eye-text {
+    display: none;
+  }
+  .ui-input-wrap input {
+    padding-right: 48px;
+  }
+}
+
+/* Pop-up modal (Dialog) */
+.ui-dialog {
+  width: min(480px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  padding: 0;
+  border: 1px solid var(--ui-line, var(--garis));
+  border-radius: 16px;
+  background: var(--ui-surface, var(--kertas));
+  color: var(--ui-ink, var(--malam));
+  box-shadow: 0 20px 60px var(--bayangan);
+}
+.ui-dialog::backdrop {
+  background: var(--overlay);
+}
+.ui-dialog-warning {
+  border-top: 6px solid var(--ui-warning, var(--kunyit-teks));
+}
+.ui-dialog-box {
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+}
+.ui-dialog-box h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+.ui-dialog-body p {
+  margin: 0 0 8px;
+  line-height: 1.5;
+}
+.ui-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+@media (max-width: 420px) {
+  .ui-dialog-actions > * {
+    flex: 1 1 100%;
+  }
+}

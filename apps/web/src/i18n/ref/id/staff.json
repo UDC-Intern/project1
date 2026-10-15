@@ -1,0 +1,8 @@
+{
+  "login.title": "Masuk Kakak & Admin",
+  "login.email": "Email",
+  "login.password": "Password",
+  "login.submit": "Masuk",
+  "login.failed": "Email atau password salah.",
+  "login.note": "Guru/fasilitator: akun dibuat oleh admin. Hubungi admin bila belum punya akun."
+}

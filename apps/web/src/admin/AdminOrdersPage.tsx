@@ -5,7 +5,7 @@ import { ApiError } from '../api/client';
 import { useAsync } from '../hooks/useAsync';
 import { useT } from '../i18n';
 import { formatDateTime } from '../lib/format';
-import { PageHeader } from '../ui/AppShell';
+import { PageHeader } from '../ui/ui';
 import { Dialog } from '../ui/Dialog';
 import { StatusBadge } from '../ui/StatusBadge';
 import { ErrorState, LoadingState } from '../ui/states';
@@ -111,7 +111,7 @@ export function AdminOrdersPage() {
                       ) : (
                         <small>{t('orders.noProof')}</small>
                       )}
-                      {o.status === 'proof_sent' && (
+                      {o.status === 'awaiting_review' && (
                         <>
                           <button type="button" className="uk-btn" onClick={() => void approve(o)}>
                             {t('orders.approve')}

@@ -1,377 +1,179 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import './charts.css';
 
-/** Grafik SVG dan CSS buatan sendiri. Semua angka juga tersedia sebagai teks untuk pembaca layar. */
-
-const prefersReducedMotion = () =>
-  typeof window !== 'undefined' &&
-  typeof window.matchMedia === 'function' &&
+/** Komponen grafik ringan (tanpa pustaka) untuk dasbor orang tua, admin, dan guru. */
+const reducedMotion = () =>
+  typeof window === 'undefined' ||
+  typeof window.matchMedia !== 'function' ||
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/** Angka yang berhitung naik saat tampil. Nilai akhir selalu ada di aria-label. */
-export function CountUp({
-  value,
-  format = (n) => n.toLocaleString('id-ID'),
-}: {
-  value: number;
-  format?: (n: number) => string;
-}) {
-  const [shown, setShown] = useState(value);
+/** Angka yang naik perlahan saat muncul (langsung bila gerak dikurangi). */
+export function useCountUp(target: number, ms = 900): number {
+  const [value, setValue] = useState(() => (reducedMotion() ? target : 0));
   const from = useRef(0);
-
   useEffect(() => {
-    if (prefersReducedMotion() || typeof requestAnimationFrame !== 'function') {
-      setShown(value);
+    if (reducedMotion() || typeof requestAnimationFrame === 'undefined') {
+      setValue(target);
       return;
     }
     const start = performance.now();
-    const origin = from.current;
-    let frame = 0;
+    const base = from.current;
+    let raf = 0;
     const tick = (now: number) => {
-      const p = Math.min(1, (now - start) / 600);
+      const p = Math.min(1, (now - start) / ms);
       const eased = 1 - (1 - p) ** 3;
-      setShown(Math.round(origin + (value - origin) * eased));
-      if (p < 1) frame = requestAnimationFrame(tick);
-      else from.current = value;
+      setValue(Math.round(base + (target - base) * eased));
+      if (p < 1) raf = requestAnimationFrame(tick);
+      else from.current = target;
     };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [value]);
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, ms]);
+  return value;
+}
 
-  return <span aria-label={format(value)}>{format(shown)}</span>;
+/** Bernilai true sesaat setelah muncul — untuk memicu transisi CSS (batang, cincin). */
+export function useMounted() {
+  const [on, setOn] = useState(reducedMotion);
+  useEffect(() => {
+    if (on) return;
+    const id = requestAnimationFrame(() => setOn(true));
+    return () => cancelAnimationFrame(id);
+  }, [on]);
+  return on;
+}
+
+export function CountUp({ value, format }: { value: number; format?: (n: number) => string }) {
+  const n = useCountUp(value);
+  return <>{format ? format(n) : n.toLocaleString('id-ID')}</>;
 }
 
 export function Kpi({
+  icon,
   label,
-  children,
+  value,
   hint,
+  tone,
+  i = 0,
 }: {
+  icon: ReactNode;
   label: string;
-  children: ReactNode;
+  value: ReactNode;
   hint?: string;
+  tone: 'grape' | 'leaf' | 'sky' | 'sun' | 'coral';
+  i?: number;
 }) {
   return (
-    <div className="kpi">
-      <span className="kpi-label">{label}</span>
-      <strong className="kpi-value">{children}</strong>
-      {hint && <span className="kpi-hint">{hint}</span>}
+    <div className={`pd-kpi tone-${tone} pd-rise`} style={{ ['--i' as string]: i }}>
+      <span className="pd-kpi-icon" aria-hidden>
+        {icon}
+      </span>
+      <span className="pd-kpi-value">{value}</span>
+      <span className="pd-kpi-label">{label}</span>
+      {hint && <span className="pd-kpi-hint">{hint}</span>}
     </div>
   );
 }
 
+/** Cincin persen (SVG) yang terisi saat muncul. */
 export function Ring({
   percent,
-  size = 56,
+  size = 64,
   label,
 }: {
   percent: number;
   size?: number;
   label: string;
 }) {
-  const r = 22;
+  const on = useMounted();
+  const r = (size - 10) / 2;
   const c = 2 * Math.PI * r;
-  const p = Math.max(0, Math.min(100, percent));
   return (
-    <svg width={size} height={size} viewBox="0 0 56 56" role="img" aria-label={`${label}: ${p}%`}>
-      <circle cx="28" cy="28" r={r} fill="none" stroke="var(--garis)" strokeWidth="7" />
+    <svg
+      className="pd-ring"
+      width={size}
+      height={size}
+      viewBox={`0 0 ${size} ${size}`}
+      role="img"
+      aria-label={label}
+    >
+      <circle cx={size / 2} cy={size / 2} r={r} className="pd-ring-bg" />
       <circle
-        cx="28"
-        cy="28"
+        cx={size / 2}
+        cy={size / 2}
         r={r}
-        fill="none"
-        stroke="var(--sawah)"
-        strokeWidth="7"
-        strokeLinecap="round"
-        strokeDasharray={`${(p / 100) * c} ${c}`}
-        transform="rotate(-90 28 28)"
+        className="pd-ring-fg"
+        strokeDasharray={c}
+        strokeDashoffset={on ? c * (1 - percent / 100) : c}
+        transform={`rotate(-90 ${size / 2} ${size / 2})`}
       />
-      <text x="28" y="32" textAnchor="middle" fontSize="13" fontWeight="800" fill="var(--malam)">
-        {p}
+      <text x="50%" y="50%" dominantBaseline="central" textAnchor="middle" className="pd-ring-text">
+        {percent}%
       </text>
     </svg>
   );
 }
 
-export function Meter({ percent, label }: { percent: number; label: string }) {
-  const p = Math.max(0, Math.min(100, percent));
-  return (
-    <div className="meter" role="img" aria-label={`${label}: ${p}%`}>
-      <span style={{ width: `${p}%` }} />
-    </div>
-  );
-}
-
-const COLORS = [
-  'var(--gonjong)',
-  'var(--sawah)',
-  'var(--langit)',
-  'var(--kunyit-tekan)',
-  'var(--toska)',
-];
-export const chartColor = (i: number) => COLORS[i % COLORS.length]!;
-
-export type Series = { label: string; values: number[]; color?: string };
-
-/** Grafik garis dengan beberapa seri. Setiap titik punya tooltip bawaan (title). */
-export function LineChart({
-  labels,
-  series,
-  height = 220,
+/** Batang harian generik: tinggi = nilai; `title` per batang untuk pembaca layar. */
+export function DayBars({
+  data,
+  label,
+  format = (n: number) => n.toLocaleString('id-ID'),
+  height = 160,
+  dayLabel,
+  labelEvery,
 }: {
-  labels: string[];
-  series: Series[];
-  height?: number;
-}) {
-  const w = 640;
-  const pad = { l: 36, r: 12, t: 12, b: 28 };
-  const max = Math.max(1, ...series.flatMap((s) => s.values));
-  const nice = Math.ceil(max / 4) * 4 || 4;
-  const x = (i: number) =>
-    pad.l + (labels.length <= 1 ? 0 : (i / (labels.length - 1)) * (w - pad.l - pad.r));
-  const y = (v: number) => pad.t + (1 - v / nice) * (height - pad.t - pad.b);
-  const step = Math.max(1, Math.ceil(labels.length / 7));
-
-  return (
-    <figure className="chart">
-      <svg
-        viewBox={`0 0 ${w} ${height}`}
-        role="img"
-        aria-label={series.map((s) => s.label).join(', ')}
-      >
-        {[0, 1, 2, 3, 4].map((g) => {
-          const v = (nice / 4) * g;
-          return (
-            <g key={g}>
-              <line x1={pad.l} x2={w - pad.r} y1={y(v)} y2={y(v)} stroke="var(--garis)" />
-              <text
-                x={pad.l - 6}
-                y={y(v) + 4}
-                textAnchor="end"
-                fontSize="11"
-                fill="var(--malam-muted)"
-              >
-                {v}
-              </text>
-            </g>
-          );
-        })}
-        {series.map((s, si) => {
-          const color = s.color ?? chartColor(si);
-          const d = s.values.map((v, i) => `${i === 0 ? 'M' : 'L'}${x(i)},${y(v)}`).join(' ');
-          return (
-            <g key={s.label}>
-              <path d={d} fill="none" stroke={color} strokeWidth="3" strokeLinejoin="round" />
-              {s.values.map((v, i) => (
-                <circle key={i} cx={x(i)} cy={y(v)} r="4" fill={color}>
-                  <title>{`${labels[i]}: ${v} (${s.label})`}</title>
-                </circle>
-              ))}
-            </g>
-          );
-        })}
-        {labels.map((l, i) =>
-          i % step === 0 ? (
-            <text
-              key={i}
-              x={x(i)}
-              y={height - 8}
-              textAnchor="middle"
-              fontSize="11"
-              fill="var(--malam-muted)"
-            >
-              {l}
-            </text>
-          ) : null,
-        )}
-      </svg>
-      <figcaption className="chart-legend">
-        {series.map((s, i) => (
-          <span key={s.label}>
-            <i style={{ background: s.color ?? chartColor(i) }} /> {s.label}
-          </span>
-        ))}
-      </figcaption>
-    </figure>
-  );
-}
-
-export function ColumnChart({
-  labels,
-  values,
-  format = (n) => String(n),
-  height = 200,
-  color = 'var(--sawah)',
-}: {
-  labels: string[];
-  values: number[];
+  data: { date: string; value: number }[];
+  label: string;
   format?: (n: number) => string;
   height?: number;
-  color?: string;
+  dayLabel: (date: string, index: number) => string;
+  /** Tampilkan label sumbu setiap n batang (bawaan: otomatis untuk > 14 batang). */
+  labelEvery?: number;
 }) {
-  const w = 640;
-  const pad = { l: 8, r: 8, t: 12, b: 28 };
-  const max = Math.max(1, ...values);
-  const slot = (w - pad.l - pad.r) / Math.max(1, values.length);
-  const bar = Math.min(32, slot * 0.7);
-  const step = Math.max(1, Math.ceil(labels.length / 7));
+  const on = useMounted();
+  const max = Math.max(1, ...data.map((d) => d.value));
+  const every = labelEvery ?? (data.length > 14 ? Math.ceil(data.length / 7) : 1);
   return (
-    <figure className="chart">
-      <svg
-        viewBox={`0 0 ${w} ${height}`}
-        role="img"
-        aria-label={labels.map((l, i) => `${l}: ${format(values[i] ?? 0)}`).join(', ')}
-      >
-        <line
-          x1={pad.l}
-          x2={w - pad.r}
-          y1={height - pad.b}
-          y2={height - pad.b}
-          stroke="var(--garis-tegas)"
-        />
-        {values.map((v, i) => {
-          const h = (v / max) * (height - pad.t - pad.b);
-          const cx = pad.l + slot * i + slot / 2;
-          return (
-            <g key={i}>
-              <rect
-                x={cx - bar / 2}
-                y={height - pad.b - h}
-                width={bar}
-                height={h}
-                rx="5"
-                fill={color}
-              >
-                <title>{`${labels[i]}: ${format(v)}`}</title>
-              </rect>
-              {i % step === 0 && (
-                <text
-                  x={cx}
-                  y={height - 8}
-                  textAnchor="middle"
-                  fontSize="11"
-                  fill="var(--malam-muted)"
-                >
-                  {labels[i]}
-                </text>
-              )}
-            </g>
-          );
-        })}
-      </svg>
-    </figure>
-  );
-}
-
-export function Donut({ slices }: { slices: { label: string; value: number }[] }) {
-  const total = slices.reduce((a, s) => a + s.value, 0) || 1;
-  const r = 52;
-  const c = 2 * Math.PI * r;
-  let offset = 0;
-  return (
-    <figure className="chart donut">
-      <svg
-        viewBox="0 0 140 140"
-        width="160"
-        height="160"
-        role="img"
-        aria-label={slices.map((s) => `${s.label}: ${s.value}`).join(', ')}
-      >
-        <circle cx="70" cy="70" r={r} fill="none" stroke="var(--garis)" strokeWidth="22" />
-        {slices.map((s, i) => {
-          const len = (s.value / total) * c;
-          const el = (
-            <circle
-              key={s.label}
-              cx="70"
-              cy="70"
-              r={r}
-              fill="none"
-              stroke={chartColor(i)}
-              strokeWidth="22"
-              strokeDasharray={`${len} ${c - len}`}
-              strokeDashoffset={-offset}
-              transform="rotate(-90 70 70)"
-            >
-              <title>{`${s.label}: ${s.value}`}</title>
-            </circle>
-          );
-          offset += len;
-          return el;
-        })}
-      </svg>
-      <figcaption className="chart-legend vertical">
-        {slices.map((s, i) => (
-          <span key={s.label}>
-            <i style={{ background: chartColor(i) }} /> {s.label}{' '}
-            <strong>{Math.round((s.value / total) * 100)}%</strong>
+    <ol className="ch-bars" style={{ height }} aria-label={label}>
+      {data.map((d, i) => (
+        <li
+          key={d.date}
+          aria-label={`${dayLabel(d.date, i)}: ${format(d.value)}`}
+          className="ch-bar"
+        >
+          <span className="ch-bar-track" aria-hidden>
+            <span
+              className="ch-bar-fill"
+              style={{
+                height: on ? `${d.value ? Math.max(4, (d.value / max) * 100) : 0}%` : '0%',
+                transitionDelay: `${Math.min(i, 20) * 25}ms`,
+              }}
+            />
           </span>
-        ))}
-      </figcaption>
-    </figure>
-  );
-}
-
-export function Funnel({ steps }: { steps: { label: string; value: number }[] }) {
-  const top = Math.max(1, steps[0]?.value ?? 1);
-  return (
-    <ol className="funnel">
-      {steps.map((s, i) => {
-        const prev = i === 0 ? s.value : steps[i - 1]!.value;
-        const drop = prev > 0 ? Math.round((s.value / prev) * 100) : 0;
-        return (
-          <li key={s.label}>
-            <div
-              className="funnel-bar"
-              style={{ width: `${Math.max(8, (s.value / top) * 100)}%`, background: chartColor(i) }}
-            >
-              <span>{s.label}</span>
-            </div>
-            <span className="funnel-value">
-              {s.value.toLocaleString('id-ID')}
-              {i > 0 && <small> ({drop}% dari langkah sebelumnya)</small>}
-            </span>
-          </li>
-        );
-      })}
+          <span className="ch-bar-day" aria-hidden>
+            {i % every === 0 || i === data.length - 1 ? dayLabel(d.date, i) : ''}
+          </span>
+        </li>
+      ))}
     </ol>
   );
 }
 
-export function Heatmap({
-  matrix,
-  rowLabels,
-  colLabels,
+/** Bar horizontal (proporsi), mis. status pesanan atau buku terpopuler. */
+export function Meter({
+  value,
+  max,
+  tone = 'grape',
 }: {
-  matrix: number[][];
-  rowLabels: string[];
-  colLabels: string[];
+  value: number;
+  max: number;
+  tone?: string;
 }) {
-  const max = Math.max(1, ...matrix.flat());
+  const pct = max > 0 ? Math.round((value / max) * 100) : 0;
   return (
-    <div className="heatmap" role="table" aria-label="Jam paling aktif">
-      <div className="heatmap-row heatmap-head" role="row">
-        <span />
-        {colLabels.map((c, i) => (
-          <span key={i} role="columnheader">
-            {i % 3 === 0 ? c : ''}
-          </span>
-        ))}
-      </div>
-      {matrix.map((row, r) => (
-        <div key={r} className="heatmap-row" role="row">
-          <span className="heatmap-label" role="rowheader">
-            {rowLabels[r]}
-          </span>
-          {row.map((v, c) => (
-            <span
-              key={c}
-              role="cell"
-              className="heatmap-cell"
-              style={{ opacity: v === 0 ? 0.12 : 0.25 + (v / max) * 0.75 }}
-              title={`${rowLabels[r]} ${colLabels[c]}: ${v} ronde`}
-            />
-          ))}
-        </div>
-      ))}
-    </div>
+    <span className={`ch-meter tone-${tone}`} aria-hidden>
+      <span style={{ width: `${pct}%` }} />
+    </span>
   );
 }
