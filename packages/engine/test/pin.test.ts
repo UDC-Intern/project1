@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isValidPin, pinSecret, samePin, type Pin } from '../src/pin.js';
+import { isValidPin, pinLockMs, pinSecret, samePin, type Pin } from '../src/pin.js';
 
 describe('sandi gambar', () => {
   const pin: Pin = ['apple', 'star', 'fish'];
@@ -18,5 +18,11 @@ describe('sandi gambar', () => {
   it('membandingkan urutan', () => {
     expect(samePin(pin, ['apple', 'star', 'fish'])).toBe(true);
     expect(samePin(pin, ['star', 'apple', 'fish'])).toBe(false);
+  });
+
+  it('kunci makin lama: 1, 5, 30, lalu 120 menit dan berhenti di situ', () => {
+    const minutes = [1, 2, 3, 4, 5, 9].map((n) => pinLockMs(n) / 60_000);
+    expect(minutes).toEqual([1, 5, 30, 120, 120, 120]);
+    expect(pinLockMs(0)).toBe(60_000);
   });
 });

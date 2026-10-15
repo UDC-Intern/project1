@@ -6,11 +6,11 @@ yang membacakan soal. Orang tua memantau perkembangan anak, dan admin mengelola 
 
 ## Fitur rilis 1.0
 
-- **Anak:** masuk dengan kode keluarga dan sandi 3 gambar, buku Kelas 1 Matematika dan Sains, ronde 5 soal yang dibacakan,
+- **Anak:** masuk dengan kode keluarga dan sandi 3 gambar, buku Kelas 1 Matematika dan Sains, ronde 10 soal yang dibacakan,
   umpan balik ramah anak, tanaman Skor Jago per topik, papan peringkat, profil.
 - **Orang tua:** daftar, kelola sampai 3 profil anak, laporan per topik, ringkasan mingguan, status paket.
-- **Admin:** kelola buku, topik, level, dan bank soal; AI pembuat soal dengan tinjauan sebelum tayang; pengguna dan Premium;
-  laporan anak dan statistik level.
+- **Admin:** kelola buku, topik, level, dan materi; pratinjau soal; asisten AI untuk materi; pengguna dan Premium; laporan anak dan statistik level.
+- **Sertifikat:** anak Premium yang lulus seluruh level satu buku mendapat Sertifikat Juara Digital.
 - **Suara:** soal dan materi dibacakan dengan Google Cloud Text-to-Speech, disimpan sekali di database.
 
 ## Teknologi
@@ -34,8 +34,3 @@ Database (mulai M6): isi `DATABASE_URL` di `.env`, lalu `pnpm db:setup`.
 | Dokumen                                      | Isi                                                                    |
 | -------------------------------------------- | ---------------------------------------------------------------------- |
 | [PRD.md](PRD.md)                             | Produk: fitur, alur, halaman, tampilan, database, keamanan, asumsi     |
-| [CLAUDE.md](CLAUDE.md)                       | Aturan kerja untuk Claude Code                                         |
-
-## Acuan
-
-Dikembangkan dalam program MBKM di Udacoding. Arsitektur dan aturan produk mengacu pada platform UdaKids milik Udacoding

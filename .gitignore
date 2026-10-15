@@ -5,3 +5,5 @@ coverage/
 *.log
 backups/
 *.tsbuildinfo
+
+# berkas kerja pribadi
