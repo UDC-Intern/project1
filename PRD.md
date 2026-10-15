@@ -2,19 +2,16 @@
 
 Versi 1.0 (rilis pertama) · 13 Oktober 2026 · Penyusun: Ridho Dwi Syahputra
 
-Catatan penamaan: produk ini bernama UdaKids. Platform UdaKids buatan Udacoding yang menjadi acuan disebut "UdaKids asli"
-atau "repo referensi" di seluruh dokumen. Nama produk dan maskot ditulis sekali di `apps/web/src/config/app.ts`
-(`APP_NAME`, `CHARACTER_NAME`).
+Nama produk dan maskot ditulis sekali di `apps/web/src/config/app.ts` (`APP_NAME`, `CHARACTER_NAME`).
 
 ## 1. Ringkasan
 
 UdaKids adalah aplikasi web belajar untuk anak SD kelas awal. Anak berlatih soal Matematika dan Sains per topik dan
 per level, ditemani robot kecil bernama Momo yang membacakan soal. Orang tua membuat profil anak, memantau laporan,
-dan melihat status paket. Admin mengelola konten soal (termasuk membuat draf soal dengan AI yang wajib ditinjau
-sebelum tayang), pengguna, dan akses Premium. Papan peringkat hanya menampilkan nama panggilan.
+dan melihat status paket. Admin mengelola buku, topik, level, pengguna, dan akses Premium, dibantu asisten AI untuk materi. Papan peringkat hanya menampilkan nama panggilan.
 
-Rilis 1.0 berfokus pada **Kelas 1** (Matematika dan Sains: 8 topik, 24 level, 240 soal) dengan tiga peran yang saling
-terhubung penuh: anak, orang tua, dan admin. Arsitekturnya mengikuti platform UdaKids asli milik Udacoding: monorepo pnpm,
+Rilis 1.0 berfokus pada **Kelas 1** (Matematika dan Sains: 8 topik, 24 level, soal dibuat generator) dengan tiga peran yang saling
+terhubung penuh: anak, orang tua, dan admin. Arsitekturnya: monorepo pnpm,
 React + Vite, NestJS, Drizzle, PostgreSQL, dan paket `engine` bersama yang dipakai web dan server. Dengan fondasi ini,
 jenjang, mapel, dan fitur berikutnya (bagian 5) bisa ditambahkan tanpa membongkar yang sudah ada.
 
@@ -33,26 +30,27 @@ jenjang, mapel, dan fitur berikutnya (bagian 5) bisa ditambahkan tanpa membongka
 - Anak kelas 1 belum lancar membaca, sedangkan banyak platform soal memakai teks panjang, iklan, dan kata "salah" yang
   membuat anak enggan mencoba.
 - Orang tua tidak tahu anaknya kuat atau lemah di topik mana.
-- Menambah soal secara manual lambat, padahal setiap soal tetap harus dicek manusia sebelum tayang.
+- Menulis ratusan soal satu per satu lambat dan cepat membosankan; anak butuh soal yang selalu segar dan sesuai level.
 - Akses level berbayar harus terkendali tanpa payment gateway (transfer manual, admin yang mengaktifkan).
 
-## 4. Fitur Rilis 1.0 (8 fitur inti)
+## 4. Fitur Rilis 1.0 (9 fitur inti)
 
 | No | Fitur                 | Penjelasan singkat                                                                                                                         |
 | -- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | 1  | Akun dan tiga peran   | Orang tua daftar (email + kata sandi, wajib centang persetujuan) dan mendapat kode keluarga 6 huruf. Orang tua membuat maksimal 3 profil anak (nama panggilan, warna Momo, sandi 3 gambar). Anak masuk dengan kode keluarga + sandi gambar. Admin masuk lewat halaman staf. |
 | 2  | Belajar terstruktur   | Buku Matematika Kelas 1 dan Sains Kelas 1. Tiap buku berisi 4 topik (A sampai D), tiap topik punya materi singkat dan 3 level. Level berurutan: level 2 terbuka setelah level 1 lulus. Level 1 gratis, level 2 dan 3 Premium. |
-| 3  | Ronde latihan         | 5 soal acak dari bank level. Tiga jenis soal: pilihan ganda, isian angka, benar/belum tepat. Soal dibacakan, ada stopwatch tanpa batas waktu, umpan balik hijau/kuning dengan petunjuk, dan halaman hasil (skor, benar, waktu, pujian usaha). **Dinilai di server.** |
+| 3  | Ronde latihan         | 10 soal yang dibuat generator di `engine` dari seed ronde (deterministik, tanpa bank soal statis). Tiga jenis soal: pilihan ganda, isian angka, benar/belum tepat. Soal dibacakan, ada stopwatch tanpa batas waktu, 10 titik indikator progres, umpan balik hijau/kuning dengan petunjuk, dan halaman hasil (skor, benar, waktu, pujian usaha). **Dinilai di server.** |
 | 4  | Skor Jago dan tanaman | Skor penguasaan per topik (0 sampai 100), diperbarui tiap jawaban. Anak hanya melihat tanaman 4 tahap (benih, tunas, pohon, berbuah). Orang tua dan admin melihat angka dan status (Belajar, Bisa, Jago). |
 | 5  | Papan peringkat       | Total dan per buku. Hanya nama panggilan dan warna Momo yang terlihat. Posisi anak sendiri disorot. 10 besar tampil di landing.             |
 | 6  | Laporan orang tua     | Beranda dengan ringkasan minggu ini, laporan per anak (Skor Jago per topik, ketepatan, 5 ronde terakhir, 3 saran topik), halaman paket dengan tombol WhatsApp ke admin. |
-| 7  | Panel admin           | Ringkasan angka, kelola buku/topik/level, bank soal (tambah, ubah, arsipkan), AI pembuat soal (Gemini) dengan tinjauan sebelum tayang, daftar pengguna, aktifkan/cabut Premium, laporan anak dan statistik level. |
+| 7  | Panel admin           | Ringkasan angka, kelola buku/topik/level dan materi, pratinjau soal generator per level, asisten AI (Gemini) untuk materi dan kurikulum, daftar pengguna, aktifkan/cabut Premium, laporan anak dan statistik level. |
+| 9  | Sertifikat Juara Digital | Eksklusif Premium. Anak berlangganan yang lulus seluruh level dalam satu buku mendapat sertifikat yang bisa diunduh atau dicetak. |
 | 8  | Suara soal            | Soal dan materi dibacakan dengan Google Cloud Text-to-Speech (Chirp 3 HD, `id-ID-Chirp3-HD-Leda`). Klip dibuat sekali, disimpan di PostgreSQL, diputar otomatis. Bila klip tidak ada, Momo diam dan teks tetap tampil (tanpa suara bawaan browser). |
 
 ### 4.1 Aturan nilai ()
 
-- **Ronde:** 5 soal, tiap soal dinilai sekali. Skor = benar / 5 × 100. Lulus bila skor ≥ 70 **dan** keliru ≤ 3 (aturan
-  UdaKids asli). Ambang, jumlah soal per ronde, dan batas keliru disimpan per level.
+- **Ronde:** 10 soal, tiap soal dinilai sekali. Skor = benar / 10 × 100. Lulus bila skor ≥ 70 **dan** keliru ≤ 3.
+  Ambang, jumlah soal per ronde, dan batas keliru disimpan per level.
 - **Level:** berurutan di dalam topik. Topik boleh dipilih bebas. Level terbuka bila bernomor 1 atau level sebelumnya
   pernah lulus.
 - **Premium:** level dengan `is_free = false` hanya bisa dimainkan bila anak punya langganan aktif. Dicek di server.
@@ -64,7 +62,8 @@ jenjang, mapel, dan fitur berikutnya (bagian 5) bisa ditambahkan tanpa membongka
 1. Orang tua mendaftar, membuat profil anak dan sandi gambar, lalu mendapat kode keluarga.
 2. Anak masuk dengan kode keluarga dan sandi gambar itu, lalu bermain.
 3. Setiap ronde tersimpan, sehingga laporan orang tua, Skor Jago, papan peringkat, dan statistik admin ikut berubah.
-4. Admin menambah soal (manual atau AI). Setelah disetujui, soal langsung muncul di ronde anak berikutnya.
+4. Admin mengubah judul, materi, atau status level. Perubahan langsung terlihat di area anak. Soal ronde selalu dibuat
+   generator, jadi tidak perlu ditinjau satu per satu.
 5. Admin mengaktifkan Premium untuk seorang anak. Level 2 dan 3 langsung terbuka di area anak, dan status paket di area
    orang tua berubah.
 
@@ -73,7 +72,7 @@ jenjang, mapel, dan fitur berikutnya (bagian 5) bisa ditambahkan tanpa membongka
 Hal berikut **tidak** dibangun di rilis 1.0. Struktur data dan modul disiapkan agar bisa ditambah nanti.
 
 - Jenjang lain (PAUD, TK, Kelas 2 sampai 6, olimpiade) dan mapel lain (literasi).
-- Generator soal berbasis parameter (family generator di `engine`), mock test, dan buku 10 level per topik.
+- Mock test dan buku 10 level per topik.
 - Petualangan Momo (puzzle kartu perintah), lab, simulasi, dan game.
 - Payment gateway, afiliasi, buku kas, komisi. Di rilis 1.0 Premium diaktifkan admin.
 - Fasilitator, kelas, dan lomba live.
@@ -104,7 +103,7 @@ Hal berikut **tidak** dibangun di rilis 1.0. Struktur data dan modul disiapkan a
 2. Beranda: dua buku dan tombol "Lanjutkan" ke level terakhir. Buka buku, lihat topik dengan tanaman masing-masing.
 3. Buka topik: dengarkan materi singkat, lalu pilih level. Level punya 5 keadaan: lulus, terbuka, terkunci (level
    sebelumnya belum lulus), Premium ("Minta orang tua membuka level ini", tanpa harga), dan segera hadir (soal belum cukup).
-4. Main ronde: 5 soal, tiap soal dibacakan otomatis. Jawab, lihat umpan balik hijau atau kuning dengan petunjuk, ketuk
+4. Main ronde: 10 soal, tiap soal dibacakan otomatis. Jawab, lihat umpan balik hijau atau kuning dengan petunjuk, ketuk
    "Lanjut".
 5. Halaman hasil: skor, "4 dari 5 benar", waktu, pujian usaha. Lulus: tombol "Lanjut level berikutnya". Belum lulus:
    "Coba lagi" dengan soal diacak ulang.
@@ -114,9 +113,10 @@ Hal berikut **tidak** dibangun di rilis 1.0. Struktur data dan modul disiapkan a
 
 1. Masuk di `/masuk/staf`. Lihat ringkasan: jumlah orang tua, anak, ronde hari ini, anak aktif 7 hari, topik paling sulit.
 2. Konten: atur buku, topik (judul + materi), level (judul, gratis/Premium).
-3. Bank soal: filter per level dan status, tambah/ubah/arsipkan manual.
-4. AI pembuat soal: pilih level, jumlah (5 sampai 20), jenis, catatan. Gemini membuat draf, divalidasi, lalu admin meninjau,
-   mengubah, dan menyetujui. Saat disetujui, suara dibuat sekali.
+3. Pratinjau soal: pilih level dan seed, lihat 10 soal yang dihasilkan generator beserta jawaban dan petunjuk (untuk
+   memeriksa kualitas), tanpa menyimpan apa pun.
+4. Asisten AI (Gemini): minta usulan materi singkat atau rincian kurikulum per topik. Hasilnya draf teks yang admin
+   salin, ubah, lalu simpan di halaman Konten.
 5. Pengguna: cari orang tua dan anak, aktifkan Premium dengan tanggal berakhir, atau cabut.
 6. Laporan: laporan anak (sama dengan versi orang tua) dan statistik per level (tingkat lulus, rata-rata skor).
 
@@ -147,8 +147,9 @@ Router: React Router 6. Bagian dinamis ditulis `:param`. URL halaman berbahasa I
 | Masuk staf        | `/masuk/staf`                | Email + kata sandi admin                                                          | Tidak        |
 | Ringkasan admin   | `/admin`                     | Kartu angka dan tabel topik tersulit                                              | Admin        |
 | Konten            | `/admin/konten`              | Buku, topik, level, toggle gratis/Premium                                         | Admin        |
-| Bank soal         | `/admin/soal`                | Tabel soal, filter level dan status, form tambah/ubah                             | Admin        |
-| AI pembuat soal   | `/admin/soal/ai`             | Form permintaan, tabel tinjauan draf, tombol setujui                              | Admin        |
+| Pratinjau soal    | `/admin/soal`                | Pilih level dan seed, lihat 10 soal generator beserta jawaban                     | Admin        |
+| Asisten AI        | `/admin/asisten`             | Permintaan materi atau kurikulum ke Gemini, draf teks untuk disalin               | Admin        |
+| Sertifikat        | `/play/sertifikat/:bookSlug` | Sertifikat Juara Digital untuk diunduh atau dicetak (Premium, buku selesai)        | Anak         |
 | Pengguna          | `/admin/pengguna`            | Orang tua dan anak, cari, dialog Premium                                          | Admin        |
 | Laporan admin     | `/admin/laporan`             | Laporan anak dan statistik level                                                  | Admin        |
 | 404               | `*`                          | Halaman tidak ditemukan dengan tombol kembali (nada ramah anak)                   | Tidak        |
@@ -160,11 +161,9 @@ Pengalihan: `/play/*` tanpa sesi anak ke `/play/masuk`. `/orang-tua/*` tanpa ses
 
 - **Kesan:** hangat, jelas, dan tenang. Area anak besar dan bersahabat. Area orang tua dan admin lebih rapat, seperti alat
   kerja. Arah desain bebas dieksplorasi di M1 lewat halaman `/gaya`; setelah dikunci, warna hanya dipakai lewat token.
-  Design system UdaKids asli (salinannya ada di  setelah M0) menjadi acuan prinsip,
-  bukan untuk disalin mentah: proyek ini punya identitas visual sendiri.
+  Identitas visual ditulis sendiri untuk produk ini.
 - **Tanpa framework UI.** CSS biasa dengan token sendiri: `apps/web/src/styles/uk-tokens.css` dan `uk-components.css`,
-  kelas berawalan `uk-` (contoh `uk-btn`, `uk-card`). Awalan ini sama dengan repo referensi karena nama produknya sama;
-  nilai token dan kodenya ditulis sendiri. Ikon berupa komponen SVG sendiri (tanpa emoji, tanpa pustaka ikon).
+  kelas berawalan `uk-` (contoh `uk-btn`, `uk-card`). Ikon berupa komponen SVG sendiri (tanpa emoji, tanpa pustaka ikon).
 - **Token warna awal** (jangan menaruh hex baru di komponen):
 
   | Token                          | Nilai                 | Dipakai untuk                                                                  |
@@ -192,7 +191,7 @@ Pengalihan: `/play/*` tanpa sesi anak ke `/play/masuk`. `/orang-tua/*` tanpa ses
     masing-masing ≥ 64 px. Konten maksimal 960 px, di tengah.
   - **Orang tua dan admin (desktop):** sidebar kiri, konten kanan. Di ponsel sidebar menjadi menu geser. Sidebar admin
     berlatar `--uk-text` dengan label "Admin" agar jelas beda dari area orang tua.
-- **Halaman ronde:** bilah progres "2 dari 5" dan stopwatch kecil di atas. Kartu soal besar dengan tombol dengar di pojok
+- **Halaman ronde:** bilah progres 10 titik indikator ("2 dari 10") dan stopwatch kecil di atas. Kartu soal besar dengan tombol dengar di pojok
   kanan atas (64 px) dan `CountObjects` bila ada. Pilihan jawaban berupa grid 2 × 2 tombol besar (tinggi ≥ 96 px). Isian
   angka memakai `Keypad` 0 sampai 9, hapus, dan "Periksa". Setelah menjawab, panel umpan balik naik dari bawah: hijau
   ("Tepat! Kamu teliti menghitung.") atau kuning ("Belum tepat." + petunjuk), dengan tombol "Lanjut" ≥ 64 px. Momo bereaksi
@@ -217,7 +216,7 @@ Pengalihan: `/play/*` tanpa sesi anak ke `/play/masuk`. `/orang-tua/*` tanpa ses
 ## 9. Struktur Database (PostgreSQL, Drizzle ORM)
 
 **Semua identifier kode, tabel, kolom, URL API, dan field JSON memakai bahasa Inggris** (`snake_case` di database,
-`camelCase` di JSON), seperti repo UdaKids asli. Teks yang dilihat pengguna berbahasa Indonesia lewat i18n. Skema hanya di
+`camelCase` di JSON), . Teks yang dilihat pengguna berbahasa Indonesia lewat i18n. Skema hanya di
 `apps/api/src/db/schema.ts`, migrasi dibuat `pnpm db:generate` ke `apps/api/drizzle/`. Semua waktu `timestamptz`.
 
 ```mermaid
@@ -226,29 +225,27 @@ erDiagram
   children ||--o| subscriptions : "Premium"
   books ||--o{ topics : ""
   topics ||--o{ levels : ""
-  levels ||--o{ questions : ""
   children ||--o{ rounds : ""
   levels ||--o{ rounds : ""
   rounds ||--o{ round_answers : ""
-  questions ||--o{ round_answers : ""
   children ||--o{ skill_mastery : ""
   topics ||--o{ skill_mastery : ""
   users ||--o{ ai_jobs : "admin"
-  questions }o--o| voice_clips : "audio_hash"
+  children ||--o{ certificates : "Premium"
+  books ||--o{ certificates : ""
 ```
 
 ### Daftar nilai
 
 - Peran akun (`users.role`): `admin`, `parent`. Token anak berperan `child` (anak tidak punya baris di `users`).
-- Jenis soal (`questions.type`): `choice` (pilihan ganda 4 opsi), `number` (isian angka), `true_false` (opsi "Benar" dan
-  "Belum tepat").
-- Status soal: `draft`, `active`, `archived`. Sumber soal: `manual`, `ai`, `seed`.
+- Jenis soal (keluaran generator): `choice` (pilihan ganda 4 opsi), `number` (isian angka), `true_false` (opsi "Benar"
+  dan "Belum tepat").
 - Status level untuk anak (dihitung server, tidak disimpan): `passed`, `open`, `locked`, `premium`, `soon`.
 - Status penguasaan untuk orang tua: `learning` (Belajar), `proficient` (Bisa), `mastered` (Jago).
 - Warna Momo: `blue`, `green`, `yellow`, `orange`, `pink`, `teal`.
 - Gambar sandi (9): `apple`, `star`, `fish`, `flower`, `ball`, `cat`, `house`, `cloud`, `leaf`.
 - Tahap tanaman (`skill_mastery.visible_stage`): 0 benih, 1 tunas, 2 pohon, 3 berbuah.
-- Objek hitung (`questions.visual.item`): `apple`, `ball`, `star`, `fish`, `leaf`, `book`.
+- Objek hitung (`visual.item` pada soal): `apple`, `ball`, `star`, `fish`, `leaf`, `book`.
 - Paket anak: `free`, `premium`.
 
 ### Tabel `users`: akun dewasa
@@ -274,7 +271,8 @@ erDiagram
 | momo_color      | text        | salah satu dari 6 warna Momo                                                   |
 | pin_hash        | text        | hash `scrypt` dari `"gambar1-gambar2-gambar3"`; kosong = sandi belum diatur     |
 | failed_attempts | integer     | default 0; naik tiap sandi keliru, kembali 0 saat berhasil                     |
-| locked_until    | timestamptz | diisi saat `failed_attempts` mencapai 5 (kunci 1 menit)                        |
+| locked_until    | timestamptz | diisi saat `failed_attempts` mencapai 5; lama kunci naik: 1, 5, 30, lalu 120 menit    |
+| lock_count      | integer     | default 0; jumlah kunci beruntun, kembali 0 saat sandi benar                    |
 | last_active_at  | timestamptz | diperbarui saat ronde selesai                                                  |
 | created_at      | timestamptz | default `now()`                                                                |
 
@@ -295,50 +293,45 @@ Paket efektif anak: `premium` bila ada baris dengan `ends_at > now()`, selain it
 | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | books  | `slug` text unik (`matematika-kelas-1`), `grade` text (`kelas-1`), `subject` text (`math`/`science`), `title` text, `sort` int                                                    |
 | topics | `book_id` fk cascade, `code` text (`A` sampai `D`), `title` text, `lesson` text (materi singkat), `lesson_audio_hash` text boleh kosong, `sort` int; unik (`book_id`, `code`)     |
-| levels | `topic_id` fk cascade, `number` int 1 sampai 10, `title` text, `is_free` boolean default false, `questions_per_round` int default 5, `pass_score` int default 70, `max_wrong` int default 3; unik (`topic_id`, `number`) |
+| levels | `topic_id` fk cascade, `number` int 1 sampai 10, `title` text, `is_free` boolean default false, `generator` text (nama family generator), `generator_params` jsonb, `questions_per_round` int default 10, `pass_score` int default 70, `max_wrong` int default 3; unik (`topic_id`, `number`) |
 
-### Tabel `questions`: bank soal
+### Soal: dibuat generator, tidak disimpan
 
-| Kolom        | Tipe        | Keterangan                                                                                              |
-| ------------ | ----------- | ------------------------------------------------------------------------------------------------------- |
-| id           | uuid        | primary key                                                                                             |
-| level_id     | uuid        | referensi `levels.id`, `on delete cascade`                                                              |
-| type         | text        | `choice`, `number`, `true_false`                                                                        |
-| prompt       | text        | kalimat soal, maks 200 karakter, maks 15 kata per kalimat                                               |
-| visual       | jsonb       | boleh kosong; contoh `{"item":"apple","count":7}` atau `{"item":"apple","groups":[7,5]}`                |
-| options      | jsonb       | array teks untuk `choice` (4 opsi) dan `true_false` (`["Benar","Belum tepat"]`); kosong untuk `number`  |
-| answer       | text        | jawaban tunggal; **tidak pernah dikirim ke endpoint anak sebelum dijawab**                              |
-| explanation  | text        | petunjuk saat belum tepat                                                                               |
-| audio_hash   | text        | referensi `voice_clips.hash`, kosong bila suara belum dibuat                                            |
-| status       | text        | default `draft`; hanya `active` yang bisa muncul di ronde                                               |
-| source       | text        | `manual`, `ai`, `seed`                                                                                  |
-| seed_key     | text        | unik, boleh kosong; kunci stabil untuk soal dari `content/` (contoh `1-MA-A-L1-03`)                     |
-| seed_version | integer     | versi isi dari `content/`; seed hanya menimpa bila versi naik (suntingan admin aman)                     |
-| created_by   | uuid        | referensi `users.id`, kosong untuk seed                                                                 |
-| created_at   | timestamptz | default `now()`                                                                                         |
+Tidak ada tabel soal. Setiap level punya `generator` (family di `packages/engine`, mis. `count`, `arith`, `compare`,
+`senses`) dan `generator_params`. Saat ronde dibuka, server membuat `seed` (disimpan di `rounds.seed`), lalu generator
+menghasilkan 10 soal secara deterministik dengan RNG ber-seed (Mulberry32). Soal yang sama dapat dibuat ulang kapan saja
+dari `level + seed`, sehingga server menilai jawaban tanpa menyimpan kunci di mana pun dan web (mode mock) menghasilkan
+soal yang identik. Satu soal berbentuk:
 
-Indeks: (`level_id`, `status`).
+```ts
+{ index: 0..9, type: 'choice' | 'number' | 'true_false', prompt: string,
+  visual: { item, count?, groups? } | null, options: string[] | null,
+  answer: string, explanation: string }   // answer dan explanation hanya di server
+```
+
+Keluaran generator wajib lolos `validateQuestion` (aturan teks anak). Test engine menguji ribuan seed per family.
 
 ### Tabel aktivitas: `rounds`, `round_answers`, `skill_mastery`
 
 | Tabel         | Kolom                                                                                                                                                                                          |
 | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| rounds        | `id` uuid pk, `child_id` fk cascade, `level_id` fk, `question_ids` uuid[] (urutan soal), `started_at` default now, `finished_at` kosong = belum selesai, `correct` int, `wrong` int, `score` int, `passed` boolean, `duration_ms` int. Indeks (`child_id`, `finished_at`) |
-| round_answers | `round_id` fk cascade, `question_id` fk, `chosen` text, `is_correct` boolean, `answered_at` timestamptz; primary key (`round_id`, `question_id`) sehingga satu soal dinilai sekali              |
+| rounds        | `id` uuid pk, `child_id` fk cascade, `level_id` fk, `seed` int (benih soal), `question_count` int, `started_at` default now, `finished_at` kosong = belum selesai, `correct` int, `wrong` int, `score` int, `passed` boolean, `duration_ms` int. Indeks (`child_id`, `finished_at`) |
+| round_answers | `round_id` fk cascade, `question_index` int (0 sampai 9), `chosen` text, `is_correct` boolean, `answered_at` timestamptz; primary key (`round_id`, `question_index`) sehingga satu soal dinilai sekali |
 | skill_mastery | `child_id` fk cascade, `topic_id` fk cascade, `score` int default 0, `visible_stage` int default 0, `challenge_correct` int default 0, `updated_at`; primary key (`child_id`, `topic_id`)       |
 
-### Tabel `voice_clips` dan `ai_jobs`
+### Tabel `voice_clips`, `ai_jobs`, dan `certificates`
 
 | Tabel       | Kolom                                                                                                                                                                         |
 | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| voice_clips | `hash` text pk (`sha256(teks + "\|" + suara)`), `text` text, `voice` text, `mime` text default `audio/mpeg`, `data` bytea, `bytes` int, `created_at`. Klip MP3 disimpan di PostgreSQL seperti UdaKids asli, jadi cadangan cukup satu `pg_dump` |
-| ai_jobs     | `id` uuid pk, `admin_id` fk `users`, `level_id` fk, `requested` int, `accepted` int default 0, `rejected` jsonb (daftar alasan), `model` text, `created_at`                       |
+| voice_clips | `hash` text pk (`sha256(teks + "\|" + suara)`), `text` text, `voice` text, `mime` text default `audio/mpeg`, `data` bytea, `bytes` int, `created_at`. Klip MP3 disimpan di PostgreSQL, jadi cadangan cukup satu `pg_dump` |
+| ai_jobs     | `id` uuid pk, `admin_id` fk `users`, `topic_id` fk boleh kosong, `purpose` text (`lesson` atau `curriculum`), `model` text, `created_at` |
+| certificates | `child_id` fk cascade, `book_id` fk, `issued_at` timestamptz default now; primary key (`child_id`, `book_id`). Dibuat saat semua level di buku itu lulus dan anak Premium |
 
 ### Isi awal (seed)
 
-Konten ada di `content/` (JSON, ). `pnpm db:seed` memasukkan 2 buku, 8 topik, 24 level, dan soal
-yang ada, dengan aturan `seed_key`/`seed_version`. Seed juga membuat admin pertama dari `ADMIN_EMAIL` dan `ADMIN_PASSWORD`
-bila belum ada admin (pola yang sama dengan UdaKids asli).
+Konten ada di `content/` (JSON buku, topik, level, dan materi; ). `pnpm db:seed` memasukkan 2 buku, 8
+topik, dan 24 level beserta konfigurasi generator, lalu membuat admin pertama dari `ADMIN_EMAIL` dan `ADMIN_PASSWORD` bila
+belum ada admin.
 
 ## 10. Aturan Keamanan (Guard dan Peran)
 
@@ -354,18 +347,18 @@ Browser tidak pernah mengakses database. **Semua akses data lewat API NestJS**, 
   - Orang tua: setiap `/parent/children/:id/*` memeriksa `children.parent_id = sub`. Anak milik orang lain dijawab 404.
   - Admin: boleh membaca dan mengubah semua.
 - **Kunci jawaban:** `answer` dan `explanation` tidak pernah ada di respons pembuka ronde. Petunjuk dan jawaban tepat
-  dikirim hanya sebagai respons setelah anak menjawab soal itu.
+  dikirim hanya sebagai respons setelah anak menjawab soal itu. Server membuat ulang soal dari `level + seed` saat menilai.
 - **Penilaian, urutan level, dan Premium** dicek di server saat ronde dibuka dan saat menjawab. Level yang tidak boleh
   dimainkan dijawab 403.
 - **Kata sandi dan sandi gambar:** hash `scrypt` dengan salt acak, dibandingkan dengan `timingSafeEqual`. Sandi gambar
-  keliru 5 kali mengunci anak itu 1 menit. Login, pencarian kode keluarga, dan pendaftaran dibatasi laju per IP
+  keliru 5 kali mengunci anak itu bertingkat (1, 5, 30, lalu 120 menit). Login, pencarian kode keluarga, dan pendaftaran dibatasi laju per IP
   (`@nestjs/throttler`).
 - **Validasi:** semua body dan query divalidasi Zod (skema dari `engine`). Tidak memakai `eval` atau `new Function`.
 - **Rahasia:** `JWT_SECRET`, `DATABASE_URL`, `GEMINI_API_KEY`, `GOOGLE_TTS_API_KEY` hanya di `.env` server, tidak pernah
   berawalan `VITE_`. Kunci TTS memakai Google Cloud, bukan kunci Google AI Studio.
 - **Header:** API mengirim `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, tanpa `X-Powered-By`. CORS hanya ke
   `WEB_ORIGIN`.
-- **Soal AI:** draf tidak pernah tampil ke anak sebelum admin menyetujui.
+- **Asisten AI:** keluarannya hanya teks draf untuk admin; tidak pernah dikirim langsung ke area anak.
 - **Papan peringkat:** respons hanya berisi peringkat, nama panggilan, warna Momo, skor, dan penanda "ini kamu". Tanpa id.
 - **Suara:** `GET /voice/:hash` publik karena hanya membaca klip berdasarkan hash dan tidak memuat kunci jawaban. Pembuatan
   klip baru dibatasi `TTS_DAILY_LIMIT` per hari.
@@ -385,42 +378,36 @@ dokumen proyek.
 | Monorepo | pnpm workspaces: `packages/engine`, `apps/web`, `apps/api` (tanpa Turborepo), TypeScript strict             |
 | Web      | React 18 + Vite 7 + React Router 6.30 + Zustand 5, CSS dengan token sendiri, i18n JSON, `<audio>` bawaan    |
 | API      | NestJS 11 (Express), Drizzle ORM + `pg`, PostgreSQL, Zod 4, JWT + `scrypt`, `@nestjs/throttler`              |
-| Engine   | TypeScript murni + Zod 4: skema, penilaian, Skor Jago, peringkat, RNG ber-seed, validasi soal               |
-| Layanan  | Google Gemini (draf soal), Google Cloud TTS Chirp 3 HD (suara)                                              |
+| Engine   | TypeScript murni + Zod 4: skema, penilaian, Skor Jago, peringkat, RNG ber-seed, generator soal, validasi soal               |
+| Layanan  | Google Gemini (asisten materi), Google Cloud TTS Chirp 3 HD (suara)                                              |
 | Test     | Vitest (engine coverage ≥ 90%), Testing Library + jsdom, Supertest + `unplugin-swc`                          |
 
-## 12. Panduan Kerja untuk Claude Code
-
-Aturan lengkap ada di [CLAUDE.md](CLAUDE.md). Intinya: satu milestone per sesi (skill `/milestone`), tanya dulu sebelum
-keputusan di luar PRD lalu catat di , dan milestone selesai hanya bila
-`pnpm lint && pnpm typecheck && pnpm test && pnpm validate:content && pnpm build` hijau.
-
-## 13. Rencana Build Bertahap
+## 12. Rencana Build Bertahap
 
 Urutan, jadwal, isi, dan kriteria tiap milestone ada di dokumen proyek. Ringkasnya:
 
 | Minggu | Milestone | Isi                                                                                                     |
 | ------ | --------- | ------------------------------------------------------------------------------------------------------- |
-| 1      | M0        | Memahami repo UdaKids asli, menyalin dokumen referensi, membuat peta repo (tanpa kode)                        |
+| 1      | M0        | Dokumen produk dan keputusan arsitektur (tanpa kode)                                                    |
 | 1      | M1 sampai M5 | Semua tampilan tiga peran dengan data tiruan di browser (mode mock), mengikuti kontrak  |
 | 2      | M6 sampai M10 | API NestJS dan database, lalu tiap modul web disambungkan dari mock ke API                            |
 | 2      | M11       | Uji, keamanan, deploy, dan skrip demo                                                                   |
 
-## 14. Asumsi
+## 13. Asumsi
 
 - Nama produk "UdaKids" dan maskot "Momo" ditulis sekali di `config/app.ts`, sehingga bisa diganti tanpa mengubah
-  komponen. Momo digambar sendiri sebagai SVG sederhana, bukan salinan aset UdaKids asli.
+  komponen. Momo digambar sendiri sebagai SVG sederhana.
 - **Database: PostgreSQL lewat `DATABASE_URL`.** Rencana awal memakai Postgres milik project Supabase hanya sebagai hosting
   (tanpa Supabase Auth, RLS, Edge Functions, atau SDK Supabase). Postgres lokal atau VPS cukup dengan mengganti
   `DATABASE_URL`. Status: Usulan ( D-003).
 - Hosting: web sebagai file statis dan API Node di layanan yang menjalankan proses terus-menerus, atau satu VPS dengan Nginx
-  + systemd seperti UdaKids asli. Status: Usulan (D-009).
+  + systemd. Status: Usulan (D-009).
 - Token JWT dikirim lewat header Bearer dan disimpan di `localStorage`, karena web dan API bisa berbeda domain.
 - Klip suara disimpan sebagai `bytea` di PostgreSQL. Sekitar 240 klip (5 sampai 10 MB) jauh di bawah batas database gratis.
-- Satu soal dinilai sekali. Setelah "Belum tepat", anak melihat petunjuk lalu lanjut. "Coba lagi" ada di tingkat ronde.
+- Satu soal dinilai sekali. Setelah "Belum tepat", anak melihat petunjuk lalu lanjut. "Coba lagi" membuka ronde baru dengan seed baru.
 - Tidak ada verifikasi email dan lupa kata sandi di rilis 1.0.
 - Pembayaran Premium: transfer manual di luar aplikasi, admin yang mengaktifkan. Nomor WhatsApp admin dari `ADMIN_WHATSAPP`.
-- Soal dibuat sendiri (manual dan AI), bukan salinan platform lain. Topik mengacu  UdaKids asli
-  (kode 1-MA dan 1-SA).
+- Soal dibuat generator di `engine`, bukan disalin dari platform lain. Topik Kelas 1 Matematika dan Sains disusun di .
+- Judul topik Matematika A tetap "Bilangan sampai 100" (Kurikulum Merdeka Kelas 1 SD).
 - Nama model Gemini tidak ditulis di PRD karena cepat berubah; dipilih saat M10 dan dicatat di .
 - Waktu ditampilkan sesuai zona waktu perangkat (umumnya WIB).

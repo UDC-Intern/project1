@@ -15,10 +15,10 @@ export function Momo({
 }) {
   const mouth =
     mood === 'happy'
-      ? 'M38 66 Q50 78 62 66'
+      ? 'M40 56 Q50 67 60 56'
       : mood === 'encourage'
-        ? 'M40 70 H60'
-        : 'M40 68 Q50 72 60 68';
+        ? 'M43 61 H57'
+        : 'M42 58 Q50 63 58 58';
   return (
     <span className="uk-momo" data-color={color} data-mood={mood}>
       <svg width={size} height={size} viewBox="0 0 100 100" role="img" aria-label={CHARACTER_NAME}>
@@ -33,12 +33,12 @@ export function Momo({
         />
         <circle cx="50" cy="8" r="5" fill="currentColor" />
         <rect x="16" y="20" width="68" height="62" rx="18" fill="currentColor" />
-        <rect x="26" y="32" width="48" height="36" rx="12" fill="#ffffff" />
-        <circle cx="39" cy="48" r="5" fill="#23302b" />
-        <circle cx="61" cy="48" r="5" fill="#23302b" />
+        <rect x="24" y="28" width="52" height="46" rx="14" fill="#ffffff" />
+        <circle cx="38" cy="44" r="4.5" fill="#23302b" />
+        <circle cx="62" cy="44" r="4.5" fill="#23302b" />
         {mood === 'encourage' && (
           <path
-            d="M33 38 L45 41 M67 38 L55 41"
+            d="M32 37 L44 33 M68 37 L56 33"
             stroke="#23302b"
             strokeWidth="3"
             strokeLinecap="round"

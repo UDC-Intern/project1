@@ -39,8 +39,8 @@ describe('skema kontrak API', () => {
   });
 
   it('jawaban dipangkas dan tidak boleh kosong', () => {
-    expect(answerBodySchema.parse({ questionId: 'q', answer: ' 5 ' }).answer).toBe('5');
-    expect(answerBodySchema.safeParse({ questionId: 'q', answer: '  ' }).success).toBe(false);
+    expect(answerBodySchema.parse({ questionIndex: 0, answer: ' 5 ' }).answer).toBe('5');
+    expect(answerBodySchema.safeParse({ questionIndex: 0, answer: '  ' }).success).toBe(false);
   });
 
   it('Premium memakai tanggal ISO dan visual boleh kosong', () => {

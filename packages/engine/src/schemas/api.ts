@@ -7,8 +7,6 @@ import {
   nicknameSchema,
   passwordSchema,
   pinSchema,
-  questionSourceSchema,
-  questionStatusSchema,
   questionTypeSchema,
   roleSchema,
   stageSchema,
@@ -89,7 +87,7 @@ export type ChildLoginResult = z.infer<typeof childLoginResultSchema>;
 // ---- Katalog dan ronde (anak) ----
 
 export const childQuestionSchema = z.object({
-  id: z.string(),
+  index: z.number().int().min(0).max(49),
   type: questionTypeSchema,
   prompt: z.string(),
   visual: visualSchema,
@@ -106,7 +104,7 @@ export const startRoundResultSchema = z.object({
 export type StartRoundResult = z.infer<typeof startRoundResultSchema>;
 
 export const answerBodySchema = z.object({
-  questionId: z.string(),
+  questionIndex: z.number().int().min(0).max(49),
   answer: z.string().trim().min(1).max(60),
 });
 export type AnswerBody = z.infer<typeof answerBodySchema>;
@@ -299,36 +297,34 @@ export type ParentPlan = z.infer<typeof parentPlanSchema>;
 
 // ---- Admin ----
 
-export const adminQuestionSchema = childQuestionSchema.extend({
-  levelId: z.string(),
+/** Pratinjau generator: soal lengkap dengan kunci, dibuat ulang dari level + seed. Tidak disimpan. */
+export const previewQuestionSchema = childQuestionSchema.extend({
   answer: z.string(),
-  explanation: z.string().nullable(),
-  status: questionStatusSchema,
-  source: questionSourceSchema,
-  createdAt: z.string(),
+  explanation: z.string(),
 });
-export type AdminQuestion = z.infer<typeof adminQuestionSchema>;
+export type PreviewQuestion = z.infer<typeof previewQuestionSchema>;
 
-export const createQuestionBodySchema = z.object({
+export const previewResultSchema = z.object({
   levelId: z.string(),
-  type: questionTypeSchema,
-  prompt: z.string().trim().min(1).max(200),
-  visual: visualSchema.optional(),
-  options: z.array(z.string()).nullable().optional(),
-  answer: z.string().trim().min(1).max(60),
-  explanation: z.string().trim().max(300).nullable().optional(),
+  seed: z.number().int(),
+  questions: z.array(previewQuestionSchema),
 });
-export type CreateQuestionBody = z.infer<typeof createQuestionBodySchema>;
-export const patchQuestionBodySchema = createQuestionBodySchema.partial();
+export type PreviewResult = z.infer<typeof previewResultSchema>;
 
-export const approveQuestionsBodySchema = z.object({ ids: z.array(z.string()).min(1).max(50) });
-export const aiQuestionsBodySchema = z.object({
-  levelId: z.string(),
-  count: z.number().int().min(5).max(20),
-  types: z.array(questionTypeSchema).optional(),
+export const aiAssistBodySchema = z.object({
+  topicId: z.string(),
+  purpose: z.enum(['lesson', 'curriculum']),
   note: z.string().trim().max(300).optional(),
 });
-export type AiQuestionsBody = z.infer<typeof aiQuestionsBodySchema>;
+export type AiAssistBody = z.infer<typeof aiAssistBodySchema>;
+export const aiAssistResultSchema = z.object({ jobId: z.string(), draft: z.string() });
+
+export const certificateSchema = z.object({
+  childName: z.string(),
+  bookTitle: z.string(),
+  issuedAt: z.string(),
+});
+export type Certificate = z.infer<typeof certificateSchema>;
 
 export const premiumBodySchema = z.object({ until: z.iso.datetime() });
 export type PremiumBody = z.infer<typeof premiumBodySchema>;
