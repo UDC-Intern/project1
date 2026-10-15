@@ -19,6 +19,9 @@ function hasPremium(childId: string): boolean {
   return premiumUntilOf(readDb(), childId) !== null;
 }
 
+/** Kelas dari slug buku, mis. matematika-kelas-3. */
+const gradeOf = (slug: string) => Number(/kelas-(\d+)$/.exec(slug)?.[1] ?? 1);
+
 export async function home(token: string | null): Promise<CatalogHome> {
   const childId = childIdFromToken(token);
   const db = readDb();
@@ -35,6 +38,7 @@ export async function home(token: string | null): Promise<CatalogHome> {
       slug: b.slug,
       title: b.title,
       subject: b.subject,
+      grade: gradeOf(b.slug),
       topicsTotal: b.topics.length,
       topicsStarted: b.topics.filter((t) =>
         t.levels.some((l) => passed.includes(levelId(b.slug, t.code, l.number))),
@@ -50,6 +54,7 @@ export async function book(token: string | null, slug: string): Promise<BookDeta
   const found = BOOKS.find((b) => b.slug === slug);
   if (!found) throw notFound();
   const passed = db.passedLevels[childId] ?? [];
+  const premium = hasPremium(childId);
   return {
     book: { slug: found.slug, title: found.title, subject: found.subject },
     topics: found.topics.map((t) => ({
@@ -60,6 +65,21 @@ export async function book(token: string | null, slug: string): Promise<BookDeta
       levelsPassed: t.levels.filter((l) => passed.includes(levelId(found.slug, t.code, l.number)))
         .length,
       levelsTotal: t.levels.length,
+      lesson: t.lesson,
+      tips: t.tips ?? [],
+      levels: t.levels.map((l) => ({
+        id: levelId(found.slug, t.code, l.number),
+        number: l.number,
+        title: l.title,
+        status: levelStatus({
+          number: l.number,
+          passed: passed.includes(levelId(found.slug, t.code, l.number)),
+          previousPassed: passed.includes(levelId(found.slug, t.code, l.number - 1)),
+          isFree: l.isFree,
+          hasPremium: premium,
+          hasGenerator: l.generator !== null,
+        }),
+      })),
     })),
   };
 }

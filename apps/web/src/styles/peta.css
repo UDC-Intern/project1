@@ -1,0 +1,761 @@
+/* Peta Belajar (D-111, D-114). Hanya token (uk-tokens.css): warna mapel --m*, status --sawah (lulus), --garis-tegas
+   (terkunci, abu — bukan merah), fokus 3 px --kunyit. Jalur ular 3–5 kolom; setiap simpul tombol ≥ 64 px. */
+
+.peta {
+  display: block;
+  margin-top: var(--space-2);
+}
+.peta.is-wide {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 400px);
+  gap: var(--space-6);
+  align-items: start;
+}
+.peta-babs {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.peta-side {
+  position: sticky;
+  top: var(--space-4);
+  max-height: calc(100vh - 2 * var(--space-4));
+  overflow-y: auto;
+  border-radius: var(--radius-lg);
+}
+
+/* ---------- ringkasan, perayaan, keterangan ---------- */
+.peta-summary-row,
+.peta-legend {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.peta-summary {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--kertas);
+  border: 2px solid var(--garis);
+  border-radius: var(--radius-lg);
+}
+.peta-legend {
+  padding-top: var(--space-3);
+  border-top: 2px dashed var(--garis);
+}
+.peta-summary-text {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+}
+.peta-summary-text strong {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.2rem;
+  color: var(--malam);
+}
+.peta-bar {
+  display: block;
+  height: 12px;
+  border-radius: var(--radius-pill);
+  background: var(--awan-2);
+  box-shadow: inset 0 0 0 2px var(--garis);
+  overflow: hidden;
+}
+.peta-bar > span {
+  display: block;
+  height: 100%;
+  min-width: 12px;
+  border-radius: inherit;
+  background: var(--sawah);
+}
+.peta-legend ul {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.peta-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 6px;
+  border-radius: var(--radius-pill);
+  background: var(--kertas);
+  border: 2px solid var(--garis);
+  color: var(--malam);
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+.peta-key-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+}
+.peta-key.is-now .peta-key-icon {
+  background: var(--gonjong-soft);
+}
+.peta-key-dot.is-now {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--gonjong);
+}
+.peta-key.is-next .peta-key-icon {
+  background: var(--kunyit);
+  color: var(--on-kunyit);
+}
+.peta-key.is-jump .peta-key-icon {
+  background: var(--langit-soft);
+  color: var(--langit-teks);
+}
+.peta-key.is-done .peta-key-icon {
+  background: var(--sawah);
+  color: var(--on-sawah);
+}
+.peta-key.is-locked .peta-key-icon {
+  background: var(--awan-2);
+  color: var(--malam-muted);
+}
+.peta-alldone {
+  overflow: hidden;
+  background: var(--sawah-soft);
+  border: 3px solid var(--sawah);
+  border-radius: var(--radius-lg);
+}
+.peta-alldone-body {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4) var(--space-4);
+}
+.peta-alldone-body > :first-child {
+  flex: none;
+}
+.peta-alldone-text {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  color: var(--malam);
+  line-height: 1.4;
+}
+.peta-alldone-text strong {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.45rem;
+  color: var(--sawah-teks);
+}
+
+/* ---------- bab ---------- */
+.peta-bab {
+  background: var(--kertas);
+  border: 2px solid var(--garis);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  min-width: 0;
+}
+.peta-bab.is-complete {
+  border-color: var(--sawah);
+}
+.peta-bab-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: 3px solid var(--m-soft);
+  color: var(--malam);
+}
+.peta-bab-head strong {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.3rem;
+  color: var(--m-text);
+}
+.peta-bab-head .speak-btn {
+  flex: none;
+}
+.peta-bab-badge {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--m);
+  color: var(--on-m);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+}
+.peta-bab-text {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.peta-bab-text > span {
+  color: var(--malam-muted);
+  font-size: 0.95rem;
+}
+/* Cincin kecil progres bab: berapa topik lulus. */
+.peta-bab-count {
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--malam);
+  background:
+    radial-gradient(circle, var(--kertas) 0 19px, transparent 20px),
+    conic-gradient(var(--sawah) var(--p, 0%), var(--awan-2) 0);
+}
+.peta-bab-done {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+.peta-bab-done-text {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  color: var(--sawah-teks);
+}
+.peta-bab-done-text svg {
+  flex: none;
+  border-radius: 50%;
+  background: var(--sawah);
+  color: var(--on-sawah);
+}
+.peta-fold {
+  min-height: var(--touch-anak);
+  padding: 0 20px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--sawah-soft);
+  color: var(--sawah-teks);
+  font: inherit;
+  font-weight: 700;
+  box-shadow: inset 0 0 0 2px var(--sawah);
+  cursor: pointer;
+}
+.peta-fold:focus-visible {
+  outline: 3px solid var(--kunyit);
+  outline-offset: 3px;
+}
+
+/* ---------- jalur ular ---------- */
+.peta-path {
+  --center: 66px; /* titik tengah simpul dari atas sel: tanda 24 + jarak 4 + setengah cincin 38 */
+  list-style: none;
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 4), minmax(0, 1fr));
+  row-gap: var(--space-2);
+}
+.peta-row {
+  position: relative;
+  /* = ROW di PetaBelajar.tsx; cukup untuk nama topik 3 baris. */
+  height: 182px;
+  min-width: 0;
+}
+/* Garis jalur ke simpul berikutnya: pita lembut + garis putus-putus warna mapel (sawah bila sudah dilalui). */
+.peta-row::before,
+.peta-row::after {
+  content: none;
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+}
+.peta-row.to-right::before,
+.peta-row.to-left::before,
+.peta-row.to-down::before {
+  content: '';
+  background: var(--m-soft);
+  border-radius: var(--radius-pill);
+}
+.peta-row.to-right::after,
+.peta-row.to-left::after,
+.peta-row.to-down::after {
+  content: '';
+}
+.peta-row.to-right::before,
+.peta-row.to-left::before {
+  top: calc(var(--center) - 8px);
+  height: 16px;
+  width: 100%;
+}
+.peta-row.to-right::after,
+.peta-row.to-left::after {
+  top: calc(var(--center) - 1.5px);
+  width: 100%;
+  border-top: 3px dashed var(--m);
+}
+.peta-row.to-right::before,
+.peta-row.to-right::after {
+  left: 50%;
+}
+.peta-row.to-left::before,
+.peta-row.to-left::after {
+  right: 50%;
+}
+.peta-row.to-down::before {
+  top: var(--center);
+  left: calc(50% - 8px);
+  width: 16px;
+  height: calc(100% + var(--space-2));
+}
+.peta-row.to-down::after {
+  top: var(--center);
+  left: calc(50% - 1.5px);
+  height: calc(100% + var(--space-2));
+  border-left: 3px dashed var(--m);
+}
+.peta-row.is-link-done::before {
+  background: var(--sawah-soft);
+}
+.peta-row.is-link-done::after {
+  border-color: var(--sawah);
+  border-style: solid;
+}
+.peta-panel-row {
+  grid-column: 1 / -1;
+  min-width: 0;
+  padding: var(--space-2) 0;
+}
+
+/* ---------- simpul ---------- */
+.peta-stop {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0 2px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--malam);
+  font: inherit;
+  cursor: pointer;
+  text-align: center;
+}
+.peta-stop:focus-visible {
+  outline: 3px solid var(--kunyit);
+  outline-offset: 2px;
+}
+.peta-flag {
+  height: 24px;
+  display: flex;
+  align-items: center;
+}
+.peta-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 4px 9px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+.peta-tag.is-now {
+  background: var(--gonjong);
+  color: var(--on-gonjong);
+}
+.peta-tag.is-next {
+  background: var(--kunyit);
+  color: var(--on-kunyit);
+}
+/* Cincin progres: bagian level lulus (sawah) mengelilingi simpul. */
+.peta-ring {
+  position: relative;
+  flex: none;
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: conic-gradient(var(--sawah) var(--p, 0%), var(--awan-2) 0);
+}
+.peta-node {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--m-soft);
+  color: var(--m-text);
+  box-shadow:
+    inset 0 0 0 3px var(--m),
+    0 4px 0 var(--m-tekan);
+  transition: transform 0.08s ease;
+}
+.peta-stop:active .peta-node {
+  transform: translateY(3px);
+}
+.peta-num {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  line-height: 1;
+}
+.peta-stop.is-sekarang .peta-node {
+  background: var(--m);
+  color: var(--on-m);
+  box-shadow: 0 4px 0 var(--m-tekan);
+}
+/* Cincin putus-putus berputar di sekitar simpul "sekarang". */
+.peta-stop.is-sekarang .peta-ring::after {
+  content: '';
+  position: absolute;
+  inset: -7px;
+  border-radius: 50%;
+  border: 3px dashed var(--gonjong);
+  animation: peta-spin 9s linear infinite;
+}
+@keyframes peta-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.peta-stop.is-berikutnya .peta-node {
+  box-shadow:
+    inset 0 0 0 3px var(--m),
+    0 0 0 3px var(--kunyit),
+    0 4px 0 var(--m-tekan);
+}
+.peta-stop.is-lulus .peta-node {
+  background: var(--sawah);
+  color: var(--on-sawah);
+  box-shadow: 0 4px 0 var(--sawah-tekan);
+}
+.peta-stop.is-terkunci .peta-node {
+  background: var(--awan-2);
+  color: var(--malam-muted);
+  box-shadow:
+    inset 0 0 0 3px var(--garis-tegas),
+    0 4px 0 var(--garis);
+}
+/* Topik yang panelnya sedang terbuka: nama disorot warna mapel (tidak bertabrakan dengan cincin "sekarang"). */
+.peta-stop.is-selected .peta-name {
+  background: var(--m);
+  color: var(--on-m);
+}
+/* Momo milik anak di simpul "sekarang": "kamu di sini". */
+.peta-here {
+  position: absolute;
+  left: -26px;
+  bottom: -8px;
+  z-index: 2;
+  pointer-events: none;
+}
+/* Lencana "boleh lompat" di pojok simpul terbuka. */
+.peta-jump {
+  position: absolute;
+  right: -4px;
+  top: -2px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--langit-soft);
+  color: var(--langit-teks);
+  box-shadow: 0 0 0 2px var(--kertas);
+}
+.peta-stars {
+  display: inline-flex;
+  gap: 2px;
+  margin-top: 4px;
+}
+.peta-stars svg path {
+  fill: none;
+  stroke: var(--garis-tegas);
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+}
+.peta-stars svg.is-on path {
+  fill: var(--kunyit);
+  stroke: var(--kunyit-teks);
+}
+.peta-name {
+  max-width: 100%;
+  font-weight: 700;
+  font-size: 0.9rem;
+  line-height: 1.2;
+  display: -webkit-box;
+  /* 3 baris: nama topik panjang ("Mengelompokkan dan menyortir") tidak terpotong (QA 360 px). */
+  /* 4 baris: nama topik EMC/KMSI panjang ("Himpunan, persen, dan sarang merpati (K8)") tidak terpotong. */
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  background: var(--kertas);
+  border-radius: var(--radius-sm);
+  padding: 0 4px;
+}
+
+@media (max-width: 420px) {
+  .peta-name {
+    /* ≥ 14 px (QA): nama topik tetap terbaca di HP 360 px. */
+    font-size: 0.875rem;
+  }
+  .peta-key {
+    font-size: 0.875rem;
+    padding: 3px 8px 3px 4px;
+    gap: 4px;
+  }
+  .peta-legend {
+    gap: var(--space-2);
+  }
+  .peta-bab {
+    padding-inline: var(--space-3);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .peta-stop.is-sekarang .peta-ring::after {
+    animation: none;
+  }
+  .peta-node {
+    transition: none;
+  }
+}
+
+/* ---------- panel topik ---------- */
+.peta-panel {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--kertas);
+  color: var(--malam);
+  border: 3px solid var(--m);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-kartu);
+  scroll-margin: var(--space-4);
+}
+.peta-panel-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.peta-panel-head h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.5rem;
+  line-height: 1.15;
+  color: var(--m-text);
+}
+.peta-panel-num {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--m);
+  color: var(--on-m);
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+}
+.peta-story {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+.peta-story > :first-child {
+  flex: none;
+}
+.peta-bubble {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--m-soft);
+  border-radius: var(--radius-md);
+}
+.peta-bubble::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 22px;
+  border: 10px solid transparent;
+  border-left: 0;
+  border-right-color: var(--m-soft);
+}
+.peta-bubble p {
+  margin: 0;
+  font-size: 1.08rem;
+  line-height: 1.45;
+}
+.kid-btn.peta-listen {
+  justify-self: start;
+  min-width: 0;
+  min-height: var(--touch-anak);
+  padding: 0 20px;
+  font-size: 1.15rem;
+}
+.peta-fact {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--kunyit-soft);
+  border: 2px solid var(--kunyit);
+}
+.peta-fact-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.peta-fact-head h4 {
+  flex: 1;
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.2rem;
+  color: var(--kunyit-teks);
+}
+.peta-fact-icon path:first-child {
+  fill: var(--kunyit);
+  stroke: var(--kunyit-teks);
+  stroke-width: 2.5;
+}
+.peta-fact-icon path:last-child {
+  stroke: var(--kunyit-teks);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+.peta-fact-say {
+  flex: none;
+  width: var(--touch-anak);
+  height: var(--touch-anak);
+  border-radius: 50%;
+  border: 2px solid var(--garis-tegas);
+  background: var(--kertas);
+  color: var(--malam);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.peta-fact-say:focus-visible,
+.peta-preview:focus-visible {
+  outline: 3px solid var(--kunyit);
+  outline-offset: 3px;
+}
+.peta-fact ul {
+  margin: var(--space-2) 0 0;
+  padding-left: 1.2em;
+  display: grid;
+  gap: 4px;
+  line-height: 1.4;
+}
+.peta-preview {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--touch-anak);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--kertas-2);
+  border: 2px solid var(--garis-tegas);
+  color: var(--malam);
+  text-decoration: none;
+}
+.peta-preview > .peta-preview-text:first-child {
+  grid-column: 1 / -1;
+}
+.peta-preview .peta-photo {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+}
+.peta-preview-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.peta-preview-text small {
+  font-weight: 700;
+  color: var(--m-text);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.8rem;
+}
+.peta-preview-text strong {
+  font-size: 1.05rem;
+}
+.peta-preview-text span {
+  color: var(--malam-muted);
+  font-size: 0.95rem;
+}
+.peta-preview-go {
+  grid-column: 1 / -1;
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  color: var(--m-text);
+}
+.peta-progress {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  font-weight: 700;
+}
+.peta-progress .peta-stars {
+  margin: 0;
+}
+.kid-btn.peta-start {
+  width: 100%;
+  min-height: 72px;
+  font-size: 1.5rem;
+}
+
+/* QA responsif (HP): kepala bab bergrup (lencana EMC/KMSI + judul panjang + cincin progres + tombol dengar) dulu
+   satu baris sehingga judul terjepit ±100 px dan patah per kata. Di HP judul turun ke baris sendiri. */
+@media (max-width: 560px) {
+  .peta-bab-head.is-group {
+    flex-wrap: wrap;
+  }
+  .peta-bab-head.is-group .peta-bab-text {
+    order: 1;
+    flex: 1 1 100%;
+  }
+  .peta-bab-head.is-group .peta-bab-count {
+    margin-inline-start: auto;
+  }
+}
+.peta-tag {
+  font-size: 0.8125rem;
+}

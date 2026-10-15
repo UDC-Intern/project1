@@ -147,6 +147,8 @@ export const catalogHomeSchema = z.object({
       slug: z.string(),
       title: z.string(),
       subject: z.enum(['math', 'science']),
+      /** Kelas 1 sampai 4. */
+      grade: z.number().int().min(1).max(6),
       topicsTotal: z.number().int(),
       topicsStarted: z.number().int(),
     }),
@@ -165,6 +167,17 @@ export const bookDetailSchema = z.object({
       stage: stageSchema,
       levelsPassed: z.number().int(),
       levelsTotal: z.number().int(),
+      /** Pengantar dan hal penting topik, untuk panel peta belajar. */
+      lesson: z.string(),
+      tips: z.array(z.string()),
+      levels: z.array(
+        z.object({
+          id: z.string(),
+          number: z.number().int(),
+          title: z.string(),
+          status: levelStatusSchema,
+        }),
+      ),
     }),
   ),
 });

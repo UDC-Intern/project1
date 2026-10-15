@@ -6,6 +6,7 @@ import './styles/uk-tokens.css';
 import './styles/uk-components.css';
 import './styles/uk-adult.css';
 import './styles/play.css';
+import './styles/peta.css';
 import './styles/site.css';
 import './styles/adminCharts.css';
 import './styles/billing.css';
