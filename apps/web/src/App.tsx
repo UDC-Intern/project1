@@ -25,7 +25,6 @@ import { ParentLayout } from './parent/ParentLayout';
 import { ParentLogin } from './parent/ParentLogin';
 import { ParentRegister } from './parent/ParentRegister';
 import { AccountPage } from './parent/AccountPage';
-import { AffiliatePage } from './parent/AffiliatePage';
 import { OrderPage } from './parent/OrderPage';
 import { OrdersPage } from './parent/OrdersPage';
 import { PackagesPage } from './parent/PackagesPage';
@@ -71,7 +70,6 @@ export function App() {
           <Route path="transaksi" element={<OrdersPage />} />
           <Route path="transaksi/:id" element={<OrderPage />} />
           <Route path="akun" element={<AccountPage />} />
-          <Route path="afiliasi" element={<AffiliatePage />} />
         </Route>
       </Route>
 

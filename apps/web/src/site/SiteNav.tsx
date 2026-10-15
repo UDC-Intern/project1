@@ -39,10 +39,14 @@ export function SiteNav() {
         aria-label={APP_NAME}
         onClick={() => setOpen(false)}
       >
-        <a href={`${base}#fitur`}>{t('nav.features')}</a>
+        <a href={`${base}#tentang`}>{t('nav.about')}</a>
         <a href={`${base}#buku`}>{t('nav.books')}</a>
-        <a href={`${base}#paket`}>{t('nav.plans')}</a>
-        <a href={`${base}#peringkat`}>{t('nav.board')}</a>
+        <a href={`${base}#kurikulum`}>{t('nav.subjects')}</a>
+        <a href={`${base}#fitur-baru`}>{t('nav.news')}</a>
+        <a href={`${base}#cara`}>{t('nav.how')}</a>
+        <a href={`${base}#pintu`}>{t('nav.doors')}</a>
+        <a href={`${base}#harga`}>{t('nav.price')}</a>
+        <a href={`${base}#aman`}>{t('nav.safe')}</a>
         <Link to="/orang-tua/masuk" className="site-btn ghost">
           {t('nav.parent')}
         </Link>

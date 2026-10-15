@@ -238,9 +238,9 @@ export async function leaderboard(
   };
 }
 
-export async function leaderboardTop(): Promise<LeaderboardTop> {
+export async function leaderboardTop(mode: 'average' | 'total' = 'total'): Promise<LeaderboardTop> {
   return {
-    entries: build('total', null)
+    entries: build(mode, null)
       .slice(0, 10)
       .map((e) => strip(e, false)),
   };

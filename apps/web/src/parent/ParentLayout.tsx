@@ -33,7 +33,6 @@ export function ParentLayout() {
         { to: '/orang-tua', label: t('nav.home'), icon: 'home', end: true },
         { to: '/orang-tua/anak/baru', label: t('nav.add'), icon: 'plus' },
         { to: '/orang-tua/paket', label: t('nav.plan'), icon: 'tag' },
-        { to: '/orang-tua/afiliasi', label: t('nav.affiliate'), icon: 'wallet' },
         {
           to: '/orang-tua/transaksi',
           label: t('nav.orders'),

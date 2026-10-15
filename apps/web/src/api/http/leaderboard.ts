@@ -6,4 +6,5 @@ export const leaderboard = (bookSlug: string | null, mode: LeaderboardMode) => {
   if (bookSlug) query.set('book', bookSlug);
   return request<Leaderboard>(`/leaderboard?${query.toString()}`);
 };
-export const leaderboardTop = () => request<LeaderboardTop>('/leaderboard/top');
+export const leaderboardTop = (mode: 'average' | 'total') =>
+  request<LeaderboardTop>(`/leaderboard/top?mode=${mode}`);

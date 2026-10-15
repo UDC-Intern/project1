@@ -10,5 +10,5 @@ export const leaderboard = (bookSlug: string | null = null, mode: LeaderboardMod
   isMocked('leaderboard')
     ? mock.leaderboard(token(), bookSlug, mode)
     : http.leaderboard(bookSlug, mode);
-export const leaderboardTop = () =>
-  isMocked('leaderboard') ? mock.leaderboardTop() : http.leaderboardTop();
+export const leaderboardTop = (mode: 'average' | 'total' = 'total') =>
+  isMocked('leaderboard') ? mock.leaderboardTop(mode) : http.leaderboardTop(mode);

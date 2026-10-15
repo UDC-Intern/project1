@@ -132,6 +132,7 @@
 }
 .package-card.is-on {
   border-color: var(--gonjong);
+  grid-column: 1 / -1;
 }
 .package-card header {
   display: flex;
@@ -176,45 +177,69 @@
   font-family: var(--font-display);
 }
 
-/* Pilihan cara bayar */
-.method-option {
+/* Pilihan cara bayar di dalam kartu paket */
+.pa-checkout {
   display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
   gap: 12px;
-  padding: 12px 14px;
+}
+.pa-methods {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.pa-methods legend {
+  font-weight: 700;
+  padding: 0;
+  margin-bottom: 6px;
+}
+.pa-method {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  min-height: 48px;
+  padding: 12px;
   border: 2px solid var(--garis);
-  border-radius: var(--radius-md);
+  border-radius: 12px;
   background: var(--kertas);
   cursor: pointer;
 }
-.method-option.is-on {
+.pa-method.selected {
   border-color: var(--gonjong);
   background: var(--gonjong-soft);
 }
-.method-option:has(input:focus-visible) {
-  outline: 3px solid var(--malam);
+.pa-method:has(input:focus-visible) {
+  outline: 3px solid var(--kunyit);
   outline-offset: 2px;
 }
-.method-name,
-.method-detail {
-  display: grid;
+.pa-method input {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
 }
-.method-detail {
-  text-align: right;
+.pa-method-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
-.method-detail code {
-  font-size: 1rem;
+.pa-method-kind {
+  font-weight: 400;
+  font-size: 0.85rem;
+  color: var(--malam-muted);
+}
+.pa-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-weight: 700;
 }
-@media (max-width: 520px) {
-  .method-option {
-    grid-template-columns: auto 1fr;
-  }
-  .method-detail {
-    grid-column: 2;
-    text-align: left;
-  }
+.pa-muted {
+  margin: 0;
+  color: var(--malam-muted);
+}
+.pa-error {
+  margin: 0;
+  color: var(--bahaya);
 }
 
 /* Pesanan */

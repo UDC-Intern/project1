@@ -14,6 +14,9 @@
   "logout": "Keluar",
   "sidebar.show": "Tampilkan menu",
   "sidebar.hide": "Sembunyikan menu",
-  "theme.dark": "Mode gelap",
-  "theme.light": "Mode terang"
+  "password.show": "Tampilkan password",
+  "password.hide": "Sembunyikan password",
+  "password.showShort": "Lihat",
+  "password.hideShort": "Tutup",
+  "required": "wajib diisi"
 }

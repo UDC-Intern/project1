@@ -5,7 +5,7 @@ import { ApiError } from '../api/client';
 import { useSession } from '../auth/store';
 import { useT } from '../i18n';
 import { AuthLayout } from '../site/AuthLayout';
-import { FormField } from '../ui/FormField';
+import { FormField, PasswordField } from '../ui/FormField';
 
 export function StaffLogin() {
   const t = useT('admin');
@@ -45,9 +45,8 @@ export function StaffLogin() {
           onChange={(e) => setEmail(e.target.value)}
           autoComplete="username"
         />
-        <FormField
+        <PasswordField
           label={t('login.password')}
-          type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           autoComplete="current-password"
