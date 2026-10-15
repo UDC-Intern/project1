@@ -4,3 +4,6 @@ coverage
 pnpm-lock.yaml
 *.md
 _ref_src
+_ref_content
+_ref_docs
+_ref_packages

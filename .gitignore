@@ -6,3 +6,6 @@ coverage/
 backups/
 *.tsbuildinfo
 _ref_src/
+_ref_content/
+_ref_docs/
+_ref_packages/

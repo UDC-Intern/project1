@@ -786,7 +786,7 @@
   flex-direction: column;
   align-items: center;
 }
-.mp span {
+.mp .mp-pillar {
   display: grid;
   place-items: center;
   width: 96px;
@@ -797,17 +797,17 @@
   font-weight: 900;
 }
 /* Podium emas/perak/perunggu dari token: kunyit, garis, jeruk. */
-.mp-1 span {
+.mp-1 .mp-pillar {
   height: 130px;
   background: var(--s-sun);
   color: var(--on-kunyit);
 }
-.mp-2 span {
+.mp-2 .mp-pillar {
   height: 90px;
   background: var(--garis);
   color: var(--malam);
 }
-.mp-3 span {
+.mp-3 .mp-pillar {
   height: 66px;
   background: var(--jeruk);
   color: var(--s-on-strong);
@@ -1286,7 +1286,7 @@
   .cta-band {
     text-align: center;
   }
-  .mp span {
+  .mp .mp-pillar {
     width: 72px;
   }
 }

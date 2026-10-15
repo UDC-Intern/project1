@@ -17,9 +17,6 @@ export const SAY_COLOR: Record<Color, string> = {
   teal: 'Hijau tosca',
 };
 
-/** Hiasan Momo tambahan. Belum dipakai: bentuknya dibiarkan longgar. */
-export type MomoLook = Record<string, unknown>;
-
 export const MAX_CHILDREN_PER_PARENT = 3;
 
 /** Nama gambar sandi, sebagaimana diucapkan. */

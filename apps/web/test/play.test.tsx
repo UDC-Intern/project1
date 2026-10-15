@@ -81,13 +81,20 @@ describe('mock katalog', () => {
     expect((await errorOf(home())).status).toBe(401);
   });
 
-  it('beranda memuat 2 buku dan buku memuat 4 topik', async () => {
+  it('beranda memuat semua buku dan buku memuat topiknya', async () => {
     asAyu();
     const h = await home();
-    expect(h.books.map((b) => b.slug)).toEqual(['matematika-kelas-1', 'sains-kelas-1']);
+    expect(h.books.map((b) => b.slug)).toEqual([
+      'matematika-kelas-1',
+      'sains-kelas-1',
+      'matematika-kelas-2',
+      'matematika-kelas-3',
+      'matematika-kelas-4',
+    ]);
     expect(h.continue).toBeNull();
     const b = await book('matematika-kelas-1');
-    expect(b.topics.map((t) => t.code)).toEqual(['A', 'B', 'C', 'D']);
+    expect(b.topics.slice(0, 4).map((t) => t.code)).toEqual(['A', 'B', 'C', 'D']);
+    expect(b.topics.length).toBeGreaterThan(30);
     expect((await errorOf(book('tidak-ada'))).status).toBe(404);
   });
 

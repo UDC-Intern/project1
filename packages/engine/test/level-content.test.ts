@@ -78,14 +78,12 @@ describe('aturan teks anak dan skema konten', () => {
     expect(bookContentSchema.safeParse(book).success).toBe(true);
   });
 
-  it('menolak materi berkata terlarang dan jumlah topik keliru', () => {
+  it('menolak materi berkata terlarang dan buku tanpa topik', () => {
     const bad = {
       ...book,
       topics: [{ ...topic('A'), lesson: 'Itu salah.' }, ...book.topics.slice(1)],
     };
     expect(bookContentSchema.safeParse(bad).success).toBe(false);
-    expect(bookContentSchema.safeParse({ ...book, topics: book.topics.slice(0, 3) }).success).toBe(
-      false,
-    );
+    expect(bookContentSchema.safeParse({ ...book, topics: [] }).success).toBe(false);
   });
 });

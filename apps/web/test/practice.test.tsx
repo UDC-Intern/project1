@@ -166,7 +166,7 @@ describe('mock peringkat dan profil', () => {
   it('profil memuat tanaman, riwayat, dan warna Momo bisa diganti', async () => {
     await playRound(LEVEL1);
     const p = await profile();
-    expect(p.plants).toHaveLength(8);
+    expect(p.plants.map((x) => x.topicId)).toEqual(['matematika-kelas-1:A']);
     expect(p.history[0]).toMatchObject({ score: 100, passed: true });
   });
 });
