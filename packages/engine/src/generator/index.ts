@@ -1,12 +1,15 @@
 import { createRng } from '../rng.js';
 import { mathFamilies } from './math.js';
 import { scienceFamilies } from './science.js';
+import { skill, stimuliSupported, type SkillSpec } from './skill.js';
 import type { Band, Family, GeneratedQuestion } from './types.js';
 
 export type { GeneratedQuestion, Band } from './types.js';
 
 export const ROUND_SIZE = 10;
-const FAMILIES: Record<string, Family> = { ...mathFamilies, ...scienceFamilies };
+const FAMILIES: Record<string, Family> = { ...mathFamilies, ...scienceFamilies, skill };
+
+export { stimuliSupported, type SkillSpec };
 
 export type LevelGenerator = {
   generator: string;

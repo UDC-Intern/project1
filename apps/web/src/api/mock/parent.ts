@@ -28,7 +28,7 @@ import {
 import { findLevel } from './levels';
 
 const MAX_CHILDREN = 3;
-const ADMIN_WHATSAPP = '6281234567890';
+const ADMIN_WHATSAPP = '6287833475970';
 
 const notFound = () => new ApiError(404, { code: 'NOT_FOUND', message: 'Anak tidak ketemu.' });
 
@@ -162,19 +162,22 @@ export async function deleteChild(token: string | null, childId: string): Promis
 
 /** Laporan satu anak. Dipakai juga oleh admin (laporan yang sama). */
 export function buildReport(db: MockDb, child: MockChild): ChildReport {
+  // Hanya topik yang sudah pernah dimainkan anak ini.
   const topics = BOOKS.flatMap((b) =>
-    b.topics.map((t) => {
-      const id = topicId(b.slug, t.code);
-      const m = db.mastery[child.id]?.[id];
-      return {
-        topicId: id,
-        title: t.title,
-        bookTitle: b.title,
-        mastery: m?.score ?? 0,
-        status: masteryStatus(m?.score ?? 0),
-        stage: m?.visibleStage ?? 0,
-      };
-    }),
+    b.topics
+      .filter((t) => db.mastery[child.id]?.[topicId(b.slug, t.code)] !== undefined)
+      .map((t) => {
+        const id = topicId(b.slug, t.code);
+        const m = db.mastery[child.id]?.[id];
+        return {
+          topicId: id,
+          title: t.title,
+          bookTitle: b.title,
+          mastery: m?.score ?? 0,
+          status: masteryStatus(m?.score ?? 0),
+          stage: m?.visibleStage ?? 0,
+        };
+      }),
   );
   const rounds = finishedRounds(db, child.id).sort(
     (a, b) => (b.finishedAt ?? 0) - (a.finishedAt ?? 0),

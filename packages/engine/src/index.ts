@@ -14,3 +14,4 @@ export * from './rules/certificate.js';
 export * from './billing/billing.js';
 export * from './schemas/billing.js';
 export * from './view/index.js';
+export * from './avatar/momo.js';

@@ -121,13 +121,16 @@ export async function profile(token: string | null): Promise<ChildProfile> {
     totalScore: Object.values(db.best[childId] ?? {}).reduce((a, b) => a + b.score, 0),
     levelsPassed: (db.passedLevels[childId] ?? []).length,
     rounds: Object.values(db.rounds).filter((r) => r.childId === childId && r.result).length,
+    // Tanaman hanya untuk topik yang sudah pernah dimainkan.
     plants: BOOKS.flatMap((b) =>
-      b.topics.map((t) => ({
-        topicId: topicId(b.slug, t.code),
-        title: t.title,
-        bookSlug: b.slug,
-        stage: db.mastery[childId]?.[topicId(b.slug, t.code)]?.visibleStage ?? 0,
-      })),
+      b.topics
+        .filter((t) => db.mastery[childId]?.[topicId(b.slug, t.code)] !== undefined)
+        .map((t) => ({
+          topicId: topicId(b.slug, t.code),
+          title: t.title,
+          bookSlug: b.slug,
+          stage: db.mastery[childId]?.[topicId(b.slug, t.code)]?.visibleStage ?? 0,
+        })),
     ),
     history: Object.values(db.rounds)
       .filter((r) => r.childId === childId && r.result)

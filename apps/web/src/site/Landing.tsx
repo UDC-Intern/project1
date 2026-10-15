@@ -374,15 +374,15 @@ export function Landing() {
             <div className="mini-podium">
               <div className="mp mp-2">
                 <Momo color="blue" mood="happy" size={70} />
-                <span>2</span>
+                <span className="mp-pillar">2</span>
               </div>
               <div className="mp mp-1">
                 <Momo color="yellow" mood="happy" size={86} />
-                <span>1</span>
+                <span className="mp-pillar">1</span>
               </div>
               <div className="mp mp-3">
                 <Momo color="green" mood="happy" size={62} />
-                <span>3</span>
+                <span className="mp-pillar">3</span>
               </div>
             </div>
           </div>
