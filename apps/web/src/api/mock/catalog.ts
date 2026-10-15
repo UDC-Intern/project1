@@ -105,6 +105,9 @@ export async function profile(token: string | null): Promise<ChildProfile> {
   return {
     nickname: child.nickname,
     momoColor: child.momoColor,
+    totalScore: Object.values(db.best[childId] ?? {}).reduce((a, b) => a + b.score, 0),
+    levelsPassed: (db.passedLevels[childId] ?? []).length,
+    rounds: Object.values(db.rounds).filter((r) => r.childId === childId && r.result).length,
     plants: BOOKS.flatMap((b) =>
       b.topics.map((t) => ({
         topicId: topicId(b.slug, t.code),

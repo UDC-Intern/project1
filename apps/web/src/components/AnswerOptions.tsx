@@ -1,34 +1,40 @@
-/** Pilihan jawaban: grid 2 x 2 tombol besar (tinggi minimal 96 px). */
+/**
+ * Pilihan jawaban. Anak memilih dulu, lalu menekan tombol periksa. Setelah dinilai: tepat hijau,
+ * belum tepat kuning, dan jawaban yang benar ikut ditandai hijau. Tidak pernah merah.
+ */
 export function AnswerOptions({
   options,
-  onPick,
+  selected,
+  onSelect,
   disabled,
-  chosen,
-  correctAnswer,
+  result,
 }: {
   options: string[];
-  onPick: (value: string) => void;
+  selected: string | null;
+  onSelect: (value: string) => void;
   disabled: boolean;
-  chosen?: string | null;
-  /** Diisi hanya setelah anak menjawab belum tepat. */
-  correctAnswer?: string | null;
+  result?: { chosen: string; isCorrect: boolean; correctAnswer: string | null } | null;
 }) {
   return (
-    <div className="uk-options">
+    <div className="choices" role="group">
       {options.map((option) => {
-        let state: 'correct' | 'retry' | undefined;
-        if (chosen === option) state = correctAnswer ? 'retry' : 'correct';
-        else if (correctAnswer === option) state = 'correct';
+        let state = '';
+        if (result) {
+          if (result.chosen === option) state = result.isCorrect ? ' is-right' : ' is-wrong';
+          else if (result.correctAnswer === option) state = ' is-answer';
+        } else if (selected === option) {
+          state = ' is-selected';
+        }
         return (
           <button
             key={option}
             type="button"
-            className="uk-option"
-            data-state={state}
+            className={`choice${state}`}
+            aria-pressed={!result && selected === option}
             disabled={disabled}
-            onClick={() => onPick(option)}
+            onClick={() => onSelect(option)}
           >
-            {option}
+            <span className="choice-text">{option}</span>
           </button>
         );
       })}

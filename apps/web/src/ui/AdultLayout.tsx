@@ -25,7 +25,7 @@ export function AdultLayout({
         className={`uk-sidebar${variant === 'admin' ? ' uk-sidebar--admin' : ''}`}
         data-open={open}
       >
-        <strong style={{ padding: 'var(--uk-space-2) var(--uk-space-3)' }}>{title}</strong>
+        <strong style={{ padding: 'var(--space-2) var(--space-3)' }}>{title}</strong>
         {items.map((item) => (
           <NavLink key={item.to} to={item.to} end={item.end} onClick={() => setOpen(false)}>
             {item.label}

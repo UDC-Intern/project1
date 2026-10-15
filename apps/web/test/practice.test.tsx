@@ -181,9 +181,10 @@ describe('halaman ronde', () => {
     );
     expect(await screen.findByText('Soal 1 dari 10')).toBeInTheDocument();
     const first = (await screen.findAllByRole('button')).filter((b) =>
-      b.className.includes('uk-option'),
+      b.className.includes('choice'),
     )[0]!;
     fireEvent.click(first);
+    fireEvent.click(screen.getByRole('button', { name: 'Periksa' }));
     const status = await screen.findByRole('status');
     await waitFor(() => expect(status.textContent).toMatch(/Tepat|Belum tepat/));
     expect(status.textContent?.toLowerCase()).not.toContain('salah');

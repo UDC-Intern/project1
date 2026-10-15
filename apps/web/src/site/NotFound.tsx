@@ -5,18 +5,13 @@ import { useT } from '../i18n';
 export function NotFound() {
   const t = useT();
   return (
-    <main
-      className="uk-empty"
-      style={{ minHeight: '100vh', display: 'grid', placeItems: 'center' }}
-    >
-      <div>
-        <Momo mood="encourage" size={128} />
-        <h1>{t('notFound.title')}</h1>
-        <p style={{ fontSize: 'var(--uk-text-child)' }}>{t('notFound.hint')}</p>
-        <Link className="uk-btn uk-btn--big" to="/">
-          {t('notFound.home')}
-        </Link>
-      </div>
+    <main className="kid-screen">
+      <Momo mood="encourage" size={140} />
+      <h1 style={{ fontFamily: 'var(--font-display)', margin: 0 }}>{t('notFound.title')}</h1>
+      <p className="kid-note">{t('notFound.hint')}</p>
+      <Link className="kid-btn" to="/">
+        {t('notFound.home')}
+      </Link>
     </main>
   );
 }

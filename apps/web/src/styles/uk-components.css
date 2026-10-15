@@ -6,9 +6,9 @@
 
 body {
   margin: 0;
-  background: var(--uk-bg);
-  color: var(--uk-text);
-  font-family: var(--uk-font-body);
+  background: var(--awan);
+  color: var(--malam);
+  font-family: var(--font-body);
   font-size: var(--uk-text-adult);
   line-height: 1.5;
 }
@@ -16,9 +16,9 @@ body {
 h1,
 h2,
 h3 {
-  font-family: var(--uk-font-title);
+  font-family: var(--font-display);
   line-height: 1.2;
-  margin: 0 0 var(--uk-space-3);
+  margin: 0 0 var(--space-3);
 }
 
 :focus-visible {
@@ -31,32 +31,32 @@ h3 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--uk-space-2);
+  gap: var(--space-2);
   min-height: 44px;
-  padding: 0 var(--uk-space-4);
-  border: 2px solid var(--uk-primary);
-  border-radius: var(--uk-radius-md);
-  background: var(--uk-primary);
-  color: var(--uk-on-primary);
+  padding: 0 var(--space-4);
+  border: 2px solid var(--gonjong);
+  border-radius: var(--radius-md);
+  background: var(--gonjong);
+  color: var(--on-gonjong);
   font: inherit;
   font-weight: 700;
   cursor: pointer;
   text-decoration: none;
 }
 .uk-btn:hover {
-  background: var(--uk-primary-hover);
-  border-color: var(--uk-primary-hover);
+  background: var(--gonjong-tekan);
+  border-color: var(--gonjong-tekan);
 }
 .uk-btn--ghost {
-  background: var(--uk-surface);
-  color: var(--uk-primary);
+  background: var(--kertas);
+  color: var(--gonjong);
 }
 .uk-btn--ghost:hover {
-  background: var(--uk-primary-soft);
+  background: var(--gonjong-soft);
 }
 .uk-btn--danger {
-  background: var(--uk-danger);
-  border-color: var(--uk-danger);
+  background: var(--bahaya);
+  border-color: var(--bahaya);
 }
 .uk-btn:disabled {
   opacity: 0.55;
@@ -65,24 +65,24 @@ h3 {
 
 /* Tombol area anak: minimal 64 px. */
 .uk-btn--big {
-  min-height: var(--uk-touch);
-  min-width: var(--uk-touch);
-  padding: 0 var(--uk-space-6);
+  min-height: var(--touch-anak);
+  min-width: var(--touch-anak);
+  padding: 0 var(--space-6);
   font-size: var(--uk-text-child);
-  font-family: var(--uk-font-title);
+  font-family: var(--font-display);
 }
 
 /* ---- Kartu ---- */
 .uk-card {
-  background: var(--uk-surface);
-  border: 2px solid var(--uk-border);
-  border-radius: var(--uk-radius-lg);
-  box-shadow: var(--uk-shadow-card);
-  padding: var(--uk-space-4);
+  background: var(--kertas);
+  border: 2px solid var(--garis-tegas);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-kartu);
+  padding: var(--space-4);
 }
 .uk-card--big {
-  min-height: var(--uk-touch);
-  padding: var(--uk-space-6);
+  min-height: var(--touch-anak);
+  padding: var(--space-6);
   font-size: var(--uk-text-child);
 }
 button.uk-card,
@@ -97,7 +97,7 @@ a.uk-card {
 }
 button.uk-card:hover,
 a.uk-card:hover {
-  border-color: var(--uk-primary);
+  border-color: var(--gonjong);
 }
 .uk-card[aria-disabled='true'] {
   opacity: 0.7;
@@ -106,27 +106,27 @@ a.uk-card:hover {
 
 /* ---- Umpan balik jawaban: hijau atau kuning, tidak pernah merah ---- */
 .uk-feedback {
-  border: 3px solid var(--uk-border);
-  border-radius: var(--uk-radius-lg);
-  padding: var(--uk-space-4);
+  border: 3px solid var(--garis-tegas);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
   font-size: var(--uk-text-child);
 }
 .uk-feedback--correct {
-  border-color: var(--uk-correct);
-  background: var(--uk-correct-soft);
+  border-color: var(--sawah);
+  background: var(--sawah-soft);
 }
 .uk-feedback--retry {
-  border-color: var(--uk-retry);
-  background: var(--uk-retry-soft);
+  border-color: var(--kunyit);
+  background: var(--kunyit-soft);
 }
 
 /* ---- Lencana ---- */
 .uk-badge {
   display: inline-block;
-  padding: 2px var(--uk-space-3);
+  padding: 2px var(--space-3);
   border-radius: 999px;
-  background: var(--uk-primary-soft);
-  color: var(--uk-primary);
+  background: var(--gonjong-soft);
+  color: var(--gonjong);
   font-size: var(--uk-text-adult-sm);
   font-weight: 700;
 }
@@ -134,19 +134,19 @@ a.uk-card:hover {
 /* ---- Isian ---- */
 .uk-field {
   display: grid;
-  gap: var(--uk-space-1);
+  gap: var(--space-1);
   font-size: var(--uk-text-adult-sm);
   font-weight: 700;
 }
 .uk-field input {
   min-height: 44px;
-  padding: 0 var(--uk-space-3);
-  border: 2px solid var(--uk-border);
-  border-radius: var(--uk-radius-md);
+  padding: 0 var(--space-3);
+  border: 2px solid var(--garis-tegas);
+  border-radius: var(--radius-md);
   font: inherit;
   font-weight: 400;
-  background: var(--uk-surface);
-  color: var(--uk-text);
+  background: var(--kertas);
+  color: var(--malam);
 }
 
 /* ---- Keadaan halaman ---- */
@@ -160,102 +160,56 @@ a.uk-card:hover {
   }
 }
 .uk-skeleton {
-  background: var(--uk-border);
-  border-radius: var(--uk-radius-md);
+  background: var(--garis-tegas);
+  border-radius: var(--radius-md);
   min-height: 24px;
   animation: uk-pulse 1.4s ease-in-out infinite;
 }
 .uk-empty,
 .uk-error {
   text-align: center;
-  padding: var(--uk-space-8) var(--uk-space-4);
+  padding: var(--space-8) var(--space-4);
 }
 
-/* ---- Tata letak ---- */
-.uk-child-layout {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  font-size: var(--uk-text-child);
-}
-.uk-child-top {
-  display: flex;
-  align-items: center;
-  gap: var(--uk-space-3);
-  padding: var(--uk-space-2) var(--uk-space-4);
-  background: var(--uk-surface);
-  border-bottom: 2px solid var(--uk-border);
-}
-.uk-child-main {
-  flex: 1;
-  width: 100%;
-  max-width: var(--uk-content-max);
-  margin: 0 auto;
-  padding: var(--uk-space-6) var(--uk-space-4);
-}
-.uk-child-nav {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--uk-space-2);
-  padding: var(--uk-space-2) var(--uk-space-4);
-  background: var(--uk-surface);
-  border-top: 2px solid var(--uk-border);
-}
-.uk-child-nav a {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: var(--uk-touch);
-  border-radius: var(--uk-radius-md);
-  color: var(--uk-text);
-  font-family: var(--uk-font-title);
-  font-size: var(--uk-text-child);
-  text-decoration: none;
-}
-.uk-child-nav a[aria-current='page'] {
-  background: var(--uk-primary-soft);
-  color: var(--uk-primary);
-}
-
+/* ---- Tata letak dewasa ---- */
 .uk-adult-layout {
   display: grid;
   grid-template-columns: 240px 1fr;
   min-height: 100vh;
 }
 .uk-sidebar {
-  background: var(--uk-surface);
-  border-right: 2px solid var(--uk-border);
-  padding: var(--uk-space-4);
+  background: var(--kertas);
+  border-right: 2px solid var(--garis-tegas);
+  padding: var(--space-4);
   display: flex;
   flex-direction: column;
-  gap: var(--uk-space-2);
+  gap: var(--space-2);
 }
 .uk-sidebar--admin {
-  background: var(--uk-text);
-  color: var(--uk-bg);
-  border-right-color: var(--uk-text);
+  background: var(--malam);
+  color: var(--awan);
+  border-right-color: var(--malam);
 }
 .uk-sidebar--admin a {
-  color: var(--uk-bg);
+  color: var(--awan);
 }
 .uk-sidebar a {
-  padding: var(--uk-space-2) var(--uk-space-3);
-  border-radius: var(--uk-radius-sm);
-  color: var(--uk-text);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--malam);
   text-decoration: none;
   font-weight: 700;
 }
 .uk-sidebar a[aria-current='page'] {
-  background: var(--uk-primary-soft);
-  color: var(--uk-primary);
+  background: var(--gonjong-soft);
+  color: var(--gonjong);
 }
 .uk-sidebar--admin a[aria-current='page'] {
-  background: var(--uk-bg);
-  color: var(--uk-text);
+  background: var(--awan);
+  color: var(--malam);
 }
 .uk-adult-main {
-  padding: var(--uk-space-6);
+  padding: var(--space-6);
   max-width: 1100px;
 }
 .uk-menu-toggle {
@@ -273,7 +227,7 @@ a.uk-card:hover {
   }
   .uk-menu-toggle {
     display: inline-flex;
-    margin: var(--uk-space-3);
+    margin: var(--space-3);
   }
 }
 
@@ -316,103 +270,94 @@ a.uk-card:hover {
   }
 }
 
-/* ---- Sandi gambar ---- */
-.uk-pin-grid {
-  display: grid;
-  grid-template-columns: repeat(3, var(--uk-touch));
-  gap: var(--uk-space-3);
-}
-.uk-pin-pic {
-  width: var(--uk-touch);
-  height: var(--uk-touch);
-  display: grid;
-  place-items: center;
-  border: 2px solid var(--uk-border);
-  border-radius: var(--uk-radius-md);
-  background: var(--uk-surface);
-  cursor: pointer;
-  padding: 0;
-}
-.uk-pin-pic:hover {
-  border-color: var(--uk-primary);
-}
-.uk-pin-pic[aria-pressed='true'] {
-  border-color: var(--uk-primary);
-  background: var(--uk-primary-soft);
-}
-.uk-pin-slots {
-  display: flex;
-  gap: var(--uk-space-2);
-  margin-bottom: var(--uk-space-3);
-}
-.uk-pin-slot {
-  width: 44px;
-  height: 44px;
-  border: 2px dashed var(--uk-border);
-  border-radius: var(--uk-radius-sm);
-  display: grid;
-  place-items: center;
-}
-
 /* ---- Hitung objek ---- */
 .uk-count {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--uk-space-3);
+  gap: var(--space-3);
   align-items: center;
 }
 .uk-count-group {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--uk-space-1);
-  padding: var(--uk-space-2);
-  border: 2px dashed var(--uk-border);
-  border-radius: var(--uk-radius-md);
+  gap: var(--space-1);
+  padding: var(--space-2);
+  border: 2px dashed var(--garis-tegas);
+  border-radius: var(--radius-md);
 }
 
 /* ---- Katalog gaya ---- */
 .uk-swatch {
   width: 100%;
   height: 56px;
-  border-radius: var(--uk-radius-sm);
-  border: 2px solid var(--uk-border);
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--garis-tegas);
 }
 .uk-grid {
   display: grid;
-  gap: var(--uk-space-4);
+  gap: var(--space-4);
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
 }
 .uk-stack {
   display: grid;
-  gap: var(--uk-space-4);
+  gap: var(--space-4);
 }
 .uk-row {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--uk-space-3);
+  gap: var(--space-3);
   align-items: center;
 }
 
 /* ---- Kartu level ---- */
 .uk-level {
   display: grid;
-  gap: var(--uk-space-2);
+  gap: var(--space-2);
 }
 .uk-level[data-status='passed'] {
-  border-color: var(--uk-correct);
-  background: var(--uk-correct-soft);
+  border-color: var(--sawah);
+  background: var(--sawah-soft);
 }
 .uk-level[data-status='open'] {
-  border-color: var(--uk-primary);
+  border-color: var(--gonjong);
 }
 .uk-level[data-status='locked'],
 .uk-level[data-status='premium'],
 .uk-level[data-status='soon'] {
-  background: var(--uk-bg);
+  background: var(--awan);
 }
 .uk-level-note {
   display: flex;
   align-items: center;
-  gap: var(--uk-space-2);
+  gap: var(--space-2);
   margin: 0;
+}
+
+/* ---- Landing ---- */
+.uk-landing {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-4);
+  display: grid;
+  gap: var(--space-8);
+}
+.uk-landing-hero {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: center;
+  text-align: center;
+}
+
+/* ---- Dialog ---- */
+.uk-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgb(35 48 43 / 0.5);
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  z-index: 20;
+}
+.uk-dialog {
+  width: min(440px, 100%);
 }

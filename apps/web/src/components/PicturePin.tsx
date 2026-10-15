@@ -14,7 +14,7 @@ const NAMES: Record<PinPicture, string> = {
   leaf: 'Daun',
 };
 
-export function PinPictureIcon({ name, size = 40 }: { name: PinPicture; size?: number }) {
+export function PinPictureIcon({ name, size = 56 }: { name: PinPicture; size?: number }) {
   const common = {
     width: size,
     height: size,
@@ -109,31 +109,35 @@ export function PinPictureIcon({ name, size = 40 }: { name: PinPicture; size?: n
   }
 }
 
-/** Grid 3 x 3 untuk memilih 3 gambar berurutan. Terkendali dari luar lewat value dan onChange. */
+/** Sandi gambar: 3 kotak jawaban dan grid 3 x 3 untuk memilih gambar berurutan. */
 export function PicturePin({
   value,
   onChange,
+  shake = false,
 }: {
   value: PinPicture[];
   onChange: (next: PinPicture[]) => void;
+  shake?: boolean;
 }) {
   const t = useT('play');
   return (
-    <div>
-      <p>{t('pin.title')}</p>
-      <div className="uk-pin-slots" aria-live="polite">
+    <div className="kid-row" style={{ flexDirection: 'column', alignItems: 'center' }}>
+      <p className="kid-say" style={{ margin: 0 }}>
+        {t('pin.title')}
+      </p>
+      <div className={`pin-slots${shake ? ' shake' : ''}`} aria-live="polite">
         {Array.from({ length: PIN_LENGTH }, (_, i) => (
-          <span key={i} className="uk-pin-slot">
-            {value[i] ? <PinPictureIcon name={value[i]} size={32} /> : null}
+          <span key={i} className="pin-slot">
+            {value[i] ? <PinPictureIcon name={value[i]} size={52} /> : null}
           </span>
         ))}
       </div>
-      <div className="uk-pin-grid">
+      <div className="pin-grid">
         {PIN_PICTURES.map((name) => (
           <button
             key={name}
             type="button"
-            className="uk-pin-pic"
+            className="pin-key"
             aria-label={NAMES[name]}
             aria-pressed={value.includes(name)}
             onClick={() => value.length < PIN_LENGTH && onChange([...value, name])}
@@ -142,11 +146,9 @@ export function PicturePin({
           </button>
         ))}
       </div>
-      <div style={{ marginTop: 'var(--uk-space-3)' }}>
-        <BigButton variant="ghost" onClick={() => onChange([])}>
-          {t('pin.clear')}
-        </BigButton>
-      </div>
+      <BigButton variant="ghost" onClick={() => onChange([])}>
+        {t('pin.clear')}
+      </BigButton>
     </div>
   );
 }

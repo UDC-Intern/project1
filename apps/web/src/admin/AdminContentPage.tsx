@@ -52,7 +52,7 @@ function TopicEditor({ topic, onSaved }: { topic: Topic; onSaved: () => void }) 
           onChange={(e) => setLesson(e.target.value)}
           rows={4}
           maxLength={600}
-          style={{ font: 'inherit', padding: 'var(--uk-space-2)' }}
+          style={{ font: 'inherit', padding: 'var(--space-2)' }}
         />
       </label>
       <div className="uk-table-wrap">
@@ -97,7 +97,7 @@ function TopicEditor({ topic, onSaved }: { topic: Topic; onSaved: () => void }) 
         </table>
       </div>
       {error && (
-        <p role="alert" style={{ color: 'var(--uk-danger)', margin: 0 }}>
+        <p role="alert" style={{ color: 'var(--bahaya)', margin: 0 }}>
           {error}
         </p>
       )}
