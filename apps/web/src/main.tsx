@@ -5,6 +5,7 @@ import '@fontsource/baloo-2/700.css';
 import './styles/uk-tokens.css';
 import './styles/uk-components.css';
 import './styles/uk-round.css';
+import './styles/uk-adult.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';

@@ -4,6 +4,15 @@ import { ChildLayout } from './components/ChildLayout';
 import { BookPage } from './play/BookPage';
 import { ChildLogin } from './play/ChildLogin';
 import { LeaderboardPage } from './play/LeaderboardPage';
+import { AddChild } from './parent/AddChild';
+import { ChildPin } from './parent/ChildPin';
+import { ChildReportPage } from './parent/ChildReportPage';
+import { EditChild } from './parent/EditChild';
+import { ParentHome } from './parent/ParentHome';
+import { ParentLayout } from './parent/ParentLayout';
+import { ParentLogin } from './parent/ParentLogin';
+import { ParentRegister } from './parent/ParentRegister';
+import { PlanPage } from './parent/PlanPage';
 import { PlayHome } from './play/PlayHome';
 import { ProfilePage } from './play/ProfilePage';
 import { ResultPage } from './play/ResultPage';
@@ -29,6 +38,19 @@ export function App() {
           <Route path="hasil/:roundId" element={<ResultPage />} />
           <Route path="peringkat" element={<LeaderboardPage />} />
           <Route path="profil" element={<ProfilePage />} />
+        </Route>
+      </Route>
+
+      <Route path="/orang-tua/daftar" element={<ParentRegister />} />
+      <Route path="/orang-tua/masuk" element={<ParentLogin />} />
+      <Route path="/orang-tua" element={<RequireRole role="parent" />}>
+        <Route element={<ParentLayout />}>
+          <Route index element={<ParentHome />} />
+          <Route path="anak/baru" element={<AddChild />} />
+          <Route path="anak/:id" element={<ChildReportPage />} />
+          <Route path="anak/:id/ubah" element={<EditChild />} />
+          <Route path="anak/:id/sandi" element={<ChildPin />} />
+          <Route path="paket" element={<PlanPage />} />
         </Route>
       </Route>
 

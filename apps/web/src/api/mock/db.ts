@@ -14,7 +14,13 @@ export const BOOKS: BookContent[] = [matematika, sains]
   .map((raw) => bookContentSchema.parse(raw))
   .sort((a, b) => a.sort - b.sort);
 
-export type MockParent = { id: string; name: string; email: string; familyCode: string };
+export type MockParent = {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  familyCode: string;
+};
 export type MockChild = {
   id: string;
   parentId: string;
@@ -64,7 +70,15 @@ const KEY = 'udakids-mock-v1';
 
 function seed(): MockDb {
   return {
-    parents: [{ id: 'p-demo', name: 'Bu Ani', email: 'ani@contoh.id', familyCode: 'BELAJR' }],
+    parents: [
+      {
+        id: 'p-demo',
+        name: 'Bu Ani',
+        email: 'ani@contoh.id',
+        password: 'rahasia123',
+        familyCode: 'BELAJR',
+      },
+    ],
     children: [
       {
         id: 'c-ayu',
@@ -105,6 +119,7 @@ export function readDb(): MockDb {
     if (raw) {
       const parsed = JSON.parse(raw) as Partial<MockDb>;
       memory = { ...seed(), ...parsed } as MockDb;
+      for (const p of memory.parents) p.password ??= 'rahasia123';
       return memory;
     }
   } catch {
@@ -130,3 +145,7 @@ export function resetMockDb(): void {
 
 export const topicId = (bookSlug: string, code: string) => `${bookSlug}:${code}`;
 export const levelId = (bookSlug: string, code: string, n: number) => `${bookSlug}:${code}:${n}`;
+
+/** Id unik untuk data tiruan (tanpa crypto.randomUUID yang butuh konteks aman). */
+export const newId = (prefix: string) =>
+  `${prefix}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;

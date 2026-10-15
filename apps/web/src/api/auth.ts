@@ -1,5 +1,6 @@
-import type { ChildLoginBody } from '@udakids/engine';
+import type { ChildLoginBody, LoginBody, RegisterParentBody } from '@udakids/engine';
 import * as http from './http/auth';
+import * as accounts from './mock/accounts';
 import * as mock from './mock/auth';
 import { isMocked } from './mode';
 
@@ -9,3 +10,9 @@ export const familyProfiles = (code: string) =>
 
 export const childLogin = (body: ChildLoginBody) =>
   isMocked('auth') ? mock.childLogin(body) : http.childLogin(body);
+
+export const parentRegister = (body: RegisterParentBody) =>
+  isMocked('auth') ? accounts.parentRegister(body) : http.parentRegister(body);
+
+export const parentLogin = (body: LoginBody) =>
+  isMocked('auth') ? accounts.parentLogin(body) : http.parentLogin(body);

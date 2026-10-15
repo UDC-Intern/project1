@@ -1,0 +1,59 @@
+/* Area orang tua dan admin: lebih rapat, seperti alat kerja. */
+.uk-stats {
+  display: grid;
+  gap: var(--uk-space-3);
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+.uk-stat {
+  background: var(--uk-surface);
+  border: 2px solid var(--uk-border);
+  border-radius: var(--uk-radius-md);
+  padding: var(--uk-space-3) var(--uk-space-4);
+}
+.uk-stat strong {
+  display: block;
+  font-family: var(--uk-font-title);
+  font-size: 1.75rem;
+}
+.uk-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--uk-surface);
+}
+.uk-table th,
+.uk-table td {
+  text-align: left;
+  padding: var(--uk-space-2) var(--uk-space-3);
+  border-bottom: 1px solid var(--uk-border);
+  font-size: var(--uk-text-adult-sm);
+}
+.uk-table th {
+  background: var(--uk-primary-soft);
+}
+.uk-table-wrap {
+  overflow-x: auto;
+}
+.uk-check {
+  display: flex;
+  gap: var(--uk-space-2);
+  align-items: flex-start;
+}
+.uk-check input {
+  width: 22px;
+  height: 22px;
+  margin-top: 2px;
+}
+.uk-code {
+  font-family: var(--uk-font-title);
+  font-size: 2rem;
+  letter-spacing: 0.2em;
+}
+.uk-auth {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: var(--uk-space-8) var(--uk-space-4);
+}
+.uk-note-ok {
+  color: var(--uk-correct);
+  font-weight: 700;
+}

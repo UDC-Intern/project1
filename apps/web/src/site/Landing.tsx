@@ -15,6 +15,14 @@ export function Landing() {
         <Momo mood="happy" size={128} />
         <h1>{APP_NAME}</h1>
         <p style={{ fontSize: 'var(--uk-text-child)' }}>{t('landing.tagline')}</p>
+        <div className="uk-row" style={{ justifyContent: 'center', margin: 'var(--uk-space-4) 0' }}>
+          <Link className="uk-btn uk-btn--big" to="/play/masuk">
+            {t('landing.child')}
+          </Link>
+          <Link className="uk-btn uk-btn--big uk-btn--ghost" to="/orang-tua/masuk">
+            {t('landing.parent')}
+          </Link>
+        </div>
         {import.meta.env.DEV && (
           <Link className="uk-btn uk-btn--ghost" to="/gaya">
             {t('style.title')}
