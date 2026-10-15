@@ -15,6 +15,7 @@ import {
 import { ListenButton } from '../components/ListenButton';
 import { Momo } from '../components/Momo';
 import { PicturePin } from '../components/PicturePin';
+import { resetMockDb } from '../api/mock/db';
 import { Plant } from '../components/Plant';
 import { useT } from '../i18n';
 import { EmptyState, ErrorState, LoadingState } from '../ui/states';
@@ -150,6 +151,24 @@ export function StylePage() {
         <div className="uk-row">
           <BookIcon /> <TrophyIcon /> <UserIcon /> <SpeakerIcon /> <MenuIcon /> <CheckIcon />{' '}
           <LockIcon />
+        </div>
+      </Section>
+
+      <Section title="Data tiruan">
+        <div className="uk-row">
+          <button
+            type="button"
+            className="uk-btn uk-btn--ghost"
+            onClick={() => {
+              resetMockDb();
+              window.location.reload();
+            }}
+          >
+            Setel ulang data tiruan
+          </button>
+          <span>
+            Keluarga demo: kode BELAJR, anak Ayu (apel, bintang, ikan) dan Bima (bola, awan, daun).
+          </span>
         </div>
       </Section>
 

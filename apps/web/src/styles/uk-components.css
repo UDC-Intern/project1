@@ -392,3 +392,27 @@ a.uk-card:hover {
   gap: var(--uk-space-3);
   align-items: center;
 }
+
+/* ---- Kartu level ---- */
+.uk-level {
+  display: grid;
+  gap: var(--uk-space-2);
+}
+.uk-level[data-status='passed'] {
+  border-color: var(--uk-correct);
+  background: var(--uk-correct-soft);
+}
+.uk-level[data-status='open'] {
+  border-color: var(--uk-primary);
+}
+.uk-level[data-status='locked'],
+.uk-level[data-status='premium'],
+.uk-level[data-status='soon'] {
+  background: var(--uk-bg);
+}
+.uk-level-note {
+  display: flex;
+  align-items: center;
+  gap: var(--uk-space-2);
+  margin: 0;
+}

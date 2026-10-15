@@ -25,6 +25,17 @@ const sentences = (text: string) =>
 const hasForbidden = (text: string) =>
   FORBIDDEN_WORDS.some((w) => new RegExp(`(^|[^\\p{L}])${w}([^\\p{L}]|$)`, 'iu').test(text));
 
+/** Aturan teks anak untuk satu teks bebas (materi, kalimat soal): panjang kalimat dan kata terlarang. */
+export function checkChildText(text: string): string[] {
+  const issues: string[] = [];
+  for (const s of sentences(text.trim())) {
+    if (countWords(s) > MAX_WORDS_PER_SENTENCE)
+      issues.push(`Ada kalimat lebih dari ${MAX_WORDS_PER_SENTENCE} kata: "${s}"`);
+  }
+  if (hasForbidden(text)) issues.push('Memakai kata "salah" atau "gagal". Pakai "belum tepat".');
+  return issues;
+}
+
 /** Aturan teks anak untuk konten anak. Murni: tanpa jaringan atau database. */
 export function validateQuestion(q: QuestionDraft): ValidationResult {
   const issues: string[] = [];

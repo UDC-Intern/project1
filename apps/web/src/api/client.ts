@@ -1,4 +1,5 @@
 import { apiErrorSchema, type ApiErrorBody } from '@udakids/engine';
+import { useSession } from '../auth/store';
 import { API_URL } from '../config/app';
 
 export class ApiError extends Error {
@@ -18,7 +19,8 @@ type Options = { method?: string; body?: unknown; token?: string | null };
 export async function request<T>(path: string, options: Options = {}): Promise<T> {
   const headers: Record<string, string> = {};
   if (options.body !== undefined) headers['Content-Type'] = 'application/json';
-  if (options.token) headers.Authorization = `Bearer ${options.token}`;
+  const token = options.token ?? useSession.getState().session?.token;
+  if (token) headers.Authorization = `Bearer ${token}`;
 
   let res: Response;
   try {
