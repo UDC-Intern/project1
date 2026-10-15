@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
@@ -34,6 +34,7 @@ import { startRound } from '../src/api/practice';
 import { useSession } from '../src/auth/store';
 import { OrderPage } from '../src/parent/OrderPage';
 import { PackagesPage } from '../src/parent/PackagesPage';
+import { PasswordField } from '../src/ui/FormField';
 
 const asParent = () =>
   useSession.setState({
@@ -230,5 +231,46 @@ describe('halaman paket dan pesanan', () => {
     await waitFor(() => expect(screen.getByText('5435032076')).toBeInTheDocument());
     expect(screen.getByText('Ridho Dwi Syahputra')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Salin jumlah' })).toBeInTheDocument();
+  });
+  it('Beli melebarkan kartu di tempat dan menggantinya dengan pilihan cara bayar', async () => {
+    render(
+      <MemoryRouter initialEntries={['/orang-tua/paket']}>
+        <Routes>
+          <Route path="/orang-tua/paket" element={<PackagesPage />} />
+          <Route path="/orang-tua/transaksi/:id" element={<p>Detail pesanan</p>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    fireEvent.click(await screen.findByRole('button', { name: 'Beli Tumbuh Bersama' }));
+    const card = screen.getByRole('article', { name: 'Tumbuh Bersama' });
+    expect(card).toHaveClass('is-on');
+    expect(within(card).queryByRole('button', { name: /^Beli/ })).toBeNull();
+    expect(within(card).getAllByRole('radio')).toHaveLength(5);
+    expect(screen.getByText('wajib diisi')).toBeInTheDocument();
+    expect(screen.getByRole('article', { name: 'Tunas' })).not.toHaveClass('is-on');
+
+    fireEvent.click(within(card).getByRole('button', { name: 'Buat pesanan' }));
+    expect(await within(card).findByRole('alert')).toHaveTextContent('Pilih salah satu cara bayar');
+
+    fireEvent.click(within(card).getByRole('button', { name: 'Batal' }));
+    expect(screen.getByRole('button', { name: 'Beli Tumbuh Bersama' })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Beli Tunas' }));
+    fireEvent.click(screen.getByLabelText(/BCA/));
+    fireEvent.click(screen.getByRole('button', { name: 'Buat pesanan' }));
+    expect(await screen.findByText('Detail pesanan')).toBeInTheDocument();
+  });
+});
+
+describe('PasswordField', () => {
+  it('tombol Lihat dan Tutup mengganti jenis isian', () => {
+    render(<PasswordField label="Kata sandi" defaultValue="rahasia123" />);
+    const input = screen.getByLabelText('Kata sandi');
+    expect(input).toHaveAttribute('type', 'password');
+    fireEvent.click(screen.getByRole('button', { name: 'Tampilkan password' }));
+    expect(input).toHaveAttribute('type', 'text');
+    expect(screen.getByRole('button', { name: 'Sembunyikan password' })).toHaveTextContent('Tutup');
+    fireEvent.click(screen.getByRole('button', { name: 'Sembunyikan password' }));
+    expect(input).toHaveAttribute('type', 'password');
   });
 });

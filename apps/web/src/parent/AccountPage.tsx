@@ -14,7 +14,7 @@ import { useT } from '../i18n';
 import { isMocked } from '../api/mode';
 import { formatDate } from '../lib/format';
 import { PageHeader } from '../ui/AppShell';
-import { FormField } from '../ui/FormField';
+import { FormField, PasswordField } from '../ui/FormField';
 import { ErrorState, LoadingState } from '../ui/states';
 
 type Notice = { kind: 'ok' | 'error'; text: string } | null;
@@ -44,7 +44,6 @@ export function AccountPage() {
   const [current, setCurrent] = useState('');
   const [next, setNext] = useState('');
   const [repeat, setRepeat] = useState('');
-  const [reveal, setReveal] = useState(false);
   const [pwNotice, setPwNotice] = useState<Notice>(null);
 
   const [newEmail, setNewEmail] = useState('');
@@ -123,7 +122,6 @@ export function AccountPage() {
   }
 
   const initial = (name ?? data.name).trim().charAt(0).toUpperCase() || '?';
-  const pwType = reveal ? 'text' : 'password';
 
   return (
     <div className="uk-stack">
@@ -152,17 +150,15 @@ export function AccountPage() {
             {t('account.password.title')}
           </h2>
           <form className="uk-stack" onSubmit={(e) => void savePassword(e)}>
-            <FormField
+            <PasswordField
               label={t('account.password.current')}
-              type={pwType}
               value={current}
               onChange={(e) => setCurrent(e.target.value)}
               autoComplete="current-password"
               required
             />
-            <FormField
+            <PasswordField
               label={t('account.password.new')}
-              type={pwType}
               value={next}
               onChange={(e) => setNext(e.target.value)}
               autoComplete="new-password"
@@ -170,22 +166,13 @@ export function AccountPage() {
               required
             />
             <small>{t('account.password.hint')}</small>
-            <FormField
+            <PasswordField
               label={t('account.password.repeat')}
-              type={pwType}
               value={repeat}
               onChange={(e) => setRepeat(e.target.value)}
               autoComplete="new-password"
               required
             />
-            <label className="uk-check">
-              <input
-                type="checkbox"
-                checked={reveal}
-                onChange={(e) => setReveal(e.target.checked)}
-              />
-              <span>{reveal ? t('account.hide') : t('account.show')}</span>
-            </label>
             <Notice notice={pwNotice} />
             <button type="submit" className="uk-btn">
               {t('account.password.save')}
@@ -228,9 +215,8 @@ export function AccountPage() {
               autoComplete="email"
               required
             />
-            <FormField
+            <PasswordField
               label={t('account.password.current')}
-              type="password"
               value={emailPw}
               onChange={(e) => setEmailPw(e.target.value)}
               autoComplete="current-password"

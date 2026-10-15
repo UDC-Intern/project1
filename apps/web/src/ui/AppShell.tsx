@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useT } from '../i18n';
-import { applyTheme, storedTheme, type Theme } from './theme';
 
 /** Ikon menu: garis tebal 2 px di kotak 24, dibuat sendiri. */
 const PATHS = {
@@ -24,8 +23,6 @@ const PATHS = {
   wallet: 'M4 7h14a2 2 0 012 2v9a2 2 0 01-2 2H4zM4 7V6a2 2 0 012-2h10M16 13h4',
   receipt: 'M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6',
   badge: 'M12 12a4 4 0 100-8 4 4 0 000 8zM5 21c0-4 3-6 7-6s7 2 7 6z',
-  moon: 'M20 14.5A8.5 8.5 0 019.5 4 8.5 8.5 0 1020 14.5z',
-  sun: 'M12 16a4 4 0 100-8 4 4 0 000 8zM12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5',
   chat: 'M4 5h16v11H9l-5 4z',
 } as const;
 export type ShellIcon = keyof typeof PATHS;
@@ -100,7 +97,6 @@ export function AppShell({
   const { pathname } = useLocation();
   const [collapsed, setCollapsed] = useState(() => readCollapsed(storeKey));
   const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState<Theme>(storedTheme);
   const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => setOpen(false), [pathname]);
@@ -111,7 +107,6 @@ export function AppShell({
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, [open]);
-  useEffect(() => applyTheme(mode, false), [mode]);
 
   const toggle = () => {
     const next = !collapsed;
@@ -121,11 +116,6 @@ export function AppShell({
     } catch {
       /* diabaikan */
     }
-  };
-  const toggleTheme = () => {
-    const next: Theme = mode === 'dark' ? 'light' : 'dark';
-    setMode(next);
-    applyTheme(next);
   };
 
   return (
@@ -199,16 +189,6 @@ export function AppShell({
             <strong>{user.name}</strong>
           </span>
           <div className="shell-tools">
-            <button
-              type="button"
-              className="shell-iconbtn"
-              aria-pressed={mode === 'dark'}
-              aria-label={mode === 'dark' ? t('theme.light') : t('theme.dark')}
-              title={mode === 'dark' ? t('theme.light') : t('theme.dark')}
-              onClick={toggleTheme}
-            >
-              <ShellIconSvg name={mode === 'dark' ? 'sun' : 'moon'} />
-            </button>
             <button
               type="button"
               className="shell-iconbtn"

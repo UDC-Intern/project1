@@ -102,3 +102,56 @@
 .shell-play {
   border: 2px dashed var(--sh-line);
 }
+
+/* Isian password dengan tombol Lihat/Tutup di dalam kolom */
+.ui-input-wrap {
+  position: relative;
+  display: flex;
+}
+.ui-input-wrap input {
+  flex: 1;
+  min-width: 0;
+  padding-right: 104px;
+}
+.ui-eye {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  translate: 0 -50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--gonjong-teks);
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.9em;
+  cursor: pointer;
+}
+.ui-eye:hover {
+  background: var(--awan);
+}
+.ui-eye:focus-visible {
+  outline: 3px solid var(--kunyit);
+}
+@media (max-width: 380px) {
+  .ui-eye-text {
+    display: none;
+  }
+  .ui-input-wrap input {
+    padding-right: 48px;
+  }
+}
+.ui-req {
+  color: var(--bahaya);
+  font-weight: 800;
+}
+.ui-req-note {
+  margin: 0 0 12px;
+  font-size: 0.9em;
+  color: var(--malam-muted);
+}

@@ -229,7 +229,7 @@ describe('halaman', () => {
       </MemoryRouter>,
     );
     expect(await screen.findByText('Rara')).toBeInTheDocument();
-    const board = screen.getByRole('region', { name: '10 besar' });
+    const board = screen.getByRole('region', { name: '10 Besar' });
     expect(within(board).getAllByRole('listitem')).toHaveLength(10);
     for (const link of screen.getAllByRole('link', { name: 'Masuk anak' }))
       expect(link).toHaveAttribute('href', '/play/masuk');

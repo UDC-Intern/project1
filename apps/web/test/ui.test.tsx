@@ -42,7 +42,15 @@ describe('navigasi dan kerangka', () => {
       </MemoryRouter>,
     );
     const nav = screen.getByRole('navigation', { name: 'UdaKids' });
-    for (const label of ['Fitur', 'Buku', 'Paket', 'Peringkat'])
+    for (const label of [
+      'Tentang',
+      'Buku',
+      'Mata pelajaran',
+      'Fitur baru',
+      'Cara main',
+      'Harga',
+      'Aman',
+    ])
       expect(within(nav).getByRole('link', { name: label })).toBeInTheDocument();
     for (const link of screen.getAllByRole('link', { name: 'Area orang tua' }))
       expect(link).toHaveAttribute('href', '/orang-tua/masuk');

@@ -5,7 +5,7 @@ import { ApiError } from '../api/client';
 import { useSession } from '../auth/store';
 import { useT } from '../i18n';
 import { AuthLayout } from '../site/AuthLayout';
-import { FormField } from '../ui/FormField';
+import { FormField, PasswordField } from '../ui/FormField';
 
 export function ParentLogin() {
   const t = useT('parent');
@@ -47,9 +47,8 @@ export function ParentLogin() {
           autoComplete="email"
           required
         />
-        <FormField
+        <PasswordField
           label={t('register.password')}
-          type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           autoComplete="current-password"
