@@ -3,8 +3,8 @@ import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { parentLogin } from '../api/auth';
 import { ApiError } from '../api/client';
 import { useSession } from '../auth/store';
-import { Momo } from '../components/Momo';
 import { useT } from '../i18n';
+import { AuthLayout } from '../site/AuthLayout';
 import { FormField } from '../ui/FormField';
 
 export function ParentLogin() {
@@ -36,8 +36,7 @@ export function ParentLogin() {
   }
 
   return (
-    <main className="uk-auth">
-      <Momo size={72} />
+    <AuthLayout variant="parent" title={t('login.title')} text={t('auth.text')}>
       <h1>{t('login.title')}</h1>
       <form className="uk-stack" onSubmit={(e) => void onSubmit(e)} noValidate>
         <FormField
@@ -68,6 +67,6 @@ export function ParentLogin() {
           {t('login.noAccount')} <Link to="/orang-tua/daftar">{t('register.submit')}</Link>
         </p>
       </form>
-    </main>
+    </AuthLayout>
   );
 }

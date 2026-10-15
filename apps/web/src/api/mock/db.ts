@@ -1,18 +1,13 @@
 import {
-  bookContentSchema,
   type BookContent,
   type MasteryState,
   type MomoColor,
   type Pin,
   type Stage,
 } from '@udakids/engine';
-import matematika from '../../../../../content/matematika-kelas-1/book.json';
-import sains from '../../../../../content/sains-kelas-1/book.json';
+import { BASE_BOOKS } from '../../content/books';
 
-/** Buku dari `content/`: sumber yang sama dengan seed database di tahap berikutnya. */
-const BASE: BookContent[] = [matematika, sains]
-  .map((raw) => bookContentSchema.parse(raw))
-  .sort((a, b) => a.sort - b.sort);
+const BASE: BookContent[] = BASE_BOOKS;
 
 /** Buku yang sedang berlaku: BASE ditambah suntingan admin. Array yang sama dipakai semua modul mock. */
 export const BOOKS: BookContent[] = structuredClone(BASE);

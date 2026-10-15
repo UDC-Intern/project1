@@ -107,5 +107,14 @@
   "profile.stat.points": "Total skor",
   "profile.stat.passed": "Level lulus",
   "profile.stat.rounds": "Ronde selesai",
-  "profile.board": "Lihat peringkat"
+  "profile.board": "Lihat peringkat",
+  "login.say": "Masukkan kode keluargamu, ya.",
+  "login.home": "Kembali ke Beranda",
+  "example.open": "Coba contoh soal",
+  "example.label": "Contoh soal, tidak dinilai",
+  "example.again": "Coba lagi",
+  "example.check": "Periksa",
+  "topic.tips": "Hal penting",
+  "home.grades": "Pilih jenjang",
+  "home.grade1": "Kelas 1"
 }

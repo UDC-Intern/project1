@@ -112,6 +112,12 @@ export function PlayHome() {
         </section>
       )}
 
+      <nav className="grade-chips" aria-label={t('home.grades')}>
+        <span className="chip is-on" aria-current="true">
+          {t('home.grade1')}
+        </span>
+      </nav>
+
       {h.data.books.length > 1 && (
         <nav className="cat-chips" aria-label={t('home.books')}>
           {h.data.books.map((b) => (

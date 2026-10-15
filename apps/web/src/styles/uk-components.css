@@ -171,66 +171,6 @@ a.uk-card:hover {
   padding: var(--space-8) var(--space-4);
 }
 
-/* ---- Tata letak dewasa ---- */
-.uk-adult-layout {
-  display: grid;
-  grid-template-columns: 240px 1fr;
-  min-height: 100vh;
-}
-.uk-sidebar {
-  background: var(--kertas);
-  border-right: 2px solid var(--garis-tegas);
-  padding: var(--space-4);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-.uk-sidebar--admin {
-  background: var(--malam);
-  color: var(--awan);
-  border-right-color: var(--malam);
-}
-.uk-sidebar--admin a {
-  color: var(--awan);
-}
-.uk-sidebar a {
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-sm);
-  color: var(--malam);
-  text-decoration: none;
-  font-weight: 700;
-}
-.uk-sidebar a[aria-current='page'] {
-  background: var(--gonjong-soft);
-  color: var(--gonjong);
-}
-.uk-sidebar--admin a[aria-current='page'] {
-  background: var(--awan);
-  color: var(--malam);
-}
-.uk-adult-main {
-  padding: var(--space-6);
-  max-width: 1100px;
-}
-.uk-menu-toggle {
-  display: none;
-}
-@media (max-width: 720px) {
-  .uk-adult-layout {
-    grid-template-columns: 1fr;
-  }
-  .uk-sidebar {
-    display: none;
-  }
-  .uk-sidebar[data-open='true'] {
-    display: flex;
-  }
-  .uk-menu-toggle {
-    display: inline-flex;
-    margin: var(--space-3);
-  }
-}
-
 /* ---- Momo dan tanaman ---- */
 .uk-momo {
   display: inline-block;

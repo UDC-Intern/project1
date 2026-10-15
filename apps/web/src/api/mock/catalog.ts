@@ -1,4 +1,6 @@
 import {
+  generateRound,
+  hasGenerator,
   levelStatus,
   type BookDetail,
   type CatalogHome,
@@ -72,7 +74,19 @@ export async function topic(token: string | null, id: string): Promise<TopicDeta
 
   const passed = readDb().passedLevels[childId] ?? [];
   const premium = hasPremium(childId);
+  const first = t.levels[0];
+  const example =
+    first && hasGenerator(first.generator)
+      ? generateRound(
+          {
+            generator: first.generator!,
+            generatorParams: first.generatorParams as Record<string, unknown> | undefined,
+          },
+          7,
+        )[0]!
+      : null;
   return {
+    example,
     topic: {
       id,
       code: t.code,

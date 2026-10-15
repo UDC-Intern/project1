@@ -4,6 +4,7 @@ import { staffLogin } from '../api/auth';
 import { ApiError } from '../api/client';
 import { useSession } from '../auth/store';
 import { useT } from '../i18n';
+import { AuthLayout } from '../site/AuthLayout';
 import { FormField } from '../ui/FormField';
 
 export function StaffLogin() {
@@ -34,7 +35,7 @@ export function StaffLogin() {
   }
 
   return (
-    <main className="uk-auth">
+    <AuthLayout variant="staff" title={t('login.title')} text={t('auth.text')}>
       <h1>{t('login.title')}</h1>
       <form className="uk-stack" onSubmit={(e) => void onSubmit(e)} noValidate>
         <FormField
@@ -60,6 +61,6 @@ export function StaffLogin() {
           {t('login.submit')}
         </button>
       </form>
-    </main>
+    </AuthLayout>
   );
 }

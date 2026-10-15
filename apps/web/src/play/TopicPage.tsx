@@ -1,8 +1,11 @@
 import type { TopicDetail } from '@udakids/engine';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { topic } from '../api/catalog';
-import { CheckIcon, LockIcon, PlayIcon } from '../components/Icons';
+import { AnswerOptions } from '../components/AnswerOptions';
+import { CountObjects } from '../components/CountObjects';
+import { CheckIcon, LockIcon, PlayIcon, StarIcon } from '../components/Icons';
+import { Keypad } from '../components/Keypad';
 import { ListenButton } from '../components/ListenButton';
 import { Momo } from '../components/Momo';
 import { PageHead } from '../components/PageHead';
@@ -11,6 +14,7 @@ import { useT } from '../i18n';
 import { ErrorState, LoadingState } from '../ui/states';
 
 type Level = TopicDetail['levels'][number];
+type Example = NonNullable<TopicDetail['example']>;
 
 function LevelCard({ level, isNext }: { level: Level; isNext: boolean }) {
   const t = useT('play');
@@ -23,7 +27,12 @@ function LevelCard({ level, isNext }: { level: Level; isNext: boolean }) {
         {level.status === 'passed' && (
           <>
             <CheckIcon size={20} /> {t('level.passed')}
-            {level.bestScore !== null && ` · ${level.bestScore}`}
+            {level.bestScore !== null && (
+              <>
+                {' · '}
+                <StarIcon size={18} /> {level.bestScore}
+              </>
+            )}
           </>
         )}
         {level.status === 'locked' && (
@@ -65,6 +74,88 @@ function LevelCard({ level, isNext }: { level: Level; isNext: boolean }) {
   );
 }
 
+/** Contoh soal dari level 1: bisa dicoba, jawaban dan petunjuk tampil, tidak dinilai dan tidak disimpan. */
+function ExampleBox({ example }: { example: Example }) {
+  const t = useT('play');
+  const [shown, setShown] = useState(false);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [value, setValue] = useState('');
+  const [result, setResult] = useState<{ chosen: string; isCorrect: boolean } | null>(null);
+
+  if (!shown) {
+    return (
+      <button type="button" className="kid-btn secondary" onClick={() => setShown(true)}>
+        {t('example.open')}
+      </button>
+    );
+  }
+
+  const isNumber = example.type === 'number';
+  const evaluate = (chosen: string) =>
+    setResult({ chosen, isCorrect: chosen.trim() === example.answer });
+  const reset = () => {
+    setResult(null);
+    setSelected(null);
+    setValue('');
+  };
+
+  return (
+    <div className="example">
+      <p className="example-label">{t('example.label')}</p>
+      <div className="item-prompt">
+        <p>{example.prompt}</p>
+      </div>
+      {example.visual && <CountObjects visual={example.visual} />}
+      {isNumber ? (
+        <>
+          <Keypad value={value} onChange={setValue} disabled={result !== null} />
+          {!result && (
+            <button
+              type="button"
+              className="kid-btn"
+              disabled={value === ''}
+              onClick={() => evaluate(value)}
+            >
+              {t('example.check')}
+            </button>
+          )}
+        </>
+      ) : (
+        <AnswerOptions
+          options={example.options ?? []}
+          selected={selected}
+          onSelect={(v) => {
+            setSelected(v);
+            evaluate(v);
+          }}
+          disabled={result !== null}
+          result={
+            result
+              ? {
+                  chosen: result.chosen,
+                  isCorrect: result.isCorrect,
+                  correctAnswer: result.isCorrect ? null : example.answer,
+                }
+              : null
+          }
+        />
+      )}
+      {result && (
+        <div
+          className={`example-feedback ${result.isCorrect ? 'is-right' : 'is-wrong'}`}
+          role="status"
+        >
+          <strong>{result.isCorrect ? t('feedback.correct') : t('feedback.retry')}</strong>
+          <span>{example.explanation}</span>
+          <button type="button" className="kid-link" onClick={reset}>
+            {t('example.again')}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function TopicPage() {
   const t = useT('play');
   const { id = '' } = useParams();
@@ -76,6 +167,9 @@ export function TopicPage() {
 
   const open = data.levels.find((l) => l.status === 'open');
   const bookSlug = data.topic.bookSlug;
+  const sentences = data.topic.lesson.split(/(?<=[.!?])\s+/).filter(Boolean);
+  const intro = sentences[0] ?? data.topic.lesson;
+  const tips = sentences.slice(1);
 
   return (
     <main
@@ -90,7 +184,18 @@ export function TopicPage() {
           <h2 id="lesson-title">{t('topic.lesson')}</h2>
           <ListenButton />
         </div>
-        <p className="lesson-intro">{data.topic.lesson}</p>
+        <p className="lesson-intro">{intro}</p>
+        {tips.length > 0 && (
+          <ul className="lesson-tips" aria-label={t('topic.tips')}>
+            {tips.map((tip) => (
+              <li key={tip}>
+                <StarIcon size={22} />
+                <span>{tip}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+        {data.example && <ExampleBox example={data.example} />}
       </section>
 
       <section aria-labelledby="levels-title">
