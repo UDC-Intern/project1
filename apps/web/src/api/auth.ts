@@ -2,6 +2,7 @@ import type { ChildLoginBody, LoginBody, RegisterParentBody } from '@udakids/eng
 import * as http from './http/auth';
 import * as accounts from './mock/accounts';
 import * as mock from './mock/auth';
+import * as staff from './mock/staff';
 import { isMocked } from './mode';
 
 // Halaman memanggil fungsi di sini. Mock atau http dipilih lewat VITE_MOCK_MODULES (tanda tangan sama).
@@ -16,3 +17,6 @@ export const parentRegister = (body: RegisterParentBody) =>
 
 export const parentLogin = (body: LoginBody) =>
   isMocked('auth') ? accounts.parentLogin(body) : http.parentLogin(body);
+
+export const staffLogin = (body: LoginBody) =>
+  isMocked('auth') ? staff.staffLogin(body) : http.staffLogin(body);

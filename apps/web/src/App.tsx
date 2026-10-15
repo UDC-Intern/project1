@@ -1,7 +1,16 @@
 import { Route, Routes } from 'react-router-dom';
+import { AdminAssistantPage } from './admin/AdminAssistantPage';
+import { AdminContentPage } from './admin/AdminContentPage';
+import { AdminLayout } from './admin/AdminLayout';
+import { AdminOverviewPage } from './admin/AdminOverviewPage';
+import { AdminPreviewPage } from './admin/AdminPreviewPage';
+import { AdminReportsPage } from './admin/AdminReportsPage';
+import { AdminUsersPage } from './admin/AdminUsersPage';
 import { RequireRole } from './auth/RequireRole';
 import { ChildLayout } from './components/ChildLayout';
 import { BookPage } from './play/BookPage';
+import { CertificatePage } from './play/CertificatePage';
+import { StaffLogin } from './staff/StaffLogin';
 import { ChildLogin } from './play/ChildLogin';
 import { LeaderboardPage } from './play/LeaderboardPage';
 import { AddChild } from './parent/AddChild';
@@ -38,6 +47,7 @@ export function App() {
           <Route path="hasil/:roundId" element={<ResultPage />} />
           <Route path="peringkat" element={<LeaderboardPage />} />
           <Route path="profil" element={<ProfilePage />} />
+          <Route path="sertifikat/:bookSlug" element={<CertificatePage />} />
         </Route>
       </Route>
 
@@ -51,6 +61,18 @@ export function App() {
           <Route path="anak/:id/ubah" element={<EditChild />} />
           <Route path="anak/:id/sandi" element={<ChildPin />} />
           <Route path="paket" element={<PlanPage />} />
+        </Route>
+      </Route>
+
+      <Route path="/masuk/staf" element={<StaffLogin />} />
+      <Route path="/admin" element={<RequireRole role="admin" />}>
+        <Route element={<AdminLayout />}>
+          <Route index element={<AdminOverviewPage />} />
+          <Route path="konten" element={<AdminContentPage />} />
+          <Route path="soal" element={<AdminPreviewPage />} />
+          <Route path="asisten" element={<AdminAssistantPage />} />
+          <Route path="pengguna" element={<AdminUsersPage />} />
+          <Route path="laporan" element={<AdminReportsPage />} />
         </Route>
       </Route>
 

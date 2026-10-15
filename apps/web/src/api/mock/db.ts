@@ -10,9 +10,41 @@ import matematika from '../../../../../content/matematika-kelas-1/book.json';
 import sains from '../../../../../content/sains-kelas-1/book.json';
 
 /** Buku dari `content/`: sumber yang sama dengan seed database di tahap berikutnya. */
-export const BOOKS: BookContent[] = [matematika, sains]
+const BASE: BookContent[] = [matematika, sains]
   .map((raw) => bookContentSchema.parse(raw))
   .sort((a, b) => a.sort - b.sort);
+
+/** Buku yang sedang berlaku: BASE ditambah suntingan admin. Array yang sama dipakai semua modul mock. */
+export const BOOKS: BookContent[] = structuredClone(BASE);
+
+export type ContentEdits = {
+  topics: Record<string, { title?: string; lesson?: string }>;
+  levels: Record<string, { title?: string; isFree?: boolean }>;
+};
+
+export function applyEdits(edits: ContentEdits): void {
+  BOOKS.splice(0, BOOKS.length, ...structuredClone(BASE));
+  for (const book of BOOKS) {
+    for (const topic of book.topics) {
+      const te = edits.topics[`${book.slug}:${topic.code}`];
+      if (te) Object.assign(topic, te);
+      for (const level of topic.levels) {
+        const le = edits.levels[`${book.slug}:${topic.code}:${level.number}`];
+        if (le) Object.assign(level, le);
+      }
+    }
+  }
+}
+
+export type MockAdmin = { id: string; name: string; email: string; password: string };
+export type MockAiJob = {
+  id: string;
+  adminName: string;
+  topicTitle: string;
+  purpose: 'lesson' | 'curriculum';
+  model: string;
+  createdAt: string;
+};
 
 export type MockParent = {
   id: string;
@@ -52,6 +84,9 @@ export type MockRound = {
 
 export type MockDb = {
   parents: MockParent[];
+  admins: MockAdmin[];
+  contentEdits: ContentEdits;
+  aiJobs: MockAiJob[];
   children: MockChild[];
   /** id level yang pernah lulus, per anak */
   passedLevels: Record<string, string[]>;
@@ -101,6 +136,11 @@ function seed(): MockDb {
         lockedUntil: null,
       },
     ],
+    admins: [
+      { id: 'a-demo', name: 'Admin UdaKids', email: 'admin@udakids.local', password: 'admin12345' },
+    ],
+    contentEdits: { topics: {}, levels: {} },
+    aiJobs: [],
     passedLevels: {},
     mastery: {},
     best: {},
@@ -120,6 +160,7 @@ export function readDb(): MockDb {
       const parsed = JSON.parse(raw) as Partial<MockDb>;
       memory = { ...seed(), ...parsed } as MockDb;
       for (const p of memory.parents) p.password ??= 'rahasia123';
+      applyEdits(memory.contentEdits);
       return memory;
     }
   } catch {
@@ -140,6 +181,7 @@ export function writeDb(db: MockDb = readDb()): void {
 
 export function resetMockDb(): void {
   memory = seed();
+  applyEdits(memory.contentEdits);
   writeDb(memory);
 }
 

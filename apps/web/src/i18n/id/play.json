@@ -79,5 +79,11 @@
   "color.yellow": "Kuning",
   "color.orange": "Oranye",
   "color.pink": "Merah muda",
-  "color.teal": "Hijau tosca"
+  "color.teal": "Hijau tosca",
+  "cert.title": "Sertifikat Juara Digital",
+  "cert.text": "Telah menyelesaikan seluruh level di buku {book}.",
+  "cert.print": "Cetak atau simpan PDF",
+  "cert.back": "Kembali ke profil",
+  "cert.link": "Lihat sertifikat {book}",
+  "profile.certs": "Sertifikat"
 }
