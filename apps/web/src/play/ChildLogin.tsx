@@ -97,7 +97,7 @@ export function ChildLogin() {
           size={140}
         />
         <div className="kid-say">
-          <ListenButton />
+          <ListenButton text={say} />
           <h1 style={{ margin: 0, fontSize: 'inherit' }}>{say}</h1>
         </div>
 

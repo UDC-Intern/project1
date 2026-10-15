@@ -53,7 +53,7 @@ export function ResultPage() {
 
         <div className="result-actions">
           {data.passed && next && next.status === 'open' && (
-            <Link className="kid-btn big-play" to={`/play/main/${next.id}`}>
+            <Link className="kid-btn big-play" to={`/play/latihan/${next.id}`}>
               <PlayIcon size={26} />
               {t('result.next')}
             </Link>
@@ -62,7 +62,7 @@ export function ResultPage() {
             <p className="kid-note">{t('premium.ask')}</p>
           )}
           {!data.passed && (
-            <Link className="kid-btn big-play" to={`/play/main/${data.levelId}`}>
+            <Link className="kid-btn big-play" to={`/play/latihan/${data.levelId}`}>
               <PlayIcon size={26} />
               {t('result.retry')}
             </Link>

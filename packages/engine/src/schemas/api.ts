@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { momoLookSchema } from '../avatar/momo.js';
 import {
   emailSchema,
   levelStatusSchema,
@@ -219,6 +220,7 @@ export type TopicDetail = z.infer<typeof topicDetailSchema>;
 export const childOwnProfileSchema = z.object({
   nickname: z.string(),
   momoColor: momoColorSchema,
+  momoLook: momoLookSchema.nullable().optional(),
   totalScore: z.number().int(),
   levelsPassed: z.number().int(),
   rounds: z.number().int(),
@@ -237,7 +239,10 @@ export const childOwnProfileSchema = z.object({
 });
 export type ChildProfile = z.infer<typeof childOwnProfileSchema>;
 
-export const setMomoBodySchema = z.object({ momoColor: momoColorSchema });
+export const setMomoBodySchema = z.object({
+  momoColor: momoColorSchema,
+  momoLook: momoLookSchema.nullable().optional(),
+});
 
 // ---- Papan peringkat ----
 
