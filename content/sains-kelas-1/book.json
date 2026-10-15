@@ -1,0 +1,63 @@
+{
+  "slug": "sains-kelas-1",
+  "grade": "kelas-1",
+  "subject": "science",
+  "title": "Sains Kelas 1",
+  "sort": 2,
+  "topics": [
+    {
+      "code": "A",
+      "title": "Tubuhku tumbuh",
+      "sort": 1,
+      "lesson": "Tubuhmu punya banyak bagian. Kepala, tangan, dan kaki adalah bagian tubuh. Kamu tumbuh makin besar setiap hari. Makan sehat dan tidur cukup membantu tubuh tumbuh.",
+      "levels": [
+        { "number": 1, "title": "Nama bagian tubuh", "isFree": true, "generator": "body-parts" },
+        {
+          "number": 2,
+          "title": "Panca indra dan fungsinya",
+          "isFree": false,
+          "generator": "senses"
+        },
+        {
+          "number": 3,
+          "title": "Merawat tubuh dan gigi",
+          "isFree": false,
+          "generator": "body-care"
+        }
+      ]
+    },
+    {
+      "code": "B",
+      "title": "Hewan",
+      "sort": 2,
+      "lesson": "Hewan hidup di tempat yang berbeda. Ikan hidup di air. Burung terbang di udara. Kucing tinggal bersama manusia di rumah.",
+      "levels": [
+        { "number": 1, "title": "Tempat hidup hewan", "isFree": true, "generator": null },
+        { "number": 2, "title": "Makanan hewan", "isFree": false, "generator": null },
+        { "number": 3, "title": "Ciri-ciri hewan", "isFree": false, "generator": null }
+      ]
+    },
+    {
+      "code": "C",
+      "title": "Tumbuhan",
+      "sort": 3,
+      "lesson": "Tumbuhan punya akar, batang, daun, dan bunga. Akar menyerap air dari tanah. Daun membantu tumbuhan membuat makanan.",
+      "levels": [
+        { "number": 1, "title": "Bagian tumbuhan", "isFree": true, "generator": null },
+        { "number": 2, "title": "Kebutuhan tumbuhan", "isFree": false, "generator": null },
+        { "number": 3, "title": "Tumbuh dari biji", "isFree": false, "generator": null }
+      ]
+    },
+    {
+      "code": "D",
+      "title": "Cuaca",
+      "sort": 4,
+      "lesson": "Cuaca bisa cerah, berawan, atau hujan. Saat hujan kita memakai jas hujan. Saat panas kita memakai topi.",
+      "levels": [
+        { "number": 1, "title": "Jenis cuaca", "isFree": true, "generator": null },
+        { "number": 2, "title": "Pakaian sesuai cuaca", "isFree": false, "generator": null },
+        { "number": 3, "title": "Tanda akan hujan", "isFree": false, "generator": null }
+      ]
+    }
+  ]
+}

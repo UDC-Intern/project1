@@ -1,0 +1,81 @@
+{
+  "slug": "matematika-kelas-1",
+  "grade": "kelas-1",
+  "subject": "math",
+  "title": "Matematika Kelas 1",
+  "sort": 1,
+  "topics": [
+    {
+      "code": "A",
+      "title": "Bilangan sampai 100",
+      "sort": 1,
+      "lesson": "Bilangan dipakai untuk menghitung benda. Hitung satu per satu mulai dari satu. Setelah sembilan ada sepuluh. Setelah sepuluh ada sebelas.",
+      "levels": [
+        {
+          "number": 1,
+          "title": "Membilang 1 sampai 20",
+          "isFree": true,
+          "generator": "count",
+          "generatorParams": { "max": 20 }
+        },
+        {
+          "number": 2,
+          "title": "Urutan dan loncat 2, 5, 10",
+          "isFree": false,
+          "generator": "skip-count",
+          "generatorParams": { "steps": [2, 5, 10] }
+        },
+        {
+          "number": 3,
+          "title": "Sebelum, sesudah, di antara",
+          "isFree": false,
+          "generator": "neighbors",
+          "generatorParams": { "max": 100 }
+        }
+      ]
+    },
+    {
+      "code": "B",
+      "title": "Puluhan dan satuan",
+      "sort": 2,
+      "lesson": "Sepuluh satuan sama dengan satu puluhan. Angka empat belas artinya satu puluhan dan empat satuan. Puluhan ada di kiri, satuan ada di kanan.",
+      "levels": [
+        { "number": 1, "title": "Belasan itu 10 dan sekian", "isFree": true, "generator": null },
+        {
+          "number": 2,
+          "title": "Puluhan dan satuan sampai 50",
+          "isFree": false,
+          "generator": null
+        },
+        {
+          "number": 3,
+          "title": "Membandingkan bilangan sampai 100",
+          "isFree": false,
+          "generator": null
+        }
+      ]
+    },
+    {
+      "code": "C",
+      "title": "Penjumlahan sampai 20",
+      "sort": 3,
+      "lesson": "Menjumlah artinya menggabungkan. Ada 3 bola merah dan 2 bola biru. Kalau digabung, hitung semuanya. Jadi 3 + 2 = 5.",
+      "levels": [
+        { "number": 1, "title": "Jumlah sampai 10 bergambar", "isFree": true, "generator": null },
+        { "number": 2, "title": "Jumlah sampai 20", "isFree": false, "generator": null },
+        { "number": 3, "title": "Soal cerita penjumlahan", "isFree": false, "generator": null }
+      ]
+    },
+    {
+      "code": "D",
+      "title": "Pengurangan sampai 20",
+      "sort": 4,
+      "lesson": "Mengurang artinya mengambil sebagian. Ada 5 apel, lalu Ayu makan 2 apel. Sisanya tinggal 3 apel. Jadi 5 - 2 = 3.",
+      "levels": [
+        { "number": 1, "title": "Kurang sampai 10 bergambar", "isFree": true, "generator": null },
+        { "number": 2, "title": "Kurang sampai 20", "isFree": false, "generator": null },
+        { "number": 3, "title": "Soal cerita pengurangan", "isFree": false, "generator": null }
+      ]
+    }
+  ]
+}
