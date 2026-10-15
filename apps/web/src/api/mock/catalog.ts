@@ -1,7 +1,15 @@
-import { levelStatus, type BookDetail, type CatalogHome, type TopicDetail } from '@udakids/engine';
+import {
+  levelStatus,
+  type BookDetail,
+  type CatalogHome,
+  type ChildProfile,
+  type MomoColor,
+  type TopicDetail,
+} from '@udakids/engine';
 import { ApiError } from '../client';
 import { childIdFromToken } from './auth';
-import { BOOKS, levelId, readDb, topicId } from './db';
+import { BOOKS, levelId, readDb, topicId, writeDb } from './db';
+import { findLevel } from './levels';
 
 const notFound = () => new ApiError(404, { code: 'NOT_FOUND', message: 'Tidak ketemu.' });
 
@@ -47,7 +55,7 @@ export async function book(token: string | null, slug: string): Promise<BookDeta
       id: topicId(found.slug, t.code),
       code: t.code,
       title: t.title,
-      stage: db.stages[childId]?.[topicId(found.slug, t.code)] ?? 0,
+      stage: db.mastery[childId]?.[topicId(found.slug, t.code)]?.visibleStage ?? 0,
       levelsPassed: t.levels.filter((l) => passed.includes(levelId(found.slug, t.code, l.number)))
         .length,
       levelsTotal: t.levels.length,
@@ -85,7 +93,44 @@ export async function topic(token: string | null, id: string): Promise<TopicDeta
         hasPremium: premium,
         hasGenerator: l.generator !== null,
       }),
-      bestScore: null,
+      bestScore: readDb().best[childId]?.[levelId(found.slug, t.code, l.number)]?.score ?? null,
     })),
   };
+}
+
+export async function profile(token: string | null): Promise<ChildProfile> {
+  const childId = childIdFromToken(token);
+  const db = readDb();
+  const child = db.children.find((c) => c.id === childId)!;
+  return {
+    nickname: child.nickname,
+    momoColor: child.momoColor,
+    plants: BOOKS.flatMap((b) =>
+      b.topics.map((t) => ({
+        topicId: topicId(b.slug, t.code),
+        title: t.title,
+        bookSlug: b.slug,
+        stage: db.mastery[childId]?.[topicId(b.slug, t.code)]?.visibleStage ?? 0,
+      })),
+    ),
+    history: Object.values(db.rounds)
+      .filter((r) => r.childId === childId && r.result)
+      .sort((a, b) => (b.finishedAt ?? 0) - (a.finishedAt ?? 0))
+      .slice(0, 10)
+      .map((r) => ({
+        roundId: r.id,
+        levelTitle: findLevel(r.levelId)?.level.title ?? r.levelId,
+        score: r.result!.score,
+        passed: r.result!.passed,
+        finishedAt: new Date(r.finishedAt!).toISOString(),
+      })),
+  };
+}
+
+export async function setMomo(token: string | null, momoColor: MomoColor) {
+  const childId = childIdFromToken(token);
+  const db = readDb();
+  db.children.find((c) => c.id === childId)!.momoColor = momoColor;
+  writeDb(db);
+  return { momoColor };
 }

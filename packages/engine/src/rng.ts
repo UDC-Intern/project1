@@ -36,3 +36,30 @@ export function shuffle<T>(items: readonly T[], seed: number | string): T[] {
   }
   return out;
 }
+
+export type Rng = {
+  /** Bilangan bulat di [min, max], inklusif. */
+  int(min: number, max: number): number;
+  pick<T>(items: readonly T[]): T;
+  shuffle<T>(items: readonly T[]): T[];
+  chance(p: number): boolean;
+};
+
+/** Pembungkus kecil di atas mulberry32 untuk generator soal. */
+export function createRng(seed: number): Rng {
+  const next = mulberry32(seed);
+  const int = (min: number, max: number) => min + Math.floor(next() * (max - min + 1));
+  return {
+    int,
+    pick: (items) => items[int(0, items.length - 1)]!,
+    shuffle: (items) => {
+      const out = [...items];
+      for (let i = out.length - 1; i > 0; i--) {
+        const j = int(0, i);
+        [out[i], out[j]] = [out[j]!, out[i]!];
+      }
+      return out;
+    },
+    chance: (p) => next() < p,
+  };
+}

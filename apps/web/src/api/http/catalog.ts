@@ -1,4 +1,10 @@
-import type { BookDetail, CatalogHome, TopicDetail } from '@udakids/engine';
+import type {
+  BookDetail,
+  CatalogHome,
+  ChildProfile,
+  MomoColor,
+  TopicDetail,
+} from '@udakids/engine';
 import { request } from '../client';
 
 export const home = () => request<CatalogHome>('/catalog/home');
@@ -6,3 +12,7 @@ export const book = (slug: string) =>
   request<BookDetail>(`/catalog/books/${encodeURIComponent(slug)}`);
 export const topic = (id: string) =>
   request<TopicDetail>(`/catalog/topics/${encodeURIComponent(id)}`);
+
+export const profile = () => request<ChildProfile>('/child/profile');
+export const setMomo = (momoColor: MomoColor) =>
+  request<{ momoColor: MomoColor }>('/child/momo', { method: 'PUT', body: { momoColor } });
