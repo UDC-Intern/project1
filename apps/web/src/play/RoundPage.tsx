@@ -132,7 +132,7 @@ export function RoundPage() {
 
       <div className="item">
         <div className="item-prompt">
-          <ListenButton />
+          <ListenButton text={question.prompt} />
           <p>{question.prompt}</p>
         </div>
         {question.visual && <CountObjects visual={question.visual} />}

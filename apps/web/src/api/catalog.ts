@@ -1,4 +1,4 @@
-import type { MomoColor } from '@udakids/engine';
+import type { MomoColor, MomoLook } from '@udakids/engine';
 import { useSession } from '../auth/store';
 import * as http from './http/catalog';
 import * as mock from './mock/catalog';
@@ -13,5 +13,7 @@ export const topic = (id: string) =>
   isMocked('catalog') ? mock.topic(token(), id) : http.topic(id);
 
 export const profile = () => (isMocked('catalog') ? mock.profile(token()) : http.profile());
-export const setMomo = (momoColor: MomoColor) =>
-  isMocked('catalog') ? mock.setMomo(token(), momoColor) : http.setMomo(momoColor);
+export const setMomo = (momoColor: MomoColor, momoLook?: MomoLook | null) =>
+  isMocked('catalog')
+    ? mock.setMomo(token(), momoColor, momoLook)
+    : http.setMomo(momoColor, momoLook);

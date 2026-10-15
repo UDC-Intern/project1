@@ -59,7 +59,7 @@ function LevelCard({ level, isNext }: { level: Level; isNext: boolean }) {
   if (level.status === 'open' || level.status === 'passed') {
     return (
       <Link
-        to={`/play/main/${level.id}`}
+        to={`/play/latihan/${level.id}`}
         className={`level-card is-${level.status}${isNext ? ' is-next' : ''}`}
         aria-label={label}
       >
@@ -182,7 +182,7 @@ export function TopicPage() {
         <div className="lesson-head">
           <Momo mood="happy" size={72} />
           <h2 id="lesson-title">{t('topic.lesson')}</h2>
-          <ListenButton />
+          <ListenButton text={[intro, ...tips].join('. ')} />
         </div>
         <p className="lesson-intro">{intro}</p>
         {tips.length > 0 && (
@@ -214,7 +214,7 @@ export function TopicPage() {
 
       <div className="topic-cta">
         {open ? (
-          <Link className="kid-btn big-play" to={`/play/main/${open.id}`}>
+          <Link className="kid-btn big-play" to={`/play/latihan/${open.id}`}>
             <PlayIcon size={26} />
             {t('topic.start', { n: open.number })}
           </Link>

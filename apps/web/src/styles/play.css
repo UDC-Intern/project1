@@ -804,6 +804,7 @@ a.level-card:active {
   text-align: center;
 }
 .item-prompt p {
+  white-space: pre-line;
   margin: 0;
 }
 .choices {

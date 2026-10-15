@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useParams } from 'react-router-dom';
 import { AdminAssistantPage } from './admin/AdminAssistantPage';
 import { AdminContentPage } from './admin/AdminContentPage';
 import { AdminLayout } from './admin/AdminLayout';
@@ -27,6 +27,12 @@ import { Landing } from './site/Landing';
 import { NotFound } from './site/NotFound';
 import { StylePage } from './site/StylePage';
 
+/** Alamat lama /play/main/:levelId diarahkan ke /play/latihan/:levelId. */
+function LegacyRoundRedirect() {
+  const { levelId = '' } = useParams();
+  return <Navigate to={`/play/latihan/${levelId}`} replace />;
+}
+
 export function App() {
   return (
     <>
@@ -40,7 +46,8 @@ export function App() {
             <Route index element={<PlayHome />} />
             <Route path="buku/:slug" element={<BookPage />} />
             <Route path="topik/:id" element={<TopicPage />} />
-            <Route path="main/:levelId" element={<RoundPage />} />
+            <Route path="latihan/:levelId" element={<RoundPage />} />
+            <Route path="main/:levelId" element={<LegacyRoundRedirect />} />
             <Route path="hasil/:roundId" element={<ResultPage />} />
             <Route path="peringkat" element={<LeaderboardPage />} />
             <Route path="profil" element={<ProfilePage />} />

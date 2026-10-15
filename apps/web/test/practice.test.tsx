@@ -174,9 +174,9 @@ describe('mock peringkat dan profil', () => {
 describe('halaman ronde', () => {
   it('menampilkan soal, menerima jawaban, dan memberi umpan balik tanpa kata salah', async () => {
     render(
-      <MemoryRouter initialEntries={[`/play/main/${LEVEL1}`]}>
+      <MemoryRouter initialEntries={[`/play/latihan/${LEVEL1}`]}>
         <Routes>
-          <Route path="/play/main/:levelId" element={<RoundPage />} />
+          <Route path="/play/latihan/:levelId" element={<RoundPage />} />
         </Routes>
       </MemoryRouter>,
     );
