@@ -203,7 +203,7 @@ export const topicDetailSchema = z.object({
 });
 export type TopicDetail = z.infer<typeof topicDetailSchema>;
 
-export const childProfileSchema = z.object({
+export const childOwnProfileSchema = z.object({
   nickname: z.string(),
   momoColor: momoColorSchema,
   totalScore: z.number().int(),
@@ -222,7 +222,7 @@ export const childProfileSchema = z.object({
     }),
   ),
 });
-export type ChildProfile = z.infer<typeof childProfileSchema>;
+export type ChildProfile = z.infer<typeof childOwnProfileSchema>;
 
 export const setMomoBodySchema = z.object({ momoColor: momoColorSchema });
 

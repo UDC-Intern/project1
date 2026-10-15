@@ -1,73 +1,74 @@
-import { formatRupiah, type BillingPackage, type PaymentMethod } from '@udakids/engine';
-import { useCallback, useState, type FormEvent, type ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { createOrder, methods, packages } from '../api/billing';
-import { ApiError } from '../api/client';
-import { plan } from '../api/parent';
-import { useAsync } from '../hooks/useAsync';
-import { useT } from '../i18n';
-import { formatDate } from '../lib/format';
-import { PageHeader } from '../ui/AppShell';
-import { ErrorState, LoadingState } from '../ui/states';
+import { useState, type FormEvent, type ReactNode } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { formatRupiah } from '@udakids/engine';
+import { errorMessage } from '../api/client';
+import { useApiCall, useFetch } from '../auth/useApi';
+import { t } from '../i18n';
+import { Badge, Button, Card, Empty, Notice, PageHeader, RequiredNote, Spinner } from '../ui/ui';
+import type { BillingOverview, BillingPackage, Order, PaymentMethod } from './billingTypes';
+import { durationText, formatDay, scopeText, useBookTitles } from './billingUi';
 
 function MethodChooser({
   pkg,
-  list,
+  methods,
+  expiryHours,
   onCancel,
 }: {
   pkg: BillingPackage;
-  list: PaymentMethod[];
+  methods: PaymentMethod[];
+  expiryHours: number;
   onCancel: () => void;
 }) {
-  const t = useT('parent');
-  const common = useT('common');
+  const call = useApiCall('parent');
   const navigate = useNavigate();
-  const [methodId, setMethodId] = useState<string | null>(null);
+  const [methodId, setMethodId] = useState<string>();
   const [missing, setMissing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    setError(null);
+    setError(undefined);
     if (!methodId) {
       setMissing(true);
       return;
     }
     setBusy(true);
     try {
-      const order = await createOrder({ packageId: pkg.id, methodId });
-      navigate(`/orang-tua/transaksi/${order.id}`);
+      const order = await call<Order>('/parent/orders', { body: { packageId: pkg.id, methodId } });
+      navigate(`/orang-tua/transaksi/${order.id}`, { state: { created: true } });
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t('error.generic'));
+      setError(errorMessage(err));
       setBusy(false);
     }
   }
 
+  if (methods.length === 0) {
+    return (
+      <div className="pa-checkout">
+        <Notice tone="info">{t('parent.billing.noMethods')}</Notice>
+        <Button variant="ghost" onClick={onCancel}>
+          {t('parent.cancel')}
+        </Button>
+      </div>
+    );
+  }
+
   return (
-    <form className="pa-checkout" onSubmit={(e) => void submit(e)} noValidate>
-      {error && (
-        <p className="banner banner-warn" role="alert">
-          {error}
-        </p>
-      )}
-      <p className="ui-req-note">
-        <span className="ui-req" aria-hidden="true">
-          *
-        </span>{' '}
-        {common('required')}
-      </p>
+    <form className="pa-checkout" onSubmit={submit} noValidate>
+      {error && <Notice tone="error">{error}</Notice>}
+      <RequiredNote />
       <fieldset
         className="pa-methods"
         aria-describedby={missing ? `pa-method-error-${pkg.id}` : undefined}
       >
         <legend>
-          {t('plan.method.title')}{' '}
-          <span className="ui-req" aria-hidden="true">
+          {t('parent.billing.chooseMethod')}{' '}
+          <span className="ui-req" aria-hidden>
             *
           </span>
         </legend>
-        {list.map((m) => (
+        {methods.map((m) => (
           <label key={m.id} className={methodId === m.id ? 'pa-method selected' : 'pa-method'}>
             <input
               type="radio"
@@ -82,137 +83,185 @@ function MethodChooser({
             />
             <span className="pa-method-body">
               <strong>
-                {m.name}{' '}
-                <span className="pa-method-kind">
-                  {m.kind === 'bank' ? t('plan.method.bank') : t('plan.method.ewallet')}
+                {m.provider}{' '}
+                <span className="ui-muted pa-method-kind">
+                  {m.kind === 'bank'
+                    ? t('parent.billing.kindBank')
+                    : t('parent.billing.kindEwallet')}
                 </span>
               </strong>
-              <span className="pa-mono">{m.number}</span>
-              <span className="pa-muted">{t('plan.method.holder', { name: m.holder })}</span>
+              <span className="pa-mono">{m.accountNumber}</span>
+              <span className="ui-muted">
+                {t('parent.billing.accountName', { name: m.accountName })}
+              </span>
             </span>
           </label>
         ))}
         {missing && (
-          <p id={`pa-method-error-${pkg.id}`} className="pa-error" role="alert">
-            {t('plan.method.noMethod')}
+          <p id={`pa-method-error-${pkg.id}`} className="ui-error" role="alert">
+            {t('parent.billing.methodMissing')}
           </p>
         )}
       </fieldset>
-      <p className="pa-muted">{t('plan.method.unique')}</p>
-      <div className="uk-row">
-        <button type="submit" className="uk-btn" disabled={busy}>
-          {t('plan.method.create')}
-        </button>
-        <button type="button" className="uk-btn uk-btn--ghost" disabled={busy} onClick={onCancel}>
-          {t('plan.method.cancel')}
-        </button>
+      <p className="ui-hint">{t('parent.billing.uniqueExplain', { hours: expiryHours })}</p>
+      <div className="ui-row">
+        <Button type="submit" disabled={busy}>
+          {busy ? t('parent.billing.creating') : t('parent.billing.createOrder')}
+        </Button>
+        <Button variant="ghost" disabled={busy} onClick={onCancel}>
+          {t('parent.cancel')}
+        </Button>
       </div>
     </form>
   );
 }
 
-/** Kartu paket: saat dipilih melebar satu baris penuh dan tombol beli diganti formulir cara bayar. */
 function PackageCard({
   pkg,
+  title,
   selected,
   onBuy,
   children,
 }: {
   pkg: BillingPackage;
+  title: (b: { domain: string; grade: string }) => string;
   selected: boolean;
   onBuy: () => void;
   children?: ReactNode;
 }) {
-  const t = useT('parent');
-  const saved = pkg.listPrice - pkg.price;
+  const p = pkg.pricing;
   return (
-    <article
-      className={selected ? 'package-card is-on' : 'package-card'}
-      aria-labelledby={`pkg-${pkg.id}`}
-    >
-      <header>
+    <article className={selected ? 'pa-pkg selected' : 'pa-pkg'} aria-labelledby={`pkg-${pkg.id}`}>
+      <div className="pa-pkg-head">
         <h3 id={`pkg-${pkg.id}`}>{pkg.name}</h3>
-        {saved > 0 && (
-          <span className="save-badge">{t('plan.save', { amount: formatRupiah(saved) })}</span>
+        {p.discountActive && (
+          <Badge tone="success">
+            {t('parent.billing.save', { amount: formatRupiah(p.discount) })}
+          </Badge>
         )}
-      </header>
-      <dl>
-        <div>
-          <dt>{t('plan.content')}</dt>
-          <dd>{t('plan.content.value')}</dd>
-        </div>
-        <div>
-          <dt>{t('plan.duration')}</dt>
-          <dd>
-            {pkg.durationDays === null
-              ? t('plan.duration.forever')
-              : t('plan.duration.days', { n: pkg.durationDays })}
-          </dd>
-        </div>
+      </div>
+      {pkg.description && <p className="ui-muted">{pkg.description}</p>}
+      <dl className="pa-pkg-facts">
+        <dt>{t('parent.billing.scope')}</dt>
+        <dd>{scopeText(pkg.scope, pkg.books, title)}</dd>
+        <dt>{t('parent.billing.duration')}</dt>
+        <dd>{durationText(pkg.durationDays)}</dd>
       </dl>
-      <p className="package-price">
-        {saved > 0 && <s>{formatRupiah(pkg.listPrice)}</s>}
-        <strong>{formatRupiah(pkg.price)}</strong>
-      </p>
+      <div className="pa-price">
+        {p.discountActive && (
+          <s className="pa-price-normal">
+            <span className="pa-sr">{t('parent.billing.normalPrice')} </span>
+            {formatRupiah(p.normal)}
+          </s>
+        )}
+        <span className="pa-price-final">
+          <span className="pa-sr">{t('parent.billing.finalPrice')} </span>
+          {formatRupiah(p.final)}
+        </span>
+      </div>
+      {p.discountActive && pkg.discountEndsAt && (
+        <p className="ui-hint">
+          {t('parent.billing.discountUntil', { when: formatDay(pkg.discountEndsAt) })}
+        </p>
+      )}
       {selected ? (
         children
       ) : (
-        <button type="button" className="uk-btn" onClick={onBuy}>
-          {t('plan.buy', { name: pkg.name })}
-        </button>
+        <Button onClick={onBuy}>{t('parent.billing.buy', { name: pkg.name })}</Button>
       )}
     </article>
   );
 }
 
+/** Paket & pembayaran: level gratis, paket aktif, daftar paket, pilih cara bayar (D-036). */
 export function PackagesPage() {
-  const t = useT('parent');
-  const loadPackages = useCallback(() => packages(), []);
-  const loadMethods = useCallback(() => methods(), []);
-  const loadPlan = useCallback(() => plan(), []);
-  const pk = useAsync(loadPackages);
-  const me = useAsync(loadMethods);
-  const pl = useAsync(loadPlan);
-  const [selected, setSelected] = useState<string | null>(null);
-
-  if (pk.loading || me.loading) return <LoadingState />;
-  if (pk.error || !pk.data || me.error || !me.data) return <ErrorState onRetry={pk.reload} />;
-
-  const until = pl.data?.children
-    .map((c) => c.until)
-    .filter((u): u is string => u !== null)
-    .sort()
-    .at(-1);
+  const { data, error, loading, reload } = useFetch<BillingOverview>('parent', '/parent/billing');
+  const [selected, setSelected] = useState<string>();
+  const needsTitles =
+    !!data &&
+    [...data.packages, ...data.entitlements].some((x) => x.scope === 'books' && x.books.length);
+  const title = useBookTitles(needsTitles);
 
   return (
-    <div className="uk-stack">
-      <PageHeader title={t('plan.title')} subtitle={t('plan.subtitle')} />
+    <>
+      <PageHeader
+        title={t('parent.billing.title')}
+        subtitle={t('parent.billing.subtitle')}
+        actions={
+          <Link className="ui-btn ui-btn-secondary" to="/orang-tua/transaksi">
+            {t('parent.nav.orders')}
+          </Link>
+        }
+      />
+      {loading && !data ? (
+        <Spinner label={t('parent.loading')} />
+      ) : error || !data ? (
+        <Notice tone="error">
+          {t('parent.billing.loadError')} {errorMessage(error)}{' '}
+          <Button variant="ghost" onClick={reload}>
+            {t('parent.dash.retry')}
+          </Button>
+        </Notice>
+      ) : (
+        <>
+          {data.settings.paywall ? (
+            <Notice tone="info">{t('parent.billing.free', { n: data.settings.freeLevels })}</Notice>
+          ) : (
+            <Notice tone="success">{t('parent.billing.allOpen')}</Notice>
+          )}
 
-      <section className="uk-card uk-stack">
-        <h2 style={{ margin: 0 }}>{t('plan.active')}</h2>
-        <p style={{ margin: 0 }}>
-          {until ? t('plan.activeUntil', { date: formatDate(until) }) : t('plan.none')}
-        </p>
-      </section>
+          <Card title={t('parent.billing.mine')}>
+            {data.entitlements.length === 0 ? (
+              <Empty>{t('parent.billing.mineNone')}</Empty>
+            ) : (
+              <ul className="pa-ent">
+                {data.entitlements.map((e) => {
+                  const ended = e.endsAt !== null && Date.parse(e.endsAt) <= Date.now();
+                  return (
+                    <li key={e.id} className={ended ? 'pa-ent-item ended' : 'pa-ent-item'}>
+                      <strong>{e.name}</strong>
+                      <span>{scopeText(e.scope, e.books, title)}</span>
+                      <Badge tone={ended ? 'muted' : 'success'}>
+                        {e.endsAt === null
+                          ? t('parent.billing.activeForever')
+                          : ended
+                            ? t('parent.billing.ended', { when: formatDay(e.endsAt) })
+                            : t('parent.billing.activeUntil', { when: formatDay(e.endsAt) })}
+                      </Badge>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </Card>
 
-      <section className="uk-card uk-stack" aria-labelledby="choose-title">
-        <h2 id="choose-title" style={{ margin: 0 }}>
-          {t('plan.choose')}
-        </h2>
-        <div className="package-grid">
-          {pk.data.map((p) => (
-            <PackageCard
-              key={p.id}
-              pkg={p}
-              selected={selected === p.id}
-              onBuy={() => setSelected(p.id)}
-            >
-              <MethodChooser pkg={p} list={me.data!} onCancel={() => setSelected(null)} />
-            </PackageCard>
-          ))}
-        </div>
-        <p className="pa-muted">{t('plan.note')}</p>
-      </section>
-    </div>
+          <Card title={t('parent.billing.packages')}>
+            {data.packages.length === 0 ? (
+              <Empty>{t('parent.billing.noPackages')}</Empty>
+            ) : (
+              <div className="pa-pkgs">
+                {data.packages.map((pkg) => (
+                  <PackageCard
+                    key={pkg.id}
+                    pkg={pkg}
+                    title={title}
+                    selected={selected === pkg.id}
+                    onBuy={() => setSelected(pkg.id)}
+                  >
+                    <MethodChooser
+                      pkg={pkg}
+                      methods={data.methods}
+                      expiryHours={data.settings.orderExpiryHours}
+                      onCancel={() => setSelected(undefined)}
+                    />
+                  </PackageCard>
+                ))}
+              </div>
+            )}
+            <p className="ui-hint pa-honest">{t('parent.billing.honest')}</p>
+          </Card>
+        </>
+      )}
+    </>
   );
 }

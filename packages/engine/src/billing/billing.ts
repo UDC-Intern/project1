@@ -7,7 +7,7 @@ export const FOREVER_ISO = '9999-12-31T00:00:00.000Z';
 
 export const ORDER_STATUSES = [
   'awaiting_payment',
-  'proof_sent',
+  'awaiting_review',
   'rejected',
   'paid',
   'expired',

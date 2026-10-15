@@ -19,7 +19,7 @@ export function AdminLayout() {
         { group: t('group.content') },
         { to: '/admin/konten', label: t('nav.content'), icon: 'book' },
         { to: '/admin/soal', label: t('nav.preview'), icon: 'grid' },
-        { to: '/admin/asisten', label: t('nav.assistant'), icon: 'spark' },
+        { to: '/admin/asisten', label: t('nav.assistant'), icon: 'gear' },
         { group: t('group.people') },
         { to: '/admin/pengguna', label: t('nav.users'), icon: 'users' },
         { to: '/admin/laporan', label: t('nav.reports'), icon: 'report' },

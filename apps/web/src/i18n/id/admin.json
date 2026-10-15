@@ -153,7 +153,7 @@
   "methods.holder": "Atas nama",
   "methods.active": "Aktif",
   "status.awaiting_payment": "Menunggu pembayaran",
-  "status.proof_sent": "Menunggu verifikasi",
+  "status.awaiting_review": "Menunggu verifikasi",
   "status.rejected": "Perlu bukti ulang",
   "status.paid": "Selesai",
   "status.expired": "Kedaluwarsa",

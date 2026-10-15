@@ -5,7 +5,7 @@ import { resetMockDb } from '../src/api/mock/db';
 import { useSession } from '../src/auth/store';
 import { ChildLogin } from '../src/play/ChildLogin';
 import { TopicPage } from '../src/play/TopicPage';
-import { ParentLayout } from '../src/parent/ParentLayout';
+import { ParentApp } from '../src/parent/ParentApp';
 import { AppShell } from '../src/ui/AppShell';
 import { Landing } from '../src/site/Landing';
 
@@ -75,30 +75,31 @@ describe('navigasi dan kerangka', () => {
     const toggle = screen.getByRole('button', { name: 'Sembunyikan menu' });
     fireEvent.click(toggle);
     expect(screen.getByRole('button', { name: 'Tampilkan menu' })).toHaveAttribute(
-      'aria-pressed',
-      'true',
+      'aria-expanded',
+      'false',
     );
-    expect(localStorage.getItem('udakids.sidebar.uji')).toBe('1');
+    expect(localStorage.getItem('lc.sidebar.uji')).toBe('1');
   });
 
-  it('kerangka orang tua menampilkan menu dan tombol keluar', () => {
+  it('kerangka orang tua: menu, lencana pesanan, tombol main, dan keluar', async () => {
     useSession.setState({
       session: { token: 'mock-parent:p-demo', role: 'parent', name: 'Ridho Dwi Syahputra' },
     });
     render(
       <MemoryRouter initialEntries={['/orang-tua']}>
         <Routes>
-          <Route path="/orang-tua" element={<ParentLayout />}>
-            <Route index element={<p>Isi beranda</p>} />
-          </Route>
-          <Route path="/orang-tua/masuk" element={<p>Halaman masuk</p>} />
+          <Route path="/orang-tua/*" element={<ParentApp />} />
         </Routes>
       </MemoryRouter>,
     );
     expect(screen.getAllByRole('link', { name: 'Paket & Pembayaran' }).length).toBeGreaterThan(0);
+    expect(screen.queryByRole('link', { name: /Afiliasi/ })).toBeNull();
+    expect(screen.queryByRole('button', { name: /mode gelap/i })).toBeNull();
+    expect(await screen.findByRole('link', { name: /Riwayat Transaksi, 1/ })).toBeInTheDocument();
+    expect(screen.getAllByText('Ridho Dwi Syahputra').length).toBeGreaterThan(0);
     fireEvent.click(screen.getAllByRole('button', { name: 'Keluar' })[0]!);
-    expect(screen.getByText('Halaman masuk')).toBeInTheDocument();
-    expect(useSession.getState().session).toBeNull();
+    await waitFor(() => expect(useSession.getState().session).toBeNull());
+    expect((await screen.findAllByText('Masuk orang tua')).length).toBeGreaterThan(0);
   });
 });
 

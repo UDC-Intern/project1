@@ -1,16 +1,52 @@
 import { apiErrorSchema, type ApiErrorBody } from '@udakids/engine';
 import { useSession } from '../auth/store';
 import { API_URL } from '../config/app';
+import { t } from '../i18n';
+
+export type ApiIssue = { path: string; message: string };
+
+const codeFor = (status: number): ApiErrorBody['error']['code'] =>
+  status === 401
+    ? 'UNAUTHENTICATED'
+    : status === 403
+      ? 'FORBIDDEN'
+      : status === 404
+        ? 'NOT_FOUND'
+        : status === 409
+          ? 'CONFLICT'
+          : status === 0 || status === 429
+            ? 'RATE_LIMITED'
+            : 'VALIDATION';
 
 export class ApiError extends Error {
   readonly status: number;
-  readonly body: ApiErrorBody['error'];
+  readonly body: ApiErrorBody['error'] & { reason?: string };
+  readonly issues: ApiIssue[];
 
-  constructor(status: number, body: ApiErrorBody['error']) {
-    super(body.message);
+  constructor(
+    status: number,
+    body: (ApiErrorBody['error'] & { reason?: string }) | string,
+    issues: ApiIssue[] = [],
+    extra: { reason?: string } = {},
+  ) {
+    const resolved =
+      typeof body === 'string' ? { code: codeFor(status), message: body, ...extra } : body;
+    super(resolved.message);
     this.status = status;
-    this.body = body;
+    this.body = resolved;
+    this.issues = issues;
   }
+}
+
+/** Pesan ramah untuk orang dewasa; isian yang bermasalah ikut disebut bila ada. */
+export function errorMessage(err: unknown): string {
+  if (err instanceof ApiError) {
+    if (err.status === 0) return t('common.error.offline');
+    if (err.issues.length)
+      return `${err.message}: ${err.issues.map((i) => (i.path ? `${i.path} — ${i.message}` : i.message)).join('; ')}`;
+    return err.message;
+  }
+  return t('common.error.generic');
 }
 
 type Options = { method?: string; body?: unknown; token?: string | null };

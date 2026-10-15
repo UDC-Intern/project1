@@ -1,0 +1,296 @@
+/* Warna grafik (D-110). Nada ikon KPI memakai token merek; seri data memakai palet kategori --viz-* yang
+   sudah divalidasi buta warna untuk tema terang (permukaan #ffffff) dan gelap (#1e252c). Urutan slot tetap —
+   urutan itulah yang menjaga jarak warna antar-seri bersebelahan. Tanpa ungu. */
+:root {
+  --pd-grape: var(--gonjong-teks);
+  --pd-grape-bg: var(--gonjong-soft);
+  --pd-leaf: var(--sawah-teks);
+  --pd-leaf-bg: var(--sawah-soft);
+  --pd-sky: var(--langit-teks);
+  --pd-sky-bg: var(--langit-soft);
+  --pd-sun: var(--kunyit-teks);
+  --pd-sun-bg: var(--kunyit-soft);
+  --pd-coral: var(--jeruk-teks);
+  --pd-coral-bg: var(--jeruk-soft);
+
+  /* Palet kategori (biru, oranye, hijau toska, kuning) — satu-satunya hex baru, khusus data. */
+  --viz-1: #2a78d6;
+  --viz-2: #eb6834;
+  --viz-3: #1baf7a;
+  --viz-4: #eda100;
+  /* Warna teks di atas tiap slot (label treemap). */
+  --viz-on-1: var(--kertas);
+  --viz-on-2: var(--malam);
+  --viz-on-3: var(--malam);
+  --viz-on-4: var(--malam);
+  /* Seri pembanding/"lainnya" dan garis bantu. */
+  --viz-muted: color-mix(in srgb, var(--garis-tegas) 45%, var(--kertas));
+  --viz-muted-2: var(--garis-tegas);
+  --viz-on-muted: var(--malam);
+  /* Ramp berurutan satu warna (biru): ujung terkuat; tingkat lain = campuran dengan --kertas. */
+  --viz-seq: #184f95;
+  --viz-seq-on: var(--kertas);
+  /* Warna status (selalu disertai label/ikon). */
+  --viz-good: var(--sawah);
+  --viz-warning: var(--kunyit);
+  --viz-info: var(--langit);
+  --viz-critical: var(--gonjong);
+  /* Rangka grafik. */
+  --viz-grid: var(--garis);
+  --viz-track: var(--awan-2);
+  --viz-cross: var(--garis-tegas);
+  --viz-hl: color-mix(in srgb, var(--langit) 8%, transparent);
+}
+:root[data-theme='dark'] {
+  --viz-1: #3987e5;
+  --viz-2: #d95926;
+  --viz-3: #199e70;
+  --viz-4: #c98500;
+  --viz-on-1: var(--awan);
+  --viz-on-2: var(--awan);
+  --viz-on-3: var(--awan);
+  --viz-on-4: var(--awan);
+  --viz-seq: #6da7ec;
+  --viz-seq-on: var(--awan);
+  --viz-hl: color-mix(in srgb, var(--langit) 14%, transparent);
+}
+.pd-kpi {
+  background: color-mix(in srgb, var(--kertas) 95%, transparent);
+}
+.pd-kpi-icon {
+  grid-area: icon;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+}
+.pd-kpi-value {
+  grid-area: value;
+  min-width: 0;
+  /* Menyesuaikan lebar layar; teks ringkas (mis. "2 jam 15 mnt") tidak terpecah ke banyak baris. */
+  font-size: clamp(1.15rem, 0.85rem + 0.9vw, 1.625rem);
+  font-weight: 800;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: break-word;
+}
+.pd-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.pd-kpi-label {
+  grid-area: label;
+  min-width: 0;
+  color: var(--ui-muted);
+  font-size: 14px;
+  line-height: 1.3;
+}
+.pd-kpi-hint {
+  grid-area: hint;
+  font-size: 12px;
+  color: var(--ui-muted);
+}
+.tone-grape .pd-kpi-icon,
+.pd-insight.tone-grape .pd-insight-icon {
+  color: var(--pd-grape);
+  background: var(--pd-grape-bg);
+}
+.tone-leaf .pd-kpi-icon,
+.pd-insight.tone-leaf .pd-insight-icon {
+  color: var(--pd-leaf);
+  background: var(--pd-leaf-bg);
+}
+.tone-sky .pd-kpi-icon,
+.pd-insight.tone-sky .pd-insight-icon {
+  color: var(--pd-sky);
+  background: var(--pd-sky-bg);
+}
+.tone-sun .pd-kpi-icon,
+.pd-insight.tone-sun .pd-insight-icon {
+  color: var(--pd-sun);
+  background: var(--pd-sun-bg);
+}
+.pd-insight.tone-coral .pd-insight-icon {
+  color: var(--pd-coral);
+  background: var(--pd-coral-bg);
+}
+.pd-ring-bg,
+.pd-ring-fg {
+  fill: none;
+  stroke-width: 7;
+}
+.pd-ring-bg {
+  stroke: var(--viz-track);
+}
+.pd-ring-fg {
+  stroke: var(--viz-good);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.pd-ring-text {
+  font-size: 14px;
+  font-weight: 800;
+  fill: var(--ui-ink);
+}
+.pd-meter {
+  display: block;
+  height: 8px;
+  border-radius: 99px;
+  background: var(--viz-track);
+  overflow: hidden;
+}
+.pd-meter span {
+  display: block;
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--viz-1), var(--viz-good));
+  animation: pd-grow 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  transform-origin: left;
+}
+/* Gerak: muncul bertahap, Momo bergoyang pelan. Mati bila pengguna meminta gerak dikurangi. */
+.pd-rise {
+  animation: pd-rise 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+.pd-bob {
+  animation: pd-bob 3.2s ease-in-out infinite;
+}
+@keyframes pd-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes pd-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes pd-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes pd-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.tone-coral .pd-kpi-icon {
+  color: var(--pd-coral);
+  background: var(--pd-coral-bg);
+}
+.pd-insight.tone-grape .pd-insight-icon {
+  color: var(--pd-grape);
+  background: var(--pd-grape-bg);
+}
+.pd-insight.tone-leaf .pd-insight-icon {
+  color: var(--pd-leaf);
+  background: var(--pd-leaf-bg);
+}
+.pd-insight.tone-sky .pd-insight-icon {
+  color: var(--pd-sky);
+  background: var(--pd-sky-bg);
+}
+.pd-insight.tone-sun .pd-insight-icon {
+  color: var(--pd-sun);
+  background: var(--pd-sun-bg);
+}
+
+/* Batang harian generik */
+.ch-bars {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 4px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.ch-bar {
+  display: grid;
+  grid-template-rows: 1fr 18px;
+  min-width: 0;
+}
+.ch-bar-track {
+  position: relative;
+  border-radius: 6px;
+  background: var(--viz-track);
+  overflow: hidden;
+}
+.ch-bar-fill {
+  position: absolute;
+  inset: auto 0 0 0;
+  border-radius: 6px;
+  background: var(--viz-1);
+  transition: height 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.ch-bar-day {
+  font-size: 11px;
+  color: var(--ui-muted, var(--malam-muted));
+  text-align: center;
+  white-space: nowrap;
+  overflow: visible;
+}
+.ch-meter {
+  display: block;
+  height: 8px;
+  border-radius: 99px;
+  background: var(--viz-track);
+  overflow: hidden;
+}
+.ch-meter span {
+  display: block;
+  height: 100%;
+  border-radius: 99px;
+  background: var(--viz-1);
+  animation: pd-grow 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  transform-origin: left;
+}
+.ch-meter.tone-leaf span {
+  background: var(--viz-good);
+}
+.ch-meter.tone-sun span {
+  background: var(--viz-4);
+}
+.ch-meter.tone-sky span {
+  background: var(--viz-info);
+}
+.ch-meter.tone-coral span {
+  background: var(--viz-2);
+}
+.ch-meter.tone-muted span {
+  background: var(--viz-muted-2);
+}
+@media (prefers-reduced-motion: reduce) {
+  .pd-rise,
+  .pd-bob,
+  .pd-meter span,
+  .ch-meter span {
+    animation: none;
+  }
+  .ch-bar-fill,
+  .pd-ring-fg {
+    transition: none;
+  }
+}

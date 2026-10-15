@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import type { MomoColor } from '@udakids/engine';
 import { Momo, type MomoMood } from '../components/Momo';
 import { APP_NAME } from '../config/app';
-import { useT } from '../i18n';
+import { t, useT } from '../i18n';
 import { Cloud, Star } from './Decor';
 
 export type AuthVariant = 'parent' | 'staff';
@@ -64,3 +64,49 @@ export function AuthLayout({
     </div>
   );
 }
+
+export function Stepper({ current, labels }: { current: number; labels: string[] }) {
+  return (
+    <ol
+      className="stepper"
+      aria-label={
+        current > labels.length
+          ? t('site.steps.done')
+          : t('site.steps.label', { n: current, total: labels.length })
+      }
+    >
+      {labels.map((label, i) => {
+        const n = i + 1;
+        const state = n < current ? 'is-done' : n === current ? 'is-current' : '';
+        return (
+          <li key={label} className={state} aria-current={n === current ? 'step' : undefined}>
+            <span className="stepper-dot">
+              {n < current ? (
+                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                  <path
+                    d="M5 12l5 5 9-10"
+                    stroke="currentColor"
+                    strokeWidth="3.4"
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              ) : (
+                n
+              )}
+            </span>
+            <span className="stepper-label">{label}</span>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+/** Wizard keluarga: isi data, kode dari email, lalu profil anak. */
+export const familySteps = () => [
+  t('site.steps.account'),
+  t('site.steps.verify'),
+  t('site.steps.child'),
+];

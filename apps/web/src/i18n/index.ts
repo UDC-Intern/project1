@@ -26,3 +26,5 @@ export function useT(ns: Namespace = 'common') {
     [ns],
   );
 }
+
+export { t, type MessageKey } from './ref';

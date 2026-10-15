@@ -4,7 +4,7 @@ import { insights, overview } from '../api/admin';
 import { Momo } from '../components/Momo';
 import { useAsync } from '../hooks/useAsync';
 import { useT } from '../i18n';
-import { PageHeader } from '../ui/AppShell';
+import { PageHeader } from '../ui/ui';
 import {
   ColumnChart,
   CountUp,
@@ -15,7 +15,7 @@ import {
   LineChart,
   Meter,
   Ring,
-} from '../ui/charts';
+} from '../ui/adminCharts';
 import { ErrorState, LoadingState } from '../ui/states';
 
 const shortDate = (iso: string) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;

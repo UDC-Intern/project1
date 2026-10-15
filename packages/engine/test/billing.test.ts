@@ -48,7 +48,7 @@ describe('pembayaran', () => {
     const now = Date.parse('2026-10-15T12:00:00Z');
     const base = { expiresAt: '2026-10-15T11:00:00Z' };
     expect(effectiveStatus({ ...base, status: 'awaiting_payment' }, now)).toBe('expired');
-    expect(effectiveStatus({ ...base, status: 'proof_sent' }, now)).toBe('proof_sent');
+    expect(effectiveStatus({ ...base, status: 'awaiting_review' }, now)).toBe('awaiting_review');
     expect(effectiveStatus({ ...base, status: 'paid' }, now)).toBe('paid');
     expect(
       effectiveStatus({ expiresAt: '2026-10-16T00:00:00Z', status: 'awaiting_payment' }, now),
