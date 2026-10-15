@@ -19,3 +19,6 @@ export const parentRegister = (body: RegisterParentBody) =>
 
 export const parentLogin = (body: LoginBody) =>
   request<AuthResult>('/auth/parent/login', { method: 'POST', body });
+
+export const staffLogin = (body: LoginBody) =>
+  request<AuthResult>('/auth/staff/login', { method: 'POST', body });

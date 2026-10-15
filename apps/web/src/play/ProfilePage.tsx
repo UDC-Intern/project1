@@ -1,6 +1,8 @@
 import { MOMO_COLORS, type ChildProfile, type MomoColor } from '@udakids/engine';
 import { useCallback, useState } from 'react';
-import { profile, setMomo } from '../api/catalog';
+import { Link } from 'react-router-dom';
+import { certificate } from '../api/certificate';
+import { home, profile, setMomo } from '../api/catalog';
 import { Momo } from '../components/Momo';
 import { Plant } from '../components/Plant';
 import { useAsync } from '../hooks/useAsync';
@@ -12,6 +14,19 @@ export function ProfilePage() {
   const load = useCallback(() => profile(), []);
   const { data, error, loading, reload } = useAsync(load);
   const [color, setColor] = useState<MomoColor | null>(null);
+  const loadCerts = useCallback(async () => {
+    const { books } = await home();
+    const found = await Promise.all(
+      books.map((b) =>
+        certificate(b.slug).then(
+          () => b,
+          () => null,
+        ),
+      ),
+    );
+    return found.filter((b) => b !== null);
+  }, []);
+  const certs = useAsync(loadCerts);
 
   if (loading) return <LoadingState />;
   if (error || !data) return <ErrorState onRetry={reload} />;
@@ -48,6 +63,17 @@ export function ProfilePage() {
           ))}
         </div>
       </section>
+
+      {certs.data && certs.data.length > 0 && (
+        <section className="uk-stack">
+          <h2>{t('profile.certs')}</h2>
+          {certs.data.map((b) => (
+            <Link key={b.slug} className="uk-btn uk-btn--big" to={`/play/sertifikat/${b.slug}`}>
+              {t('cert.link', { book: b.title })}
+            </Link>
+          ))}
+        </section>
+      )}
 
       <section className="uk-stack">
         <h2>{t('profile.plants')}</h2>

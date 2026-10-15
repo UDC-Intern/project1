@@ -328,3 +328,91 @@ export type Certificate = z.infer<typeof certificateSchema>;
 
 export const premiumBodySchema = z.object({ until: z.iso.datetime() });
 export type PremiumBody = z.infer<typeof premiumBodySchema>;
+
+// ---- Admin: ringkasan, konten, pengguna, laporan ----
+
+export const adminOverviewSchema = z.object({
+  parents: z.number().int(),
+  children: z.number().int(),
+  roundsToday: z.number().int(),
+  activeChildren7d: z.number().int(),
+  hardestTopics: z.array(
+    z.object({ topicId: z.string(), title: z.string(), passRate: z.number().int() }),
+  ),
+});
+export type AdminOverview = z.infer<typeof adminOverviewSchema>;
+
+export const adminCatalogSchema = z.object({
+  books: z.array(
+    z.object({
+      id: z.string(),
+      slug: z.string(),
+      title: z.string(),
+      topics: z.array(
+        z.object({
+          id: z.string(),
+          code: z.string(),
+          title: z.string(),
+          lesson: z.string(),
+          levels: z.array(
+            z.object({
+              id: z.string(),
+              number: z.number().int(),
+              title: z.string(),
+              isFree: z.boolean(),
+              generator: z.string().nullable(),
+            }),
+          ),
+        }),
+      ),
+    }),
+  ),
+});
+export type AdminCatalog = z.infer<typeof adminCatalogSchema>;
+
+export const updateTopicBodySchema = z.object({
+  title: z.string().trim().min(1).max(60).optional(),
+  lesson: z.string().trim().min(1).max(600).optional(),
+});
+export type UpdateTopicBody = z.infer<typeof updateTopicBodySchema>;
+
+export const updateLevelBodySchema = z.object({
+  title: z.string().trim().min(1).max(60).optional(),
+  isFree: z.boolean().optional(),
+});
+export type UpdateLevelBody = z.infer<typeof updateLevelBodySchema>;
+
+export const adminUsersSchema = z.object({
+  parents: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      email: z.string(),
+      familyCode: z.string(),
+      children: z.array(
+        z.object({
+          id: z.string(),
+          nickname: z.string(),
+          plan: z.enum(['free', 'premium']),
+          until: z.string().nullable(),
+        }),
+      ),
+    }),
+  ),
+  total: z.number().int(),
+});
+export type AdminUsers = z.infer<typeof adminUsersSchema>;
+
+export const levelStatsSchema = z.object({
+  levels: z.array(
+    z.object({
+      levelId: z.string(),
+      levelTitle: z.string(),
+      topicTitle: z.string(),
+      rounds: z.number().int(),
+      passRate: z.number().int(),
+      avgScore: z.number().int(),
+    }),
+  ),
+});
+export type LevelStats = z.infer<typeof levelStatsSchema>;

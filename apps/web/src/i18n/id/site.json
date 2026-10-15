@@ -4,5 +4,8 @@
   "style.intro": "Halaman ini hanya ada saat pengembangan. Isinya token dan komponen yang dipakai di seluruh aplikasi.",
   "landing.child": "Anak masuk",
   "landing.parent": "Orang tua",
-  "landing.register": "Daftar sebagai orang tua"
+  "landing.register": "Daftar sebagai orang tua",
+  "landing.staff": "Masuk staf",
+  "landing.top": "10 besar",
+  "landing.topEmpty": "Belum ada yang bermain."
 }
