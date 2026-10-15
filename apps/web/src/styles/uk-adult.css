@@ -57,3 +57,48 @@
   color: var(--sawah);
   font-weight: 700;
 }
+
+.code-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.child-grid {
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+.progress {
+  height: 12px;
+  border-radius: var(--radius-pill);
+  background: var(--awan-2);
+  overflow: hidden;
+  border: 1px solid var(--garis);
+  margin-bottom: 4px;
+}
+.progress > span {
+  display: block;
+  height: 100%;
+  background: var(--sawah);
+  border-radius: inherit;
+}
+.uk-badge.is-premium {
+  background: var(--kunyit-soft);
+  color: var(--kunyit-teks);
+}
+.plan-compare {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+.plan-premium {
+  border-color: var(--gonjong);
+  background: var(--gonjong-soft);
+}
+.plan-list {
+  margin: 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 6px;
+}
+.shell-play {
+  border: 2px dashed var(--sh-line);
+}

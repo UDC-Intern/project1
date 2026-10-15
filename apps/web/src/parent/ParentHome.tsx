@@ -2,9 +2,11 @@ import { useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { overview } from '../api/parent';
 import { Momo } from '../components/Momo';
+import { TOTAL_LEVELS } from '../content/books';
 import { useAsync } from '../hooks/useAsync';
 import { useT } from '../i18n';
 import { formatDate } from '../lib/format';
+import { PageHeader } from '../ui/AppShell';
 import { EmptyState, ErrorState, LoadingState } from '../ui/states';
 
 const MAX_CHILDREN = 3;
@@ -28,22 +30,30 @@ export function ParentHome() {
   }
 
   const full = data.children.length >= MAX_CHILDREN;
+  const premium = data.children.some((c) => c.premiumUntil !== null);
 
   return (
     <div className="uk-stack">
-      <h1>{t('home.title')}</h1>
+      <PageHeader
+        title={t('home.title')}
+        actions={
+          <span className={`uk-badge${premium ? ' is-premium' : ''}`}>
+            {t('home.plan')}: {premium ? t('home.plan.premium') : t('home.plan.free')}
+          </span>
+        }
+      />
 
-      <section className="uk-card">
-        <p style={{ margin: 0 }}>{t('home.familyCode')}</p>
-        <div className="uk-row">
+      <section className="uk-card code-card">
+        <div>
+          <p style={{ margin: 0 }}>{t('home.familyCode')}</p>
           <span className="uk-code" aria-label={data.familyCode.split('').join(' ')}>
             {data.familyCode}
           </span>
-          <button type="button" className="uk-btn uk-btn--ghost" onClick={() => void copy()}>
-            {copied ? t('home.copied') : t('home.copy')}
-          </button>
+          <p style={{ margin: 0 }}>{t('home.familyCodeHint')}</p>
         </div>
-        <p style={{ margin: 0 }}>{t('home.familyCodeHint')}</p>
+        <button type="button" className="uk-btn uk-btn--ghost" onClick={() => void copy()}>
+          {copied ? t('home.copied') : t('home.copy')}
+        </button>
       </section>
 
       <section className="uk-stack">
@@ -69,13 +79,13 @@ export function ParentHome() {
       </section>
 
       <section className="uk-stack">
-        <div className="uk-row" style={{ justifyContent: 'space-between' }}>
+        <div className="page-header" style={{ marginBottom: 0 }}>
           <h2 style={{ margin: 0 }}>{t('home.children')}</h2>
           {full ? (
             <span>{t('home.maxChildren')}</span>
           ) : (
             <Link className="uk-btn" to="/orang-tua/anak/baru">
-              {t('home.addChild')}
+              + {t('home.addChild')}
             </Link>
           )}
         </div>
@@ -83,39 +93,54 @@ export function ParentHome() {
         {data.children.length === 0 ? (
           <EmptyState title={t('home.children')} hint={t('home.noChildren')} />
         ) : (
-          <div className="uk-grid">
-            {data.children.map((c) => (
-              <article key={c.id} className="uk-card uk-stack">
-                <div className="uk-row">
-                  <Momo color={c.momoColor} size={56} />
-                  <strong>{c.nickname}</strong>
-                </div>
-                <p style={{ margin: 0 }}>
-                  {t('child.stats', {
-                    rounds: c.rounds,
-                    levels: c.levelsPassed,
-                    score: c.totalScore,
-                  })}
-                </p>
-                {c.premiumUntil && (
-                  <span className="uk-badge">
-                    {t('child.premium', { date: formatDate(c.premiumUntil) })}
-                  </span>
-                )}
-                {!c.hasPin && <span role="status">{t('child.noPin')}</span>}
-                <div className="uk-row">
-                  <Link className="uk-btn" to={`/orang-tua/anak/${c.id}`}>
-                    {t('child.report')}
-                  </Link>
-                  <Link className="uk-btn uk-btn--ghost" to={`/orang-tua/anak/${c.id}/ubah`}>
-                    {t('child.edit')}
-                  </Link>
-                  <Link className="uk-btn uk-btn--ghost" to={`/orang-tua/anak/${c.id}/sandi`}>
-                    {t('child.pin')}
-                  </Link>
-                </div>
-              </article>
-            ))}
+          <div className="uk-grid child-grid">
+            {data.children.map((c) => {
+              const pct = Math.min(100, Math.round((c.levelsPassed / TOTAL_LEVELS) * 100));
+              return (
+                <article key={c.id} className="uk-card uk-stack">
+                  <div className="uk-row">
+                    <Momo color={c.momoColor} size={56} />
+                    <strong style={{ fontSize: '1.15rem' }}>{c.nickname}</strong>
+                  </div>
+                  <div>
+                    <div
+                      className="progress"
+                      role="img"
+                      aria-label={`${t('home.progress')} ${pct}%`}
+                    >
+                      <span style={{ width: `${pct}%` }} />
+                    </div>
+                    <small>
+                      {t('home.progress.value', { passed: c.levelsPassed, total: TOTAL_LEVELS })}
+                    </small>
+                  </div>
+                  <p style={{ margin: 0 }}>
+                    {t('child.stats', {
+                      rounds: c.rounds,
+                      levels: c.levelsPassed,
+                      score: c.totalScore,
+                    })}
+                  </p>
+                  {c.premiumUntil && (
+                    <span className="uk-badge is-premium">
+                      {t('child.premium', { date: formatDate(c.premiumUntil) })}
+                    </span>
+                  )}
+                  <span role="status">{c.hasPin ? t('home.pinSet') : t('child.noPin')}</span>
+                  <div className="uk-row">
+                    <Link className="uk-btn" to={`/orang-tua/anak/${c.id}`}>
+                      {t('child.report')}
+                    </Link>
+                    <Link className="uk-btn uk-btn--ghost" to={`/orang-tua/anak/${c.id}/ubah`}>
+                      {t('child.edit')}
+                    </Link>
+                    <Link className="uk-btn uk-btn--ghost" to={`/orang-tua/anak/${c.id}/sandi`}>
+                      {t('child.pin')}
+                    </Link>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         )}
       </section>

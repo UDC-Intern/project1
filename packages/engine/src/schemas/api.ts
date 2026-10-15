@@ -164,7 +164,19 @@ export const bookDetailSchema = z.object({
 });
 export type BookDetail = z.infer<typeof bookDetailSchema>;
 
+/** Contoh soal di halaman topik: boleh dicoba tanpa dinilai, jadi kunci ikut dikirim. */
+export const topicExampleSchema = z.object({
+  type: questionTypeSchema,
+  prompt: z.string(),
+  visual: visualSchema,
+  options: z.array(z.string()).nullable(),
+  answer: z.string(),
+  explanation: z.string(),
+});
+export type TopicExample = z.infer<typeof topicExampleSchema>;
+
 export const topicDetailSchema = z.object({
+  example: topicExampleSchema.nullable(),
   topic: z.object({
     id: z.string(),
     code: z.string(),

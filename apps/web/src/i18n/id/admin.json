@@ -81,5 +81,11 @@
   "status.learning": "Belajar",
   "status.proficient": "Bisa",
   "status.mastered": "Jago",
-  "error.generic": "Ada yang belum berjalan. Coba lagi, ya."
+  "error.generic": "Ada yang belum berjalan. Coba lagi, ya.",
+  "auth.text": "Kelola konten, pengguna, dan akses Premium UdaKids.",
+  "brand": "UdaKids Admin",
+  "nav.label": "Menu admin",
+  "group.content": "Konten",
+  "group.people": "Pengguna",
+  "signedIn": "Masuk sebagai"
 }

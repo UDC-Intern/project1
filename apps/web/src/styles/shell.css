@@ -1,0 +1,253 @@
+/* Kerangka area orang tua (terang) dan admin (gelap). */
+.shell {
+  --sh-w: 264px;
+  --sh-bg: var(--kertas);
+  --sh-ink: var(--malam);
+  --sh-muted: var(--malam-muted);
+  --sh-line: var(--garis);
+  --sh-hover: var(--gonjong-soft);
+  --sh-active-bg: var(--gonjong);
+  --sh-active-ink: var(--on-gonjong);
+  display: grid;
+  grid-template-columns: var(--sh-w) minmax(0, 1fr);
+  min-height: 100vh;
+  background: var(--awan);
+  color: var(--malam);
+  font-family: var(--font-body);
+}
+.shell.shell-dark {
+  --sh-bg: var(--malam);
+  --sh-ink: #eef1f4;
+  --sh-muted: #a9b2bc;
+  --sh-line: rgb(255 255 255 / 0.12);
+  --sh-hover: rgb(255 255 255 / 0.08);
+  --sh-active-bg: var(--kunyit);
+  --sh-active-ink: var(--on-kunyit);
+}
+.shell.is-collapsed {
+  --sh-w: 76px;
+}
+
+.shell-side {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 12px;
+  background: var(--sh-bg);
+  color: var(--sh-ink);
+  border-right: 1px solid var(--sh-line);
+  overflow-y: auto;
+}
+.shell-side-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.shell-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.2rem;
+  min-width: 0;
+}
+.shell-brand a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: inherit;
+  text-decoration: none;
+}
+.shell-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+.shell-group {
+  margin: 14px 12px 4px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--sh-muted);
+}
+.shell-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: var(--radius-md);
+  color: var(--sh-ink);
+  font-weight: 800;
+  text-decoration: none;
+}
+.shell-link:hover {
+  background: var(--sh-hover);
+}
+.shell-link[aria-current='page'] {
+  background: var(--sh-active-bg);
+  color: var(--sh-active-ink);
+}
+.shell-user {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 8px 0;
+  border-top: 1px solid var(--sh-line);
+}
+.shell-label {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.shell-label strong,
+.shell-label small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.shell-label small {
+  color: var(--sh-muted);
+}
+.shell-iconbtn {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border: 2px solid var(--sh-line);
+  border-radius: 14px;
+  background: transparent;
+  color: var(--sh-ink);
+  cursor: pointer;
+}
+.shell-iconbtn:hover {
+  background: var(--sh-hover);
+}
+.shell-iconbtn:focus-visible,
+.shell-link:focus-visible {
+  outline: 3px solid var(--kunyit);
+  outline-offset: 2px;
+}
+.shell-collapse {
+  align-self: flex-start;
+}
+.shell-top,
+.shell-close,
+.shell-backdrop {
+  display: none;
+}
+.shell-main {
+  min-width: 0;
+  padding: clamp(16px, 3vw, 32px);
+  max-width: 1200px;
+  width: 100%;
+}
+
+/* Rel ikon */
+.shell.is-collapsed .shell-side .shell-label,
+.shell.is-collapsed .shell-side .shell-group,
+.shell.is-collapsed .shell-side .shell-brand span {
+  display: none;
+}
+.shell.is-collapsed .shell-link {
+  justify-content: center;
+  padding: 0;
+}
+.shell.is-collapsed .shell-user {
+  flex-direction: column;
+}
+
+/* Ponsel dan tablet: laci */
+@media (max-width: 899px) {
+  .shell,
+  .shell.is-collapsed {
+    --sh-w: 0px;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .shell-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    background: var(--kertas);
+    border-bottom: 1px solid var(--garis);
+    position: sticky;
+    top: 0;
+    z-index: 15;
+  }
+  .shell-top .shell-iconbtn {
+    color: var(--malam);
+    border-color: var(--garis-tegas);
+  }
+  .shell-side {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: min(300px, 86vw);
+    z-index: 30;
+    transform: translateX(-102%);
+    transition: transform 0.2s ease;
+    box-shadow: var(--shadow-kartu);
+  }
+  .shell.is-open .shell-side {
+    transform: translateX(0);
+  }
+  .shell-close {
+    display: inline-grid;
+  }
+  .shell-collapse {
+    display: none;
+  }
+  .shell-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: var(--overlay);
+    z-index: 25;
+  }
+  .shell.is-collapsed .shell-side .shell-label,
+  .shell.is-collapsed .shell-side .shell-group,
+  .shell.is-collapsed .shell-side .shell-brand span {
+    display: revert;
+  }
+  .shell.is-collapsed .shell-link {
+    justify-content: flex-start;
+    padding: 0 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shell-side {
+    transition: none;
+  }
+}
+
+/* Judul halaman dewasa */
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.page-header h1 {
+  margin: 0;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+}
+.page-header p {
+  margin: 4px 0 0;
+  color: var(--malam-muted);
+}
+.page-header-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}

@@ -114,17 +114,21 @@ export function PicturePin({
   value,
   onChange,
   shake = false,
+  title = true,
 }: {
   value: PinPicture[];
   onChange: (next: PinPicture[]) => void;
   shake?: boolean;
+  title?: boolean;
 }) {
   const t = useT('play');
   return (
     <div className="kid-row" style={{ flexDirection: 'column', alignItems: 'center' }}>
-      <p className="kid-say" style={{ margin: 0 }}>
-        {t('pin.title')}
-      </p>
+      {title && (
+        <p className="kid-say" style={{ margin: 0 }}>
+          {t('pin.title')}
+        </p>
+      )}
       <div className={`pin-slots${shake ? ' shake' : ''}`} aria-live="polite">
         {Array.from({ length: PIN_LENGTH }, (_, i) => (
           <span key={i} className="pin-slot">

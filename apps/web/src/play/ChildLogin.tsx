@@ -1,12 +1,14 @@
 import type { PinPicture } from '@udakids/engine';
 import { useState } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { childLogin, familyProfiles } from '../api/auth';
 import { ApiError } from '../api/client';
 import { useSession } from '../auth/store';
 import { BigButton } from '../components/BigButton';
+import { ListenButton } from '../components/ListenButton';
 import { Momo } from '../components/Momo';
 import { PicturePin } from '../components/PicturePin';
+import { APP_NAME } from '../config/app';
 import { useT } from '../i18n';
 
 type Profile = Awaited<ReturnType<typeof familyProfiles>>['profiles'][number];
@@ -75,88 +77,103 @@ export function ChildLogin() {
     if (next.length === 3) void submitPin(next);
   };
 
+  const say = chosen ? t('pin.title') : profiles ? t('login.who') : t('login.say');
+
   return (
-    <main className="kid-screen">
-      <Momo mood={message ? 'encourage' : 'happy'} size={120} />
-      <h1 className="kid-say" style={{ margin: 0 }}>
-        {t('login.title')}
-      </h1>
+    <>
+      <header className="kid-nav">
+        <Link to="/" className="site-brand" aria-label={APP_NAME}>
+          <Momo mood="happy" size={40} />
+          <span>{APP_NAME}</span>
+        </Link>
+        <Link to="/" className="kid-nav-back">
+          <span aria-hidden="true">←</span> {t('login.home')}
+        </Link>
+      </header>
+      <main className="kid-screen kid-login">
+        <Momo
+          color={chosen?.momoColor ?? 'blue'}
+          mood={message ? 'encourage' : 'happy'}
+          size={140}
+        />
+        <div className="kid-say">
+          <ListenButton />
+          <h1 style={{ margin: 0, fontSize: 'inherit' }}>{say}</h1>
+        </div>
 
-      {message && (
-        <p className="kid-note" role="alert">
-          {message}
-        </p>
-      )}
-
-      {!profiles && (
-        <form
-          className="code-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (code.length === CODE_LENGTH) void findFamily();
-          }}
-        >
-          <label htmlFor="family-code">{t('login.code.label')}</label>
-          <input
-            id="family-code"
-            value={code}
-            maxLength={CODE_LENGTH}
-            autoComplete="off"
-            autoCapitalize="characters"
-            onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z]/g, ''))}
-          />
-          <p style={{ margin: 0 }}>{t('login.code.hint')}</p>
-          <BigButton type="submit" variant="play" disabled={code.length !== CODE_LENGTH || busy}>
-            {busy ? t('login.checking') : t('login.next')}
-          </BigButton>
-        </form>
-      )}
-
-      {profiles && !chosen && (
-        <>
-          <p className="kid-say" style={{ margin: 0 }}>
-            {t('login.who')}
+        {message && (
+          <p className="kid-note" role="alert">
+            {message}
           </p>
-          <div className="profiles">
-            {profiles.map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                className="profile-card"
-                aria-disabled={!p.hasPin || undefined}
-                onClick={() => p.hasPin && setChosen(p)}
-              >
-                <Momo color={p.momoColor} size={72} />
-                <span>{p.nickname}</span>
-                {!p.hasPin && <small>{t('login.nopin')}</small>}
-              </button>
-            ))}
-          </div>
-          <BigButton variant="ghost" onClick={() => setProfiles(null)}>
-            {t('login.change')}
-          </BigButton>
-        </>
-      )}
+        )}
 
-      {chosen && (
-        <>
-          <div className="kid-row" style={{ alignItems: 'center' }}>
-            <Momo color={chosen.momoColor} size={72} />
-            <strong style={{ fontSize: '1.6rem' }}>{chosen.nickname}</strong>
-          </div>
-          <PicturePin value={pin} onChange={onPinChange} shake={shake} />
-          <BigButton
-            variant="ghost"
-            onClick={() => {
-              setChosen(null);
-              setPin([]);
-              setMessage(null);
+        {!profiles && (
+          <form
+            className="code-form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (code.length === CODE_LENGTH) void findFamily();
             }}
           >
-            {t('login.change')}
-          </BigButton>
-        </>
-      )}
-    </main>
+            <label htmlFor="family-code">{t('login.code.label')}</label>
+            <input
+              id="family-code"
+              value={code}
+              maxLength={CODE_LENGTH}
+              autoComplete="off"
+              autoCapitalize="characters"
+              onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z]/g, ''))}
+            />
+            <p style={{ margin: 0 }}>{t('login.code.hint')}</p>
+            <BigButton type="submit" variant="play" disabled={code.length !== CODE_LENGTH || busy}>
+              {busy ? t('login.checking') : t('login.next')}
+            </BigButton>
+          </form>
+        )}
+
+        {profiles && !chosen && (
+          <>
+            <div className="profiles">
+              {profiles.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  className="profile-card"
+                  aria-disabled={!p.hasPin || undefined}
+                  onClick={() => p.hasPin && setChosen(p)}
+                >
+                  <Momo color={p.momoColor} size={72} />
+                  <span>{p.nickname}</span>
+                  {!p.hasPin && <small>{t('login.nopin')}</small>}
+                </button>
+              ))}
+            </div>
+            <BigButton variant="ghost" onClick={() => setProfiles(null)}>
+              {t('login.change')}
+            </BigButton>
+          </>
+        )}
+
+        {chosen && (
+          <>
+            <div className="kid-row" style={{ alignItems: 'center' }}>
+              <Momo color={chosen.momoColor} size={72} />
+              <strong style={{ fontSize: '1.6rem' }}>{chosen.nickname}</strong>
+            </div>
+            <PicturePin value={pin} onChange={onPinChange} shake={shake} title={false} />
+            <BigButton
+              variant="ghost"
+              onClick={() => {
+                setChosen(null);
+                setPin([]);
+                setMessage(null);
+              }}
+            >
+              {t('login.change')}
+            </BigButton>
+          </>
+        )}
+      </main>
+    </>
   );
 }

@@ -226,8 +226,10 @@ describe('halaman', () => {
       </MemoryRouter>,
     );
     expect(await screen.findByText('Rara')).toBeInTheDocument();
-    expect(screen.getAllByRole('listitem')).toHaveLength(10);
-    expect(screen.getByRole('link', { name: 'Anak masuk' })).toHaveAttribute('href', '/play/masuk');
+    const board = screen.getByRole('region', { name: '10 besar' });
+    expect(within(board).getAllByRole('listitem')).toHaveLength(10);
+    for (const link of screen.getAllByRole('link', { name: 'Masuk anak' }))
+      expect(link).toHaveAttribute('href', '/play/masuk');
   });
 
   it('dialog Premium: aktifkan lalu status berubah', async () => {

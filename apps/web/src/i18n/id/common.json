@@ -9,5 +9,9 @@
   "notFound.title": "Halaman ini tidak ketemu",
   "notFound.hint": "Ayo kembali ke halaman awal.",
   "notFound.home": "Ke halaman awal",
-  "menu": "Menu"
+  "menu": "Menu",
+  "close": "Tutup",
+  "logout": "Keluar",
+  "sidebar.show": "Tampilkan menu",
+  "sidebar.hide": "Sembunyikan menu"
 }

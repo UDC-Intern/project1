@@ -126,7 +126,7 @@ Router: React Router 6. Bagian dinamis ditulis `:param`. URL halaman berbahasa I
 
 | Halaman           | URL                          | Isi                                                                               | Perlu login? |
 | ----------------- | ---------------------------- | --------------------------------------------------------------------------------- | ------------ |
-| Landing           | `/`                          | Penjelasan singkat, 10 besar peringkat, tombol "Anak masuk", "Orang tua", "Staf"  | Tidak        |
+| Landing           | `/`                          | Navbar, hero, fitur, buku dan topik, paket, 10 besar peringkat, tombol masuk anak, orang tua, staf | Tidak        |
 | Gaya (dev)        | `/gaya`                      | Katalog token dan komponen. Hanya ada saat `import.meta.env.DEV`                  | Tidak        |
 | Masuk anak        | `/play/masuk`                | Kode keluarga, pilih profil, sandi gambar                                         | Tidak        |
 | Beranda anak      | `/play`                      | Rak buku, tombol Lanjutkan                                                        | Anak         |
