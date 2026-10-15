@@ -1,0 +1,394 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--uk-bg);
+  color: var(--uk-text);
+  font-family: var(--uk-font-body);
+  font-size: var(--uk-text-adult);
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--uk-font-title);
+  line-height: 1.2;
+  margin: 0 0 var(--uk-space-3);
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--uk-focus);
+}
+
+/* ---- Tombol ---- */
+.uk-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--uk-space-2);
+  min-height: 44px;
+  padding: 0 var(--uk-space-4);
+  border: 2px solid var(--uk-primary);
+  border-radius: var(--uk-radius-md);
+  background: var(--uk-primary);
+  color: var(--uk-on-primary);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+}
+.uk-btn:hover {
+  background: var(--uk-primary-hover);
+  border-color: var(--uk-primary-hover);
+}
+.uk-btn--ghost {
+  background: var(--uk-surface);
+  color: var(--uk-primary);
+}
+.uk-btn--ghost:hover {
+  background: var(--uk-primary-soft);
+}
+.uk-btn--danger {
+  background: var(--uk-danger);
+  border-color: var(--uk-danger);
+}
+.uk-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Tombol area anak: minimal 64 px. */
+.uk-btn--big {
+  min-height: var(--uk-touch);
+  min-width: var(--uk-touch);
+  padding: 0 var(--uk-space-6);
+  font-size: var(--uk-text-child);
+  font-family: var(--uk-font-title);
+}
+
+/* ---- Kartu ---- */
+.uk-card {
+  background: var(--uk-surface);
+  border: 2px solid var(--uk-border);
+  border-radius: var(--uk-radius-lg);
+  box-shadow: var(--uk-shadow-card);
+  padding: var(--uk-space-4);
+}
+.uk-card--big {
+  min-height: var(--uk-touch);
+  padding: var(--uk-space-6);
+  font-size: var(--uk-text-child);
+}
+button.uk-card,
+a.uk-card {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+button.uk-card:hover,
+a.uk-card:hover {
+  border-color: var(--uk-primary);
+}
+.uk-card[aria-disabled='true'] {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ---- Umpan balik jawaban: hijau atau kuning, tidak pernah merah ---- */
+.uk-feedback {
+  border: 3px solid var(--uk-border);
+  border-radius: var(--uk-radius-lg);
+  padding: var(--uk-space-4);
+  font-size: var(--uk-text-child);
+}
+.uk-feedback--correct {
+  border-color: var(--uk-correct);
+  background: var(--uk-correct-soft);
+}
+.uk-feedback--retry {
+  border-color: var(--uk-retry);
+  background: var(--uk-retry-soft);
+}
+
+/* ---- Lencana ---- */
+.uk-badge {
+  display: inline-block;
+  padding: 2px var(--uk-space-3);
+  border-radius: 999px;
+  background: var(--uk-primary-soft);
+  color: var(--uk-primary);
+  font-size: var(--uk-text-adult-sm);
+  font-weight: 700;
+}
+
+/* ---- Isian ---- */
+.uk-field {
+  display: grid;
+  gap: var(--uk-space-1);
+  font-size: var(--uk-text-adult-sm);
+  font-weight: 700;
+}
+.uk-field input {
+  min-height: 44px;
+  padding: 0 var(--uk-space-3);
+  border: 2px solid var(--uk-border);
+  border-radius: var(--uk-radius-md);
+  font: inherit;
+  font-weight: 400;
+  background: var(--uk-surface);
+  color: var(--uk-text);
+}
+
+/* ---- Keadaan halaman ---- */
+@keyframes uk-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+.uk-skeleton {
+  background: var(--uk-border);
+  border-radius: var(--uk-radius-md);
+  min-height: 24px;
+  animation: uk-pulse 1.4s ease-in-out infinite;
+}
+.uk-empty,
+.uk-error {
+  text-align: center;
+  padding: var(--uk-space-8) var(--uk-space-4);
+}
+
+/* ---- Tata letak ---- */
+.uk-child-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-size: var(--uk-text-child);
+}
+.uk-child-top {
+  display: flex;
+  align-items: center;
+  gap: var(--uk-space-3);
+  padding: var(--uk-space-2) var(--uk-space-4);
+  background: var(--uk-surface);
+  border-bottom: 2px solid var(--uk-border);
+}
+.uk-child-main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--uk-content-max);
+  margin: 0 auto;
+  padding: var(--uk-space-6) var(--uk-space-4);
+}
+.uk-child-nav {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--uk-space-2);
+  padding: var(--uk-space-2) var(--uk-space-4);
+  background: var(--uk-surface);
+  border-top: 2px solid var(--uk-border);
+}
+.uk-child-nav a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--uk-touch);
+  border-radius: var(--uk-radius-md);
+  color: var(--uk-text);
+  font-family: var(--uk-font-title);
+  font-size: var(--uk-text-child);
+  text-decoration: none;
+}
+.uk-child-nav a[aria-current='page'] {
+  background: var(--uk-primary-soft);
+  color: var(--uk-primary);
+}
+
+.uk-adult-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+}
+.uk-sidebar {
+  background: var(--uk-surface);
+  border-right: 2px solid var(--uk-border);
+  padding: var(--uk-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--uk-space-2);
+}
+.uk-sidebar--admin {
+  background: var(--uk-text);
+  color: var(--uk-bg);
+  border-right-color: var(--uk-text);
+}
+.uk-sidebar--admin a {
+  color: var(--uk-bg);
+}
+.uk-sidebar a {
+  padding: var(--uk-space-2) var(--uk-space-3);
+  border-radius: var(--uk-radius-sm);
+  color: var(--uk-text);
+  text-decoration: none;
+  font-weight: 700;
+}
+.uk-sidebar a[aria-current='page'] {
+  background: var(--uk-primary-soft);
+  color: var(--uk-primary);
+}
+.uk-sidebar--admin a[aria-current='page'] {
+  background: var(--uk-bg);
+  color: var(--uk-text);
+}
+.uk-adult-main {
+  padding: var(--uk-space-6);
+  max-width: 1100px;
+}
+.uk-menu-toggle {
+  display: none;
+}
+@media (max-width: 720px) {
+  .uk-adult-layout {
+    grid-template-columns: 1fr;
+  }
+  .uk-sidebar {
+    display: none;
+  }
+  .uk-sidebar[data-open='true'] {
+    display: flex;
+  }
+  .uk-menu-toggle {
+    display: inline-flex;
+    margin: var(--uk-space-3);
+  }
+}
+
+/* ---- Momo dan tanaman ---- */
+.uk-momo {
+  display: inline-block;
+  color: var(--uk-momo-blue);
+}
+.uk-momo[data-color='green'] {
+  color: var(--uk-momo-green);
+}
+.uk-momo[data-color='yellow'] {
+  color: var(--uk-momo-yellow);
+}
+.uk-momo[data-color='orange'] {
+  color: var(--uk-momo-orange);
+}
+.uk-momo[data-color='pink'] {
+  color: var(--uk-momo-pink);
+}
+.uk-momo[data-color='teal'] {
+  color: var(--uk-momo-teal);
+}
+@keyframes uk-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+.uk-momo[data-mood='happy'] svg {
+  animation: uk-bob 1s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .uk-momo[data-mood='happy'] svg,
+  .uk-skeleton {
+    animation: none;
+  }
+}
+
+/* ---- Sandi gambar ---- */
+.uk-pin-grid {
+  display: grid;
+  grid-template-columns: repeat(3, var(--uk-touch));
+  gap: var(--uk-space-3);
+}
+.uk-pin-pic {
+  width: var(--uk-touch);
+  height: var(--uk-touch);
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--uk-border);
+  border-radius: var(--uk-radius-md);
+  background: var(--uk-surface);
+  cursor: pointer;
+  padding: 0;
+}
+.uk-pin-pic:hover {
+  border-color: var(--uk-primary);
+}
+.uk-pin-pic[aria-pressed='true'] {
+  border-color: var(--uk-primary);
+  background: var(--uk-primary-soft);
+}
+.uk-pin-slots {
+  display: flex;
+  gap: var(--uk-space-2);
+  margin-bottom: var(--uk-space-3);
+}
+.uk-pin-slot {
+  width: 44px;
+  height: 44px;
+  border: 2px dashed var(--uk-border);
+  border-radius: var(--uk-radius-sm);
+  display: grid;
+  place-items: center;
+}
+
+/* ---- Hitung objek ---- */
+.uk-count {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--uk-space-3);
+  align-items: center;
+}
+.uk-count-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--uk-space-1);
+  padding: var(--uk-space-2);
+  border: 2px dashed var(--uk-border);
+  border-radius: var(--uk-radius-md);
+}
+
+/* ---- Katalog gaya ---- */
+.uk-swatch {
+  width: 100%;
+  height: 56px;
+  border-radius: var(--uk-radius-sm);
+  border: 2px solid var(--uk-border);
+}
+.uk-grid {
+  display: grid;
+  gap: var(--uk-space-4);
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+}
+.uk-stack {
+  display: grid;
+  gap: var(--uk-space-4);
+}
+.uk-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--uk-space-3);
+  align-items: center;
+}

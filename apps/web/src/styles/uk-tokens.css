@@ -1,0 +1,52 @@
+/* Token desain UdaKids. Warna dan ukuran hanya dipakai lewat variabel ini (PRD bagian 8). */
+:root {
+  --uk-bg: #fff8ee;
+  --uk-surface: #ffffff;
+  --uk-text: #23302b;
+  --uk-text-muted: #5b6b63;
+  --uk-border: #e7dcc8;
+
+  --uk-primary: #1f6fb2;
+  --uk-primary-hover: #185a91;
+  --uk-primary-soft: #e3f0fa;
+  --uk-on-primary: #ffffff;
+
+  --uk-correct: #2f9e63;
+  --uk-correct-soft: #e2f5ea;
+  --uk-retry: #f2b705;
+  --uk-retry-soft: #fff4cc;
+  /* Hanya area orang tua dan admin, untuk tindakan hapus. Tidak pernah untuk jawaban anak. */
+  --uk-danger: #c0392b;
+
+  --uk-momo-blue: #3b82c4;
+  --uk-momo-green: #3fa66b;
+  --uk-momo-yellow: #f2b705;
+  --uk-momo-orange: #f08a24;
+  --uk-momo-pink: #ec7fa8;
+  --uk-momo-teal: #2aa5a0;
+
+  --uk-font-body: 'Andika', system-ui, sans-serif;
+  --uk-font-title: 'Baloo 2', 'Andika', system-ui, sans-serif;
+
+  --uk-text-child: 1.375rem;
+  --uk-text-question: 1.875rem;
+  --uk-text-adult: 1rem;
+  --uk-text-adult-sm: 0.875rem;
+
+  --uk-radius-sm: 8px;
+  --uk-radius-md: 16px;
+  --uk-radius-lg: 24px;
+
+  --uk-space-1: 4px;
+  --uk-space-2: 8px;
+  --uk-space-3: 12px;
+  --uk-space-4: 16px;
+  --uk-space-6: 24px;
+  --uk-space-8: 32px;
+
+  --uk-touch: 64px;
+  --uk-answer-height: 96px;
+  --uk-content-max: 960px;
+  --uk-focus: 0 0 0 3px var(--uk-surface), 0 0 0 6px var(--uk-primary);
+  --uk-shadow-card: 0 2px 0 var(--uk-border);
+}
