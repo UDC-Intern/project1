@@ -173,7 +173,7 @@ export function ProfilePage() {
       {/* Hero card: avatar Momo, nama, status kelas, dan 4 tombol aksi */}
       <section className="profile-hero">
         <div className="profile-avatar">
-          <Momo own color={current} mood="proud" size={110} />
+          <Momo color={current} mood="proud" size={110} />
         </div>
         <div className="profile-id">
           <h1>{data.nickname}</h1>

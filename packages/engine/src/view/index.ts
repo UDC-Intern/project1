@@ -51,16 +51,13 @@ const classCode = z
 export const childProfileSchema = z.object({
   nickname,
   momoColor: z.enum(MOMO_COLORS),
-  momoLook: z.record(z.string(), z.unknown()).nullable().optional(),
   pin,
   classCode: classCode.optional(),
 });
-export type ChildProfileInput = z.infer<typeof childProfileSchema>;
 
 export const childUpdateSchema = z.object({
   nickname: nickname.optional(),
   momoColor: z.enum(MOMO_COLORS).optional(),
-  momoLook: z.record(z.string(), z.unknown()).nullable().optional(),
   pin: pin.optional(),
   classCode: classCode.nullable().optional(),
 });
@@ -178,8 +175,6 @@ export function durationWords(ms: number): string {
 /** Rata-rata skor dengan satu desimal, mis. "86,5". */
 export const formatAverage = (n: number): string =>
   n.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-
-export const LEADERBOARD_TOP = 10;
 
 export const GRADES = ['sd1'] as const;
 export const GRADE_LABEL: Record<(typeof GRADES)[number], string> = { sd1: 'Kelas 1' };

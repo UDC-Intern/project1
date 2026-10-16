@@ -14,4 +14,3 @@ export const TOTAL_LEVELS = BASE_BOOKS.reduce(
   (n, b) => n + b.topics.reduce((m, t) => m + t.levels.length, 0),
   0,
 );
-export const TOTAL_TOPICS = BASE_BOOKS.reduce((n, b) => n + b.topics.length, 0);

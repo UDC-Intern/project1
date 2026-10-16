@@ -67,7 +67,7 @@ export const PetaPanel = forwardRef<
 
       {story && (
         <div className="peta-story">
-          <Momo own color={momoColor} mood="happy" size={76} />
+          <Momo color={momoColor} mood="happy" size={76} />
           <div className="peta-bubble">
             <p>{story}</p>
             <button

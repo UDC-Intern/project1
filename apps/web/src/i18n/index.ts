@@ -27,4 +27,4 @@ export function useT(ns: Namespace = 'common') {
   );
 }
 
-export { t, type MessageKey } from './ref';
+export { t, type MessageKey } from './halaman';

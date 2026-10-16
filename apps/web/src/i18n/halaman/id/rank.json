@@ -1,0 +1,12 @@
+{
+  "title": "Papan Peringkat",
+  "scopes": "Pilih papan",
+  "me": "Kamu",
+  "empty": "Belum ada yang bermain di papan ini. Jadilah yang pertama!",
+  "detail.title": "Rapor {name}",
+  "mode.label": "Urutan papan peringkat",
+  "mode.average": "Nilai peringkat",
+  "mode.total": "Total skor",
+  "mode.mock": "Mock test",
+  "mock.empty": "Belum ada yang mengerjakan mock test ini. Jadilah yang pertama!"
+}

@@ -311,7 +311,7 @@ function AllDone({ momoColor, title }: { momoColor: string; title: string }) {
     <div className="peta-alldone" role="status">
       <RebungBand />
       <div className="peta-alldone-body">
-        <Momo own color={momoColor} mood="proud" size={88} />
+        <Momo color={momoColor} mood="proud" size={88} />
         <span className="peta-alldone-text">
           <strong>
             <TrophyIcon size={30} />
@@ -501,7 +501,7 @@ function Node({
         </span>
         {info.state === 'sekarang' && (
           <span className="peta-here">
-            <Momo own color={momoColor} mood="happy" size={40} />
+            <Momo color={momoColor} mood="happy" size={40} />
           </span>
         )}
         {info.mark === 'lompat' && (

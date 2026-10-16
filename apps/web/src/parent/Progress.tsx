@@ -7,7 +7,6 @@ import {
   type Color,
   type DayActivity,
   type PlanStatus,
-  type MomoLook,
 } from '@udakids/engine';
 import { Momo } from '../components/Momo';
 import { t } from '../i18n';
@@ -20,7 +19,6 @@ export type OverviewChild = {
   id: string;
   nickname: string;
   momoColor: string;
-  momoLook?: MomoLook | null;
   lastActiveAt: string | null;
   className: string | null;
   /** Status Free / Premium (D-041). */
@@ -167,12 +165,7 @@ export function ChildProgress({ child, actions }: { child: OverviewChild; action
     <article className="pd-child" aria-labelledby={`child-${child.id}`}>
       <header className="pd-child-head">
         <div className="pd-avatar pd-bob" aria-hidden>
-          <Momo
-            color={child.momoColor as Color}
-            look={child.momoLook ?? null}
-            mood={empty ? 'curious' : 'proud'}
-            size={84}
-          />
+          <Momo color={child.momoColor as Color} mood={empty ? 'curious' : 'proud'} size={84} />
         </div>
         <div className="pd-child-id">
           <h2 id={`child-${child.id}`}>{child.nickname}</h2>

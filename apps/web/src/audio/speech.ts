@@ -10,8 +10,6 @@ type Synth = SpeechSynthesis;
 const synth = (): Synth | null =>
   typeof window !== 'undefined' && 'speechSynthesis' in window ? window.speechSynthesis : null;
 
-export const speechAvailable = (): boolean => synth() !== null;
-
 let touched = false;
 let pending: { text: string; onEnd: (() => void) | undefined } | null = null;
 

@@ -6,7 +6,6 @@ import {
   type CatalogHome,
   type ChildProfile,
   type MomoColor,
-  type MomoLook,
   type TopicDetail,
 } from '@udakids/engine';
 import { ApiError } from '../client';
@@ -139,7 +138,6 @@ export async function profile(token: string | null): Promise<ChildProfile> {
   return {
     nickname: child.nickname,
     momoColor: child.momoColor,
-    momoLook: child.momoLook ?? null,
     totalScore: Object.values(db.best[childId] ?? {}).reduce((a, b) => a + b.score, 0),
     levelsPassed: (db.passedLevels[childId] ?? []).length,
     rounds: Object.values(db.rounds).filter((r) => r.childId === childId && r.result).length,
@@ -168,16 +166,10 @@ export async function profile(token: string | null): Promise<ChildProfile> {
   };
 }
 
-export async function setMomo(
-  token: string | null,
-  momoColor: MomoColor,
-  momoLook?: MomoLook | null,
-) {
+export async function setMomo(token: string | null, momoColor: MomoColor) {
   const childId = childIdFromToken(token);
   const db = readDb();
-  const child = db.children.find((c) => c.id === childId)!;
-  child.momoColor = momoColor;
-  if (momoLook !== undefined) child.momoLook = momoLook;
+  db.children.find((c) => c.id === childId)!.momoColor = momoColor;
   writeDb(db);
-  return { momoColor, momoLook: child.momoLook ?? null };
+  return { momoColor };
 }

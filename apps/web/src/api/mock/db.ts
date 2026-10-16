@@ -2,7 +2,6 @@ import {
   type BookContent,
   type MasteryState,
   type MomoColor,
-  type MomoLook,
   type Pin,
   type Stage,
 } from '@udakids/engine';
@@ -76,8 +75,6 @@ export type MockChild = {
   nickname: string;
   momoColor: MomoColor;
   pin: Pin | null;
-  /** Hiasan Momo pilihan anak (model, aksesori, warna). */
-  momoLook?: MomoLook | null;
   failedAttempts: number;
   lockCount: number;
   lockedUntil: number | null;

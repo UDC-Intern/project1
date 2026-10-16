@@ -1,7 +1,7 @@
 import { PROOF_MAX_BYTES, PROOF_TYPES } from '@udakids/engine';
 import { ApiError } from '../api/client';
 import { getSession, setSession } from '../auth/session';
-import { api } from '../api/ref';
+import { api } from '../api/parentApi';
 import { isMocked } from '../api/mode';
 import { API_URL } from '../config/app';
 import { t } from '../i18n';
