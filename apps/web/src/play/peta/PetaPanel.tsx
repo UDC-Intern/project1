@@ -4,6 +4,7 @@ import { speak } from '../../audio/speech';
 import { PlayIcon } from '../../components/Icons';
 import { Momo } from '../../components/Momo';
 import { t } from '../../i18n';
+import { PremiumNotice } from '../PremiumNotice';
 import { Stars, type NodeInfo } from './PetaBelajar';
 import type { Shelf } from './types';
 
@@ -111,11 +112,7 @@ export const PetaPanel = forwardRef<
             : t('play.peta.levels', { passed: info.passed, total: info.total })}
         </span>
       </div>
-      {info.paidNext && !premium && (
-        <p className="peta-paid" role="note">
-          {t('play.library.paid')}
-        </p>
-      )}
+      {info.paidNext && !premium && <PremiumNotice compact />}
 
       <Link className="kid-btn peta-start" to={shelf.href}>
         <PlayIcon />

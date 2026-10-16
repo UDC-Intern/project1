@@ -14,7 +14,7 @@ import { RoundPage } from '../src/play/RoundPage';
 const AYU = 'c-ayu';
 const BIMA = 'c-bima';
 const LEVEL1 = 'matematika-kelas-1:A:1';
-const LEVEL1_PARAMS = { max: 20 };
+const LEVEL1_PARAMS = { max: 10 };
 
 const login = (id: string, name: string) =>
   useSession.setState({ session: { token: `mock-child:${id}`, role: 'child', name } });
@@ -59,11 +59,11 @@ describe('mock practice', () => {
     expect(JSON.stringify(round)).not.toContain('Hitung satu per satu');
   });
 
-  it('10 benar: skor 100, lulus, level 2 menjadi Premium, tanaman tumbuh', async () => {
+  it('10 benar: skor 100, lulus, level 2 terbuka, tanaman tumbuh', async () => {
     const { summary } = await playRound(LEVEL1);
     expect(summary.score).toBe(100);
     expect(summary.passed).toBe(true);
-    expect(summary.nextLevel?.status).toBe('premium');
+    expect(summary.nextLevel?.status).toBe('open');
     expect(summary.plant.stageAfter).toBeGreaterThan(summary.plant.stageBefore);
     expect((await topic('matematika-kelas-1:A')).levels[0]).toMatchObject({
       status: 'passed',
@@ -111,26 +111,28 @@ describe('mock practice', () => {
     expect((await errorOf(finish(round.roundId))).status).toBe(409);
   });
 
-  it('level terkunci, Premium, dan segera hadir ditolak di server', async () => {
+  it('level terkunci dan Premium ditolak di server', async () => {
     expect((await errorOf(startRound('matematika-kelas-1:A:2'))).body.code).toBe('LEVEL_LOCKED');
     const db = readDb();
     db.passedLevels[AYU] = [LEVEL1];
     writeDb(db);
-    expect((await errorOf(startRound('matematika-kelas-1:A:2'))).body.code).toBe(
+    // Level 2 gratis dan terbuka setelah level 1 lulus; level 3 baru terbuka setelah level 2 lulus.
+    expect((await startRound('matematika-kelas-1:A:2')).questions).toHaveLength(10);
+    expect((await errorOf(startRound('matematika-kelas-1:A:3'))).body.code).toBe('LEVEL_LOCKED');
+    db.passedLevels[AYU] = [LEVEL1, 'matematika-kelas-1:A:2'];
+    writeDb(db);
+    expect((await errorOf(startRound('matematika-kelas-1:A:3'))).body.code).toBe(
       'PREMIUM_REQUIRED',
-    );
-    expect((await errorOf(startRound('matematika-kelas-1:B:1'))).body.code).toBe(
-      'NOT_ENOUGH_QUESTIONS',
     );
     expect((await errorOf(startRound('tidak:ada:1'))).status).toBe(404);
   });
 
-  it('Premium aktif membuka level 2', async () => {
+  it('Premium aktif membuka level 3', async () => {
     const db = readDb();
-    db.passedLevels[AYU] = [LEVEL1];
+    db.passedLevels[AYU] = [LEVEL1, 'matematika-kelas-1:A:2'];
     db.premiumUntil[AYU] = new Date(Date.now() + 86_400_000).toISOString();
     writeDb(db);
-    const round = await startRound('matematika-kelas-1:A:2');
+    const round = await startRound('matematika-kelas-1:A:3');
     expect(round.questions).toHaveLength(10);
   });
 

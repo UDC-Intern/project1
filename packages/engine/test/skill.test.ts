@@ -8,6 +8,7 @@ const BOOKS = [
   'matematika-kelas-2',
   'matematika-kelas-3',
   'matematika-kelas-4',
+  'sains-kelas-1',
 ].map((slug) =>
   bookContentSchema.parse(
     JSON.parse(readFileSync(join(__dirname, '../../../content', slug, 'book.json'), 'utf8')),
@@ -44,6 +45,6 @@ describe('generator skill (materi kelas 1 sampai 4)', () => {
         }
       }
     }
-    expect(levels).toBeGreaterThan(250);
+    expect(levels).toBeGreaterThan(180);
   }, 180_000);
 });

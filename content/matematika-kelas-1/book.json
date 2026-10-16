@@ -13,355 +13,38 @@
       "levels": [
         {
           "number": 1,
-          "title": "Membilang 1 sampai 20",
+          "title": "Membilang sampai 10",
           "isFree": true,
           "generator": "count",
-          "generatorParams": {
-            "max": 20
-          }
+          "generatorParams": { "max": 10 }
         },
         {
           "number": 2,
+          "title": "Membilang sampai 20",
+          "isFree": true,
+          "generator": "count",
+          "generatorParams": { "max": 20 }
+        },
+        {
+          "number": 3,
           "title": "Urutan dan loncat 2, 5, 10",
           "isFree": false,
           "generator": "skip-count",
-          "generatorParams": {
-            "steps": [2, 5, 10]
-          }
+          "generatorParams": { "steps": [2, 5, 10] }
         },
         {
-          "number": 3,
+          "number": 4,
           "title": "Sebelum, sesudah, di antara",
           "isFree": false,
           "generator": "neighbors",
-          "generatorParams": {
-            "max": 100
-          }
-        }
-      ]
-    },
-    {
-      "code": "B",
-      "title": "Puluhan dan satuan",
-      "sort": 2,
-      "lesson": "Sepuluh satuan sama dengan satu puluhan. Angka empat belas artinya satu puluhan dan empat satuan. Puluhan ada di kiri, satuan ada di kanan.",
-      "levels": [
-        {
-          "number": 1,
-          "title": "Belasan itu 10 dan sekian",
-          "isFree": true,
-          "generator": null
-        },
-        {
-          "number": 2,
-          "title": "Puluhan dan satuan sampai 50",
-          "isFree": false,
-          "generator": null
-        },
-        {
-          "number": 3,
-          "title": "Membandingkan bilangan sampai 100",
-          "isFree": false,
-          "generator": null
-        }
-      ]
-    },
-    {
-      "code": "C",
-      "title": "Penjumlahan sampai 20",
-      "sort": 3,
-      "lesson": "Menjumlah artinya menggabungkan. Ada 3 bola merah dan 2 bola biru. Kalau digabung, hitung semuanya. Jadi 3 + 2 = 5.",
-      "levels": [
-        {
-          "number": 1,
-          "title": "Jumlah sampai 10 bergambar",
-          "isFree": true,
-          "generator": null
-        },
-        {
-          "number": 2,
-          "title": "Jumlah sampai 20",
-          "isFree": false,
-          "generator": null
-        },
-        {
-          "number": 3,
-          "title": "Soal cerita penjumlahan",
-          "isFree": false,
-          "generator": null
-        }
-      ]
-    },
-    {
-      "code": "D",
-      "title": "Pengurangan sampai 20",
-      "sort": 4,
-      "lesson": "Mengurang artinya mengambil sebagian. Ada 5 apel, lalu Ayu makan 2 apel. Sisanya tinggal 3 apel. Jadi 5 - 2 = 3.",
-      "levels": [
-        {
-          "number": 1,
-          "title": "Kurang sampai 10 bergambar",
-          "isFree": true,
-          "generator": null
-        },
-        {
-          "number": 2,
-          "title": "Kurang sampai 20",
-          "isFree": false,
-          "generator": null
-        },
-        {
-          "number": 3,
-          "title": "Soal cerita pengurangan",
-          "isFree": false,
-          "generator": null
-        }
-      ]
-    },
-    {
-      "code": "KA",
-      "title": "Membilang sampai 100",
-      "sort": 5,
-      "lesson": "Membilang artinya menyebut bilangan berurutan: satu, dua, tiga, dan seterusnya sampai seratus. Kita juga belajar bingkai sepuluh, papan seratus, dan urutan ke-berapa.",
-      "tips": [
-        "Bingkai sepuluh penuh berisi 10 titik.",
-        "Di papan seratus, turun satu baris berarti tambah 10.",
-        "Hitung mundur berarti setiap langkah berkurang 1."
-      ],
-      "levels": [
-        {
-          "number": 1,
-          "title": "Hitung mundur sampai 100",
-          "isFree": true,
-          "generator": "skill",
-          "generatorParams": {
-            "family": "mix",
-            "params": {
-              "parts": [
-                {
-                  "family": "expr",
-                  "params": {
-                    "vars": {
-                      "a": [10, 100]
-                    },
-                    "prompt": "Hitung mundur: {a}, {=a-1}, {=a-2}, … Angka berikutnya?",
-                    "answer": "a - 3",
-                    "explain": "Hitung mundur berarti setiap langkah berkurang 1: {a}, {=a-1}, {=a-2}, {answer}.",
-                    "distractors": [
-                      {
-                        "expr": "a + 1",
-                        "tag": "arah-terbalik"
-                      },
-                      {
-                        "expr": "a - 4",
-                        "tag": "melompat"
-                      },
-                      {
-                        "expr": "a - 13",
-                        "tag": "salah-puluhan"
-                      }
-                    ]
-                  }
-                },
-                {
-                  "family": "expr",
-                  "params": {
-                    "vars": {
-                      "a": [10, 100]
-                    },
-                    "prompt": "Hitung mundur: {a}, {=a-1}, …, {=a-3}. Angka yang hilang?",
-                    "answer": "a - 2",
-                    "explain": "Sesudah {=a-1} (hitung mundur) adalah {answer}, lalu {=a-3}.",
-                    "distractors": [
-                      {
-                        "expr": "a + 2",
-                        "tag": "arah-terbalik"
-                      },
-                      {
-                        "expr": "a - 4",
-                        "tag": "melompat"
-                      },
-                      {
-                        "expr": "a - 12",
-                        "tag": "salah-puluhan"
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-          }
-        },
-        {
-          "number": 2,
-          "title": "Bilangan urutan (ke-berapa)",
-          "isFree": false,
-          "generator": "skill",
-          "generatorParams": {
-            "family": "mix",
-            "params": {
-              "parts": [
-                {
-                  "family": "expr",
-                  "params": {
-                    "vars": {
-                      "k": [2, 10]
-                    },
-                    "prompt": "Ada 10 anak antre membeli bakso. {nama} di urutan ke-{k} dari depan. Berapa anak di depan {nama}?",
-                    "answer": "k - 1",
-                    "explain": "Urutan ke-{k} berarti ada {answer} anak sebelum {nama}.",
-                    "words": {
-                      "nama": [
-                        "Alya",
-                        "Raka",
-                        "Dimas",
-                        "Sari",
-                        "Budi",
-                        "Putri",
-                        "Nina",
-                        "Adit",
-                        "Tegar",
-                        "Wulan",
-                        "Bayu",
-                        "Intan"
-                      ]
-                    },
-                    "distractors": [
-                      {
-                        "expr": "k",
-                        "tag": "urutan-bukan-banyak"
-                      },
-                      {
-                        "expr": "k + 1",
-                        "tag": "lebih-satu"
-                      },
-                      {
-                        "expr": "10 - k",
-                        "tag": "di-belakang"
-                      }
-                    ],
-                    "choices": 3
-                  }
-                },
-                {
-                  "family": "expr",
-                  "params": {
-                    "vars": {
-                      "k": [1, 9]
-                    },
-                    "prompt": "Anak-anak antre naik ayunan. {nama} di urutan ke-{k}. Anak tepat di belakang {nama} ada di urutan ke- …",
-                    "answer": "k + 1",
-                    "explain": "Tepat di belakang urutan ke-{k} adalah urutan ke-{answer}.",
-                    "words": {
-                      "nama": [
-                        "Alya",
-                        "Raka",
-                        "Dimas",
-                        "Sari",
-                        "Budi",
-                        "Putri",
-                        "Nina",
-                        "Adit",
-                        "Tegar",
-                        "Wulan",
-                        "Bayu",
-                        "Intan"
-                      ]
-                    },
-                    "distractors": [
-                      {
-                        "expr": "k",
-                        "tag": "sama"
-                      },
-                      {
-                        "expr": "k + 2",
-                        "tag": "melompat"
-                      },
-                      {
-                        "expr": "max(0, k - 1)",
-                        "tag": "di-depan"
-                      }
-                    ],
-                    "choices": 3
-                  }
-                }
-              ]
-            }
-          }
-        },
-        {
-          "number": 3,
-          "title": "Tantangan membilang sampai 100",
-          "isFree": false,
-          "generator": "skill",
-          "generatorParams": {
-            "family": "mix",
-            "params": {
-              "parts": [
-                {
-                  "family": "expr",
-                  "params": {
-                    "vars": {
-                      "a": [10, 100]
-                    },
-                    "prompt": "Hitung mundur: {a}, {=a-1}, {=a-2}, … Angka berikutnya?",
-                    "answer": "a - 3",
-                    "explain": "Hitung mundur berarti setiap langkah berkurang 1: {a}, {=a-1}, {=a-2}, {answer}.",
-                    "mode": "input"
-                  }
-                },
-                {
-                  "family": "expr",
-                  "params": {
-                    "vars": {
-                      "k": [2, 10]
-                    },
-                    "prompt": "Ada 10 anak antre membeli bakso. {nama} di urutan ke-{k} dari depan. Berapa anak di depan {nama}?",
-                    "answer": "k - 1",
-                    "explain": "Urutan ke-{k} berarti ada {answer} anak sebelum {nama}.",
-                    "words": {
-                      "nama": [
-                        "Alya",
-                        "Raka",
-                        "Dimas",
-                        "Sari",
-                        "Budi",
-                        "Putri",
-                        "Nina",
-                        "Adit",
-                        "Tegar",
-                        "Wulan",
-                        "Bayu",
-                        "Intan"
-                      ]
-                    },
-                    "distractors": [
-                      {
-                        "expr": "k",
-                        "tag": "urutan-bukan-banyak"
-                      },
-                      {
-                        "expr": "k + 1",
-                        "tag": "lebih-satu"
-                      },
-                      {
-                        "expr": "10 - k",
-                        "tag": "di-belakang"
-                      }
-                    ],
-                    "choices": 3
-                  }
-                }
-              ]
-            }
-          }
+          "generatorParams": { "max": 100 }
         }
       ]
     },
     {
       "code": "KB",
       "title": "Membilang sampai 120",
-      "sort": 6,
+      "sort": 2,
       "lesson": "Sesudah 100 kita terus membilang: seratus satu, seratus dua, sampai seratus dua puluh. Kita berlatih membaca, menulis, dan mengurutkan bilangan ini.",
       "tips": [
         "Sesudah 109 adalah 110, sesudah 119 adalah 120.",
@@ -377,9 +60,7 @@
           "generatorParams": {
             "family": "expr",
             "params": {
-              "vars": {
-                "a": [20, 120]
-              },
+              "vars": { "a": [20, 120] },
               "prompt": "Dengarkan, lalu tulis angkanya.",
               "answer": "a",
               "explain": "{w:a} ditulis {answer}.",
@@ -391,30 +72,19 @@
         {
           "number": 2,
           "title": "Bilangan sesudahnya sampai 120",
-          "isFree": false,
+          "isFree": true,
           "generator": "skill",
           "generatorParams": {
             "family": "expr",
             "params": {
-              "vars": {
-                "a": [60, 119]
-              },
+              "vars": { "a": [60, 119] },
               "prompt": "Angka berapa yang tepat sesudah {a}?",
               "answer": "a + 1",
               "explain": "Hitung maju satu dari {a}: {answer}.",
               "distractors": [
-                {
-                  "expr": "a - 1",
-                  "tag": "sebelum-bukan-sesudah"
-                },
-                {
-                  "expr": "a + 10",
-                  "tag": "salah-puluhan"
-                },
-                {
-                  "expr": "a + 2",
-                  "tag": "melompat"
-                }
+                { "expr": "a - 1", "tag": "sebelum-bukan-sesudah" },
+                { "expr": "a + 10", "tag": "salah-puluhan" },
+                { "expr": "a + 2", "tag": "melompat" }
               ]
             }
           }
@@ -427,25 +97,14 @@
           "generatorParams": {
             "family": "expr",
             "params": {
-              "vars": {
-                "a": [61, 120]
-              },
+              "vars": { "a": [61, 120] },
               "prompt": "Angka berapa yang tepat sebelum {a}?",
               "answer": "a - 1",
               "explain": "Hitung mundur satu dari {a}: {answer}.",
               "distractors": [
-                {
-                  "expr": "a + 1",
-                  "tag": "sesudah-bukan-sebelum"
-                },
-                {
-                  "expr": "a - 10",
-                  "tag": "salah-puluhan"
-                },
-                {
-                  "expr": "a - 2",
-                  "tag": "melompat"
-                }
+                { "expr": "a + 1", "tag": "sesudah-bukan-sebelum" },
+                { "expr": "a - 10", "tag": "salah-puluhan" },
+                { "expr": "a - 2", "tag": "melompat" }
               ]
             }
           }
@@ -458,203 +117,11 @@
           "generatorParams": {
             "family": "expr",
             "params": {
-              "vars": {
-                "a": [95, 116]
-              },
+              "vars": { "a": [95, 116] },
               "prompt": "Hitung maju: {a}, {=a+1}, {=a+2}, {=a+3}, … Angka berikutnya?",
               "answer": "a + 4",
               "explain": "{=a+3} lalu {answer}.",
               "mode": "input"
-            }
-          }
-        },
-        {
-          "number": 5,
-          "title": "Urutan maju dan mundur",
-          "isFree": false,
-          "generator": "skill",
-          "generatorParams": {
-            "family": "mix",
-            "params": {
-              "parts": [
-                {
-                  "family": "expr",
-                  "params": {
-                    "vars": {
-                      "a": [70, 117]
-                    },
-                    "prompt": "{a}, {=a+1}, {=a+2}, … Angka berikutnya?",
-                    "answer": "a + 3",
-                    "explain": "Setiap langkah bertambah 1: {answer}.",
-                    "distractors": [
-                      {
-                        "expr": "a + 2",
-                        "tag": "diam"
-                      },
-                      {
-                        "expr": "a + 4",
-                        "tag": "melompat"
-                      },
-                      {
-                        "expr": "a + 1",
-                        "tag": "arah-terbalik"
-                      }
-                    ]
-                  }
-                },
-                {
-                  "family": "expr",
-                  "params": {
-                    "vars": {
-                      "a": [73, 120]
-                    },
-                    "prompt": "{a}, {=a-1}, {=a-2}, … Angka berikutnya?",
-                    "answer": "a - 3",
-                    "explain": "Setiap langkah berkurang 1: {answer}.",
-                    "distractors": [
-                      {
-                        "expr": "a - 1",
-                        "tag": "arah-terbalik"
-                      },
-                      {
-                        "expr": "a - 4",
-                        "tag": "melompat"
-                      },
-                      {
-                        "expr": "a - 13",
-                        "tag": "salah-puluhan"
-                      }
-                    ]
-                  }
-                },
-                {
-                  "family": "expr",
-                  "params": {
-                    "vars": {
-                      "a": [74, 120]
-                    },
-                    "prompt": "{a}, {=a-1}, …, {=a-3}, {=a-4}. Angka yang hilang?",
-                    "answer": "a - 2",
-                    "explain": "Hitung mundur: {=a-1}, {answer}, {=a-3}.",
-                    "distractors": [
-                      {
-                        "expr": "a + 2",
-                        "tag": "arah-terbalik"
-                      },
-                      {
-                        "expr": "a - 12",
-                        "tag": "salah-puluhan"
-                      },
-                      {
-                        "expr": "a - 5",
-                        "tag": "melompat"
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-          }
-        },
-        {
-          "number": 6,
-          "title": "Nama bilangan dan angkanya",
-          "isFree": false,
-          "generator": "skill",
-          "generatorParams": {
-            "family": "mix",
-            "params": {
-              "parts": [
-                {
-                  "family": "expr",
-                  "params": {
-                    "vars": {
-                      "a": [21, 99]
-                    },
-                    "prompt": "Angka untuk \"{w:a}\" adalah …",
-                    "answer": "a",
-                    "explain": "\"{w:a}\" ditulis {answer}: puluhan di depan, satuan di belakang.",
-                    "constraint": "a % 10 != 0 && a % 10 != floor(a / 10)",
-                    "distractors": [
-                      {
-                        "expr": "(a % 10) * 10 + floor(a / 10)",
-                        "tag": "angka-tertukar"
-                      },
-                      {
-                        "expr": "a + 10",
-                        "tag": "salah-puluhan"
-                      },
-                      {
-                        "expr": "a - 10",
-                        "tag": "salah-puluhan"
-                      }
-                    ]
-                  }
-                },
-                {
-                  "family": "expr",
-                  "params": {
-                    "vars": {
-                      "a": [101, 120]
-                    },
-                    "prompt": "Angka untuk \"{w:a}\" adalah …",
-                    "answer": "a",
-                    "explain": "\"{w:a}\" ditulis {answer}, tiga angka saja.",
-                    "distractors": [
-                      {
-                        "expr": "a - 100",
-                        "tag": "lupa-seratus"
-                      },
-                      {
-                        "expr": "a + 10",
-                        "tag": "salah-puluhan"
-                      },
-                      {
-                        "expr": "a - 10",
-                        "tag": "salah-puluhan"
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-          }
-        },
-        {
-          "number": 7,
-          "title": "Tantangan membilang sampai 120",
-          "isFree": false,
-          "generator": "skill",
-          "generatorParams": {
-            "family": "mix",
-            "params": {
-              "parts": [
-                {
-                  "family": "expr",
-                  "params": {
-                    "vars": {
-                      "a": [20, 120]
-                    },
-                    "prompt": "Dengarkan, lalu tulis angkanya.",
-                    "answer": "a",
-                    "explain": "{w:a} ditulis {answer}.",
-                    "say": "Tulis angka {w:a}.",
-                    "mode": "input"
-                  }
-                },
-                {
-                  "family": "expr",
-                  "params": {
-                    "vars": {
-                      "a": [73, 120]
-                    },
-                    "prompt": "{a}, {=a-1}, {=a-2}, … Angka berikutnya?",
-                    "answer": "a - 3",
-                    "explain": "Setiap langkah berkurang 1: {answer}.",
-                    "mode": "input"
-                  }
-                }
-              ]
             }
           }
         }
@@ -663,7 +130,7 @@
     {
       "code": "KC",
       "title": "Membilang loncat",
-      "sort": 7,
+      "sort": 3,
       "lesson": "Membilang loncat berarti melompati beberapa bilangan dengan jarak yang sama, misalnya loncat dua, loncat lima, dan loncat sepuluh. Cara ini membuat menghitung benda lebih cepat.",
       "tips": [
         "Loncat dua: 2, 4, 6, 8, 10.",
@@ -683,21 +150,13 @@
                 {
                   "family": "expr",
                   "params": {
-                    "vars": {
-                      "k": [0, 22]
-                    },
+                    "vars": { "k": [0, 22] },
                     "prompt": "Loncat dua: {=2*k}, {=2*k+2}, {=2*k+4}, … Angka berikutnya?",
                     "answer": "2 * k + 6",
                     "explain": "Setiap loncatan bertambah 2: {=2*k+4} + 2 = {answer}.",
                     "distractors": [
-                      {
-                        "expr": "2 * k + 5",
-                        "tag": "tambah-satu"
-                      },
-                      {
-                        "expr": "2 * k + 8",
-                        "tag": "melompat"
-                      },
+                      { "expr": "2 * k + 5", "tag": "tambah-satu" },
+                      { "expr": "2 * k + 8", "tag": "melompat" },
                       "2 * k + 7"
                     ]
                   }
@@ -705,50 +164,28 @@
                 {
                   "family": "expr",
                   "params": {
-                    "vars": {
-                      "k": [0, 22]
-                    },
+                    "vars": { "k": [0, 22] },
                     "prompt": "Loncat dua: {=2*k}, …, {=2*k+4}, {=2*k+6}. Angka yang hilang?",
                     "answer": "2 * k + 2",
                     "explain": "{=2*k} + 2 = {answer}, lalu {answer} + 2 = {=2*k+4}.",
                     "distractors": [
-                      {
-                        "expr": "2 * k + 1",
-                        "tag": "tambah-satu"
-                      },
-                      {
-                        "expr": "2 * k + 3",
-                        "tag": "lain"
-                      },
-                      {
-                        "expr": "2 * k + 5",
-                        "tag": "lain"
-                      }
+                      { "expr": "2 * k + 1", "tag": "tambah-satu" },
+                      { "expr": "2 * k + 3", "tag": "lain" },
+                      { "expr": "2 * k + 5", "tag": "lain" }
                     ]
                   }
                 },
                 {
                   "family": "expr",
                   "params": {
-                    "vars": {
-                      "k": [2, 10]
-                    },
+                    "vars": { "k": [2, 10] },
                     "prompt": "Ada {k} pasang sandal. Satu pasang = 2 sandal. Hitung loncat dua: berapa sandal semuanya?",
                     "answer": "2 * k",
                     "explain": "Hitung loncat dua sebanyak {k} kali: {answer} sandal.",
                     "distractors": [
-                      {
-                        "expr": "k",
-                        "tag": "menghitung-pasang"
-                      },
-                      {
-                        "expr": "2 * k + 2",
-                        "tag": "lebih-satu-loncat"
-                      },
-                      {
-                        "expr": "2 * k - 2",
-                        "tag": "kurang-satu-loncat"
-                      }
+                      { "expr": "k", "tag": "menghitung-pasang" },
+                      { "expr": "2 * k + 2", "tag": "lebih-satu-loncat" },
+                      { "expr": "2 * k - 2", "tag": "kurang-satu-loncat" }
                     ],
                     "choices": 3
                   }
@@ -760,7 +197,7 @@
         {
           "number": 2,
           "title": "Loncat lima",
-          "isFree": false,
+          "isFree": true,
           "generator": "skill",
           "generatorParams": {
             "family": "mix",
@@ -769,75 +206,42 @@
                 {
                   "family": "expr",
                   "params": {
-                    "vars": {
-                      "k": [0, 17]
-                    },
+                    "vars": { "k": [0, 17] },
                     "prompt": "Loncat lima: {=5*k}, {=5*k+5}, {=5*k+10}, … Angka berikutnya?",
                     "answer": "5 * k + 15",
                     "explain": "Setiap loncatan bertambah 5: {answer}.",
                     "distractors": [
-                      {
-                        "expr": "5 * k + 11",
-                        "tag": "tambah-satu"
-                      },
-                      {
-                        "expr": "5 * k + 20",
-                        "tag": "melompat"
-                      },
-                      {
-                        "expr": "5 * k + 12",
-                        "tag": "tambah-dua"
-                      }
+                      { "expr": "5 * k + 11", "tag": "tambah-satu" },
+                      { "expr": "5 * k + 20", "tag": "melompat" },
+                      { "expr": "5 * k + 12", "tag": "tambah-dua" }
                     ]
                   }
                 },
                 {
                   "family": "expr",
                   "params": {
-                    "vars": {
-                      "k": [0, 17]
-                    },
+                    "vars": { "k": [0, 17] },
                     "prompt": "Loncat lima: {=5*k}, …, {=5*k+10}, {=5*k+15}. Angka yang hilang?",
                     "answer": "5 * k + 5",
                     "explain": "{=5*k} + 5 = {answer}.",
                     "distractors": [
-                      {
-                        "expr": "5 * k + 1",
-                        "tag": "tambah-satu"
-                      },
-                      {
-                        "expr": "5 * k + 6",
-                        "tag": "lain"
-                      },
-                      {
-                        "expr": "5 * k + 4",
-                        "tag": "lain"
-                      }
+                      { "expr": "5 * k + 1", "tag": "tambah-satu" },
+                      { "expr": "5 * k + 6", "tag": "lain" },
+                      { "expr": "5 * k + 4", "tag": "lain" }
                     ]
                   }
                 },
                 {
                   "family": "expr",
                   "params": {
-                    "vars": {
-                      "k": [2, 10]
-                    },
+                    "vars": { "k": [2, 10] },
                     "prompt": "Ada {k} tangan. Setiap tangan punya 5 jari. Hitung loncat lima: berapa jari semuanya?",
                     "answer": "5 * k",
                     "explain": "Hitung loncat lima sebanyak {k} kali: {answer} jari.",
                     "distractors": [
-                      {
-                        "expr": "k",
-                        "tag": "menghitung-tangan"
-                      },
-                      {
-                        "expr": "5 * k + 5",
-                        "tag": "lebih-satu-loncat"
-                      },
-                      {
-                        "expr": "k + 5",
-                        "tag": "menjumlah"
-                      }
+                      { "expr": "k", "tag": "menghitung-tangan" },
+                      { "expr": "5 * k + 5", "tag": "lebih-satu-loncat" },
+                      { "expr": "k + 5", "tag": "menjumlah" }
                     ],
                     "choices": 3
                   }
@@ -858,59 +262,35 @@
                 {
                   "family": "expr",
                   "params": {
-                    "vars": {
-                      "k": [0, 7]
-                    },
+                    "vars": { "k": [0, 7] },
                     "prompt": "Loncat sepuluh: {=10*k}, {=10*k+10}, {=10*k+20}, … Angka berikutnya?",
                     "answer": "10 * k + 30",
                     "explain": "Setiap loncatan bertambah 10: {answer}.",
                     "distractors": [
-                      {
-                        "expr": "10 * k + 21",
-                        "tag": "tambah-satu"
-                      },
-                      {
-                        "expr": "10 * k + 40",
-                        "tag": "melompat"
-                      },
-                      {
-                        "expr": "10 * k + 25",
-                        "tag": "tambah-lima"
-                      }
+                      { "expr": "10 * k + 21", "tag": "tambah-satu" },
+                      { "expr": "10 * k + 40", "tag": "melompat" },
+                      { "expr": "10 * k + 25", "tag": "tambah-lima" }
                     ]
                   }
                 },
                 {
                   "family": "expr",
                   "params": {
-                    "vars": {
-                      "k": [0, 7]
-                    },
+                    "vars": { "k": [0, 7] },
                     "prompt": "Loncat sepuluh: {=10*k}, …, {=10*k+20}, {=10*k+30}. Angka yang hilang?",
                     "answer": "10 * k + 10",
                     "explain": "{=10*k} + 10 = {answer}.",
                     "distractors": [
-                      {
-                        "expr": "10 * k + 1",
-                        "tag": "tambah-satu"
-                      },
-                      {
-                        "expr": "10 * k + 15",
-                        "tag": "lain"
-                      },
-                      {
-                        "expr": "10 * k + 11",
-                        "tag": "lain"
-                      }
+                      { "expr": "10 * k + 1", "tag": "tambah-satu" },
+                      { "expr": "10 * k + 15", "tag": "lain" },
+                      { "expr": "10 * k + 11", "tag": "lain" }
                     ]
                   }
                 },
                 {
                   "family": "expr",
                   "params": {
-                    "vars": {
-                      "k": [2, 10]
-                    },
+                    "vars": { "k": [2, 10] },
                     "prompt": "Ada {k} kotak. Setiap kotak berisi 10 telur. Berapa telur semuanya?",
                     "answer": "10 * k",
                     "explain": "Hitung loncat sepuluh sebanyak {k} kali: {answer}.",
@@ -931,18 +311,9 @@
                       ]
                     },
                     "distractors": [
-                      {
-                        "expr": "k",
-                        "tag": "menghitung-kotak"
-                      },
-                      {
-                        "expr": "10 * k + 10",
-                        "tag": "lebih-satu-loncat"
-                      },
-                      {
-                        "expr": "10 * k - 10",
-                        "tag": "kurang-satu-loncat"
-                      }
+                      { "expr": "k", "tag": "menghitung-kotak" },
+                      { "expr": "10 * k + 10", "tag": "lebih-satu-loncat" },
+                      { "expr": "10 * k - 10", "tag": "kurang-satu-loncat" }
                     ],
                     "choices": 3
                   }
@@ -963,388 +334,45 @@
                 {
                   "family": "expr",
                   "params": {
-                    "vars": {
-                      "a": [1, 90]
-                    },
+                    "vars": { "a": [1, 90] },
                     "prompt": "Loncat sepuluh: {a}, {=a+10}, {=a+20}, … Angka berikutnya?",
                     "answer": "a + 30",
                     "explain": "Loncat sepuluh: angka puluhan naik 1, angka satuan tetap. {=a+20} + 10 = {answer}.",
                     "constraint": "a % 10 != 0",
                     "distractors": [
-                      {
-                        "expr": "a + 21",
-                        "tag": "tambah-satu"
-                      },
-                      {
-                        "expr": "a + 40",
-                        "tag": "melompat"
-                      },
-                      {
-                        "expr": "a + 31",
-                        "tag": "lain"
-                      }
+                      { "expr": "a + 21", "tag": "tambah-satu" },
+                      { "expr": "a + 40", "tag": "melompat" },
+                      { "expr": "a + 31", "tag": "lain" }
                     ]
                   }
                 },
                 {
                   "family": "expr",
                   "params": {
-                    "vars": {
-                      "k": [6, 10]
-                    },
+                    "vars": { "k": [6, 10] },
                     "prompt": "Loncat sepuluh: {=10*k}, {=10*k+10}, …, Angka berikutnya?",
                     "answer": "10 * k + 20",
                     "explain": "Setiap loncatan bertambah 10: {answer}.",
                     "distractors": [
-                      {
-                        "expr": "10 * k + 11",
-                        "tag": "tambah-satu"
-                      },
-                      {
-                        "expr": "10 * k + 30",
-                        "tag": "melompat"
-                      },
-                      {
-                        "expr": "10 * k + 10",
-                        "tag": "diam"
-                      }
+                      { "expr": "10 * k + 11", "tag": "tambah-satu" },
+                      { "expr": "10 * k + 30", "tag": "melompat" },
+                      { "expr": "10 * k + 10", "tag": "diam" }
                     ]
                   }
                 },
                 {
                   "family": "expr",
                   "params": {
-                    "vars": {
-                      "a": [1, 90]
-                    },
+                    "vars": { "a": [1, 90] },
                     "prompt": "Loncat sepuluh: {a}, …, {=a+20}, {=a+30}. Angka yang hilang?",
                     "answer": "a + 10",
                     "explain": "{a} + 10 = {answer}.",
                     "constraint": "a % 10 != 0",
                     "distractors": [
-                      {
-                        "expr": "a + 1",
-                        "tag": "tambah-satu"
-                      },
-                      {
-                        "expr": "a + 11",
-                        "tag": "lain"
-                      },
-                      {
-                        "expr": "a + 15",
-                        "tag": "lain"
-                      }
+                      { "expr": "a + 1", "tag": "tambah-satu" },
+                      { "expr": "a + 11", "tag": "lain" },
+                      { "expr": "a + 15", "tag": "lain" }
                     ]
-                  }
-                }
-              ]
-            }
-          }
-        },
-        {
-          "number": 5,
-          "title": "Loncat 2, 5, dan 10",
-          "isFree": false,
-          "generator": "skill",
-          "generatorParams": {
-            "family": "mix",
-            "params": {
-              "parts": [
-                {
-                  "family": "expr",
-                  "params": {
-                    "vars": {
-                      "s": {
-                        "values": [2, 5, 10]
-                      },
-                      "k": [0, 9]
-                    },
-                    "prompt": "{=s*k}, {=s*k+s}, {=s*k+2*s}, … Angka berikutnya?",
-                    "answer": "s * k + 3 * s",
-                    "explain": "Polanya loncat {s}: {=s*k+2*s} + {s} = {answer}.",
-                    "distractors": [
-                      {
-                        "expr": "s * k + 2 * s + 1",
-                        "tag": "tambah-satu"
-                      },
-                      {
-                        "expr": "s * k + 4 * s",
-                        "tag": "melompat"
-                      },
-                      {
-                        "expr": "s * k + 2 * s + 2",
-                        "tag": "tambah-dua"
-                      }
-                    ]
-                  }
-                },
-                {
-                  "family": "expr",
-                  "params": {
-                    "vars": {
-                      "s": {
-                        "values": [2, 5, 10]
-                      },
-                      "k": [1, 9]
-                    },
-                    "prompt": "Pola {=s*k}, {=s*k+s}, {=s*k+2*s}, {=s*k+3*s} bertambah berapa setiap langkah?",
-                    "answer": "s",
-                    "explain": "Selisih dua angka yang berurutan: {=s*k+s} − {=s*k} = {answer}.",
-                    "constraint": "s * k + 3 * s <= 100",
-                    "distractors": [
-                      {
-                        "expr": "1",
-                        "tag": "loncat-satu"
-                      },
-                      {
-                        "expr": "2",
-                        "tag": "loncat-lain"
-                      },
-                      {
-                        "expr": "5",
-                        "tag": "loncat-lain"
-                      },
-                      {
-                        "expr": "10",
-                        "tag": "loncat-lain"
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-          }
-        },
-        {
-          "number": 6,
-          "title": "Urutan loncat maju dan mundur",
-          "isFree": false,
-          "generator": "skill",
-          "generatorParams": {
-            "family": "mix",
-            "params": {
-              "parts": [
-                {
-                  "family": "expr",
-                  "params": {
-                    "vars": {
-                      "s": {
-                        "values": [1, 2, 5, 10]
-                      },
-                      "k": [0, 20]
-                    },
-                    "prompt": "{=s*k}, {=s*k+s}, {=s*k+2*s}, … Angka berikutnya?",
-                    "answer": "s * k + 3 * s",
-                    "explain": "Polanya maju {s}: {answer}.",
-                    "constraint": "s * k + 3 * s <= 100",
-                    "distractors": [
-                      {
-                        "expr": "s * k + 4 * s",
-                        "tag": "melompat"
-                      },
-                      {
-                        "expr": "s * k + s",
-                        "tag": "arah-terbalik"
-                      },
-                      {
-                        "expr": "s * k + 2 * s + 1",
-                        "tag": "tambah-satu"
-                      }
-                    ]
-                  }
-                },
-                {
-                  "family": "expr",
-                  "params": {
-                    "vars": {
-                      "s": {
-                        "values": [1, 2, 5, 10]
-                      },
-                      "k": [3, 25]
-                    },
-                    "prompt": "{=s*k}, {=s*k-s}, {=s*k-2*s}, … Angka berikutnya?",
-                    "answer": "s * k - 3 * s",
-                    "explain": "Polanya mundur {s}: {=s*k-2*s} − {s} = {answer}.",
-                    "constraint": "s * k <= 100",
-                    "distractors": [
-                      {
-                        "expr": "s * k - 4 * s",
-                        "tag": "melompat"
-                      },
-                      {
-                        "expr": "s * k - s",
-                        "tag": "arah-terbalik"
-                      },
-                      {
-                        "expr": "s * k - 2 * s - 1",
-                        "tag": "kurang-satu"
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-          }
-        },
-        {
-          "number": 7,
-          "title": "Loncat 2, 5, dan 10 sampai 120",
-          "isFree": false,
-          "generator": "skill",
-          "generatorParams": {
-            "family": "mix",
-            "params": {
-              "parts": [
-                {
-                  "family": "expr",
-                  "params": {
-                    "vars": {
-                      "s": {
-                        "values": [2, 5, 10]
-                      },
-                      "k": [8, 55]
-                    },
-                    "prompt": "{=s*k}, {=s*k+s}, {=s*k+2*s}, … Angka berikutnya?",
-                    "answer": "s * k + 3 * s",
-                    "explain": "Polanya loncat {s}: {=s*k+2*s} + {s} = {answer}.",
-                    "constraint": "s * k >= 80 && s * k + 3 * s <= 120",
-                    "distractors": [
-                      {
-                        "expr": "s * k + 2 * s + 1",
-                        "tag": "tambah-satu"
-                      },
-                      {
-                        "expr": "s * k + 4 * s",
-                        "tag": "melompat"
-                      },
-                      {
-                        "expr": "s * k + 2 * s + 10",
-                        "tag": "salah-loncat"
-                      }
-                    ]
-                  }
-                },
-                {
-                  "family": "expr",
-                  "params": {
-                    "vars": {
-                      "s": {
-                        "values": [2, 5, 10]
-                      },
-                      "k": [8, 55]
-                    },
-                    "prompt": "{=s*k}, …, {=s*k+2*s}, {=s*k+3*s}. Angka yang hilang?",
-                    "answer": "s * k + s",
-                    "explain": "{=s*k} + {s} = {answer}.",
-                    "constraint": "s * k >= 80 && s * k + 3 * s <= 120",
-                    "distractors": [
-                      {
-                        "expr": "s * k + 1",
-                        "tag": "tambah-satu"
-                      },
-                      {
-                        "expr": "s * k + 2 * s + 1",
-                        "tag": "lain"
-                      },
-                      {
-                        "expr": "s * k + s + 1",
-                        "tag": "lebih-satu"
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-          }
-        },
-        {
-          "number": 8,
-          "title": "Puluhan dan satuan sampai 120",
-          "isFree": false,
-          "generator": "skill",
-          "generatorParams": {
-            "family": "expr",
-            "params": {
-              "vars": {
-                "a": [1, 60],
-                "p": [1, 4],
-                "q": [1, 4]
-              },
-              "prompt": "Mulai dari {a}. Loncat sepuluh {p} kali, lalu maju satu {q} kali. Sampai di angka berapa?",
-              "answer": "a + 10 * p + q",
-              "explain": "{a} + {=10*p} = {=a+10*p}, lalu + {q} = {answer}.",
-              "constraint": "a + 10 * p + q <= 120",
-              "distractors": [
-                {
-                  "expr": "a + p + q",
-                  "tag": "semua-dianggap-satu"
-                },
-                {
-                  "expr": "a + 10 * p",
-                  "tag": "lupa-satuan"
-                },
-                {
-                  "expr": "a + 10 * p + 10 * q",
-                  "tag": "semua-dianggap-sepuluh"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "number": 9,
-          "title": "Tantangan membilang loncat",
-          "isFree": false,
-          "generator": "skill",
-          "generatorParams": {
-            "family": "mix",
-            "params": {
-              "parts": [
-                {
-                  "family": "expr",
-                  "params": {
-                    "vars": {
-                      "s": {
-                        "values": [1, 2, 5, 10]
-                      },
-                      "k": [3, 25]
-                    },
-                    "prompt": "{=s*k}, {=s*k-s}, {=s*k-2*s}, … Angka berikutnya?",
-                    "answer": "s * k - 3 * s",
-                    "explain": "Polanya mundur {s}: {=s*k-2*s} − {s} = {answer}.",
-                    "constraint": "s * k <= 100",
-                    "mode": "input"
-                  }
-                },
-                {
-                  "family": "expr",
-                  "params": {
-                    "vars": {
-                      "s": {
-                        "values": [2, 5, 10]
-                      },
-                      "k": [8, 55]
-                    },
-                    "prompt": "{=s*k}, {=s*k+s}, {=s*k+2*s}, … Angka berikutnya?",
-                    "answer": "s * k + 3 * s",
-                    "explain": "Polanya loncat {s}: {=s*k+2*s} + {s} = {answer}.",
-                    "constraint": "s * k >= 80 && s * k + 3 * s <= 120",
-                    "mode": "input"
-                  }
-                },
-                {
-                  "family": "expr",
-                  "params": {
-                    "vars": {
-                      "a": [1, 60],
-                      "p": [1, 4],
-                      "q": [1, 4]
-                    },
-                    "prompt": "Mulai dari {a}. Loncat sepuluh {p} kali, lalu maju satu {q} kali. Sampai di angka berapa?",
-                    "answer": "a + 10 * p + q",
-                    "explain": "{a} + {=10*p} = {=a+10*p}, lalu + {q} = {answer}.",
-                    "constraint": "a + 10 * p + q <= 120",
-                    "mode": "input"
                   }
                 }
               ]
@@ -1356,7 +384,7 @@
     {
       "code": "KD",
       "title": "Membandingkan sampai 10",
-      "sort": 8,
+      "sort": 4,
       "lesson": "Membandingkan berarti mencari mana yang lebih banyak, lebih sedikit, atau sama banyak. Kita juga memakai tanda >, <, dan =.",
       "tips": [
         "Pasangkan benda satu-satu, yang tersisa menunjukkan selisihnya.",
@@ -1376,10 +404,7 @@
                 {
                   "family": "expr",
                   "params": {
-                    "vars": {
-                      "a": [2, 10],
-                      "b": [0, 9]
-                    },
+                    "vars": { "a": [2, 10], "b": [0, 9] },
                     "prompt": "Ada {a} {x} dan {b} {y}. Berapa lebih banyak {x} daripada {y}?",
                     "answer": "a - b",
                     "explain": "{a} − {b} = {answer}. Jadi {x} lebih banyak {answer}.",
@@ -1398,14 +423,8 @@
                       "y": ["bola", "balon", "mobil", "bintang", "kue", "topi", "pensil", "buku"]
                     },
                     "distractors": [
-                      {
-                        "expr": "a + b",
-                        "tag": "menjumlah"
-                      },
-                      {
-                        "expr": "a",
-                        "tag": "tidak-dikurangi"
-                      },
+                      { "expr": "a + b", "tag": "menjumlah" },
+                      { "expr": "a", "tag": "tidak-dikurangi" },
                       "a - b + 1"
                     ]
                   }
@@ -1413,10 +432,7 @@
                 {
                   "family": "expr",
                   "params": {
-                    "vars": {
-                      "a": [2, 10],
-                      "b": [0, 9]
-                    },
+                    "vars": { "a": [2, 10], "b": [0, 9] },
                     "prompt": "Ada {a} {x} dan {b} {y}. Berapa lebih sedikit {y} daripada {x}?",
                     "answer": "a - b",
                     "explain": "{a} − {b} = {answer}. Jadi {y} lebih sedikit {answer}.",
@@ -1435,14 +451,8 @@
                       "y": ["bola", "balon", "mobil", "bintang", "kue", "topi", "pensil", "buku"]
                     },
                     "distractors": [
-                      {
-                        "expr": "a + b",
-                        "tag": "menjumlah"
-                      },
-                      {
-                        "expr": "b",
-                        "tag": "tidak-dikurangi"
-                      },
+                      { "expr": "a + b", "tag": "menjumlah" },
+                      { "expr": "b", "tag": "tidak-dikurangi" },
                       "a - b - 1"
                     ]
                   }
@@ -1454,7 +464,7 @@
         {
           "number": 2,
           "title": "Soal cerita membandingkan",
-          "isFree": false,
+          "isFree": true,
           "generator": "skill",
           "generatorParams": {
             "family": "mix",
@@ -1463,10 +473,7 @@
                 {
                   "family": "expr",
                   "params": {
-                    "vars": {
-                      "a": [2, 10],
-                      "b": [1, 9]
-                    },
+                    "vars": { "a": [2, 10], "b": [1, 9] },
                     "prompt": "{nama} punya {a} kelereng. {teman} punya {b} kelereng. Berapa lebih banyak kelereng {nama}?",
                     "answer": "a - b",
                     "explain": "Bandingkan: {a} − {b} = {answer}. Kelereng {nama} lebih banyak {answer}.",
@@ -1489,14 +496,8 @@
                       "teman": ["Kak Rudi", "Ayu", "Fajar", "Rani", "Joko", "Mega"]
                     },
                     "distractors": [
-                      {
-                        "expr": "a + b",
-                        "tag": "menjumlah"
-                      },
-                      {
-                        "expr": "a",
-                        "tag": "tidak-dikurangi"
-                      },
+                      { "expr": "a + b", "tag": "menjumlah" },
+                      { "expr": "a", "tag": "tidak-dikurangi" },
                       "a - b + 1"
                     ]
                   }
@@ -1504,23 +505,14 @@
                 {
                   "family": "expr",
                   "params": {
-                    "vars": {
-                      "a": [2, 10],
-                      "b": [1, 9]
-                    },
+                    "vars": { "a": [2, 10], "b": [1, 9] },
                     "prompt": "Di kebun ada {a} pohon rambutan dan {b} pohon mangga. Berapa lebih sedikit pohon mangga?",
                     "answer": "a - b",
                     "explain": "{a} − {b} = {answer}. Pohon mangga lebih sedikit {answer}.",
                     "constraint": "b < a",
                     "distractors": [
-                      {
-                        "expr": "a + b",
-                        "tag": "menjumlah"
-                      },
-                      {
-                        "expr": "b",
-                        "tag": "tidak-dikurangi"
-                      },
+                      { "expr": "a + b", "tag": "menjumlah" },
+                      { "expr": "b", "tag": "tidak-dikurangi" },
                       "a - b + 1"
                     ]
                   }
@@ -1528,10 +520,7 @@
                 {
                   "family": "expr",
                   "params": {
-                    "vars": {
-                      "a": [2, 10],
-                      "b": [1, 9]
-                    },
+                    "vars": { "a": [2, 10], "b": [1, 9] },
                     "prompt": "{nama} memetik {b} salak. {teman} memetik {a} salak. Berapa lebih sedikit salak yang dipetik {nama}?",
                     "answer": "a - b",
                     "explain": "{a} − {b} = {answer}. {nama} memetik {answer} lebih sedikit.",
@@ -1554,14 +543,8 @@
                       "teman": ["Kak Rudi", "Ayu", "Fajar", "Rani", "Joko", "Mega"]
                     },
                     "distractors": [
-                      {
-                        "expr": "a + b",
-                        "tag": "menjumlah"
-                      },
-                      {
-                        "expr": "b",
-                        "tag": "tidak-dikurangi"
-                      },
+                      { "expr": "a + b", "tag": "menjumlah" },
+                      { "expr": "b", "tag": "tidak-dikurangi" },
                       "a - b - 1"
                     ]
                   }
@@ -1578,18 +561,11 @@
           "generatorParams": {
             "family": "expr",
             "params": {
-              "vars": {
-                "a": [0, 10],
-                "b": [0, 10]
-              },
+              "vars": { "a": [0, 10], "b": [0, 10] },
               "prompt": "Pilih kata yang tepat: {a} … {b}",
               "answer": "(a > b) * 1 + (a < b) * 2 + (a == b) * 3",
               "explain": "Bandingkan {a} dan {b}: {a} {answer} {b}.",
-              "labels": {
-                "1": "lebih besar dari",
-                "2": "lebih kecil dari",
-                "3": "sama dengan"
-              }
+              "labels": { "1": "lebih besar dari", "2": "lebih kecil dari", "3": "sama dengan" }
             }
           }
         },
@@ -1601,175 +577,11 @@
           "generatorParams": {
             "family": "expr",
             "params": {
-              "vars": {
-                "a": [0, 10],
-                "b": [0, 10]
-              },
+              "vars": { "a": [0, 10], "b": [0, 10] },
               "prompt": "Tanda yang tepat: {a} … {b}",
               "answer": "(a > b) * 1 + (a < b) * 2 + (a == b) * 3",
               "explain": "{a} {answer} {b}. Mulut tanda > dan < terbuka ke bilangan yang lebih besar.",
-              "labels": {
-                "1": ">",
-                "2": "<",
-                "3": "="
-              }
-            }
-          }
-        },
-        {
-          "number": 5,
-          "title": "Tantangan membandingkan sampai 10",
-          "isFree": false,
-          "generator": "skill",
-          "generatorParams": {
-            "family": "mix",
-            "params": {
-              "parts": [
-                {
-                  "family": "expr",
-                  "params": {
-                    "vars": {
-                      "a": [2, 10],
-                      "b": [0, 9]
-                    },
-                    "prompt": "Ada {a} {x} dan {b} {y}. Berapa lebih banyak {x} daripada {y}?",
-                    "answer": "a - b",
-                    "explain": "{a} − {b} = {answer}. Jadi {x} lebih banyak {answer}.",
-                    "constraint": "b < a",
-                    "words": {
-                      "x": [
-                        "apel",
-                        "jeruk",
-                        "pisang",
-                        "bebek",
-                        "ayam",
-                        "ikan",
-                        "kelinci",
-                        "kucing"
-                      ],
-                      "y": ["bola", "balon", "mobil", "bintang", "kue", "topi", "pensil", "buku"]
-                    },
-                    "mode": "input"
-                  }
-                },
-                {
-                  "family": "expr",
-                  "params": {
-                    "vars": {
-                      "a": [0, 10],
-                      "b": [0, 10]
-                    },
-                    "prompt": "Tanda yang tepat: {a} … {b}",
-                    "answer": "(a > b) * 1 + (a < b) * 2 + (a == b) * 3",
-                    "explain": "{a} {answer} {b}. Mulut tanda > dan < terbuka ke bilangan yang lebih besar.",
-                    "labels": {
-                      "1": ">",
-                      "2": "<",
-                      "3": "="
-                    }
-                  }
-                },
-                {
-                  "family": "expr",
-                  "params": {
-                    "vars": {
-                      "a": [2, 10],
-                      "b": [1, 9]
-                    },
-                    "prompt": "{nama} memetik {b} salak. {teman} memetik {a} salak. Berapa lebih sedikit salak yang dipetik {nama}?",
-                    "answer": "a - b",
-                    "explain": "{a} − {b} = {answer}. {nama} memetik {answer} lebih sedikit.",
-                    "constraint": "b < a",
-                    "words": {
-                      "nama": [
-                        "Alya",
-                        "Raka",
-                        "Dimas",
-                        "Sari",
-                        "Budi",
-                        "Putri",
-                        "Nina",
-                        "Adit",
-                        "Tegar",
-                        "Wulan",
-                        "Bayu",
-                        "Intan"
-                      ],
-                      "teman": ["Kak Rudi", "Ayu", "Fajar", "Rani", "Joko", "Mega"]
-                    },
-                    "mode": "input"
-                  }
-                },
-                {
-                  "family": "expr",
-                  "params": {
-                    "vars": {
-                      "a": [0, 10],
-                      "b": [0, 10]
-                    },
-                    "prompt": "Pilih kata yang tepat: {a} … {b}",
-                    "answer": "(a > b) * 1 + (a < b) * 2 + (a == b) * 3",
-                    "explain": "Bandingkan {a} dan {b}: {a} {answer} {b}.",
-                    "labels": {
-                      "1": "lebih besar dari",
-                      "2": "lebih kecil dari",
-                      "3": "sama dengan"
-                    }
-                  }
-                }
-              ]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "code": "KE",
-      "title": "Memahami penjumlahan",
-      "sort": 9,
-      "lesson": "Menjumlah berarti menggabungkan dua kelompok benda lalu menghitung semuanya. Kalimat penjumlahan ditulis seperti 3 + 2 = 5.",
-      "tips": [
-        "Tanda + dibaca \"tambah\", tanda = dibaca \"sama dengan\".",
-        "Pada garis bilangan, penjumlahan berarti melompat ke kanan."
-      ],
-      "levels": [
-        {
-          "number": 1,
-          "title": "Dari kata ke kalimat penjumlahan",
-          "isFree": true,
-          "generator": "skill",
-          "generatorParams": {
-            "family": "expr",
-            "params": {
-              "vars": {
-                "a": [0, 9],
-                "b": [0, 9]
-              },
-              "prompt": "{w:a} ditambah {w:b} sama dengan …",
-              "answer": "a + b",
-              "explain": "{a} + {b} = {answer}.",
-              "constraint": "a + b <= 10",
-              "mode": "input"
-            }
-          }
-        },
-        {
-          "number": 2,
-          "title": "Tantangan memahami penjumlahan",
-          "isFree": false,
-          "generator": "skill",
-          "generatorParams": {
-            "family": "expr",
-            "params": {
-              "vars": {
-                "a": [0, 9],
-                "b": [0, 9]
-              },
-              "prompt": "{w:a} ditambah {w:b} sama dengan …",
-              "answer": "a + b",
-              "explain": "{a} + {b} = {answer}.",
-              "constraint": "a + b <= 10",
-              "mode": "input"
+              "labels": { "1": ">", "2": "<", "3": "=" }
             }
           }
         }
@@ -1778,7 +590,7 @@
     {
       "code": "KF",
       "title": "Strategi penjumlahan sampai 10",
-      "sort": 10,
+      "sort": 5,
       "lesson": "Ada cara cepat untuk menjumlah: menukar urutan bilangan, menghitung maju dari bilangan yang lebih besar, dan mencari pasangan yang membuat sepuluh.",
       "tips": [
         "3 + 5 hasilnya sama dengan 5 + 3.",
@@ -1794,23 +606,14 @@
           "generatorParams": {
             "family": "expr",
             "params": {
-              "vars": {
-                "a": [0, 9],
-                "b": [1, 9]
-              },
+              "vars": { "a": [0, 9], "b": [1, 9] },
               "prompt": "{a} + {b} = {b} + …",
               "answer": "a",
               "explain": "Urutan penjumlahan boleh ditukar: {a} + {b} = {b} + {a}.",
               "constraint": "a != b && a + b <= 10",
               "distractors": [
-                {
-                  "expr": "b",
-                  "tag": "bilangan-sama"
-                },
-                {
-                  "expr": "a + b",
-                  "tag": "jumlah"
-                },
+                { "expr": "b", "tag": "bilangan-sama" },
+                { "expr": "a + b", "tag": "jumlah" },
                 "a + 1"
               ],
               "choices": 3
@@ -1820,27 +623,17 @@
         {
           "number": 2,
           "title": "Hitung maju dari bilangan terbesar",
-          "isFree": false,
+          "isFree": true,
           "generator": "skill",
           "generatorParams": {
             "family": "expr",
             "params": {
-              "vars": {
-                "a": [4, 9],
-                "b": [1, 3]
-              },
+              "vars": { "a": [4, 9], "b": [1, 3] },
               "prompt": "Hitung maju dari bilangan yang lebih besar: {b} + {a} = …",
               "answer": "a + b",
               "explain": "Mulai dari {a} (lebih besar), hitung maju {b}: {answer}.",
               "constraint": "a + b <= 10",
-              "distractors": [
-                "a + b + 1",
-                "a + b - 1",
-                {
-                  "expr": "a",
-                  "tag": "tidak-ditambah"
-                }
-              ]
+              "distractors": ["a + b + 1", "a + b - 1", { "expr": "a", "tag": "tidak-ditambah" }]
             }
           }
         },
@@ -1856,10 +649,7 @@
                 {
                   "family": "expr",
                   "params": {
-                    "vars": {
-                      "a": [3, 9],
-                      "b": [1, 3]
-                    },
+                    "vars": { "a": [3, 9], "b": [1, 3] },
                     "prompt": "{a} + {b} = …",
                     "answer": "a + b",
                     "explain": "Mulai dari {a}, hitung maju {b}: {answer}.",
@@ -1870,10 +660,7 @@
                 {
                   "family": "expr",
                   "params": {
-                    "vars": {
-                      "a": [3, 9],
-                      "b": [1, 3]
-                    },
+                    "vars": { "a": [3, 9], "b": [1, 3] },
                     "prompt": "{b} + {a} = …",
                     "answer": "a + b",
                     "explain": "Mulai dari yang besar, {a}, hitung maju {b}: {answer}.",
@@ -1897,28 +684,17 @@
                 {
                   "family": "expr",
                   "params": {
-                    "vars": {
-                      "a": [0, 10]
-                    },
+                    "vars": { "a": [0, 10] },
                     "prompt": "Pasangan {a} agar jumlahnya 10 adalah …",
                     "answer": "10 - a",
                     "explain": "{a} + {answer} = 10.",
-                    "distractors": [
-                      "11 - a",
-                      "9 - a",
-                      {
-                        "expr": "a",
-                        "tag": "bilangan-sama"
-                      }
-                    ]
+                    "distractors": ["11 - a", "9 - a", { "expr": "a", "tag": "bilangan-sama" }]
                   }
                 },
                 {
                   "family": "expr",
                   "params": {
-                    "vars": {
-                      "a": [1, 9]
-                    },
+                    "vars": { "a": [1, 9] },
                     "prompt": "{nama} punya {a} kelereng. Berapa kelereng lagi agar {nama} punya 10?",
                     "answer": "10 - a",
                     "explain": "{a} + {answer} = 10.",
@@ -1938,73 +714,72 @@
                         "Intan"
                       ]
                     },
-                    "distractors": [
-                      "11 - a",
-                      "9 - a",
-                      {
-                        "expr": "a + 10",
-                        "tag": "menjumlah"
-                      }
-                    ],
+                    "distractors": ["11 - a", "9 - a", { "expr": "a + 10", "tag": "menjumlah" }],
                     "choices": 3
                   }
                 }
               ]
             }
           }
-        },
+        }
+      ]
+    },
+    {
+      "code": "KG",
+      "title": "Penjumlahan sampai 10",
+      "sort": 6,
+      "lesson": "Kita berlatih fakta penjumlahan sampai 10 dan mencari banyak cara membuat sebuah bilangan, misalnya 6 = 1 + 5 = 2 + 4 = 3 + 3.",
+      "tips": [
+        "Bilangan ditambah 0 tidak berubah.",
+        "Satu bilangan bisa dibuat dari banyak pasangan penjumlahan."
+      ],
+      "levels": [
         {
-          "number": 5,
-          "title": "Lengkapi kalimat membuat sepuluh",
-          "isFree": false,
+          "number": 1,
+          "title": "Fakta penjumlahan sampai 5",
+          "isFree": true,
           "generator": "skill",
           "generatorParams": {
-            "family": "mix",
+            "family": "expr",
             "params": {
-              "parts": [
-                {
-                  "family": "expr",
-                  "params": {
-                    "vars": {
-                      "a": [0, 10]
-                    },
-                    "prompt": "{a} + … = 10",
-                    "answer": "10 - a",
-                    "explain": "{a} + {answer} = 10.",
-                    "mode": "input"
-                  }
-                },
-                {
-                  "family": "expr",
-                  "params": {
-                    "vars": {
-                      "a": [0, 10]
-                    },
-                    "prompt": "… + {a} = 10",
-                    "answer": "10 - a",
-                    "explain": "{answer} + {a} = 10.",
-                    "mode": "input"
-                  }
-                },
-                {
-                  "family": "expr",
-                  "params": {
-                    "vars": {
-                      "a": [0, 10]
-                    },
-                    "prompt": "10 = {a} + …",
-                    "answer": "10 - a",
-                    "explain": "10 = {a} + {answer}.",
-                    "mode": "input"
-                  }
-                }
+              "vars": { "a": [0, 5], "b": [0, 5] },
+              "prompt": "{a} + {b} = …",
+              "answer": "a + b",
+              "explain": "{a} + {b} = {answer}.",
+              "constraint": "a + b <= 5",
+              "distractors": [
+                "a + b + 1",
+                "a + b - 1",
+                { "expr": "abs(a - b)", "tag": "operasi-terbalik" }
+              ],
+              "choices": 3
+            }
+          }
+        },
+        {
+          "number": 2,
+          "title": "Fakta penjumlahan sampai 10",
+          "isFree": true,
+          "generator": "skill",
+          "generatorParams": {
+            "family": "expr",
+            "params": {
+              "vars": { "a": [0, 10], "b": [0, 10] },
+              "prompt": "{a} + {b} = …",
+              "answer": "a + b",
+              "explain": "{a} + {b} = {answer}.",
+              "constraint": "a + b <= 10",
+              "distractors": [
+                "a + b + 1",
+                "a + b - 1",
+                { "expr": "abs(a - b)", "tag": "operasi-terbalik" }
               ]
             }
           }
         },
         {
-          "number": 6,
-          "title": "Pilih strategi penjumlahan",
+          "number": 3,
+          "title": "Menambah 0, 1, dan 2",
           "isFree": false,
           "generator": "skill",
           "generatorParams": {
@@ -2014,37 +789,113 @@
                 {
                   "family": "expr",
                   "params": {
-                    "vars": {
-                      "a": [5, 9],
-                      "b": [1, 4]
-                    },
-                    "prompt": "Untuk menghitung {b} + {a} dengan hitung maju, lebih cepat mulai dari angka …",
+                    "vars": { "a": [1, 10] },
+                    "prompt": "{a} + 0 = …",
                     "answer": "a",
-                    "explain": "Mulai dari bilangan yang lebih besar ({a}), lalu hitung maju {b}. Langkahnya lebih sedikit.",
+                    "explain": "Bilangan ditambah 0 tidak berubah: {a} + 0 = {answer}.",
+                    "distractors": [
+                      { "expr": "a + 1", "tag": "nol-dianggap-satu" },
+                      { "expr": "0", "tag": "nol-menghapus" },
+                      "a - 1"
+                    ],
+                    "choices": 3
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "a": [0, 10], "b": { "values": [1, 2] } },
+                    "prompt": "{a} + {b} = …",
+                    "answer": "a + b",
+                    "explain": "Ditambah {b} berarti hitung maju {b} dari {a}: {answer}.",
                     "constraint": "a + b <= 10",
                     "distractors": [
-                      {
-                        "expr": "b",
-                        "tag": "mulai-dari-kecil"
-                      },
-                      {
-                        "expr": "a + b",
-                        "tag": "jumlah"
-                      }
-                    ],
-                    "choices": 3
+                      "a + b + 1",
+                      { "expr": "a", "tag": "tidak-ditambah" },
+                      "a + b - 1"
+                    ]
                   }
                 },
                 {
                   "family": "expr",
                   "params": {
-                    "vars": {
-                      "a": [5, 9],
-                      "b": [1, 4]
-                    },
-                    "prompt": "{nama} menghitung {b} + {a} dengan mulai dari {a}. Berapa langkah {nama} menghitung maju?",
-                    "answer": "b",
-                    "explain": "Mulai dari {a}, cukup hitung maju {b} langkah sampai {=a+b}.",
+                    "vars": { "a": [2, 10], "b": { "values": [1, 2] } },
+                    "prompt": "{b} + {a} = …",
+                    "answer": "a + b",
+                    "explain": "Mulai dari {a} (lebih besar), hitung maju {b}: {answer}.",
+                    "constraint": "a + b <= 10",
+                    "distractors": [
+                      "a + b + 1",
+                      { "expr": "a", "tag": "tidak-ditambah" },
+                      "a + b - 1"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "number": 4,
+          "title": "Fakta penjumlahan: isian",
+          "isFree": false,
+          "generator": "skill",
+          "generatorParams": {
+            "family": "expr",
+            "params": {
+              "vars": { "a": [0, 10], "b": [0, 10] },
+              "prompt": "{a} + {b} = …",
+              "answer": "a + b",
+              "explain": "{a} + {b} = {answer}.",
+              "constraint": "a + b <= 10",
+              "mode": "input"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "code": "KH",
+      "title": "Soal cerita penjumlahan sampai 10",
+      "sort": 7,
+      "lesson": "Soal cerita menceritakan kejadian sehari-hari. Bila benda digabung, bertambah, atau datang lagi, kita memakai penjumlahan.",
+      "tips": [
+        "Baca ceritanya, cari dua bilangan yang digabung.",
+        "Kata \"lagi\", \"datang\", dan \"semuanya\" sering berarti menjumlah.",
+        "Boleh menggambar atau memakai kubus untuk membantu."
+      ],
+      "levels": [
+        {
+          "number": 1,
+          "title": "Soal cerita tanpa gambar",
+          "isFree": true,
+          "generator": "skill",
+          "generatorParams": {
+            "family": "mix",
+            "params": {
+              "parts": [
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "a": [1, 9], "b": [1, 9] },
+                    "prompt": "Di kolam ada {a} ikan. Ayah menambahkan {b} ikan lagi. Berapa ikan di kolam sekarang?",
+                    "answer": "a + b",
+                    "explain": "{a} + {b} = {answer} ikan.",
+                    "constraint": "a + b <= 10",
+                    "distractors": [
+                      "a + b + 1",
+                      { "expr": "abs(a - b)", "tag": "mengurangi" },
+                      "a + b - 1"
+                    ]
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "a": [1, 9], "b": [1, 9] },
+                    "prompt": "{nama} memetik {a} rambutan, lalu memetik {b} lagi. Berapa rambutan yang dipetik {nama}?",
+                    "answer": "a + b",
+                    "explain": "{a} + {b} = {answer} rambutan.",
                     "constraint": "a + b <= 10",
                     "words": {
                       "nama": [
@@ -2063,16 +914,40 @@
                       ]
                     },
                     "distractors": [
-                      {
-                        "expr": "a",
-                        "tag": "bilangan-awal"
-                      },
-                      {
-                        "expr": "a + b",
-                        "tag": "jumlah"
-                      }
-                    ],
-                    "choices": 3
+                      "a + b + 1",
+                      { "expr": "abs(a - b)", "tag": "mengurangi" },
+                      "a + b - 1"
+                    ]
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "a": [1, 9], "b": [1, 9] },
+                    "prompt": "Ada {a} anak laki-laki dan {b} anak perempuan bermain gobak sodor. Berapa anak semuanya?",
+                    "answer": "a + b",
+                    "explain": "{a} + {b} = {answer} anak.",
+                    "constraint": "a + b <= 10",
+                    "distractors": [
+                      "a + b + 1",
+                      { "expr": "a", "tag": "hanya-satu-kelompok" },
+                      "a + b - 1"
+                    ]
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "a": [1, 9], "b": [1, 9] },
+                    "prompt": "Di rak ada {a} buku cerita dan {b} buku gambar. Berapa buku semuanya?",
+                    "answer": "a + b",
+                    "explain": "{a} + {b} = {answer} buku.",
+                    "constraint": "a + b <= 10",
+                    "distractors": [
+                      "a + b + 1",
+                      { "expr": "b", "tag": "hanya-satu-kelompok" },
+                      "a + b - 1"
+                    ]
                   }
                 }
               ]
@@ -2080,8 +955,107 @@
           }
         },
         {
-          "number": 7,
-          "title": "Tantangan strategi penjumlahan",
+          "number": 2,
+          "title": "Soal cerita: isian",
+          "isFree": true,
+          "generator": "skill",
+          "generatorParams": {
+            "family": "mix",
+            "params": {
+              "parts": [
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "a": [1, 9], "b": [1, 9] },
+                    "prompt": "{nama} punya {a} kelereng. Kakak memberi {b} kelereng lagi. Berapa kelereng {nama} sekarang?",
+                    "answer": "a + b",
+                    "explain": "{a} + {b} = {answer}.",
+                    "constraint": "a + b <= 10",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Raka",
+                        "Dimas",
+                        "Sari",
+                        "Budi",
+                        "Putri",
+                        "Nina",
+                        "Adit",
+                        "Tegar",
+                        "Wulan",
+                        "Bayu",
+                        "Intan"
+                      ]
+                    },
+                    "mode": "input"
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "a": [1, 9], "b": [1, 9] },
+                    "prompt": "Di dahan ada {a} burung pipit. Datang {b} burung lagi. Berapa burung di dahan sekarang?",
+                    "answer": "a + b",
+                    "explain": "{a} + {b} = {answer}.",
+                    "constraint": "a + b <= 10",
+                    "mode": "input"
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "a": [1, 9], "b": [1, 9] },
+                    "prompt": "Ibu membeli {a} tomat dan {b} cabai. Berapa sayur yang dibeli Ibu?",
+                    "answer": "a + b",
+                    "explain": "{a} + {b} = {answer}.",
+                    "constraint": "a + b <= 10",
+                    "mode": "input"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "number": 3,
+          "title": "Soal cerita tiga bilangan",
+          "isFree": false,
+          "generator": "skill",
+          "generatorParams": {
+            "family": "expr",
+            "params": {
+              "vars": { "a": [1, 4], "b": [1, 4], "c": [1, 4] },
+              "prompt": "{nama} punya {a} pensil merah, {b} pensil biru, dan {c} pensil hijau. Berapa pensil semuanya?",
+              "answer": "a + b + c",
+              "explain": "{a} + {b} + {c} = {answer}.",
+              "constraint": "a + b + c <= 10",
+              "words": {
+                "nama": [
+                  "Alya",
+                  "Raka",
+                  "Dimas",
+                  "Sari",
+                  "Budi",
+                  "Putri",
+                  "Nina",
+                  "Adit",
+                  "Tegar",
+                  "Wulan",
+                  "Bayu",
+                  "Intan"
+                ]
+              },
+              "distractors": [
+                { "expr": "a + b", "tag": "lupa-satu-bilangan" },
+                "a + b + c + 1",
+                { "expr": "b + c", "tag": "lupa-satu-bilangan" }
+              ]
+            }
+          }
+        },
+        {
+          "number": 4,
+          "title": "Tantangan soal cerita penjumlahan",
           "isFree": false,
           "generator": "skill",
           "generatorParams": {
@@ -2091,65 +1065,1922 @@
                 {
                   "family": "expr",
                   "params": {
-                    "vars": {
-                      "a": [0, 9],
-                      "b": [1, 9]
-                    },
-                    "prompt": "{a} + {b} = {b} + …",
-                    "answer": "a",
-                    "explain": "Urutan penjumlahan boleh ditukar: {a} + {b} = {b} + {a}.",
-                    "constraint": "a != b && a + b <= 10",
-                    "mode": "input"
-                  }
-                },
-                {
-                  "family": "expr",
-                  "params": {
-                    "vars": {
-                      "a": [0, 10]
-                    },
-                    "prompt": "… + {a} = 10",
-                    "answer": "10 - a",
-                    "explain": "{answer} + {a} = 10.",
-                    "mode": "input"
-                  }
-                },
-                {
-                  "family": "expr",
-                  "params": {
-                    "vars": {
-                      "a": [3, 9],
-                      "b": [1, 3]
-                    },
-                    "prompt": "{b} + {a} = …",
+                    "vars": { "a": [1, 9], "b": [1, 9] },
+                    "prompt": "{nama} memetik {a} rambutan, lalu memetik {b} lagi. Berapa rambutan yang dipetik {nama}?",
                     "answer": "a + b",
-                    "explain": "Mulai dari yang besar, {a}, hitung maju {b}: {answer}.",
+                    "explain": "{a} + {b} = {answer} rambutan.",
                     "constraint": "a + b <= 10",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Raka",
+                        "Dimas",
+                        "Sari",
+                        "Budi",
+                        "Putri",
+                        "Nina",
+                        "Adit",
+                        "Tegar",
+                        "Wulan",
+                        "Bayu",
+                        "Intan"
+                      ]
+                    },
                     "mode": "input"
                   }
                 },
                 {
                   "family": "expr",
                   "params": {
-                    "vars": {
-                      "a": [5, 9],
-                      "b": [1, 4]
+                    "vars": { "a": [1, 4], "b": [1, 4], "c": [1, 4] },
+                    "prompt": "{nama} punya {a} pensil merah, {b} pensil biru, dan {c} pensil hijau. Berapa pensil semuanya?",
+                    "answer": "a + b + c",
+                    "explain": "{a} + {b} + {c} = {answer}.",
+                    "constraint": "a + b + c <= 10",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Raka",
+                        "Dimas",
+                        "Sari",
+                        "Budi",
+                        "Putri",
+                        "Nina",
+                        "Adit",
+                        "Tegar",
+                        "Wulan",
+                        "Bayu",
+                        "Intan"
+                      ]
                     },
-                    "prompt": "Untuk menghitung {b} + {a} dengan hitung maju, lebih cepat mulai dari angka …",
-                    "answer": "a",
-                    "explain": "Mulai dari bilangan yang lebih besar ({a}), lalu hitung maju {b}. Langkahnya lebih sedikit.",
+                    "mode": "input"
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "a": [1, 9], "b": [1, 9] },
+                    "prompt": "Di dahan ada {a} burung pipit. Datang {b} burung lagi. Berapa burung di dahan sekarang?",
+                    "answer": "a + b",
+                    "explain": "{a} + {b} = {answer}.",
                     "constraint": "a + b <= 10",
+                    "mode": "input"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "code": "KJ",
+      "title": "Strategi pengurangan sampai 10",
+      "sort": 8,
+      "lesson": "Ada cara cepat untuk mengurangi: hitung mundur bila yang diambil sedikit, atau hitung maju dari bilangan kecil ke bilangan besar.",
+      "tips": [
+        "Penjumlahan dan pengurangan berpasangan: 3 + 4 = 7, jadi 7 − 4 = 3.",
+        "Untuk 9 − 7, hitung maju dari 7 ke 9: dua langkah."
+      ],
+      "levels": [
+        {
+          "number": 1,
+          "title": "Hitung mundur 1 dan 2",
+          "isFree": true,
+          "generator": "skill",
+          "generatorParams": {
+            "family": "expr",
+            "params": {
+              "vars": { "a": [2, 10], "b": { "values": [1, 2] } },
+              "prompt": "Hitung mundur {b} dari {a}. {a} − {b} = …",
+              "answer": "a - b",
+              "explain": "Mulai dari {a}, hitung mundur {b}: {answer}.",
+              "constraint": "b < a",
+              "distractors": [{ "expr": "a + b", "tag": "arah-terbalik" }, "a - b + 1", "a - b - 1"]
+            }
+          }
+        },
+        {
+          "number": 2,
+          "title": "Hitung mundur: isian",
+          "isFree": true,
+          "generator": "skill",
+          "generatorParams": {
+            "family": "mix",
+            "params": {
+              "parts": [
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "a": [3, 10], "b": [1, 3] },
+                    "prompt": "Hitung mundur: {a} − {b} = …",
+                    "answer": "a - b",
+                    "explain": "{a}, mundur {b}: {answer}.",
+                    "constraint": "b < a",
+                    "mode": "input"
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "a": [3, 10], "b": [1, 3] },
+                    "prompt": "{nama} punya {a} permen. {nama} makan {b}. Hitung mundur: sisa berapa?",
+                    "answer": "a - b",
+                    "explain": "{a} − {b} = {answer}.",
+                    "constraint": "b < a",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Raka",
+                        "Dimas",
+                        "Sari",
+                        "Budi",
+                        "Putri",
+                        "Nina",
+                        "Adit",
+                        "Tegar",
+                        "Wulan",
+                        "Bayu",
+                        "Intan"
+                      ]
+                    },
+                    "mode": "input"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "number": 3,
+          "title": "Hitung maju untuk mengurangi",
+          "isFree": false,
+          "generator": "skill",
+          "generatorParams": {
+            "family": "expr",
+            "params": {
+              "vars": { "b": [1, 9], "d": [1, 3] },
+              "prompt": "Untuk {a} − {b}, hitung maju dari {b} sampai {a}. Berapa langkah?",
+              "answer": "d",
+              "explain": "{b} ke {a} ada {answer} langkah. Jadi {a} − {b} = {answer}.",
+              "derived": { "a": "b + d" },
+              "constraint": "a <= 10",
+              "distractors": [
+                { "expr": "a", "tag": "bilangan-awal" },
+                { "expr": "b", "tag": "pengurang" },
+                "d + 1"
+              ],
+              "choices": 3
+            }
+          }
+        },
+        {
+          "number": 4,
+          "title": "Hubungan penjumlahan dan pengurangan",
+          "isFree": false,
+          "generator": "skill",
+          "generatorParams": {
+            "family": "mix",
+            "params": {
+              "parts": [
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "a": [1, 9], "b": [1, 9] },
+                    "prompt": "{a} + {b} = {c}. Maka {c} − {b} = …",
+                    "answer": "a",
+                    "explain": "Penjumlahan dan pengurangan berpasangan: {c} − {b} = {answer}.",
+                    "derived": { "c": "a + b" },
+                    "constraint": "c <= 10",
                     "distractors": [
-                      {
-                        "expr": "b",
-                        "tag": "mulai-dari-kecil"
-                      },
-                      {
-                        "expr": "a + b",
-                        "tag": "jumlah"
-                      }
+                      { "expr": "c", "tag": "total" },
+                      { "expr": "b", "tag": "bagian-lain" },
+                      { "expr": "c + b", "tag": "menjumlah" }
+                    ]
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "a": [1, 9], "b": [1, 9] },
+                    "prompt": "{a} + {b} = {c}. Maka {c} − {a} = …",
+                    "answer": "b",
+                    "explain": "{c} − {a} = {answer}, karena {a} + {answer} = {c}.",
+                    "derived": { "c": "a + b" },
+                    "constraint": "c <= 10",
+                    "distractors": [
+                      { "expr": "c", "tag": "total" },
+                      { "expr": "a", "tag": "bagian-lain" },
+                      { "expr": "c + a", "tag": "menjumlah" }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "code": "KK",
+      "title": "Pengurangan sampai 10",
+      "sort": 9,
+      "lesson": "Kita berlatih fakta pengurangan sampai 10 dan mencari banyak cara mendapat sebuah bilangan dengan pengurangan, misalnya 3 = 5 − 2 = 7 − 4.",
+      "tips": [
+        "Hasil pengurangan tidak lebih besar dari bilangan awalnya.",
+        "Periksa pengurangan dengan penjumlahan: 8 − 3 = 5 karena 5 + 3 = 8."
+      ],
+      "levels": [
+        {
+          "number": 1,
+          "title": "Fakta pengurangan sampai 5",
+          "isFree": true,
+          "generator": "skill",
+          "generatorParams": {
+            "family": "expr",
+            "params": {
+              "vars": { "a": [0, 5], "b": [0, 5] },
+              "prompt": "{a} − {b} = …",
+              "answer": "a - b",
+              "explain": "{a} − {b} = {answer}.",
+              "constraint": "b <= a",
+              "distractors": [
+                "a - b + 1",
+                "a - b - 1",
+                { "expr": "a + b", "tag": "menjumlah-bukan-mengurangi" }
+              ],
+              "choices": 3
+            }
+          }
+        },
+        {
+          "number": 2,
+          "title": "Fakta pengurangan sampai 10",
+          "isFree": true,
+          "generator": "skill",
+          "generatorParams": {
+            "family": "expr",
+            "params": {
+              "vars": { "a": [1, 10], "b": [0, 10] },
+              "prompt": "{a} − {b} = …",
+              "answer": "a - b",
+              "explain": "{a} − {b} = {answer}.",
+              "constraint": "b <= a",
+              "distractors": [
+                "a - b + 1",
+                "a - b - 1",
+                { "expr": "a + b", "tag": "menjumlah-bukan-mengurangi" }
+              ]
+            }
+          }
+        },
+        {
+          "number": 3,
+          "title": "Mengurangi 1, 2, dan 3",
+          "isFree": false,
+          "generator": "skill",
+          "generatorParams": {
+            "family": "mix",
+            "params": {
+              "parts": [
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "a": [1, 10], "b": { "values": [1, 2, 3] } },
+                    "prompt": "{a} − {b} = …",
+                    "answer": "a - b",
+                    "explain": "Hitung mundur {b} dari {a}: {answer}.",
+                    "constraint": "b <= a",
+                    "distractors": [
+                      "a - b + 1",
+                      "a - b - 1",
+                      { "expr": "a + b", "tag": "menjumlah-bukan-mengurangi" }
+                    ]
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "a": [1, 10], "b": { "values": [1, 2, 3] } },
+                    "prompt": "Berapa {b} lebih sedikit dari {a}?",
+                    "answer": "a - b",
+                    "explain": "{a} − {b} = {answer}.",
+                    "constraint": "b <= a",
+                    "distractors": [
+                      "a - b + 1",
+                      { "expr": "a + b", "tag": "lebih-banyak-bukan-lebih-sedikit" },
+                      "a - b - 1"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "number": 4,
+          "title": "Fakta pengurangan: isian",
+          "isFree": false,
+          "generator": "skill",
+          "generatorParams": {
+            "family": "expr",
+            "params": {
+              "vars": { "a": [0, 10], "b": [0, 10] },
+              "prompt": "{a} − {b} = …",
+              "answer": "a - b",
+              "explain": "{a} − {b} = {answer}.",
+              "constraint": "b <= a",
+              "mode": "input"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "code": "KL",
+      "title": "Soal cerita pengurangan sampai 10",
+      "sort": 10,
+      "lesson": "Soal cerita pengurangan menceritakan benda yang diambil, pergi, atau dipisah. Kita cari berapa yang tersisa lalu menulis kalimat pengurangannya.",
+      "tips": [
+        "Kata tersisa, pergi, dimakan, atau diberikan biasanya berarti mengurangi.",
+        "Mulai dari banyak benda awal, lalu ambil sebanyak yang pergi.",
+        "Kalimatnya ditulis: awal − yang diambil = sisa."
+      ],
+      "levels": [
+        {
+          "number": 1,
+          "title": "Soal cerita tanpa gambar",
+          "isFree": true,
+          "generator": "skill",
+          "generatorParams": {
+            "family": "mix",
+            "params": {
+              "parts": [
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "{nama} punya {a} apel. {b} apel diberikan kepada adik. Berapa apel {nama} sekarang?",
+                    "answer": "c",
+                    "explain": "Mulai dari {a}, ambil {b}. {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10",
+                    "distractors": [
+                      { "expr": "a + b", "tag": "menjumlah-bukan-mengurangi" },
+                      { "expr": "a", "tag": "tidak-dikurangi" },
+                      "c + 1",
+                      "c - 1"
                     ],
-                    "choices": 3
+                    "choices": 4
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "Ada {a} kupu-kupu di taman. {b} kupu-kupu terbang pergi. Berapa kupu-kupu yang masih di taman?",
+                    "answer": "c",
+                    "explain": "Mulai dari {a}, ambil {b}. {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10",
+                    "distractors": [
+                      { "expr": "a + b", "tag": "menjumlah-bukan-mengurangi" },
+                      { "expr": "a", "tag": "tidak-dikurangi" },
+                      "c + 1",
+                      "c - 1"
+                    ],
+                    "choices": 4
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "Ibu membuat {a} kue. {b} kue sudah dimakan. Berapa kue yang tersisa?",
+                    "answer": "c",
+                    "explain": "Mulai dari {a}, ambil {b}. {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10",
+                    "distractors": [
+                      { "expr": "a + b", "tag": "menjumlah-bukan-mengurangi" },
+                      { "expr": "a", "tag": "tidak-dikurangi" },
+                      "c + 1",
+                      "c - 1"
+                    ],
+                    "choices": 4
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "{nama} membawa {a} balon. {b} balon meletus. Berapa balon yang tersisa?",
+                    "answer": "c",
+                    "explain": "Mulai dari {a}, ambil {b}. {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10",
+                    "distractors": [
+                      { "expr": "a + b", "tag": "menjumlah-bukan-mengurangi" },
+                      { "expr": "a", "tag": "tidak-dikurangi" },
+                      "c + 1",
+                      "c - 1"
+                    ],
+                    "choices": 4
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "Di kolam ada {a} bebek. {b} bebek naik ke darat. Berapa bebek yang masih di kolam?",
+                    "answer": "c",
+                    "explain": "Mulai dari {a}, ambil {b}. {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10",
+                    "distractors": [
+                      { "expr": "a + b", "tag": "menjumlah-bukan-mengurangi" },
+                      { "expr": "a", "tag": "tidak-dikurangi" },
+                      "c + 1",
+                      "c - 1"
+                    ],
+                    "choices": 4
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "Di rak ada {a} buku. {nama} meminjam {b} buku. Berapa buku yang masih di rak?",
+                    "answer": "c",
+                    "explain": "Mulai dari {a}, ambil {b}. {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10",
+                    "distractors": [
+                      { "expr": "a + b", "tag": "menjumlah-bukan-mengurangi" },
+                      { "expr": "a", "tag": "tidak-dikurangi" },
+                      "c + 1",
+                      "c - 1"
+                    ],
+                    "choices": 4
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "{nama} punya {a} pensil. {b} pensil dipinjam teman. Berapa pensil yang masih ada pada {nama}?",
+                    "answer": "c",
+                    "explain": "Mulai dari {a}, ambil {b}. {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10",
+                    "distractors": [
+                      { "expr": "a + b", "tag": "menjumlah-bukan-mengurangi" },
+                      { "expr": "a", "tag": "tidak-dikurangi" },
+                      "c + 1",
+                      "c - 1"
+                    ],
+                    "choices": 4
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "Ada {a} jeruk di meja. {nama} makan {b} jeruk. Berapa jeruk yang masih di meja?",
+                    "answer": "c",
+                    "explain": "Mulai dari {a}, ambil {b}. {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10",
+                    "distractors": [
+                      { "expr": "a + b", "tag": "menjumlah-bukan-mengurangi" },
+                      { "expr": "a", "tag": "tidak-dikurangi" },
+                      "c + 1",
+                      "c - 1"
+                    ],
+                    "choices": 4
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "Ada {a} ikan di akuarium. {b} ikan dipindah ke kolam. Berapa ikan yang masih di akuarium?",
+                    "answer": "c",
+                    "explain": "Mulai dari {a}, ambil {b}. {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10",
+                    "distractors": [
+                      { "expr": "a + b", "tag": "menjumlah-bukan-mengurangi" },
+                      { "expr": "a", "tag": "tidak-dikurangi" },
+                      "c + 1",
+                      "c - 1"
+                    ],
+                    "choices": 4
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "Ada {a} mobil di tempat parkir. {b} mobil pergi. Berapa mobil yang masih diparkir?",
+                    "answer": "c",
+                    "explain": "Mulai dari {a}, ambil {b}. {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10",
+                    "distractors": [
+                      { "expr": "a + b", "tag": "menjumlah-bukan-mengurangi" },
+                      { "expr": "a", "tag": "tidak-dikurangi" },
+                      "c + 1",
+                      "c - 1"
+                    ],
+                    "choices": 4
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "{nama} punya {a} pisang. {b} pisang dimakan monyet di kebun binatang. Berapa pisang yang tersisa?",
+                    "answer": "c",
+                    "explain": "Mulai dari {a}, ambil {b}. {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10",
+                    "distractors": [
+                      { "expr": "a + b", "tag": "menjumlah-bukan-mengurangi" },
+                      { "expr": "a", "tag": "tidak-dikurangi" },
+                      "c + 1",
+                      "c - 1"
+                    ],
+                    "choices": 4
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "Ada {a} kelinci di kandang. {b} kelinci melompat keluar. Berapa kelinci yang masih di kandang?",
+                    "answer": "c",
+                    "explain": "Mulai dari {a}, ambil {b}. {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10",
+                    "distractors": [
+                      { "expr": "a + b", "tag": "menjumlah-bukan-mengurangi" },
+                      { "expr": "a", "tag": "tidak-dikurangi" },
+                      "c + 1",
+                      "c - 1"
+                    ],
+                    "choices": 4
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "number": 2,
+          "title": "Tulis kalimat pengurangan",
+          "isFree": true,
+          "generator": "skill",
+          "generatorParams": {
+            "family": "mix",
+            "params": {
+              "parts": [
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "{nama} punya {a} apel. {b} apel diberikan kepada adik. Berapa apel {nama} sekarang? Isi: {a} − {b} = …",
+                    "answer": "c",
+                    "explain": "{a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "mode": "input",
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10"
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "{nama} punya {a} apel. {b} apel diberikan kepada adik. Berapa apel {nama} sekarang? Isi: … − {b} = {c}",
+                    "answer": "a",
+                    "explain": "Mulainya ada {a}. Jadi {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "mode": "input",
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10"
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "Ada {a} kupu-kupu di taman. {b} kupu-kupu terbang pergi. Berapa kupu-kupu yang masih di taman? Isi: {a} − {b} = …",
+                    "answer": "c",
+                    "explain": "{a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "mode": "input",
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10"
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "Ada {a} kupu-kupu di taman. {b} kupu-kupu terbang pergi. Berapa kupu-kupu yang masih di taman? Isi: … − {b} = {c}",
+                    "answer": "a",
+                    "explain": "Mulainya ada {a}. Jadi {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "mode": "input",
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10"
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "Ibu membuat {a} kue. {b} kue sudah dimakan. Berapa kue yang tersisa? Isi: {a} − {b} = …",
+                    "answer": "c",
+                    "explain": "{a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "mode": "input",
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10"
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "Ibu membuat {a} kue. {b} kue sudah dimakan. Berapa kue yang tersisa? Isi: … − {b} = {c}",
+                    "answer": "a",
+                    "explain": "Mulainya ada {a}. Jadi {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "mode": "input",
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10"
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "{nama} membawa {a} balon. {b} balon meletus. Berapa balon yang tersisa? Isi: {a} − {b} = …",
+                    "answer": "c",
+                    "explain": "{a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "mode": "input",
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10"
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "{nama} membawa {a} balon. {b} balon meletus. Berapa balon yang tersisa? Isi: … − {b} = {c}",
+                    "answer": "a",
+                    "explain": "Mulainya ada {a}. Jadi {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "mode": "input",
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10"
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "Di kolam ada {a} bebek. {b} bebek naik ke darat. Berapa bebek yang masih di kolam? Isi: {a} − {b} = …",
+                    "answer": "c",
+                    "explain": "{a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "mode": "input",
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10"
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "Di kolam ada {a} bebek. {b} bebek naik ke darat. Berapa bebek yang masih di kolam? Isi: … − {b} = {c}",
+                    "answer": "a",
+                    "explain": "Mulainya ada {a}. Jadi {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "mode": "input",
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10"
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "Di rak ada {a} buku. {nama} meminjam {b} buku. Berapa buku yang masih di rak? Isi: {a} − {b} = …",
+                    "answer": "c",
+                    "explain": "{a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "mode": "input",
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10"
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "Di rak ada {a} buku. {nama} meminjam {b} buku. Berapa buku yang masih di rak? Isi: … − {b} = {c}",
+                    "answer": "a",
+                    "explain": "Mulainya ada {a}. Jadi {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "mode": "input",
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "number": 3,
+          "title": "Soal cerita memisahkan",
+          "isFree": false,
+          "generator": "skill",
+          "generatorParams": {
+            "family": "mix",
+            "params": {
+              "parts": [
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "Ada {a} bunga di vas. {b} bunga merah, sisanya kuning. Berapa bunga kuning?",
+                    "answer": "c",
+                    "explain": "Semuanya {a}. Satu bagian {b}. Bagian lain: {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10",
+                    "distractors": [
+                      { "expr": "a + b", "tag": "menjumlah-bukan-mengurangi" },
+                      { "expr": "a", "tag": "tidak-dikurangi" },
+                      "c + 1",
+                      "c - 1"
+                    ],
+                    "choices": 4
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "{nama} punya {a} kelereng. {b} kelereng biru, sisanya hijau. Berapa kelereng hijau?",
+                    "answer": "c",
+                    "explain": "Semuanya {a}. Satu bagian {b}. Bagian lain: {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10",
+                    "distractors": [
+                      { "expr": "a + b", "tag": "menjumlah-bukan-mengurangi" },
+                      { "expr": "a", "tag": "tidak-dikurangi" },
+                      "c + 1",
+                      "c - 1"
+                    ],
+                    "choices": 4
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "Di kandang ada {a} kelinci. {b} kelinci putih, sisanya cokelat. Berapa kelinci cokelat?",
+                    "answer": "c",
+                    "explain": "Semuanya {a}. Satu bagian {b}. Bagian lain: {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10",
+                    "distractors": [
+                      { "expr": "a + b", "tag": "menjumlah-bukan-mengurangi" },
+                      { "expr": "a", "tag": "tidak-dikurangi" },
+                      "c + 1",
+                      "c - 1"
+                    ],
+                    "choices": 4
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "Ada {a} anak di taman. {b} anak laki-laki, sisanya perempuan. Berapa anak perempuan?",
+                    "answer": "c",
+                    "explain": "Semuanya {a}. Satu bagian {b}. Bagian lain: {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10",
+                    "distractors": [
+                      { "expr": "a + b", "tag": "menjumlah-bukan-mengurangi" },
+                      { "expr": "a", "tag": "tidak-dikurangi" },
+                      "c + 1",
+                      "c - 1"
+                    ],
+                    "choices": 4
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "Di piring ada {a} kue. {b} kue cokelat, sisanya kue keju. Berapa kue keju?",
+                    "answer": "c",
+                    "explain": "Semuanya {a}. Satu bagian {b}. Bagian lain: {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10",
+                    "distractors": [
+                      { "expr": "a + b", "tag": "menjumlah-bukan-mengurangi" },
+                      { "expr": "a", "tag": "tidak-dikurangi" },
+                      "c + 1",
+                      "c - 1"
+                    ],
+                    "choices": 4
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "{nama} membeli {a} buah. {b} buah mangga, sisanya jambu. Berapa buah jambu?",
+                    "answer": "c",
+                    "explain": "Semuanya {a}. Satu bagian {b}. Bagian lain: {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10",
+                    "distractors": [
+                      { "expr": "a + b", "tag": "menjumlah-bukan-mengurangi" },
+                      { "expr": "a", "tag": "tidak-dikurangi" },
+                      "c + 1",
+                      "c - 1"
+                    ],
+                    "choices": 4
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "Ada {a} ayam di halaman. {b} ayam jantan, sisanya betina. Berapa ayam betina?",
+                    "answer": "c",
+                    "explain": "Semuanya {a}. Satu bagian {b}. Bagian lain: {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10",
+                    "distractors": [
+                      { "expr": "a + b", "tag": "menjumlah-bukan-mengurangi" },
+                      { "expr": "a", "tag": "tidak-dikurangi" },
+                      "c + 1",
+                      "c - 1"
+                    ],
+                    "choices": 4
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "Di parkiran ada {a} kendaraan. {b} mobil, sisanya sepeda motor. Berapa sepeda motor?",
+                    "answer": "c",
+                    "explain": "Semuanya {a}. Satu bagian {b}. Bagian lain: {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10",
+                    "distractors": [
+                      { "expr": "a + b", "tag": "menjumlah-bukan-mengurangi" },
+                      { "expr": "a", "tag": "tidak-dikurangi" },
+                      "c + 1",
+                      "c - 1"
+                    ],
+                    "choices": 4
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "number": 4,
+          "title": "Soal cerita pengurangan: isian",
+          "isFree": false,
+          "generator": "skill",
+          "generatorParams": {
+            "family": "mix",
+            "params": {
+              "parts": [
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "{nama} punya {a} apel. {b} apel diberikan kepada adik. Berapa apel {nama} sekarang?",
+                    "answer": "c",
+                    "explain": "Mulai dari {a}, ambil {b}. {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10",
+                    "mode": "input"
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "Ada {a} kupu-kupu di taman. {b} kupu-kupu terbang pergi. Berapa kupu-kupu yang masih di taman?",
+                    "answer": "c",
+                    "explain": "Mulai dari {a}, ambil {b}. {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10",
+                    "mode": "input"
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "Ibu membuat {a} kue. {b} kue sudah dimakan. Berapa kue yang tersisa?",
+                    "answer": "c",
+                    "explain": "Mulai dari {a}, ambil {b}. {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10",
+                    "mode": "input"
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "{nama} membawa {a} balon. {b} balon meletus. Berapa balon yang tersisa?",
+                    "answer": "c",
+                    "explain": "Mulai dari {a}, ambil {b}. {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10",
+                    "mode": "input"
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "Di kolam ada {a} bebek. {b} bebek naik ke darat. Berapa bebek yang masih di kolam?",
+                    "answer": "c",
+                    "explain": "Mulai dari {a}, ambil {b}. {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10",
+                    "mode": "input"
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "Di rak ada {a} buku. {nama} meminjam {b} buku. Berapa buku yang masih di rak?",
+                    "answer": "c",
+                    "explain": "Mulai dari {a}, ambil {b}. {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10",
+                    "mode": "input"
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "Ada {a} bunga di vas. {b} bunga merah, sisanya kuning. Berapa bunga kuning?",
+                    "answer": "c",
+                    "explain": "Semuanya {a}. Satu bagian {b}. Bagian lain: {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10",
+                    "mode": "input"
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "{nama} punya {a} kelereng. {b} kelereng biru, sisanya hijau. Berapa kelereng hijau?",
+                    "answer": "c",
+                    "explain": "Semuanya {a}. Satu bagian {b}. Bagian lain: {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10",
+                    "mode": "input"
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "Di kandang ada {a} kelinci. {b} kelinci putih, sisanya cokelat. Berapa kelinci cokelat?",
+                    "answer": "c",
+                    "explain": "Semuanya {a}. Satu bagian {b}. Bagian lain: {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10",
+                    "mode": "input"
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "Ada {a} anak di taman. {b} anak laki-laki, sisanya perempuan. Berapa anak perempuan?",
+                    "answer": "c",
+                    "explain": "Semuanya {a}. Satu bagian {b}. Bagian lain: {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10",
+                    "mode": "input"
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "Di piring ada {a} kue. {b} kue cokelat, sisanya kue keju. Berapa kue keju?",
+                    "answer": "c",
+                    "explain": "Semuanya {a}. Satu bagian {b}. Bagian lain: {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10",
+                    "mode": "input"
+                  }
+                },
+                {
+                  "family": "expr",
+                  "params": {
+                    "vars": { "b": [1, 9], "c": [1, 9] },
+                    "prompt": "{nama} membeli {a} buah. {b} buah mangga, sisanya jambu. Berapa buah jambu?",
+                    "answer": "c",
+                    "explain": "Semuanya {a}. Satu bagian {b}. Bagian lain: {a} − {b} = {c}.",
+                    "words": {
+                      "nama": [
+                        "Alya",
+                        "Sari",
+                        "Putri",
+                        "Nina",
+                        "Wulan",
+                        "Dewi",
+                        "Rina",
+                        "Ayu",
+                        "Raka",
+                        "Dimas",
+                        "Budi",
+                        "Adit",
+                        "Tegar",
+                        "Bayu",
+                        "Fajar",
+                        "Joko"
+                      ]
+                    },
+                    "derived": { "a": "b + c" },
+                    "constraint": "b + c <= 10",
+                    "mode": "input"
                   }
                 }
               ]

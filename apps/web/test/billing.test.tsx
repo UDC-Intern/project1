@@ -100,7 +100,7 @@ describe('mock billing: pesanan', () => {
 
   it('buat pesanan, kirim bukti, admin setujui: Premium terbuka untuk semua anak', async () => {
     const db = readDb();
-    db.passedLevels['c-ayu'] = ['matematika-kelas-1:A:1'];
+    db.passedLevels['c-ayu'] = ['matematika-kelas-1:A:1', 'matematika-kelas-1:A:2'];
     writeDb(db);
 
     const o = await createOrder({ packageId: 'tunas', methodId: 'bca' });
@@ -113,7 +113,7 @@ describe('mock billing: pesanan', () => {
     expect(sent.status).toBe('awaiting_review');
 
     asAyu();
-    expect((await errorOf(startRound('matematika-kelas-1:A:2'))).body.code).toBe(
+    expect((await errorOf(startRound('matematika-kelas-1:A:3'))).body.code).toBe(
       'PREMIUM_REQUIRED',
     );
 
@@ -122,7 +122,7 @@ describe('mock billing: pesanan', () => {
     expect((await approveOrder(o.id)).status).toBe('paid');
 
     asAyu();
-    expect((await startRound('matematika-kelas-1:A:2')).questions).toHaveLength(10);
+    expect((await startRound('matematika-kelas-1:A:3')).questions).toHaveLength(10);
     asParent();
     expect((await plan()).children.every((c) => c.plan === 'premium')).toBe(true);
   });

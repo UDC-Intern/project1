@@ -1994,3 +1994,68 @@ a.level-card:active {
 .swatch-btn[aria-pressed='true']:active {
   box-shadow: 0 1px 0 var(--gonjong);
 }
+
+/* Pemberitahuan level Premium untuk anak: oranye agar mudah disadari, bukan merah. */
+.kid-alert {
+  max-width: 640px;
+  margin: 16px auto;
+  padding: 14px 18px;
+  border: 3px solid var(--jeruk);
+  border-radius: 20px;
+  background: var(--jeruk-soft);
+  color: var(--malam);
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.45;
+  text-align: left;
+}
+.kid-alert.is-compact {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  font-size: 1rem;
+}
+.kid-alert p {
+  margin: 8px 0 0;
+}
+.kid-alert-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.2rem;
+  color: var(--jeruk-teks);
+}
+.kid-alert.is-compact .kid-alert-head {
+  font-size: 1.05rem;
+}
+.kid-alert-head strong {
+  flex: 1;
+}
+.kid-alert-icon {
+  flex: none;
+  color: var(--jeruk);
+}
+.kid-alert-head .speak-btn {
+  flex: none;
+}
+.kid-alert-parent {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border: 2px dashed var(--jeruk);
+  border-radius: 14px;
+  background: var(--kertas);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--malam);
+}
+.kid-alert-parent ol {
+  margin: 6px 0 0;
+  padding-left: 22px;
+}
+.kid-alert-parent li + li {
+  margin-top: 4px;
+}
+
+/* Jarak profil: pilihan warna Momo tidak menempel pada kartu statistik di bawahnya. */
+.swatches-box {
+  margin: 20px 0 28px;
+}
