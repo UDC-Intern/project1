@@ -10,6 +10,7 @@ import {
 } from '@udakids/engine';
 import { errorMessage } from '../api/client';
 import type { ChildProfile } from '../api/types';
+import { useSettings } from '../api/settings';
 import { useApiCall, useFetch } from '../auth/useApi';
 import { t } from '../i18n';
 import { familySteps, Stepper } from '../site/AuthLayout';
@@ -20,6 +21,11 @@ import { ColorPicker } from './ColorPicker';
 import { fieldErrors, serverFieldErrors } from './form';
 import { PinSetter } from './PinSetter';
 import { ChildCount, ChildLimitDialog, isChildLimitError } from './ChildLimit';
+import {
+  CertificateNameFields,
+  checkCertificateName,
+  type CertificateNameState,
+} from './CertificateName';
 
 export type ChildFormMode = 'new' | 'edit' | 'pin';
 
@@ -50,6 +56,15 @@ function Form({
   const [limitOpen, setLimitOpen] = useState(false);
   const withPin = mode !== 'edit';
   const withProfile = mode !== 'pin';
+  // Nama lengkap khusus sertifikat: hanya saat mengubah profil, dan bila Pengaturan memakai nama lengkap.
+  const { useFullName } = useSettings().certificate;
+  const withCertName = mode === 'edit' && useFullName;
+  const savedCertName = child?.certificateName ?? null;
+  const [certName, setCertName] = useState<CertificateNameState>({
+    name: savedCertName ?? '',
+    consent: false,
+  });
+  const certNameChanged = certName.name.trim().replace(/\s+/g, ' ') !== (savedCertName ?? '');
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -57,6 +72,11 @@ function Form({
     const input = {
       ...(withProfile && { nickname, momoColor: color }),
       ...(withPin && pin && { pin }),
+      ...(withCertName &&
+        certNameChanged && {
+          certificateName: certName.name,
+          certificateConsent: certName.consent,
+        }),
       // Kode kelas (D-022): kosong saat membuat = tanpa kelas; dikosongkan saat mengubah = keluar kelas.
       ...(withProfile &&
         (classCode.trim()
@@ -69,6 +89,8 @@ function Form({
       mode === 'new' ? childProfileSchema.safeParse(input) : childUpdateSchema.safeParse(input);
     const next = parsed.success ? {} : fieldErrors(parsed.error.issues);
     if (withPin && !pin) next.pin = t('parent.form.pinMissing');
+    if (withCertName && certNameChanged)
+      Object.assign(next, checkCertificateName(certName, savedCertName));
     setErrors(next);
     if (!parsed.success || Object.keys(next).length > 0) return;
     setBusy(true);
@@ -150,6 +172,21 @@ function Form({
               />
             </section>
           )}
+          {withCertName && (
+            <section className="cf-section" aria-labelledby="cf-cert">
+              <h2 id="cf-cert">
+                <span className="cf-num">{num()}</span>
+                {t('parent.form.sectionCertificate')}
+              </h2>
+              <CertificateNameFields
+                nickname={child?.nickname ?? nickname}
+                saved={savedCertName}
+                value={certName}
+                onChange={setCertName}
+                errors={errors}
+              />
+            </section>
+          )}
           {withPin && (
             <section className="cf-section" aria-labelledby="cf-pin">
               <h2 id="cf-pin">
@@ -194,6 +231,11 @@ function Form({
                 {nickname.trim() || t('parent.form.previewName')}
               </strong>
               <small>{t('parent.form.previewHint')}</small>
+              {withCertName && certName.name.trim() && (
+                <small className="cf-preview-cert">
+                  {t('parent.form.certPreview', { name: certName.name.trim() })}
+                </small>
+              )}
             </div>
             <div className="cf-privacy">
               <ShellIconSvg name="badge" />

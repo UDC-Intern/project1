@@ -1,4 +1,10 @@
-import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode } from 'react';
+import type {
+  ButtonHTMLAttributes,
+  InputHTMLAttributes,
+  ReactNode,
+  SelectHTMLAttributes,
+  TextareaHTMLAttributes,
+} from 'react';
 import { useEffect, useId, useRef, useState } from 'react';
 import { t } from '../i18n';
 import './ui.css';
@@ -141,6 +147,67 @@ export function PasswordField({
         <small id={`${id}-error`} className="ui-error">
           {error}
         </small>
+      )}
+    </div>
+  );
+}
+
+export function TextArea({
+  label,
+  hint,
+  error,
+  ...props
+}: FieldProps & TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  const id = useId();
+  return (
+    <div className="ui-field">
+      <label htmlFor={id}>{label}</label>
+      <textarea id={id} aria-invalid={error ? true : undefined} {...props} />
+      {hint && !error && <small className="ui-hint">{hint}</small>}
+      {error && <small className="ui-error">{error}</small>}
+    </div>
+  );
+}
+
+export function SelectField({
+  label,
+  hint,
+  error,
+  options,
+  ...props
+}: FieldProps &
+  SelectHTMLAttributes<HTMLSelectElement> & { options: { value: string; label: string }[] }) {
+  const id = useId();
+  return (
+    <div className="ui-field">
+      <label htmlFor={id}>{label}</label>
+      <select id={id} {...props}>
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+      {hint && !error && <small className="ui-hint">{hint}</small>}
+      {error && <small className="ui-error">{error}</small>}
+    </div>
+  );
+}
+
+export function Checkbox({
+  label,
+  ...props
+}: { label: ReactNode } & InputHTMLAttributes<HTMLInputElement>) {
+  return (
+    <div className="ui-check-row">
+      <label className="ui-check">
+        <input type="checkbox" aria-required={props.required || undefined} {...props} />
+        <span>{label}</span>
+      </label>
+      {props.required && (
+        <span className="ui-req" aria-hidden>
+          *
+        </span>
       )}
     </div>
   );
@@ -325,6 +392,16 @@ export function Table<T>({
           ))}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+export function Stat({ label, value, hint }: { label: string; value: ReactNode; hint?: string }) {
+  return (
+    <div className="ui-stat">
+      <span className="ui-stat-value">{value}</span>
+      <span className="ui-stat-label">{label}</span>
+      {hint && <small className="ui-muted">{hint}</small>}
     </div>
   );
 }

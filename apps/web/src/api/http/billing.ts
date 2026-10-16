@@ -14,6 +14,7 @@ import { request } from '../client';
 const enc = encodeURIComponent;
 
 export const packages = () => request<BillingPackage[]>('/billing/packages');
+export const publicPackages = () => request<BillingPackage[]>('/packages');
 export const methods = () => request<PaymentMethod[]>('/billing/methods');
 export const orders = () => request<Order[]>('/billing/orders');
 export const order = (id: string) => request<Order>(`/billing/orders/${enc(id)}`);

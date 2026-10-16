@@ -1,4 +1,4 @@
-import { FREE_LEVELS } from '@udakids/engine';
+import { useSettings } from '../api/settings';
 import { t } from '../i18n';
 import { SpeakButton } from './SpeakButton';
 
@@ -25,15 +25,16 @@ function InfoIcon() {
  * yang ditujukan ke Ayah atau Bunda. Muncul setelah level gratis di topik itu selesai.
  */
 export function PremiumNotice({ compact = false }: { compact?: boolean }) {
-  const say = t('play.premium.say', { n: FREE_LEVELS + 1 });
+  const free = useSettings().billing.freeLevels;
+  const say = t('play.premium.say', { n: free + 1 });
   return (
     <section className={`kid-alert${compact ? ' is-compact' : ''}`} role="note">
       <div className="kid-alert-head">
         <InfoIcon />
-        <strong>{t('play.premium.title', { n: FREE_LEVELS + 1 })}</strong>
+        <strong>{t('play.premium.title', { n: free + 1 })}</strong>
         <SpeakButton text={say} />
       </div>
-      <p>{t('play.premium.kid', { free: FREE_LEVELS })}</p>
+      <p>{t('play.premium.kid', { free })}</p>
       {!compact && (
         <div className="kid-alert-parent">
           <strong>{t('play.premium.parentTitle')}</strong>

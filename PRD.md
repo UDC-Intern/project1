@@ -1,6 +1,6 @@
 # PRD: UdaKids
 
-Versi 1.1 · 16 Oktober 2026 · Penyusun: Ridho Dwi Syahputra
+Versi 1.2 · 16 Oktober 2026 · Penyusun: Ridho Dwi Syahputra
 
 Nama produk dan maskot ditulis sekali di `apps/web/src/config/app.ts` (`APP_NAME`, `CHARACTER_NAME`).
 
@@ -8,8 +8,9 @@ Nama produk dan maskot ditulis sekali di `apps/web/src/config/app.ts` (`APP_NAME
 
 UdaKids adalah aplikasi web belajar untuk anak SD Kelas 1 sampai 4. Anak berlatih soal Matematika dan Sains per topik dan
 per level, ditemani robot kecil bernama Momo yang membacakan soal. Orang tua membuat profil anak, memantau laporan, membeli
-paket, dan mengunduh sertifikat anak. Admin mengelola buku, topik, level, pengguna, transaksi, Premium, dan sertifikat,
-dibantu asisten AI untuk draf materi. Papan peringkat hanya menampilkan nama panggilan.
+paket, dan mengunduh sertifikat anak. Admin mengelola buku, topik, level, keluarga, transaksi, Premium, sertifikat, dan
+pengaturan aplikasi (level gratis, kontak WhatsApp, isi lembar sertifikat), dibantu asisten AI untuk draf materi. Papan
+peringkat hanya menampilkan nama panggilan.
 
 Rilis 1.0 memuat **5 buku**: Matematika Kelas 1, 2, 3, 4 dan Sains Kelas 1. Totalnya 50 topik dan 199 level, semua soal
 dibuat generator. Tiga peran (anak, orang tua, admin) saling terhubung penuh. Arsitekturnya monorepo pnpm, React + Vite,
@@ -25,9 +26,10 @@ tambahannya selesai). API NestJS dan database dibangun di M6 sampai M11 dengan k
   - **Anak:** bermain ronde latihan, melihat Peta Belajar, tanaman, peringkat, profil, dan sertifikat. Tidak punya email
     dan tidak punya kata sandi tertulis. Akun anak dibuat oleh orang tua.
   - **Orang tua:** mendaftar, membuat profil anak, memantau laporan, membeli paket, mengunduh dan mencetak sertifikat.
-  - **Admin:** staf yang mengelola konten, pengguna, transaksi, Premium, dan sertifikat. Akun admin pertama dibuat oleh
-    seed, bukan pendaftaran.
-  - **Pengunjung:** melihat landing, paket, contoh sertifikat, dan 10 besar peringkat.
+  - **Admin:** staf yang mengelola konten, keluarga, transaksi, Premium, sertifikat, dan pengaturan. Akun admin pertama
+    dibuat oleh seed, bukan pendaftaran; admin lain ditambahkan admin di menu Staf. Satu peran admin, tanpa tingkatan.
+  - **Pengunjung:** melihat landing, paket, contoh sertifikat, dan 10 besar peringkat, serta mengecek keaslian nomor
+    sertifikat.
 
 ## 3. Masalah yang Diselesaikan
 
@@ -36,21 +38,24 @@ tambahannya selesai). API NestJS dan database dibangun di M6 sampai M11 dengan k
 - Orang tua tidak tahu anaknya kuat atau lemah di topik mana.
 - Menulis ratusan soal satu per satu lambat dan cepat membosankan; anak butuh soal yang selalu segar dan sesuai level.
 - Akses level berbayar harus terkendali tanpa payment gateway (transfer manual, admin yang memeriksa).
-- Anak dan orang tua butuh penanda pencapaian yang nyata saat sebuah buku tuntas.
+- Anak dan orang tua butuh penanda pencapaian yang nyata saat sebuah buku tuntas, dan sertifikatnya harus tampak resmi
+  walau nama panggilan anak pendek.
+- Aturan bisnis (batas level gratis, nomor WhatsApp, isi lembar sertifikat) berubah-ubah, jadi admin harus bisa mengubahnya
+  tanpa menunggu rilis baru.
 
 ## 4. Fitur Rilis 1.0 (10 fitur inti)
 
 | No | Fitur                    | Penjelasan singkat |
 | -- | ------------------------ | ------------------ |
 | 1  | Akun dan tiga peran      | Orang tua daftar (email + kata sandi, wajib centang persetujuan) dan mendapat kode keluarga 6 huruf. Orang tua membuat maksimal 3 profil anak (nama panggilan, warna Momo, sandi 3 gambar). Anak masuk dengan kode keluarga + sandi gambar. Admin masuk lewat halaman staf. Orang tua punya halaman akun (nama, kata sandi, email dengan kode konfirmasi). |
-| 2  | Belajar terstruktur      | 5 buku, 10 topik per buku, 4 level per topik (topik pertama Sains Kelas 1 berisi 3 level). Semua topik terbuka sejak awal; di dalam topik level berurutan. Level 1 dan 2 gratis, level 3 dan 4 Premium. Beranda anak berupa **Peta Belajar**: pilihan Kelas 1 sampai 4, jalur topik per buku, dan panel topik (pengantar yang bisa didengar, "Tahukah kamu?", kemajuan, Mulai belajar). Kartu Premium muncul setelah level gratis topik itu lulus. |
+| 2  | Belajar terstruktur      | 5 buku, 10 topik per buku, 4 level per topik (topik pertama Sains Kelas 1 berisi 3 level). Semua topik terbuka sejak awal; di dalam topik level berurutan. Awalnya level 1 dan 2 gratis, level 3 dan 4 Premium; batasnya diatur admin di Pengaturan. Beranda anak berupa **Peta Belajar**: pilihan Kelas 1 sampai 4, jalur topik per buku, dan panel topik (pengantar yang bisa didengar, "Tahukah kamu?", kemajuan, Mulai belajar). Kartu Premium muncul setelah level gratis topik itu lulus. |
 | 3  | Ronde latihan            | 10 soal dibuat generator di `engine` dari seed ronde (deterministik, tanpa bank soal statis). Jenis soal: pilihan ganda, isian angka, benar/belum tepat. Pilihan langsung dinilai saat diketuk; isian angka memakai `Keypad` dan tombol periksa. Umpan balik hijau/kuning dengan petunjuk langsung dibacakan, stopwatch tanpa batas, 10 titik indikator, lalu halaman hasil. **Dinilai di server.** |
 | 4  | Skor Jago dan tanaman    | Skor penguasaan per topik (0 sampai 100), diperbarui tiap jawaban. Anak hanya melihat tanaman 4 tahap (benih, tunas, pohon, berbuah). Orang tua dan admin melihat angka dan status (Belajar, Bisa, Jago). |
 | 5  | Papan peringkat          | Tiga mode: Rata-rata (tertimbang), Total Skor, dan Mock Test (disiapkan, belum berisi). Total dan per buku. Hanya nama panggilan dan warna Momo yang terlihat. Posisi anak sendiri disorot. 10 besar tampil di landing. |
 | 6  | Laporan orang tua        | Dasbor keluarga (ringkasan minggu, progres tiap anak dan tiap buku, level berikutnya, topik terkuat dan yang perlu ditemani), laporan per anak, dan kartu sertifikat. |
-| 7  | Paket dan pembayaran     | 5 paket: Tunas (30 hari), Kumbang (90), Tumbuh Bersama (180), Bintang Kecil (365), Teman Setia (selamanya). Orang tua memilih paket dan cara bayar (BCA, BNI, CIMB Niaga, Gopay, ShopeePay), mentransfer total dengan kode unik Rp1 sampai Rp499, lalu mengunggah bukti. Admin menyetujui atau menolak dengan catatan. Premium berlaku untuk semua anak di keluarga itu. Tanpa perpanjangan otomatis. Tombol WhatsApp admin di semua halaman. |
-| 8  | Panel admin              | Ringkasan bergrafik, kelola buku/topik/level dan materi, pratinjau soal generator per level, asisten AI (Gemini) untuk draf materi dan kurikulum, pengguna dan Premium per anak, laporan anak dan statistik level, transaksi, paket, rekening, dan sertifikat. |
-| 9  | Sertifikat Juara Digital | Bagian dari Premium. Anak yang lulus semua level dalam satu buku mendapat sertifikat bernomor (`CERT-XXXXXX`) yang terbit otomatis. Anak melihat dan mencetaknya; orang tua mengunduh gambar PNG atau mencetak/menyimpan PDF; admin mengelola desain, daftar menunggu, dan semua sertifikat. Aturan lengkap di bagian 4.2. |
+| 7  | Paket dan pembayaran     | 5 paket: Tunas (30 hari), Kumbang (90), Tumbuh Bersama (180), Bintang Kecil (365), Teman Setia (selamanya). Orang tua memilih paket dan cara bayar (BCA, BNI, CIMB Niaga, Gopay, ShopeePay), mentransfer total dengan kode unik Rp1 sampai Rp499, lalu mengunggah bukti. Admin menyetujui atau menolak dengan catatan. Premium berlaku untuk semua anak di keluarga itu. Tanpa perpanjangan otomatis. Tombol WhatsApp admin di semua halaman. Paket dan rekening bisa ditambah, diubah, dinonaktifkan, atau dihapus admin; harga di landing dan area orang tua mengikuti menu Paket, dan nomor WhatsApp mengikuti Pengaturan. |
+| 8  | Panel admin              | Ringkasan bergrafik; **Konten** (buku, topik, materi, "Tahukah kamu?", judul level, pengecualian gratis/Premium per level); pratinjau soal generator; asisten AI (Gemini) untuk draf materi dan kurikulum; **Keluarga** (cari, saring, urutkan, nonaktifkan akun, atur ulang sandi gambar dan kata sandi, Premium per anak); **Staf**; **Laporan** (statistik level dan laporan per anak); **Transaksi**, **Paket**, dan **Rekening**; **Sertifikat**; **Pengaturan**; dan lonceng notifikasi (pendaftaran, pesanan, bukti, sertifikat). Aturan Pengaturan di bagian 4.3. |
+| 9  | Sertifikat Juara Digital | Bagian dari Premium. Anak yang lulus semua level dalam satu buku mendapat sertifikat bernomor (`CERT-XXXXXX`) yang terbit otomatis. Anak melihat dan mencetaknya; orang tua mengunduh gambar PNG atau mencetak/menyimpan PDF dan bisa mengisi nama lengkap anak khusus untuk sertifikat; admin mengelola desain, isi lembar, daftar menunggu, dan semua sertifikat. Setiap lembar punya kode QR ke halaman publik cek keaslian. Aturan lengkap di bagian 4.2. |
 | 10 | Suara                    | Setiap halaman anak membacakan isinya begitu tampil, tombol dan tautan menyebut namanya saat diketuk, soal dan umpan balik dibacakan tanpa jeda. Mode tiruan memakai suara peramban berbahasa Indonesia. M10 menambah klip Google Cloud Text-to-Speech (`id-ID-Chirp3-HD-Leda`) untuk soal dan materi, dibuat sekali dan disimpan di PostgreSQL. Tanpa suara, teks tetap tampil. |
 
 ### 4.1 Aturan nilai
@@ -59,9 +64,10 @@ tambahannya selesai). API NestJS dan database dibangun di M6 sampai M11 dengan k
   Ambang, jumlah soal per ronde, dan batas keliru disimpan per level.
 - **Level:** semua topik boleh dipilih bebas. Di dalam topik, level 1 selalu terbuka dan level berikutnya terbuka bila
   level sebelumnya pernah lulus.
-- **Premium:** level dengan `is_free = false` (level 3 dan 4; batasnya `FREE_LEVELS = 2` di `engine`) hanya bisa dimainkan
-  bila anak punya Premium aktif, dari paket keluarga atau dari admin. Yang berlaku adalah tanggal berakhir yang paling
-  akhir. Dicek di server.
+- **Premium:** level berbayar hanya bisa dimainkan bila anak punya Premium aktif, dari paket keluarga atau dari admin.
+  Level gratis: nomor level ≤ `freeLevels` di Pengaturan (awalnya 2, nilai awal `FREE_LEVELS` di `engine`), kecuali
+  admin mengecualikan satu level di menu Konten (level 1 selalu gratis). Kunci berbayar bisa dimatikan: semua level
+  gratis. Yang berlaku adalah tanggal berakhir Premium yang paling akhir. Dicek di server.
 - **Skor Jago:** tahap tanaman yang sudah terlihat tidak pernah turun. Kekeliruan di mode tantangan tidak menghukum.
 - **Peringkat:** total skor = jumlah skor terbaik tiap level, seri dipecah dengan total waktu lebih cepat. Mode Rata-rata
   memakai rata-rata tertimbang dengan 5 ronde awal bernilai 70.
@@ -78,14 +84,27 @@ tambahannya selesai). API NestJS dan database dibangun di M6 sampai M11 dengan k
   walau Premium tidak aktif (cara terbit `admin`).
 - **Nomor:** `CERT-` diikuti 6 karakter dari `ABCDEFGHJKLMNPQRSTUVWXYZ23456789` (tanpa I, O, 0, dan 1 agar tidak
   tertukar), dibuat dari sumber acak dan dijamin unik.
-- **Isi lembar (A4 mendatar):** UdaKids · Belajar bersama Momo, "SERTIFIKAT Juara Digital", nama panggilan anak, kalimat
-  pujian usaha ("atas ketekunannya berlatih dan menyelesaikan seluruh 40 level di 10 topik buku"), judul buku, stempel
-  JUARA, tanda tangan Momo (Teman Belajar) dan Tim UdaKids (Pengelola), tanggal terbit, dan nomor sertifikat. Tanpa data
-  pribadi lain.
-- **Data tetap:** nama panggilan, judul buku, jumlah topik dan level disalin saat terbit. Admin bisa menekan "Perbarui"
-  untuk memakai nama panggilan terbaru dan desain yang sedang dipakai; nomor dan tanggal terbit tidak berubah. Admin bisa
-  menghapus sertifikat; bila anak tetap lulus semua level, ia kembali ke daftar Menunggu. Menghapus profil anak ikut
-  menghapus sertifikatnya.
+- **Isi lembar (A4 mendatar):** kepala (penerbit dan kalimat kecil), judul dan sub-judul, nama di sertifikat, kalimat
+  pujian usaha ("atas ketekunannya berlatih dan menyelesaikan seluruh 40 level di 10 topik buku"), judul buku, baris
+  keterangan (kurikulum dan rata-rata skor, bila diaktifkan), stempel JUARA, dua penanda tangan, kode QR, tanggal
+  terbit, dan nomor sertifikat. Teks tetap lembar (penerbit, judul, penanda tangan, kurikulum, tampil/sembunyi skor dan
+  QR) dari Pengaturan, bukan tertulis di kode; awalnya "UdaKids · Belajar bersama Momo", "SERTIFIKAT Juara Digital", Momo
+  (Teman Belajar) dan Tim UdaKids (Pengelola). Tanpa data pribadi lain.
+- **Nama di sertifikat:** nama panggilan sering pendek atau lucu, sehingga lembarnya kurang meyakinkan. Orang tua boleh
+  mengisi nama lengkap anak khusus untuk sertifikat (2 sampai 60 huruf; huruf, spasi, titik, tanda petik, tanda hubung) di
+  formulir ubah anak atau di halaman Sertifikat. Karena itu data pribadi anak, mengisinya pertama kali butuh centang
+  persetujuan orang tua, disimpan bersama waktunya, dan bisa dihapus dengan mengosongkan isian. Nama ini hanya tampil di
+  lembar; aplikasi dan papan peringkat tetap memakai nama panggilan. Bila Pengaturan "Pakai nama lengkap" dimatikan,
+  semua sertifikat memakai nama panggilan dan isian itu disembunyikan.
+- **Cek keaslian (publik):** kode QR di lembar membuka `/sertifikat/cek/:id`. Pengunjung juga bisa mengetik nomornya di
+  `/sertifikat/cek`. Hasilnya menyatakan asli atau tidak terdaftar, dengan buku, capaian, tanggal terbit, penerbit, dan
+  nama yang disamarkan (huruf pertama tiap kata, mis. "A** L******"); nama lengkap anak tidak pernah terbuka. Contoh lembar
+  (belum terbit) tidak memuat QR.
+- **Data tetap:** nama di sertifikat, judul buku, jumlah topik, jumlah level, dan rata-rata skor terbaik level buku itu
+  disalin saat terbit. Nama di sertifikat ikut berubah bila orang tua mengubah nama lengkap, mengganti nama panggilan
+  (saat belum ada nama lengkap), atau admin mengubah aturan "Pakai nama lengkap"; nomor dan tanggal terbit tidak berubah.
+  Admin bisa menekan "Perbarui" untuk memakai nama dan desain terbaru. Admin bisa menghapus sertifikat; bila anak tetap
+  lulus semua level, ia kembali ke daftar Menunggu. Menghapus profil anak ikut menghapus sertifikatnya.
 - **Desain:** tiga desain bawaan, Klasik (kunyit), Gonjong (merah), dan Sawah (hijau), dengan bingkai ganda dan pita
   rebung. Admin memilih satu; desain itu dipakai untuk sertifikat yang terbit berikutnya.
 - **Unduh dan cetak:** orang tua dan admin mengunduh gambar PNG (2246 × 1588 piksel) atau mencetak/menyimpan PDF lewat
@@ -94,17 +113,37 @@ tambahannya selesai). API NestJS dan database dibangun di M6 sampai M11 dengan k
   anak (Sertifikatku), menu Sertifikat dan kartu dasbor orang tua, laporan anak, halaman paket, panel admin, dan landing
   (contoh lembar).
 
-### 4.3 Interaksi antar peran
+### 4.3 Pengaturan admin
+
+Menu **Pengaturan** (`/admin/pengaturan`) menyimpan nilai yang dulu tertulis di kode. Semua halaman membaca nilai yang
+sama lewat `useSettings()`, sehingga perubahan langsung berlaku tanpa memuat ulang. Tiap bagian disimpan sendiri (`PUT
+/admin/settings/:part`) dan diperiksa skema di `engine`; isian yang keliru ditolak per isian.
+
+| Bagian       | Isian | Dipakai di |
+| ------------ | ----- | ---------- |
+| `billing`    | Kunci berbayar (hidup/mati), level gratis per topik (1 sampai 12, awalnya 2), batas bayar pesanan (1 sampai 168 jam, awalnya 24) | Status level anak, landing, halaman Paket dan Konten admin, masa berlaku pesanan baru |
+| `contact`    | Nomor atau link WhatsApp admin (nomor HP 08… diubah menjadi `https://wa.me/62…`, hanya domain WhatsApp), pesan pembuka (maks 200 huruf), link grup WhatsApp orang tua (hanya `chat.whatsapp.com`, opsional) | Tombol "Hubungi admin" (kosong berarti tombol disembunyikan), halaman Paket orang tua |
+| `certificate`| Penerbit, kalimat kecil kepala, judul, sub-judul, dua penanda tangan beserta jabatannya, keterangan kurikulum, tampilkan rata-rata skor, tampilkan kode QR, pakai nama lengkap dari orang tua | Lembar sertifikat (anak, orang tua, admin, landing), halaman cek keaslian |
+
+Halaman Pengaturan menampilkan pratinjau lembar langsung dari isian (data contoh) sebelum disimpan. Pilihan desain tetap di
+menu Sertifikat. Pengecualian per level ada di menu Konten dan ditandai "Pengecualian"; pengecualian yang kembali sama
+dengan aturan Pengaturan otomatis dihapus.
+
+### 4.4 Interaksi antar peran
 
 1. Orang tua mendaftar, membuat profil anak dan sandi gambar, lalu mendapat kode keluarga.
 2. Anak masuk dengan kode keluarga dan sandi gambar itu, lalu bermain.
 3. Setiap ronde tersimpan, sehingga laporan orang tua, Skor Jago, papan peringkat, dan statistik admin ikut berubah.
-4. Orang tua membeli paket dan mengunggah bukti transfer. Admin menyetujui, lalu level 3 dan 4 di semua topik terbuka
-   untuk semua anak di keluarga itu. Admin juga bisa memberi atau mencabut Premium per anak.
+4. Orang tua membeli paket dan mengunggah bukti transfer. Admin menyetujui, lalu level berbayar di semua topik terbuka
+   untuk semua anak di keluarga itu. Admin juga bisa memberi atau mencabut Premium per anak tanpa transaksi.
 5. Admin mengubah judul, materi, atau status level. Perubahan langsung terlihat di area anak. Soal ronde selalu dibuat
    generator, jadi tidak perlu ditinjau satu per satu.
 6. Anak menuntaskan sebuah buku. Sertifikat terbit, tampil di halaman hasil dan Profil anak, di menu Sertifikat orang tua,
-   dan di panel admin.
+   dan di panel admin. Orang tua bisa mengisi nama lengkap anak agar lembarnya resmi; siapa pun bisa mencocokkan nomornya
+   di halaman cek keaslian.
+7. Admin mengubah Pengaturan (level gratis, WhatsApp, isi lembar). Anak, orang tua, dan pengunjung langsung melihat
+   perubahannya. Admin menonaktifkan akun anak atau keluarga; akun itu tidak bisa masuk dan tersembunyi dari pilihan
+   profil sampai diaktifkan lagi.
 
 ## 5. Peta Jalan (setelah rilis 1.0)
 
@@ -120,8 +159,8 @@ Hal berikut **tidak** dibangun di rilis 1.0. Struktur data dan modul disiapkan a
 - Data realtime (SSE dan polling). Rilis 1.0 memuat data saat halaman dibuka.
 - Foto nyata (Pexels) dan penyaringan foto dengan AI.
 - Hias Momo (aksesori) dan mode gelap. Rilis 1.0 cukup warna Momo dan tema terang.
-- Sertifikat lanjutan: halaman publik cek keaslian nomor sertifikat (dengan kode QR), unggah latar sertifikat oleh admin,
-  dan lencana per topik.
+- Sertifikat lanjutan: unggah latar sertifikat oleh admin dan lencana per topik.
+- Peran staf bertingkat (rilis 1.0 hanya satu peran admin) dan catatan aktivitas admin.
 - Hapus akun orang tua secara mandiri (hapus profil anak sudah ada).
 
 ## 6. Alur User
@@ -137,9 +176,10 @@ Hal berikut **tidak** dibangun di rilis 1.0. Struktur data dan modul disiapkan a
    ditemani). Buka laporan anak untuk Skor Jago per topik, ketepatan, ronde terakhir, saran topik, dan kemajuan sertifikat.
 5. Buka **Paket & Pembayaran**: pilih paket, pilih cara bayar, buat pesanan, transfer sesuai total (3 digit terakhir kode
    unik), unggah bukti. Pantau di **Riwayat Transaksi**; pesanan yang perlu tindakan diberi angka di menu.
-6. Buka **Sertifikat**: lihat sertifikat yang sudah terbit per anak, kemajuan tiap buku, dan contoh lembar. Buka satu
-   sertifikat untuk mengunduh gambar atau mencetak/menyimpan PDF. Sertifikat yang tertunda bisa diterbitkan setelah
-   Premium aktif.
+6. Buka **Sertifikat**: lihat sertifikat yang sudah terbit per anak, kemajuan tiap buku, dan contoh lembar. Bila lembar
+   masih memakai nama panggilan, isi nama lengkap anak di sana (dengan centang persetujuan); nama itu juga bisa diubah di
+   formulir ubah anak. Buka satu sertifikat untuk mengunduh gambar atau mencetak/menyimpan PDF dan melihat tautan cek
+   keaslian. Sertifikat yang tertunda bisa diterbitkan setelah Premium aktif.
 
 ### Anak
 
@@ -158,16 +198,25 @@ Hal berikut **tidak** dibangun di rilis 1.0. Struktur data dan modul disiapkan a
 ### Admin
 
 1. Masuk di `/masuk/staf`. Lihat ringkasan bergrafik: orang tua, anak, ronde, anak aktif, topik paling sulit.
-2. Konten: atur buku, topik (judul + materi), level (judul, gratis/Premium).
+2. Konten: atur buku, topik (judul, materi, "Tahukah kamu?"), dan level (judul, gratis/Premium). Aturan gratis datang dari
+   Pengaturan; mengubah satu level menjadi pengecualian ditandai "Pengecualian". Tiap buku bisa dilipat.
 3. Pratinjau soal: pilih level dan seed, lihat 10 soal dari generator beserta jawaban dan petunjuk, tanpa menyimpan apa
    pun.
 4. Asisten AI (Gemini): minta usulan materi singkat atau rincian kurikulum per topik. Hasilnya draf teks yang admin salin,
    ubah, lalu simpan di halaman Konten.
-5. Pengguna: cari orang tua dan anak, aktifkan Premium per anak dengan tanggal berakhir, atau cabut.
-6. Transaksi: periksa bukti transfer, setujui atau tolak dengan catatan. Paket dan Rekening: ubah harga, nama, dan status.
+5. Keluarga: ringkasan angka, tab Keluarga dan Anak, cari, saring (Free/Premium, aktif/nonaktif), urutkan, dan paging.
+   Per anak: beri atau cabut Premium dengan masa berlaku dan catatan (tanpa transaksi), atur ulang sandi gambar,
+   nonaktifkan, atau buka laporannya. Per keluarga: nonaktifkan akun atau atur kata sandi baru. Staf: tambah admin lain,
+   atur kata sandi, nonaktifkan (akun yang sedang dipakai tidak bisa dinonaktifkan).
+6. Transaksi: saring menurut status, periksa bukti transfer, setujui atau tolak dengan catatan; lencana di menu menghitung
+   pesanan yang menunggu verifikasi. Paket dan Rekening: tambah, ubah (nama, keterangan, harga normal, harga jual, masa
+   aktif, status, urutan), nonaktifkan, atau hapus; paket yang sudah pernah dipesan hanya dinonaktifkan.
 7. Sertifikat: pilih desain, terbitkan sertifikat dari daftar Menunggu, cari sertifikat terbit, lihat/unduh, perbarui,
    atau hapus (konfirmasi mengetik "hapus").
-8. Laporan: laporan anak (sama dengan versi orang tua) dan statistik per level (tingkat lulus, rata-rata skor).
+8. Laporan: statistik per level (tingkat lulus, jawaban keliru terbanyak) dan laporan per anak (Skor Jago, topik yang
+   perlu ditemani, kemajuan tiap buku).
+9. Pengaturan: ubah level gratis, kunci berbayar, batas bayar pesanan, kontak WhatsApp, dan isi lembar sertifikat dengan
+   pratinjau langsung (bagian 4.3). Lonceng di pojok kanan atas memuat 30 kabar terakhir.
 
 ## 7. Daftar Halaman
 
@@ -176,6 +225,7 @@ Router: React Router 6. Bagian dinamis ditulis `:param`. URL halaman berbahasa I
 | Halaman             | URL                           | Isi                                                                                   | Perlu login? |
 | ------------------- | ----------------------------- | ------------------------------------------------------------------------------------- | ------------ |
 | Landing             | `/`                           | Navbar, hero, fitur, kurikulum, fitur terbaru (paket, keluarga, contoh sertifikat), harga, 10 besar | Tidak        |
+| Cek keaslian        | `/sertifikat/cek`, `/sertifikat/cek/:id` | Ketik nomor sertifikat atau pindai QR; hasil asli atau tidak terdaftar dengan nama disamarkan | Tidak        |
 | Gaya (dev)          | `/gaya`                       | Katalog token dan komponen, setel ulang data tiruan, bantuan demo sertifikat. Hanya saat `import.meta.env.DEV` | Tidak        |
 | Masuk anak          | `/play/masuk`                 | Kode keluarga, pilih profil, sandi gambar                                             | Tidak        |
 | Beranda anak        | `/play`                       | Lanjutkan, pilihan kelas dan mapel, Peta Belajar, tautan sertifikat buku              | Anak         |
@@ -191,25 +241,28 @@ Router: React Router 6. Bagian dinamis ditulis `:param`. URL halaman berbahasa I
 | Dasbor orang tua    | `/orang-tua`                  | Ringkasan minggu, progres anak, kode keluarga, kartu paket, kartu sertifikat          | Orang tua    |
 | Tambah anak         | `/orang-tua/anak/baru`        | Nama panggilan, warna Momo, sandi gambar                                              | Orang tua    |
 | Laporan anak        | `/orang-tua/anak/:id`         | Skor Jago per topik, ketepatan, ronde terakhir, sertifikat, saran                     | Orang tua    |
-| Ubah anak           | `/orang-tua/anak/:id/ubah`    | Ubah nama/warna, hapus anak (konfirmasi)                                              | Orang tua    |
+| Ubah anak           | `/orang-tua/anak/:id/ubah`    | Ubah nama/warna, nama lengkap untuk sertifikat (opsional, dengan persetujuan), hapus anak (konfirmasi) | Orang tua    |
 | Sandi gambar        | `/orang-tua/anak/:id/sandi`   | Atur ulang sandi 3 gambar                                                             | Orang tua    |
-| Sertifikat          | `/orang-tua/sertifikat`       | Sertifikat terbit per anak, kemajuan tiap buku, contoh lembar, terbitkan yang tertunda | Orang tua    |
-| Satu sertifikat     | `/orang-tua/sertifikat/:id`   | Lembar, unduh PNG, cetak/simpan PDF, keterangan                                       | Orang tua    |
-| Paket & Pembayaran  | `/orang-tua/paket`            | Level gratis, paket aktif, pilihan paket, pilih cara bayar                            | Orang tua    |
+| Sertifikat          | `/orang-tua/sertifikat`       | Sertifikat terbit per anak, isian nama lengkap, kemajuan tiap buku, contoh lembar, terbitkan yang tertunda | Orang tua    |
+| Satu sertifikat     | `/orang-tua/sertifikat/:id`   | Lembar, unduh PNG, cetak/simpan PDF, keterangan, tautan cek keaslian                  | Orang tua    |
+| Paket & Pembayaran  | `/orang-tua/paket`            | Level gratis, tautan grup WhatsApp (bila diisi), paket aktif, pilihan paket, pilih cara bayar | Orang tua    |
 | Riwayat Transaksi   | `/orang-tua/transaksi`        | Daftar pesanan dan statusnya                                                          | Orang tua    |
 | Detail pesanan      | `/orang-tua/transaksi/:id`    | Jumlah transfer, rekening tujuan, unggah bukti, batalkan                              | Orang tua    |
 | Akun saya           | `/orang-tua/akun`             | Nama, kata sandi, email dengan kode konfirmasi                                        | Orang tua    |
 | Masuk staf          | `/masuk/staf`                 | Email + kata sandi admin                                                              | Tidak        |
 | Ringkasan admin     | `/admin`                      | Kartu angka, grafik, topik tersulit                                                   | Admin        |
-| Konten              | `/admin/konten`               | Buku, topik, level, toggle gratis/Premium                                             | Admin        |
+| Konten              | `/admin/konten`               | Buku (bisa dilipat), topik, "Tahukah kamu?", level, gratis/Premium dan pengecualian    | Admin        |
 | Pratinjau soal      | `/admin/soal`                 | Pilih level dan seed, lihat 10 soal generator beserta jawaban                         | Admin        |
 | Asisten AI          | `/admin/asisten`              | Permintaan materi atau kurikulum ke Gemini, draf teks untuk disalin                   | Admin        |
-| Pengguna            | `/admin/pengguna`             | Orang tua dan anak, cari, dialog Premium                                              | Admin        |
-| Laporan admin       | `/admin/laporan`              | Laporan anak dan statistik level                                                      | Admin        |
+| Keluarga            | `/admin/keluarga`             | Ringkasan, tab Keluarga dan Anak, cari/saring/urutkan, Premium per anak, sandi gambar, nonaktifkan (`/admin/pengguna` dialihkan ke sini) | Admin        |
+| Staf                | `/admin/staf`                 | Daftar admin, tambah, atur kata sandi, nonaktifkan                                    | Admin        |
+| Laporan admin       | `/admin/laporan`              | Statistik level dan daftar anak                                                       | Admin        |
+| Laporan anak (admin)| `/admin/laporan/anak/:id`     | Skor Jago, topik yang perlu ditemani, kemajuan tiap buku dan level                    | Admin        |
 | Sertifikat admin    | `/admin/sertifikat`           | Sistem terbit otomatis, desain, daftar Menunggu, sertifikat terbit                    | Admin        |
-| Transaksi           | `/admin/transaksi`            | Pesanan, bukti transfer, setujui atau tolak                                           | Admin        |
-| Paket               | `/admin/paket`                | Nama, harga coret, harga jual, aktif                                                  | Admin        |
-| Rekening            | `/admin/rekening`             | Bank dan e-wallet tujuan transfer                                                     | Admin        |
+| Transaksi           | `/admin/transaksi`            | Pesanan menurut status, bukti transfer, setujui atau tolak                            | Admin        |
+| Paket               | `/admin/paket`                | Tambah, ubah, hapus paket: nama, keterangan, harga normal, harga jual, masa aktif     | Admin        |
+| Rekening            | `/admin/rekening`             | Bank dan e-wallet tujuan transfer, petunjuk bayar                                     | Admin        |
+| Pengaturan          | `/admin/pengaturan`           | Level gratis dan kunci berbayar, kontak WhatsApp, isi lembar sertifikat dengan pratinjau | Admin        |
 | 404                 | `*`                           | Halaman tidak ditemukan dengan tombol kembali (nada ramah anak)                       | Tidak        |
 
 Pengalihan: `/play/*` tanpa sesi anak ke `/play/masuk`. `/orang-tua/*` tanpa sesi orang tua ke `/orang-tua/masuk`.
@@ -221,8 +274,8 @@ Pengalihan: `/play/*` tanpa sesi anak ke `/play/masuk`. `/orang-tua/*` tanpa ses
   kerja. Identitas visual ditulis sendiri untuk produk ini; warna hanya dipakai lewat token. Tema terang saja.
 - **Tanpa framework UI.** CSS biasa dengan token sendiri: `apps/web/src/styles/uk-tokens.css` (token), `uk-components.css`
   dan `uk-adult.css` (area dewasa dan landing, kelas berawalan `uk-`), `play.css` dan `peta.css` (area anak),
-  `certificate.css` (lembar sertifikat, cetak, dan halaman sertifikat). Ikon berupa komponen SVG sendiri (tanpa emoji,
-  tanpa pustaka ikon).
+  `certificate.css` (lembar sertifikat, cetak, halaman sertifikat, dan halaman cek keaslian), dan `admin/admin.css` (panel
+  admin). Ikon berupa komponen SVG sendiri (tanpa emoji, tanpa pustaka ikon).
 - **Token** (jangan menaruh hex baru di komponen). Nama memakai bahasa Indonesia:
 
   | Token                               | Nilai                 | Dipakai untuk                                                              |
@@ -246,9 +299,11 @@ Pengalihan: `/play/*` tanpa sesi anak ke `/play/masuk`. `/orang-tua/*` tanpa ses
 - **Komponen anak:** `BigButton`, `BigCard`, `Momo` (robot SVG buatan sendiri, 6 warna lewat CSS variable), `Plant` (4
   tahap SVG), `ListenButton`, `SpeakButton`, `AnswerOptions`, `Keypad`, `PicturePin` (grid 3 × 3, 9 gambar SVG),
   `CountObjects`, `RoundProgress`, `Stopwatch`, `PetaBelajar`, `PremiumNotice`.
-- **Komponen bersama:** `CertificateSheet` (lembar sertifikat SVG A4 mendatar dari satu daftar bentuk; daftar yang sama
-  digambar ke kanvas untuk unduhan PNG) dan `CertificatePrint` (salinan khusus cetak).
-- **Komponen dewasa:** `AppShell` (sidebar yang bisa disembunyikan, laci di layar sempit), `Card`, `Table`, `FormField`,
+- **Komponen bersama:** `CertificateSheet` (lembar sertifikat SVG A4 mendatar dari satu daftar bentuk, termasuk kode QR
+  buatan pustaka `uqr`; daftar yang sama digambar ke kanvas untuk unduhan PNG) dan `CertificatePrint` (salinan khusus
+  cetak). Isi teks lembar selalu datang dari Pengaturan lewat `SheetData.settings`.
+- **Komponen dewasa:** `AppShell` (sidebar yang bisa disembunyikan, laci di layar sempit, bilah atas untuk lonceng
+  notifikasi admin), `Card`, `Table`, `FormField`, `TextArea`, `SelectField`, `Checkbox`, `Pager` (paging tabel),
   `Dialog`, `Badge`, `Notice`, `PlanBadge`, grafik dasbor.
 - **Tata letak:**
   - **Anak:** bilah atas tipis di beranda: chip profil (Momo kecil, nama panggilan, poin bintang) dan dua tombol ikon
@@ -272,7 +327,9 @@ Pengalihan: `/play/*` tanpa sesi anak ke `/play/masuk`. `/orang-tua/*` tanpa ses
   - Tidak ada harga, iklan, tautan keluar, atau chat AI di area anak. Level dan sertifikat Premium menampilkan ajakan
     meminta orang tua beserta langkah untuk orang tua.
   - Kalimat untuk anak maksimal 15 kata.
-  - Data anak hanya nama panggilan, warna Momo, dan hash sandi gambar. Tanpa foto, email, tanggal lahir, gender.
+  - Data anak hanya nama panggilan, warna Momo, dan hash sandi gambar. Tanpa foto, email, tanggal lahir, gender. Satu
+    tambahan opsional: nama lengkap khusus sertifikat yang diisi orang tua dengan persetujuan (bagian 4.2); anak tidak
+    pernah melihat isiannya.
 - **Keadaan tiap halaman:** loading, kosong (pesan ramah + tindakan berikutnya), error (pesan jelas + tombol "Coba lagi").
 - **Responsif dan aksesibilitas:** cek di lebar 1280 px dan 390 px. Fokus keyboard terlihat, kontras teks ≥ 4,5:1, gambar
   bermakna punya teks alternatif (lembar sertifikat punya label lengkap), tombol ikon punya `aria-label`.
@@ -286,7 +343,7 @@ Pengalihan: `/play/*` tanpa sesi anak ke `/play/masuk`. `/orang-tua/*` tanpa ses
 ```mermaid
 erDiagram
   users ||--o{ children : "orang tua punya"
-  children ||--o| subscriptions : "Premium dari admin"
+  children ||--o{ premium_grants : "Premium dari admin"
   users ||--o| family_premium : "Premium dari paket"
   users ||--o{ orders : "orang tua"
   packages ||--o{ orders : ""
@@ -328,6 +385,7 @@ erDiagram
 | password_hash | text        | `scrypt` Node crypto dengan salt acak                                        |
 | family_code   | text        | unik, 6 huruf A sampai Z tanpa `I` dan `O`; hanya orang tua                   |
 | consent_at    | timestamptz | waktu centang persetujuan; wajib untuk orang tua                             |
+| active        | boolean     | default true; akun yang dinonaktifkan admin tidak bisa masuk dan ditolak guard |
 | created_at    | timestamptz | default `now()`                                                              |
 
 ### Tabel `children`: profil anak (data seminimal mungkin)
@@ -343,24 +401,29 @@ erDiagram
 | locked_until    | timestamptz | diisi saat `failed_attempts` mencapai 5; lama kunci naik: 1, 5, 30, lalu 120 menit |
 | lock_count      | integer     | default 0; jumlah kunci beruntun, kembali 0 saat sandi benar                    |
 | last_active_at  | timestamptz | diperbarui saat ronde selesai                                                  |
+| active          | boolean     | default true; anak yang dinonaktifkan (atau yang orang tuanya nonaktif) tidak bisa masuk |
+| certificate_name | text       | boleh kosong; nama lengkap khusus sertifikat, 2 sampai 60 huruf, diisi orang tua    |
+| certificate_consent_at | timestamptz | boleh kosong; waktu persetujuan orang tua; dikosongkan bersama `certificate_name` |
 | created_at      | timestamptz | default `now()`                                                                |
 
-### Tabel Premium: `subscriptions` (per anak, dari admin) dan `family_premium` (per keluarga, dari paket)
+### Tabel Premium: `premium_grants` (per anak, dari admin) dan `family_premium` (per keluarga, dari paket)
 
 | Tabel          | Kolom                                                                                                     |
 | -------------- | --------------------------------------------------------------------------------------------------------- |
-| subscriptions  | `child_id` pk fk `children` cascade, `ends_at`, `set_by` fk `users` (admin), `updated_at`                 |
+| premium_grants | `id` uuid pk, `child_id` fk `children` cascade, `ends_at` boleh kosong (selamanya), `note` text maks 200, `granted_by` fk `users` (admin), `created_at`. Satu anak boleh punya beberapa pemberian; admin mencabut satu per satu |
 | family_premium | `parent_id` pk fk `users` cascade, `ends_at` (`9999-12-31` berarti selamanya), `updated_at`. Diperpanjang saat pesanan disetujui |
 
-Premium efektif seorang anak: `ends_at` paling akhir dari kedua tabel yang masih di masa depan.
+Premium efektif seorang anak: `ends_at` paling akhir dari `premium_grants` anak itu dan `family_premium` keluarganya yang
+masih di masa depan (kosong atau `9999-12-31` berarti selamanya). Pemberian baru memperpanjang dari akhir pemberian yang
+masih berlaku; anak yang sudah Premium selamanya dari admin tidak bisa diberi lagi.
 
 ### Tabel paket dan pembayaran: `packages`, `payment_methods`, `orders`
 
 | Tabel           | Kolom                                                                                                                         |
 | --------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| packages        | `id` text pk (`tunas`, `kumbang`, ...), `name`, `duration_days` int boleh kosong (selamanya), `list_price` int, `price` int, `active`, `sort` |
-| payment_methods | `id` text pk, `kind` (`bank`/`ewallet`), `name`, `number`, `holder`, `active`, `sort`                                          |
-| orders          | `id` uuid pk, `number` text unik, `parent_id` fk cascade, salinan paket (`package_id`, `package_name`, `duration_days`, `list_price`, `discount`, `price`), `unique_code` int 1 sampai 499, `total` int, salinan rekening (`method_id`, `method_name`, `method_number`, `method_holder`), `status`, `proof_name`, `proof_mime`, `proof_data` bytea (maks 3 MB), `proof_at`, `reject_note`, `paid_at`, `created_at`, `expires_at` (24 jam) |
+| packages        | `id` text pk (`tunas`, `kumbang`, ... atau dibuat dari nama paket baru), `name`, `description` (maks 300), `duration_days` int boleh kosong (selamanya), `list_price` int, `price` int (≤ `list_price`), `active`, `sort` |
+| payment_methods | `id` text pk, `kind` (`bank`/`ewallet`), `name`, `number`, `holder`, `instructions` (maks 300), `active`, `sort`              |
+| orders          | `id` uuid pk, `number` text unik, `parent_id` fk cascade, salinan paket (`package_id`, `package_name`, `duration_days`, `list_price`, `discount`, `price`), `unique_code` int 1 sampai 499, `total` int, salinan rekening (`method_id`, `method_name`, `method_number`, `method_holder`), `status`, `proof_name`, `proof_mime`, `proof_data` bytea (maks 3 MB), `proof_at`, `reject_note`, `paid_at`, `created_at`, `expires_at` (`created_at` + `billing.orderExpiryHours`, awalnya 24 jam) |
 
 Isi awal paket dan rekening dari `content/billing.json`.
 
@@ -400,8 +463,8 @@ Keluaran generator wajib lolos `validateQuestion` (aturan teks anak). Test engin
 
 | Tabel        | Kolom |
 | ------------ | ----- |
-| certificates | `id` text pk (nomor `CERT-XXXXXX`), `child_id` fk `children` cascade, `book_id` fk `books`, `child_name` text (nama saat terbit), `book_title` text, `topics` int, `levels` int, `design` text, `source` text, `issued_at` timestamptz default now; unik (`child_id`, `book_id`) |
-| app_settings | `key` text pk, `value` jsonb, `updated_at`. Dipakai untuk `certificate_design` (desain yang dipakai saat sertifikat terbit) |
+| certificates | `id` text pk (nomor `CERT-XXXXXX`), `child_id` fk `children` cascade, `book_id` fk `books`, `child_name` text (nama di sertifikat), `book_title` text, `topics` int, `levels` int, `average_score` int boleh kosong (rata-rata skor terbaik level buku itu), `design` text, `source` text, `issued_at` timestamptz default now; unik (`child_id`, `book_id`) |
+| app_settings | `key` text pk, `value` jsonb, `updated_at`. Kunci: `billing`, `contact`, `certificate` (bagian 4.3, isinya diperiksa skema `engine`), dan `certificate_design` (desain yang dipakai saat sertifikat terbit). Kunci yang belum ada memakai nilai awal `DEFAULT_SETTINGS` |
 
 ### Tabel `voice_clips` dan `ai_jobs`
 
@@ -413,7 +476,7 @@ Keluaran generator wajib lolos `validateQuestion` (aturan teks anak). Test engin
 ### Isi awal (seed)
 
 Konten ada di `content/` (JSON buku, topik, level, materi, dan tips, ditambah `billing.json`). `pnpm db:seed` memasukkan
-5 buku, 50 topik, dan 199 level beserta konfigurasi generator, paket dan rekening, desain sertifikat awal `klasik`, lalu
+5 buku, 50 topik, dan 199 level beserta konfigurasi generator, paket dan rekening, pengaturan awal (`DEFAULT_SETTINGS`, nomor WhatsApp admin dari `ADMIN_WHATSAPP`), desain sertifikat awal `klasik`, lalu
 membuat admin pertama dari `ADMIN_EMAIL` dan `ADMIN_PASSWORD` bila belum ada admin.
 
 ## 10. Aturan Keamanan (Guard dan Peran)
@@ -435,9 +498,12 @@ Browser tidak pernah mengakses database. **Semua akses data lewat API NestJS**, 
   dimainkan dijawab 403.
 - **Sertifikat:** hanya server yang menerbitkan, sesuai aturan bagian 4.2 (semua level lulus dan Premium aktif, kecuali
   admin). Nomor dibuat dengan `crypto.randomInt` dan diperiksa unik. Anak hanya membaca sertifikatnya sendiri, orang tua
-  hanya sertifikat anaknya, admin semua. Rilis 1.0 belum punya halaman publik untuk sertifikat.
+  hanya sertifikat anaknya, admin semua. Satu-satunya rute publik adalah cek keaslian (`GET /certificates/verify/:id`): hanya mengembalikan nomor, buku,
+  capaian, tanggal, penerbit, dan nama yang disamarkan; dibatasi laju per IP dan tidak membedakan sertifikat yang dihapus dari
+  yang tidak pernah ada. Nama lengkap anak (`certificate_name`) hanya dikirim ke orang tua pemiliknya dan admin.
 - **Pembayaran:** harga, potongan, kode unik, dan total dihitung server. Bukti hanya JPG, PNG, atau WEBP sampai 3 MB.
-  Pesanan berlaku 24 jam, maksimal 3 pesanan menunggu per orang tua. Hanya admin yang menyetujui atau menolak.
+  Pesanan berlaku selama `billing.orderExpiryHours` (awalnya 24 jam), maksimal 3 pesanan menunggu per orang tua. Hanya admin
+  yang menyetujui atau menolak. Paket yang sudah dipesan tidak bisa dihapus, hanya dinonaktifkan.
 - **Kata sandi dan sandi gambar:** hash `scrypt` dengan salt acak, dibandingkan dengan `timingSafeEqual`. Sandi gambar
   keliru 5 kali mengunci anak itu bertingkat (1, 5, 30, lalu 120 menit). Login, pencarian kode keluarga, dan pendaftaran
   dibatasi laju per IP (`@nestjs/throttler`).
@@ -451,7 +517,13 @@ Browser tidak pernah mengakses database. **Semua akses data lewat API NestJS**, 
 - **Papan peringkat:** respons hanya berisi peringkat, nama panggilan, warna Momo, skor, dan penanda "ini kamu". Tanpa id.
 - **Suara:** `GET /voice/:hash` publik karena hanya membaca klip berdasarkan hash dan tidak memuat kunci jawaban. Pembuatan
   klip baru dibatasi `TTS_DAILY_LIMIT` per hari.
-- **Penghapusan:** menghapus anak menghapus ronde, jawaban, penguasaan, langganan, dan sertifikatnya (cascade).
+- **Penghapusan:** menghapus anak menghapus ronde, jawaban, penguasaan, pemberian Premium, dan sertifikatnya (cascade).
+- **Akun nonaktif:** admin bisa menonaktifkan orang tua, anak, dan staf. Masuk dan guard menolak akun nonaktif (403 saat
+  masuk, 401 untuk token lama); akun nonaktif tidak muncul di pilihan profil anak. Admin tidak bisa menonaktifkan akunnya
+  sendiri.
+- **Pengaturan:** hanya admin yang mengubah (`PUT /admin/settings/:part`), tiap bagian diperiksa skema `engine`; nomor
+  WhatsApp hanya `wa.me`, `api.whatsapp.com`, atau `whatsapp.com`, dan grup hanya `chat.whatsapp.com` (selalu https). `GET
+  /settings` publik karena isinya tidak rahasia.
 - **Log:** tidak mencatat kata sandi, token, sandi gambar, atau isi bukti transfer.
 
 Penting: aturan paket, urutan level, kepemilikan, kunci jawaban, dan penerbitan sertifikat wajib punya test e2e (M7
@@ -475,10 +547,11 @@ sampai M9), bukan hanya disembunyikan di tampilan.
 | 1      | M0             | Dokumen produk dan keputusan arsitektur (tanpa kode)                                                  | Selesai |
 | 1      | M1 sampai M5   | Semua tampilan tiga peran dengan data tiruan di browser (mode mock), mengikuti kontrak                | Selesai |
 | 1      | Tambahan M5    | Paket dan pembayaran manual, Kelas 1 sampai 4 dan Peta Belajar, area anak bersuara, 2 level gratis + 2 Premium, Sertifikat Juara Digital | Selesai |
+| 1      | Tambahan M5b   | Menu Pengaturan admin (level gratis, WhatsApp, lembar sertifikat), nama sertifikat dengan persetujuan orang tua, kode QR dan cek keaslian, panel admin lengkap (Keluarga, Staf, Laporan, Paket dan Rekening yang bisa ditambah, notifikasi) | Selesai |
 | 2      | M6             | API fondasi: NestJS, database, seed, guard                                                            | Belum   |
 | 2      | M7             | Akun, masuk, area orang tua, paket dan pesanan                                                        | Belum   |
 | 2      | M8             | Katalog dan ronde di server, sertifikat terbit otomatis                                               | Belum   |
-| 2      | M9             | Peringkat dan admin (transaksi, paket, rekening, sertifikat)                                          | Belum   |
+| 2      | M9             | Peringkat dan admin (keluarga, staf, laporan, transaksi, paket, rekening, sertifikat, pengaturan)      | Belum   |
 | 2      | M10            | Asisten AI materi dan suara                                                                           | Belum   |
 | 2      | M11            | Uji, keamanan, deploy, dan skrip demo                                                                 | Belum   |
 
@@ -498,7 +571,11 @@ sampai M9), bukan hanya disembunyikan di tampilan.
 - Tidak ada verifikasi email saat daftar dan lupa kata sandi di rilis 1.0. Kode konfirmasi ganti email di mode tiruan
   adalah `123456`.
 - Pembayaran Premium: transfer manual ke rekening atas nama pemilik produk, bukti diperiksa admin. Nomor WhatsApp admin
-  dari `content/billing.json` (server: `ADMIN_WHATSAPP`).
+  awalnya dari `content/billing.json` (server: `ADMIN_WHATSAPP`), lalu diatur admin di Pengaturan.
+- Pengaturan, paket, dan rekening disimpan di database dan dibaca halaman saat dibuka; di mode tiruan disimpan di
+  `localStorage` bersama data tiruan lain dan berlaku langsung. Isi awal paket dan rekening tetap dari `content/billing.json`.
+- Rilis 1.0 hanya punya satu peran admin. Nama lengkap anak di sertifikat bersifat opsional dan hanya ada atas
+  persetujuan orang tua; tanpa itu, sertifikat memakai nama panggilan.
 - Sertifikat dibuat di browser dari data sertifikat (SVG untuk layar dan cetak, kanvas untuk PNG), sehingga server tidak
   perlu membuat berkas PDF atau gambar.
 - Soal dibuat generator di `engine`, bukan disalin dari platform lain.

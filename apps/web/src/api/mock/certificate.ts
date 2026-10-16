@@ -3,6 +3,9 @@ import {
   certificateNumber,
   certificateStatus,
   levelsPassedIn,
+  maskName,
+  meanScore,
+  type CertificateVerify,
   type AdminCertificates,
   type BookContent,
   type Certificate,
@@ -15,7 +18,16 @@ import {
 import { ApiError } from '../client';
 import { parentFromToken } from './accounts';
 import { childIdFromToken } from './auth';
-import { BOOKS, gradeOf, levelId, premiumUntilOf, readDb, writeDb, type MockDb } from './db';
+import {
+  BOOKS,
+  gradeOf,
+  levelId,
+  premiumUntilOf,
+  readDb,
+  writeDb,
+  type MockChild,
+  type MockDb,
+} from './db';
 import { adminFromToken } from './staff';
 
 /**
@@ -77,20 +89,56 @@ function issue(
   const child = db.children.find((c) => c.id === childId)!;
   let id = certificateNumber(Math.random);
   while (db.certificates[id]) id = certificateNumber(Math.random);
+  const ids = bookLevelIds(book);
   const cert: Certificate = {
     id,
     childId,
-    childName: child.nickname,
+    childName: certificateNameOf(db, child),
     bookSlug: book.slug,
     bookTitle: book.title,
     topics: book.topics.length,
-    levels: bookLevelIds(book).length,
+    levels: ids.length,
     design: db.certificateDesign,
     issuedAt: new Date().toISOString(),
     source,
+    averageScore: meanScore(
+      ids.flatMap((l) => {
+        const best = db.best[childId]?.[l];
+        return best ? [best.score] : [];
+      }),
+    ),
   };
   db.certificates[id] = cert;
   return cert;
+}
+
+/** Nama di lembar: nama lengkap dari orang tua bila Pengaturan mengizinkan dan sudah diisi, selain itu panggilan. */
+export const certificateNameOf = (db: MockDb, child: MockChild) =>
+  db.settings.certificate.useFullName && child.certificateName
+    ? child.certificateName
+    : child.nickname;
+
+/** Nama lengkap anak berubah: semua sertifikatnya ikut memakai nama itu. Nomor dan tanggal terbit tetap. */
+export function renameCertificates(db: MockDb, child: MockChild): void {
+  const name = certificateNameOf(db, child);
+  for (const cert of Object.values(db.certificates))
+    if (cert.childId === child.id) cert.childName = name;
+}
+
+/** `GET /certificates/verify/:id` (publik): sertifikat asli atau 404, dengan nama yang disamarkan. */
+export async function verifyCertificate(id: string): Promise<CertificateVerify> {
+  const db = readDb();
+  const cert = db.certificates[id.trim().toUpperCase()];
+  if (!cert) throw notFound('Nomor sertifikat tidak ditemukan.');
+  return {
+    id: cert.id,
+    name: maskName(cert.childName),
+    bookTitle: cert.bookTitle,
+    topics: cert.topics,
+    levels: cert.levels,
+    issuedAt: cert.issuedAt,
+    issuer: db.settings.certificate.issuer,
+  };
 }
 
 /**
@@ -162,6 +210,7 @@ export async function parentCertificates(token: string | null): Promise<ParentCe
       .map((c) => ({
         id: c.id,
         nickname: c.nickname,
+        certificateName: c.certificateName ?? null,
         momoColor: c.momoColor,
         hasPremium: premiumUntilOf(db, c.id) !== null,
         books: progressOf(db, c.id),
@@ -262,14 +311,14 @@ export async function adminIssue(
   return cert;
 }
 
-/** Memakai nama panggilan anak saat ini dan desain yang sedang dipakai. Nomor dan tanggal terbit tetap. */
+/** Memakai nama di sertifikat saat ini dan desain yang sedang dipakai. Nomor dan tanggal terbit tetap. */
 export async function adminRefresh(token: string | null, id: string): Promise<Certificate> {
   adminFromToken(token);
   const db = readDb();
   const cert = db.certificates[id];
   if (!cert) throw notFound();
   const child = db.children.find((c) => c.id === cert.childId);
-  if (child) cert.childName = child.nickname;
+  if (child) cert.childName = certificateNameOf(db, child);
   cert.design = db.certificateDesign;
   writeDb(db);
   return cert;

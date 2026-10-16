@@ -14,6 +14,8 @@ const token = () => useSession.getState().session?.token ?? null;
 const mocked = () => isMocked('billing');
 
 export const packages = () => (mocked() ? mock.packages(token()) : http.packages());
+/** Paket aktif untuk halaman depan (tanpa masuk). */
+export const publicPackages = () => (mocked() ? mock.publicPackages() : http.publicPackages());
 export const methods = () => (mocked() ? mock.methods(token()) : http.methods());
 export const orders = () => (mocked() ? mock.orders(token()) : http.orders());
 export const order = (id: string) => (mocked() ? mock.order(token(), id) : http.order(id));

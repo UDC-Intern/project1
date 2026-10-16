@@ -12,6 +12,7 @@ import { ApiError } from '../client';
 import { childIdFromToken } from './auth';
 import { BOOKS, gradeOf, levelId, premiumUntilOf, readDb, topicId, writeDb } from './db';
 import { findLevel } from './levels';
+import { isLevelFree } from './settings';
 
 const notFound = () => new ApiError(404, { code: 'NOT_FOUND', message: 'Tidak ketemu.' });
 
@@ -72,7 +73,7 @@ export async function book(token: string | null, slug: string): Promise<BookDeta
           number: l.number,
           passed: passed.includes(levelId(found.slug, t.code, l.number)),
           previousPassed: passed.includes(levelId(found.slug, t.code, l.number - 1)),
-          isFree: l.isFree,
+          isFree: isLevelFree(db, levelId(found.slug, t.code, l.number), l.number),
           hasPremium: premium,
           hasGenerator: l.generator !== null,
         }),
@@ -88,7 +89,8 @@ export async function topic(token: string | null, id: string): Promise<TopicDeta
   const t = found?.topics.find((x) => x.code === code);
   if (!found || !t) throw notFound();
 
-  const passed = readDb().passedLevels[childId] ?? [];
+  const db = readDb();
+  const passed = db.passedLevels[childId] ?? [];
   const premium = hasPremium(childId);
   const first = t.levels[0];
   const example =
@@ -119,7 +121,7 @@ export async function topic(token: string | null, id: string): Promise<TopicDeta
         number: l.number,
         passed: passed.includes(levelId(found.slug, t.code, l.number)),
         previousPassed: passed.includes(levelId(found.slug, t.code, l.number - 1)),
-        isFree: l.isFree,
+        isFree: isLevelFree(db, levelId(found.slug, t.code, l.number), l.number),
         hasPremium: premium,
         hasGenerator: l.generator !== null,
       }),

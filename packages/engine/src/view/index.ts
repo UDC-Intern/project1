@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { PIN_PICTURES, type PinPicture } from '../pin.js';
+import { certificateNameInputSchema } from '../schemas/api.js';
 import { MOMO_COLORS, type MomoColor } from '../schemas/domain.js';
 import type { Role } from '../schemas/domain.js';
 
@@ -60,6 +61,10 @@ export const childUpdateSchema = z.object({
   momoColor: z.enum(MOMO_COLORS).optional(),
   pin: pin.optional(),
   classCode: classCode.nullable().optional(),
+  /** Nama lengkap untuk sertifikat; string kosong menghapusnya. */
+  certificateName: certificateNameInputSchema.optional(),
+  /** Persetujuan orang tua menyimpan nama lengkap anak khusus untuk sertifikat. */
+  certificateConsent: z.boolean().optional(),
 });
 
 export const parentProfileSchema = z.object({

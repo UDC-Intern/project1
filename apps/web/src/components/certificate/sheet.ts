@@ -1,4 +1,5 @@
-import type { Certificate, CertificateDesign } from '@udakids/engine';
+import type { Certificate, CertificateDesign, CertificateSettings } from '@udakids/engine';
+import { encode } from 'uqr';
 import { t } from '../../i18n';
 import { formatDate } from '../../lib/format';
 
@@ -75,7 +76,7 @@ export type Shape =
   | TextShape
   | { kind: 'group'; x: number; y: number; scale: number; children: Shape[] };
 
-/** Isi lembar. `number` null berarti contoh (belum terbit). */
+/** Isi lembar. `number` null berarti contoh (belum terbit). Teks tetap lembar dari Pengaturan admin. */
 export type SheetData = {
   childName: string;
   bookTitle: string;
@@ -84,9 +85,17 @@ export type SheetData = {
   design: CertificateDesign;
   number: string | null;
   issuedAt: string | null;
+  averageScore?: number | null;
+  settings: CertificateSettings;
+  /** Alamat halaman cek keaslian untuk kode QR; null berarti tanpa QR. */
+  verifyUrl?: string | null;
 };
 
-export const sheetDataOf = (c: Certificate): SheetData => ({
+/** Alamat halaman cek keaslian sertifikat di domain yang sedang dipakai. */
+export const verifyUrlOf = (id: string) =>
+  `${typeof window !== 'undefined' ? window.location.origin : ''}/sertifikat/cek/${encodeURIComponent(id)}`;
+
+export const sheetDataOf = (c: Certificate, settings: CertificateSettings): SheetData => ({
   childName: c.childName,
   bookTitle: c.bookTitle,
   levels: c.levels,
@@ -94,7 +103,32 @@ export const sheetDataOf = (c: Certificate): SheetData => ({
   design: c.design,
   number: c.id,
   issuedAt: c.issuedAt,
+  averageScore: c.averageScore ?? null,
+  settings,
+  verifyUrl: settings.showQr ? verifyUrlOf(c.id) : null,
 });
+
+/**
+ * Kotak modul QR sebagai satu path: modul gelap yang berderet dalam satu baris digabung menjadi satu persegi
+ * panjang, supaya tidak ada garis tipis di antara modul saat dicetak atau digambar ulang.
+ */
+export function qrPath(text: string, x: number, y: number, size: number): string {
+  const { data } = encode(text, { ecc: 'M', border: 0 });
+  const n = data.length;
+  const m = size / n;
+  const f = (v: number) => Number(v.toFixed(2));
+  let d = '';
+  data.forEach((row, r) => {
+    for (let c = 0; c < n; c++) {
+      if (!row[c]) continue;
+      let end = c;
+      while (end + 1 < n && row[end + 1]) end++;
+      d += `M${f(x + c * m)} ${f(y + r * m)}h${f((end - c + 1) * m)}v${f(m)}h${f(-(end - c + 1) * m)}z`;
+      c = end;
+    }
+  });
+  return d;
+}
 
 /** Perkiraan lebar teks (px) untuk memilih ukuran huruf tanpa mengukur di DOM. */
 export const textWidth = (s: Pick<TextShape, 'text' | 'size' | 'font' | 'spacing'>) =>
@@ -156,9 +190,25 @@ const CX = SHEET_W / 2;
 
 /** Semua bentuk satu lembar sertifikat, berurutan dari belakang ke depan. */
 export function sheetShapes(data: SheetData): Shape[] {
+  const s = data.settings;
   const sample = data.number === null;
-  const text = (s: Omit<TextShape, 'kind' | 'anchor'> & { anchor?: TextShape['anchor'] }) =>
-    ({ kind: 'text', anchor: 'middle', ...s }) as TextShape;
+  const qr = !sample && !!data.verifyUrl;
+  const text = (x: Omit<TextShape, 'kind' | 'anchor'> & { anchor?: TextShape['anchor'] }) =>
+    ({ kind: 'text', anchor: 'middle', ...x }) as TextShape;
+  const kicker = [s.issuer, s.tagline].filter(Boolean).join(' · ').toUpperCase();
+  const detail = [
+    s.curriculum,
+    s.showScore && data.averageScore != null
+      ? t('common.cert.score', { score: data.averageScore })
+      : '',
+  ]
+    .filter(Boolean)
+    .join(' · ');
+  // Dengan QR di pojok kanan, tanda tangan kanan digeser sedikit ke kiri.
+  const right = qr ? CX + 290 : CX + 317;
+  const QR_SIZE = 76;
+  const qrX = SHEET_W - 80 - QR_SIZE;
+  const qrY = 590;
 
   return [
     { kind: 'rect', x: 0, y: 0, w: SHEET_W, h: SHEET_H, fill: 'paper' },
@@ -211,33 +261,40 @@ export function sheetShapes(data: SheetData): Shape[] {
     text({
       x: CX,
       y: 104,
-      text: t('common.cert.kicker').toUpperCase(),
+      text: kicker,
       size: 16,
       font: 'body',
       weight: 700,
       fill: 'accent',
       spacing: 4,
+      maxWidth: 820,
     }),
     text({
       x: CX,
       y: 176,
-      text: t('common.cert.title'),
-      size: 76,
+      text: s.title,
+      size: fitSize(s.title, 76, 760),
       font: 'display',
       weight: 700,
       fill: 'ink',
       spacing: 8,
+      maxWidth: 820,
     }),
-    text({
-      x: CX,
-      y: 214,
-      text: t('common.cert.subtitle'),
-      size: 28,
-      font: 'display',
-      weight: 700,
-      fill: 'accent',
-      spacing: 10,
-    }),
+    ...(s.subtitle
+      ? [
+          text({
+            x: CX,
+            y: 214,
+            text: s.subtitle,
+            size: 28,
+            font: 'display',
+            weight: 700,
+            fill: 'accent',
+            spacing: 10,
+            maxWidth: 820,
+          }),
+        ]
+      : []),
     text({
       x: CX,
       y: 262,
@@ -287,6 +344,20 @@ export function sheetShapes(data: SheetData): Shape[] {
       fill: 'accent',
       maxWidth: 800,
     }),
+    ...(detail
+      ? [
+          text({
+            x: CX,
+            y: 516,
+            text: detail,
+            size: 17,
+            font: 'body',
+            weight: 700,
+            fill: 'muted',
+            maxWidth: 560,
+          }),
+        ]
+      : []),
 
     // Tanda tangan kiri: Momo, teman belajar.
     momo(CX - 316 - 32, 538, 64),
@@ -294,21 +365,27 @@ export function sheetShapes(data: SheetData): Shape[] {
     text({
       x: CX - 316,
       y: 642,
-      text: t('common.cert.signMomo'),
+      text: s.signer1Name,
       size: 24,
       font: 'display',
       weight: 700,
       fill: 'ink',
+      maxWidth: 220,
     }),
-    text({
-      x: CX - 316,
-      y: 666,
-      text: t('common.cert.signMomoRole'),
-      size: 16,
-      font: 'body',
-      weight: 400,
-      fill: 'muted',
-    }),
+    ...(s.signer1Role
+      ? [
+          text({
+            x: CX - 316,
+            y: 666,
+            text: s.signer1Role,
+            size: 16,
+            font: 'body',
+            weight: 400,
+            fill: 'muted',
+            maxWidth: 220,
+          }),
+        ]
+      : []),
 
     // Stempel di tengah.
     {
@@ -335,32 +412,69 @@ export function sheetShapes(data: SheetData): Shape[] {
       spacing: 3,
     }),
 
-    // Tanda tangan kanan: tim pengelola.
+    // Tanda tangan kanan.
     {
       kind: 'path',
-      d: `M${CX + 247} 598c14-26 30-30 36-8s-4 22 10 6 22-26 30-6 4 14 18 2 16-12 24-4`,
+      d: `M${right - 70} 598c14-26 30-30 36-8s-4 22 10 6 22-26 30-6 4 14 18 2 16-12 24-4`,
       stroke: 'deep',
       width: 3,
     },
-    { kind: 'path', d: `M${CX + 232} 612H${CX + 402}`, stroke: 'muted', width: 1.5 },
+    { kind: 'path', d: `M${right - 85} 612H${right + 85}`, stroke: 'muted', width: 1.5 },
     text({
-      x: CX + 317,
+      x: right,
       y: 642,
-      text: t('common.cert.signTeam'),
+      text: s.signer2Name,
       size: 24,
       font: 'display',
       weight: 700,
       fill: 'ink',
+      maxWidth: 230,
     }),
-    text({
-      x: CX + 317,
-      y: 666,
-      text: t('common.cert.signTeamRole'),
-      size: 16,
-      font: 'body',
-      weight: 400,
-      fill: 'muted',
-    }),
+    ...(s.signer2Role
+      ? [
+          text({
+            x: right,
+            y: 666,
+            text: s.signer2Role,
+            size: 16,
+            font: 'body',
+            weight: 400,
+            fill: 'muted',
+            maxWidth: 230,
+          }),
+        ]
+      : []),
+
+    // Kode QR menuju halaman cek keaslian.
+    ...(qr
+      ? [
+          {
+            kind: 'rect',
+            x: qrX - 4,
+            y: qrY - 4,
+            w: QR_SIZE + 8,
+            h: QR_SIZE + 8,
+            r: 4,
+            fill: 'paper',
+            stroke: 'soft',
+            width: 1.5,
+          } satisfies Shape,
+          {
+            kind: 'path',
+            d: qrPath(data.verifyUrl!, qrX, qrY, QR_SIZE),
+            fill: 'ink',
+          } satisfies Shape,
+          text({
+            x: qrX + QR_SIZE / 2,
+            y: qrY + QR_SIZE + 18,
+            text: t('common.cert.qr'),
+            size: 12,
+            font: 'body',
+            weight: 700,
+            fill: 'muted',
+          }),
+        ]
+      : []),
 
     text({
       x: 80,
@@ -393,9 +507,12 @@ export function sheetShapes(data: SheetData): Shape[] {
 /** Keterangan lembar untuk pembaca layar. */
 export function sheetLabel(data: SheetData): string {
   const base = t('common.cert.alt', { name: data.childName, book: data.bookTitle });
-  return data.number && data.issuedAt
-    ? `${base}, ${t('common.cert.altNumber', { number: data.number, date: formatDate(data.issuedAt) })}`
-    : base;
+  const issued =
+    data.number && data.issuedAt
+      ? `, ${t('common.cert.altNumber', { number: data.number, date: formatDate(data.issuedAt) })}`
+      : '';
+  const qr = data.number && data.verifyUrl ? `, ${t('common.cert.altQr')}` : '';
+  return `${base}${issued}${qr}`;
 }
 
 /** Nama berkas unduhan/cetak, mis. "Sertifikat-Ayu-Matematika-Kelas-1". */

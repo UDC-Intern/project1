@@ -7,7 +7,7 @@ import {
   type FamilyProfiles,
 } from '@udakids/engine';
 import { ApiError } from '../client';
-import { readDb, writeDb } from './db';
+import { isChildActive, readDb, writeDb } from './db';
 
 const TOKEN_PREFIX = 'mock-child:';
 
@@ -18,7 +18,9 @@ export function childIdFromToken(token: string | null | undefined): string {
   if (!token?.startsWith(TOKEN_PREFIX))
     throw new ApiError(401, { code: 'UNAUTHENTICATED', message: 'Silakan masuk dulu.' });
   const id = token.slice(TOKEN_PREFIX.length);
-  if (!readDb().children.some((c) => c.id === id))
+  const db = readDb();
+  const child = db.children.find((c) => c.id === id);
+  if (!child || !isChildActive(db, child))
     throw new ApiError(401, { code: 'UNAUTHENTICATED', message: 'Silakan masuk dulu.' });
   return id;
 }
@@ -30,7 +32,7 @@ export async function familyProfiles(code: string): Promise<FamilyProfiles> {
     throw new ApiError(404, { code: 'NOT_FOUND', message: 'Kode keluarga tidak ketemu.' });
   return {
     profiles: db.children
-      .filter((c) => c.parentId === parent.id)
+      .filter((c) => c.parentId === parent.id && isChildActive(db, c))
       .map((c) => ({
         id: c.id,
         nickname: c.nickname,
@@ -44,6 +46,11 @@ export async function childLogin(body: ChildLoginBody): Promise<ChildLoginResult
   const db = readDb();
   const child = db.children.find((c) => c.id === body.childId);
   if (!child) throw new ApiError(404, { code: 'NOT_FOUND', message: 'Profil tidak ketemu.' });
+  if (!isChildActive(db, child))
+    throw new ApiError(403, {
+      code: 'FORBIDDEN',
+      message: 'Akun ini sedang tidak aktif. Minta orang tua menghubungi admin.',
+    });
   if (!child.pin)
     throw new ApiError(403, { code: 'FORBIDDEN', message: 'Sandi gambar belum diatur.' });
 

@@ -1,0 +1,152 @@
+import { z } from 'zod';
+import { FREE_LEVELS } from '../rules/level.js';
+
+/**
+ * Pengaturan aplikasi yang diubah admin di menu Pengaturan: akses berbayar, kontak WhatsApp, dan isi lembar
+ * sertifikat. Nilai awal ada di `DEFAULT_SETTINGS`; semua bagian aplikasi membaca dari sini, bukan dari konstanta.
+ */
+
+// ---- Akses berbayar ----
+
+export const billingSettingsSchema = z.strictObject({
+  /** Mati: semua level terbuka gratis untuk semua anak. */
+  paywall: z.boolean(),
+  /** Level 1 sampai angka ini gratis di setiap topik. Level 1 selalu gratis. */
+  freeLevels: z.number().int().min(1).max(12),
+  /** Pesanan yang belum dibayar kedaluwarsa setelah sekian jam. */
+  orderExpiryHours: z.number().int().min(1).max(168),
+});
+export type BillingSettings = z.infer<typeof billingSettingsSchema>;
+
+/** Level gratis bila kunci berbayar mati, atau nomornya tidak melewati batas level gratis. */
+export const isFreeLevel = (levelNumber: number, billing: BillingSettings): boolean =>
+  !billing.paywall || levelNumber <= billing.freeLevels;
+
+// ---- Kontak WhatsApp ----
+
+const WA_HOSTS = new Set(['wa.me', 'api.whatsapp.com', 'whatsapp.com', 'www.whatsapp.com']);
+const GROUP_HOSTS = new Set(['chat.whatsapp.com']);
+
+/** Nomor HP Indonesia (08…, 62…, +62…) menjadi https://wa.me/62…; selain nomor dikembalikan apa adanya. */
+export function whatsappFromPhone(input: string): string {
+  const raw = input.trim();
+  if (!/^\+?[\d\s().-]{8,20}$/.test(raw)) return raw;
+  let digits = raw.replace(/\D/g, '');
+  if (digits.startsWith('0')) digits = `62${digits.slice(1)}`;
+  return `https://wa.me/${digits}`;
+}
+
+/** Host dari URL https (tanpa global `URL`, engine tetap murni); selain https atau format aneh: undefined. */
+function httpsHost(v: string): string | undefined {
+  const m = /^https:\/\/([a-z0-9.-]+)(?::\d+)?(?:[/?#]|$)/i.exec(v);
+  return m && !/\s/.test(v) ? m[1]!.toLowerCase() : undefined;
+}
+
+const httpsOn = (hosts: Set<string>, message: string) =>
+  z
+    .string()
+    .trim()
+    .max(300)
+    .refine((v) => {
+      if (v === '') return true;
+      const host = httpsHost(v);
+      return host !== undefined && hosts.has(host);
+    }, message);
+
+export const contactSettingsSchema = z.strictObject({
+  /** Tombol "Hubungi admin" melayang di landing dan area orang tua. Kosong: tombol tidak tampil. */
+  adminWhatsapp: z.preprocess(
+    (v) => (typeof v === 'string' ? whatsappFromPhone(v) : v),
+    httpsOn(WA_HOSTS, 'isi nomor WhatsApp (08…) atau link https://wa.me/…'),
+  ),
+  /** Pesan pembuka yang langsung terisi saat orang tua membuka WhatsApp. */
+  adminMessage: z.string().trim().max(200),
+  /** Tautan grup WhatsApp orang tua (opsional), tampil di halaman Paket. */
+  groupWhatsapp: httpsOn(GROUP_HOSTS, 'isi link undangan grup https://chat.whatsapp.com/…'),
+});
+export type ContactSettings = z.infer<typeof contactSettingsSchema>;
+
+/** Link tombol admin, dengan pesan pembuka bila ada (`?text=` untuk wa.me dan api.whatsapp.com). */
+export function adminWhatsappHref(c: Pick<ContactSettings, 'adminWhatsapp' | 'adminMessage'>) {
+  if (!c.adminWhatsapp) return '';
+  if (!c.adminMessage) return c.adminWhatsapp;
+  const [base, hash = ''] = c.adminWhatsapp.split('#', 2);
+  const clean = base!.replace(/([?&])text=[^&]*&?/, '$1').replace(/[?&]$/, '');
+  const text = encodeURIComponent(c.adminMessage).replace(/%20/g, '+');
+  return `${clean}${clean.includes('?') ? '&' : '?'}text=${text}${hash ? `#${hash}` : ''}`;
+}
+
+// ---- Lembar sertifikat ----
+
+const line = (min: number, max: number) => z.string().trim().min(min).max(max);
+
+export const certificateSettingsSchema = z.strictObject({
+  /** Nama penerbit di kepala lembar dan di tanda tangan tim, mis. "UdaKids". */
+  issuer: line(2, 40),
+  /** Kalimat kecil di kepala lembar, mis. "Belajar bersama Momo". */
+  tagline: line(0, 50),
+  title: line(2, 24),
+  subtitle: line(0, 32),
+  /** Penanda tangan kiri (di atas garisnya tampil Momo). */
+  signer1Name: line(2, 40),
+  signer1Role: line(0, 40),
+  /** Penanda tangan kanan (di atas garisnya tampil tanda tangan). */
+  signer2Name: line(2, 60),
+  signer2Role: line(0, 40),
+  /** Keterangan kurikulum di bawah judul buku, mis. "Sesuai Kurikulum Merdeka". Kosong: tidak tampil. */
+  curriculum: line(0, 60),
+  /** Tampilkan rata-rata skor terbaik level buku itu. */
+  showScore: z.boolean(),
+  /** Tampilkan kode QR menuju halaman cek keaslian. */
+  showQr: z.boolean(),
+  /** Pakai nama lengkap yang diisi orang tua bila ada; selain itu nama panggilan. */
+  useFullName: z.boolean(),
+});
+export type CertificateSettings = z.infer<typeof certificateSettingsSchema>;
+
+// ---- Semua pengaturan ----
+
+export const appSettingsSchema = z.strictObject({
+  billing: billingSettingsSchema,
+  contact: contactSettingsSchema,
+  certificate: certificateSettingsSchema,
+});
+export type AppSettings = z.infer<typeof appSettingsSchema>;
+
+export const DEFAULT_SETTINGS: AppSettings = {
+  billing: { paywall: true, freeLevels: FREE_LEVELS, orderExpiryHours: 24 },
+  contact: { adminWhatsapp: '', adminMessage: '', groupWhatsapp: '' },
+  certificate: {
+    issuer: 'UdaKids',
+    tagline: 'Belajar bersama Momo',
+    title: 'SERTIFIKAT',
+    subtitle: 'JUARA DIGITAL',
+    signer1Name: 'Momo',
+    signer1Role: 'Teman Belajar',
+    signer2Name: 'Tim UdaKids',
+    signer2Role: 'Pengelola',
+    curriculum: '',
+    showScore: true,
+    showQr: true,
+    useFullName: true,
+  },
+};
+
+/**
+ * Pengaturan tersimpan yang mungkin lebih lama (field baru belum ada) digabung dengan nilai awal, per bagian.
+ * Field yang tidak dikenal dibuang; nilai yang tidak lolos skema diganti nilai awal bagian itu.
+ */
+export function mergeSettings(stored: unknown): AppSettings {
+  const s = (stored ?? {}) as Partial<Record<keyof AppSettings, Record<string, unknown>>>;
+  const part = <K extends keyof AppSettings>(key: K, schema: z.ZodType<AppSettings[K]>) => {
+    const base = DEFAULT_SETTINGS[key] as Record<string, unknown>;
+    const merged = Object.fromEntries(Object.keys(base).map((k) => [k, s[key]?.[k] ?? base[k]]));
+    const parsed = schema.safeParse(merged);
+    return parsed.success ? parsed.data : DEFAULT_SETTINGS[key];
+  };
+  return {
+    billing: part('billing', billingSettingsSchema),
+    contact: part('contact', contactSettingsSchema),
+    certificate: part('certificate', certificateSettingsSchema),
+  };
+}

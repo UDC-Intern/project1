@@ -6,6 +6,8 @@ export const orderStatusSchema = z.enum(ORDER_STATUSES);
 export const billingPackageSchema = z.object({
   id: z.string(),
   name: z.string().min(1).max(40),
+  /** Keterangan singkat di kartu paket (opsional). */
+  description: z.string().max(300).optional(),
   /** Masa aktif dalam hari; null berarti selamanya. */
   durationDays: z.number().int().min(1).nullable(),
   /** Harga sebelum potongan (dicoret). */
@@ -22,10 +24,41 @@ export const paymentMethodSchema = z.object({
   name: z.string().min(1).max(40),
   number: z.string().min(3).max(40),
   holder: z.string().min(1).max(60),
+  /** Petunjuk transfer tambahan untuk orang tua (opsional). */
+  instructions: z.string().max(300).optional(),
   active: z.boolean(),
   sort: z.number().int(),
 });
 export type PaymentMethod = z.infer<typeof paymentMethodSchema>;
+
+/** Membuat atau mengubah paket dari panel admin. Harga jual tidak boleh melebihi harga normal. */
+export const packageInputSchema = z
+  .object({
+    name: z.string().trim().min(3).max(40),
+    description: z.string().trim().max(300),
+    durationDays: z.number().int().min(1).max(3650).nullable(),
+    listPrice: z.number().int().min(1000).max(100_000_000),
+    price: z.number().int().min(1000).max(100_000_000),
+    active: z.boolean(),
+    sort: z.number().int().min(0).max(999),
+  })
+  .refine((p) => p.price <= p.listPrice, {
+    message: 'harga jual tidak boleh melebihi harga normal',
+    path: ['price'],
+  });
+export type PackageInput = z.infer<typeof packageInputSchema>;
+
+/** Membuat atau mengubah rekening dan e-wallet tujuan transfer. */
+export const paymentMethodInputSchema = z.object({
+  kind: z.enum(['bank', 'ewallet']),
+  name: z.string().trim().min(2).max(40),
+  number: z.string().trim().min(4).max(40),
+  holder: z.string().trim().min(2).max(60),
+  instructions: z.string().trim().max(300),
+  active: z.boolean(),
+  sort: z.number().int().min(0).max(999),
+});
+export type PaymentMethodInput = z.infer<typeof paymentMethodInputSchema>;
 
 export const billingContentSchema = z.object({
   adminWhatsapp: z.string().regex(/^\d{8,15}$/),

@@ -9,6 +9,8 @@ export type ChildProfile = {
   momoColor: string;
   lastActiveAt: string | null;
   createdAt: string;
+  /** Nama lengkap khusus sertifikat (diisi orang tua), atau null. */
+  certificateName?: string | null;
 };
 
 export type CatalogResponse = {

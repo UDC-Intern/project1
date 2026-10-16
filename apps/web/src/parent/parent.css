@@ -1839,6 +1839,11 @@ p.cf-count {
 .cf-preview small {
   color: var(--ui-muted);
 }
+.cf-preview small.cf-preview-cert {
+  color: var(--ui-ink);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
 .cf-privacy {
   display: flex;
   gap: 10px;

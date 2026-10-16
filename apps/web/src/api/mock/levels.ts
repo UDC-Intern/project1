@@ -5,6 +5,7 @@ import {
   type TopicContent,
 } from '@udakids/engine';
 import { BOOKS, levelId, premiumUntilOf, readDb, topicId } from './db';
+import { isLevelFree } from './settings';
 
 export type FoundLevel = {
   bookSlug: string;
@@ -28,13 +29,14 @@ export function hasPremium(childId: string): boolean {
 }
 
 export function statusFor(childId: string, found: FoundLevel): LevelStatus {
-  const passed = readDb().passedLevels[childId] ?? [];
+  const db = readDb();
+  const passed = db.passedLevels[childId] ?? [];
   const { bookSlug, topic, level } = found;
   return levelStatus({
     number: level.number,
     passed: passed.includes(levelId(bookSlug, topic.code, level.number)),
     previousPassed: passed.includes(levelId(bookSlug, topic.code, level.number - 1)),
-    isFree: level.isFree,
+    isFree: isLevelFree(db, levelId(bookSlug, topic.code, level.number), level.number),
     hasPremium: hasPremium(childId),
     hasGenerator: level.generator !== null,
   });

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ApiError } from '../api/client';
-import { api } from '../api/parentApi';
+import { api } from '../api/pageApi';
 import { getSession, setSession, type SessionKind } from './session';
 
 /** Panggil API dengan token sesi; 401 → sesi dihapus (kembali ke halaman masuk). */

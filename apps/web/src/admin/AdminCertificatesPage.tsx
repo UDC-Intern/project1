@@ -13,6 +13,7 @@ import {
   setCertificateDesign,
 } from '../api/admin';
 import { ApiError } from '../api/client';
+import { useSettings } from '../api/settings';
 import { CertificatePrint, CertificateSheet } from '../components/certificate/CertificateSheet';
 import {
   downloadCertificateImage,
@@ -45,6 +46,8 @@ export function AdminCertificatesPage() {
   const [removing, setRemoving] = useState<AdminCertificate | null>(null);
   const [confirm, setConfirm] = useState('');
   const [downloadError, setDownloadError] = useState(false);
+  const settings = useSettings().certificate;
+  const viewingSheet = viewing ? sheetDataOf(viewing, settings) : null;
 
   async function run(action: () => Promise<string>) {
     setMessage(null);
@@ -139,6 +142,7 @@ export function AdminCertificatesPage() {
                       design: d,
                       number: null,
                       issuedAt: null,
+                      settings,
                     }}
                   />
                   <div className="cert-admin-design-row">
@@ -277,24 +281,22 @@ export function AdminCertificatesPage() {
         </>
       )}
 
-      {viewing && (
+      {viewing && viewingSheet && (
         <Dialog
           wide
           title={`${viewing.id} · ${viewing.childName}`}
           onClose={() => setViewing(null)}
         >
           <div className="uk-stack">
-            <CertificateSheet data={sheetDataOf(viewing)} />
-            <CertificatePrint data={sheetDataOf(viewing)} />
+            <CertificateSheet data={viewingSheet} />
+            <CertificatePrint data={viewingSheet} />
             {downloadError && <p role="alert">{t('cert.downloadError')}</p>}
             <div className="uk-row">
               <button
                 type="button"
                 className="uk-btn"
                 onClick={() =>
-                  void downloadCertificateImage(sheetDataOf(viewing)).catch(() =>
-                    setDownloadError(true),
-                  )
+                  void downloadCertificateImage(viewingSheet).catch(() => setDownloadError(true))
                 }
               >
                 {t('cert.download')}
@@ -302,7 +304,7 @@ export function AdminCertificatesPage() {
               <button
                 type="button"
                 className="uk-btn uk-btn--ghost"
-                onClick={() => printCertificate(sheetDataOf(viewing))}
+                onClick={() => printCertificate(viewingSheet)}
               >
                 {t('cert.print')}
               </button>

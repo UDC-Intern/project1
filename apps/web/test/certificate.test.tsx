@@ -1,5 +1,12 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { CERTIFICATE_NUMBER, generateRound, seedFrom, type Certificate } from '@udakids/engine';
+import {
+  CERTIFICATE_NUMBER,
+  DEFAULT_SETTINGS,
+  generateRound,
+  seedFrom,
+  type Certificate,
+  type CertificateSettings,
+} from '@udakids/engine';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
@@ -10,25 +17,40 @@ import {
   setCertificateDesign,
 } from '../src/api/admin';
 import { parentRegister } from '../src/api/auth';
-import { claimCertificate, myCertificate, myCertificates } from '../src/api/certificate';
+import {
+  claimCertificate,
+  myCertificate,
+  myCertificates,
+  verifyCertificate,
+} from '../src/api/certificate';
 import { ApiError } from '../src/api/client';
 import { BOOKS, levelId, readDb, resetMockDb, writeDb } from '../src/api/mock/db';
 import { demoFinishBook } from '../src/api/mock/demo';
+import { handle as adminHandle } from '../src/api/mock/adminRoutes';
 import { handle } from '../src/api/mock/parentRoutes';
 import { deleteChild } from '../src/api/parent';
 import { answer, finish, startRound } from '../src/api/practice';
 import { useSession } from '../src/auth/store';
+import {
+  qrPath,
+  sheetDataOf,
+  sheetShapes,
+  type SheetData,
+} from '../src/components/certificate/sheet';
 import { AdminCertificatesPage } from '../src/admin/AdminCertificatesPage';
 import { CertificatesPage, CertificateView } from '../src/parent/Certificates';
+import { ChildForm } from '../src/parent/ChildForm';
 import { CertificatePage } from '../src/play/CertificatePage';
 import { PlayHome } from '../src/play/PlayHome';
 import { ProfilePage } from '../src/play/ProfilePage';
 import { ResultPage } from '../src/play/ResultPage';
+import { VerifyCertificate } from '../src/site/VerifyCertificate';
 
 const AYU = 'c-ayu';
 const BIMA = 'c-bima';
 const MATH1 = 'matematika-kelas-1';
 const PARENT_TOKEN = 'mock-parent:p-demo';
+const ADMIN_TOKEN = 'mock-admin:a-demo';
 const DAY_MS = 86_400_000;
 
 const asChild = (id: string, name: string) =>
@@ -438,5 +460,249 @@ describe('halaman sertifikat', () => {
     fireEvent.click(confirm);
     expect(await screen.findByText(/dihapus\./)).toBeInTheDocument();
     expect(readDb().certificates).toEqual({});
+  });
+});
+
+describe('sertifikat: nama lengkap, Pengaturan, dan cek keaslian', () => {
+  const patchChild = (body: Record<string, unknown>) =>
+    handle<{ certificateName: string | null }>(
+      `/parent/children/${AYU}`,
+      'PATCH',
+      body,
+      PARENT_TOKEN,
+    );
+  const certSettings = (patch: Partial<CertificateSettings>) =>
+    adminHandle(
+      '/admin/settings/certificate',
+      'PUT',
+      { ...readDb().settings.certificate, ...patch },
+      ADMIN_TOKEN,
+    );
+  const nameOf = (id: string) => readDb().certificates[id]!.childName;
+  const sampleCert: Certificate = {
+    id: 'CERT-7KQ2MX',
+    childId: AYU,
+    childName: 'Ayu',
+    bookSlug: MATH1,
+    bookTitle: 'Matematika Kelas 1',
+    topics: 10,
+    levels: 40,
+    design: 'klasik',
+    issuedAt: '2026-10-01T00:00:00.000Z',
+    source: 'auto',
+    averageScore: 92,
+  };
+
+  async function issuedForAyu() {
+    passBook(AYU);
+    givePremium(AYU);
+    return (await claimCertificate(MATH1)).certificate!;
+  }
+
+  it('nama lengkap dari orang tua dipakai di sertifikat, persetujuan wajib saat pertama diisi', async () => {
+    const cert = await issuedForAyu();
+    expect(cert.childName).toBe('Ayu');
+
+    const noConsent = await errorOf(patchChild({ certificateName: 'Ayu Lestari' }));
+    expect(noConsent.status).toBe(400);
+    expect(noConsent.issues[0]?.path).toBe('certificateConsent');
+    const badName = await errorOf(
+      patchChild({ certificateName: 'Ayu123', certificateConsent: true }),
+    );
+    expect(badName.issues[0]?.path).toBe('certificateName');
+
+    const saved = await patchChild({
+      certificateName: '  Ayu   Lestari ',
+      certificateConsent: true,
+    });
+    expect(saved.certificateName).toBe('Ayu Lestari');
+    expect(nameOf(cert.id)).toBe('Ayu Lestari');
+    const child = readDb().children.find((c) => c.id === AYU)!;
+    expect(child.nickname).toBe('Ayu');
+    expect(child.certificateConsentAt).toBeTruthy();
+
+    // Mengganti nama berikutnya tidak perlu centang lagi; mengosongkan kembali ke nama panggilan.
+    await patchChild({ certificateName: 'Ayu L. Putri' });
+    expect(nameOf(cert.id)).toBe('Ayu L. Putri');
+    await patchChild({ certificateName: '' });
+    expect(nameOf(cert.id)).toBe('Ayu');
+    expect(readDb().children.find((c) => c.id === AYU)!.certificateConsentAt).toBeNull();
+  });
+
+  it('Pengaturan "pakai nama lengkap" mati: semua sertifikat memakai nama panggilan', async () => {
+    const cert = await issuedForAyu();
+    await patchChild({ certificateName: 'Ayu Lestari', certificateConsent: true });
+    await certSettings({ useFullName: false });
+    expect(nameOf(cert.id)).toBe('Ayu');
+    await certSettings({ useFullName: true });
+    expect(nameOf(cert.id)).toBe('Ayu Lestari');
+  });
+
+  it('nama panggilan berganti: sertifikat tanpa nama lengkap ikut berganti', async () => {
+    const cert = await issuedForAyu();
+    await patchChild({ nickname: 'Ayuni' });
+    expect(nameOf(cert.id)).toBe('Ayuni');
+  });
+
+  it('rata-rata skor terbaik level buku tercatat saat terbit', async () => {
+    const ids = passBook(AYU);
+    givePremium(AYU);
+    const db = readDb();
+    db.best[AYU] = Object.fromEntries(
+      ids.map((id, i) => [id, { score: i === 0 ? 70 : 100, ms: 1 }]),
+    );
+    writeDb(db);
+    const cert = (await claimCertificate(MATH1)).certificate!;
+    expect(cert.averageScore).toBe(Math.round((70 + 100 * (ids.length - 1)) / ids.length));
+  });
+
+  it('cek keaslian: nomor terdaftar dengan nama disamarkan, nomor lain 404', async () => {
+    const cert = await issuedForAyu();
+    await patchChild({ certificateName: 'Ayu Lestari', certificateConsent: true });
+    useSession.setState({ session: null });
+    const found = await verifyCertificate(cert.id.toLowerCase());
+    expect(found).toMatchObject({
+      id: cert.id,
+      name: 'A** L******',
+      bookTitle: 'Matematika Kelas 1',
+      levels: bookLevels().length,
+      issuer: 'UdaKids',
+    });
+    expect(JSON.stringify(found)).not.toContain('Lestari');
+    expect((await errorOf(verifyCertificate('CERT-ZZZZZZ'))).status).toBe(404);
+  });
+
+  it('lembar memakai teks Pengaturan: penerbit, judul, penanda tangan, kurikulum, skor, dan QR', () => {
+    const settings: CertificateSettings = {
+      ...DEFAULT_SETTINGS.certificate,
+      issuer: 'Sekolah Ceria',
+      title: 'PIAGAM',
+      subtitle: '',
+      signer2Name: 'Bu Rina',
+      signer2Role: 'Kepala Sekolah',
+      curriculum: 'Sesuai Kurikulum Merdeka',
+    };
+    const data: SheetData = {
+      childName: 'Ayu Lestari',
+      bookTitle: 'Matematika Kelas 1',
+      levels: 40,
+      topics: 10,
+      design: 'klasik',
+      number: 'CERT-7KQ2MX',
+      issuedAt: '2026-10-01T00:00:00.000Z',
+      averageScore: 92,
+      settings,
+      verifyUrl: 'https://contoh.id/sertifikat/cek/CERT-7KQ2MX',
+    };
+    const texts = (d: SheetData) =>
+      sheetShapes(d).flatMap((s) => (s.kind === 'text' ? [s.text] : []));
+    const full = texts(data);
+    expect(full).toEqual(
+      expect.arrayContaining([
+        'SEKOLAH CERIA · BELAJAR BERSAMA MOMO',
+        'PIAGAM',
+        'Ayu Lestari',
+        'Bu Rina',
+        'Kepala Sekolah',
+        'Sesuai Kurikulum Merdeka · Rata-rata skor 92',
+        'Pindai untuk cek',
+      ]),
+    );
+    expect(full).not.toContain('JUARA DIGITAL');
+
+    const plain = texts({ ...data, settings: { ...settings, showScore: false }, verifyUrl: null });
+    expect(plain).toContain('Sesuai Kurikulum Merdeka');
+    expect(plain).not.toContain('Pindai untuk cek');
+    // Contoh lembar (belum terbit) tidak pernah memuat QR.
+    expect(texts({ ...data, number: null, issuedAt: null })).not.toContain('Pindai untuk cek');
+
+    expect(sheetDataOf({ ...sampleCert, id: 'CERT-7KQ2MX' }, settings).verifyUrl).toMatch(
+      /\/sertifikat\/cek\/CERT-7KQ2MX$/,
+    );
+    expect(sheetDataOf(sampleCert, { ...settings, showQr: false }).verifyUrl).toBeNull();
+    expect(qrPath('https://contoh.id/sertifikat/cek/CERT-7KQ2MX', 0, 0, 76)).toMatch(
+      /^M[\d.]+ [\d.]+h/,
+    );
+  });
+
+  it('halaman cek keaslian publik: cocok dan tidak cocok', async () => {
+    const cert = await issuedForAyu();
+    useSession.setState({ session: null });
+    const view = (path: string) =>
+      render(
+        <MemoryRouter initialEntries={[path]}>
+          <Routes>
+            <Route path="/sertifikat/cek" element={<VerifyCertificate />} />
+            <Route path="/sertifikat/cek/:id" element={<VerifyCertificate />} />
+          </Routes>
+        </MemoryRouter>,
+      );
+    const first = view(`/sertifikat/cek/${cert.id}`);
+    expect(
+      await screen.findByText('Sertifikat asli, diterbitkan oleh UdaKids'),
+    ).toBeInTheDocument();
+    expect(screen.getByText('A**')).toBeInTheDocument();
+    first.unmount();
+
+    view('/sertifikat/cek');
+    fireEvent.change(screen.getByLabelText('Nomor sertifikat'), {
+      target: { value: 'cert-zzzzzz' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Cek' }));
+    expect(await screen.findByText('Nomor CERT-ZZZZZZ tidak terdaftar.')).toBeInTheDocument();
+  });
+
+  it('orang tua: isi nama lengkap di halaman Sertifikat dengan centang persetujuan', async () => {
+    const cert = await issuedForAyu();
+    asParent();
+    render(
+      <MemoryRouter initialEntries={['/orang-tua/sertifikat']}>
+        <Routes>
+          <Route path="/orang-tua/sertifikat" element={<CertificatesPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    const field = (
+      await screen.findAllByRole('textbox', { name: 'Nama lengkap untuk sertifikat' })
+    )[0]!;
+    const form = field.closest('form')!;
+    fireEvent.change(field, { target: { value: 'Ayu Lestari' } });
+    fireEvent.click(within(form).getByRole('button', { name: 'Simpan nama' }));
+    expect(
+      await within(form).findByText('Centang persetujuan dulu untuk menyimpan nama lengkap.'),
+    ).toBeInTheDocument();
+    fireEvent.click(within(form).getByRole('checkbox', { name: /setuju nama lengkap/ }));
+    fireEvent.click(within(form).getByRole('button', { name: 'Simpan nama' }));
+    expect(await screen.findByText(/Nama di sertifikat Ayu Lestari disimpan/)).toBeInTheDocument();
+    expect(await screen.findByText(/Nama di sertifikat: Ayu Lestari/)).toBeInTheDocument();
+    expect(nameOf(cert.id)).toBe('Ayu Lestari');
+  });
+
+  it('orang tua: formulir ubah anak memuat nama sertifikat; disembunyikan bila Pengaturan mematikannya', async () => {
+    asParent();
+    const edit = () =>
+      render(
+        <MemoryRouter initialEntries={[`/orang-tua/anak/${AYU}/ubah`]}>
+          <Routes>
+            <Route path="/orang-tua/anak/:id/ubah" element={<ChildForm mode="edit" />} />
+            <Route path="/orang-tua" element={<p>Beranda orang tua</p>} />
+          </Routes>
+        </MemoryRouter>,
+      );
+    const first = edit();
+    fireEvent.change(await screen.findByLabelText(/Nama lengkap untuk sertifikat/), {
+      target: { value: 'Ayu Lestari' },
+    });
+    expect(screen.getByText('Di sertifikat: Ayu Lestari')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('checkbox', { name: /setuju nama lengkap/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Simpan/ }));
+    expect(await screen.findByText('Beranda orang tua')).toBeInTheDocument();
+    expect(readDb().children.find((c) => c.id === AYU)!.certificateName).toBe('Ayu Lestari');
+    first.unmount();
+
+    await certSettings({ useFullName: false });
+    edit();
+    expect(await screen.findByLabelText(/Nama panggilan/)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/Nama lengkap untuk sertifikat/)).toBeNull();
   });
 });

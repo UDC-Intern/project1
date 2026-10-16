@@ -15,7 +15,8 @@ export const parentTokenFor = (id: string) => `${PARENT_PREFIX}${id}`;
 export function parentFromToken(token: string | null | undefined): MockParent {
   const id = token?.startsWith(PARENT_PREFIX) ? token.slice(PARENT_PREFIX.length) : null;
   const parent = readDb().parents.find((p) => p.id === id);
-  if (!parent) throw new ApiError(401, { code: 'UNAUTHENTICATED', message: 'Silakan masuk dulu.' });
+  if (!parent || parent.active === false)
+    throw new ApiError(401, { code: 'UNAUTHENTICATED', message: 'Silakan masuk dulu.' });
   return parent;
 }
 
@@ -77,6 +78,11 @@ export async function parentLogin(body: LoginBody): Promise<AuthResult> {
     throw new ApiError(401, {
       code: 'INVALID_CREDENTIALS',
       message: 'Email atau kata sandi belum cocok.',
+    });
+  if (parent.active === false)
+    throw new ApiError(403, {
+      code: 'FORBIDDEN',
+      message: 'Akun ini sedang dinonaktifkan. Hubungi admin lewat WhatsApp.',
     });
   return authResult(parent);
 }

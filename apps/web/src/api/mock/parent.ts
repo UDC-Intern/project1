@@ -1,5 +1,6 @@
 import {
   accuracy,
+  certificateNameSchema,
   createChildBodySchema,
   masteryStatus,
   patchChildBodySchema,
@@ -15,6 +16,7 @@ import {
 } from '@udakids/engine';
 import { ApiError } from '../client';
 import { parentFromToken } from './accounts';
+import { renameCertificates } from './certificate';
 import {
   BOOKS,
   newId,
@@ -28,7 +30,6 @@ import {
 import { findLevel } from './levels';
 
 const MAX_CHILDREN = 3;
-const ADMIN_WHATSAPP = '6287833475970';
 
 const notFound = () => new ApiError(404, { code: 'NOT_FOUND', message: 'Anak tidak ketemu.' });
 
@@ -133,8 +134,45 @@ export async function updateChild(
     throw new ApiError(409, { code: 'CONFLICT', message: 'Nama panggilan ini sudah dipakai.' });
   if (nickname) child.nickname = nickname;
   if (momoColor) child.momoColor = momoColor;
+  // Sertifikat yang memakai nama panggilan ikut berganti nama.
+  if (nickname) renameCertificates(db, child);
   writeDb(db);
   return summary(db, child);
+}
+
+/**
+ * Nama lengkap khusus sertifikat (opsional). Mengisi pertama kali butuh persetujuan orang tua; string kosong
+ * menghapus nama dan persetujuannya. Sertifikat yang sudah terbit ikut memakai nama terbaru.
+ */
+export async function setCertificateName(
+  token: string | null,
+  childId: string,
+  name: string,
+  consent: boolean,
+): Promise<void> {
+  const { db, child } = ownChild(token, childId);
+  if (name.trim() === '') {
+    child.certificateName = null;
+    child.certificateConsentAt = null;
+  } else {
+    const parsed = certificateNameSchema.safeParse(name);
+    if (!parsed.success) {
+      const message = parsed.error.issues[0]?.message ?? 'Nama belum sesuai.';
+      throw new ApiError(400, { code: 'VALIDATION', message }, [
+        { path: 'certificateName', message },
+      ]);
+    }
+    if (!consent && !child.certificateConsentAt) {
+      const message = 'Centang persetujuan menyimpan nama lengkap untuk sertifikat.';
+      throw new ApiError(400, { code: 'VALIDATION', message }, [
+        { path: 'certificateConsent', message },
+      ]);
+    }
+    child.certificateName = parsed.data;
+    child.certificateConsentAt ??= new Date().toISOString();
+  }
+  renameCertificates(db, child);
+  writeDb(db);
 }
 
 export async function setPin(token: string | null, childId: string, pin: Pin): Promise<void> {
@@ -216,7 +254,7 @@ export async function plan(token: string | null): Promise<ParentPlan> {
   const parent = parentFromToken(token);
   const db = readDb();
   return {
-    adminWhatsapp: ADMIN_WHATSAPP,
+    adminWhatsapp: db.settings.contact.adminWhatsapp,
     children: db.children
       .filter((c) => c.parentId === parent.id)
       .map((c) => {

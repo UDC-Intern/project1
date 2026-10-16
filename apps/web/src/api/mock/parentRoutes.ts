@@ -1,6 +1,5 @@
 import {
   FOREVER_ISO,
-  FREE_LEVELS,
   PIN_PICTURES,
   type ChildInsights,
   type DayActivity,
@@ -14,6 +13,7 @@ import * as billing from './billing';
 import * as certificates from './certificate';
 import { BOOKS, gradeOf, premiumUntilOf, readDb, topicId, type MockChild, type MockDb } from './db';
 import * as parent from './parent';
+import { isLevelFree } from './settings';
 
 /**
  * Pintu masuk data tiruan untuk halaman area orang tua: alamat dan bentuk respons mengikuti
@@ -94,7 +94,8 @@ function insightsOf(db: MockDb, child: MockChild, now = Date.now()): ChildInsigh
           level: lvl.number,
           topic: topic.title,
           book: book.title,
-          paid: !lvl.isFree && !premium,
+          paid:
+            !isLevelFree(db, `${book.slug}:${topic.code}:${lvl.number}`, lvl.number) && !premium,
         };
         break;
       }
@@ -196,11 +197,13 @@ function profileOf(db: MockDb, child: MockChild) {
     className: null,
     classCode: null,
     lastActiveAt: last ? new Date(last.finishedAt!).toISOString() : null,
-    createdAt: new Date(0).toISOString(),
+    createdAt: child.createdAt ?? new Date(0).toISOString(),
+    certificateName: child.certificateName ?? null,
   };
 }
 
-const orderView = (o: OwnOrder, kind: 'bank' | 'ewallet', mime: string | null) => ({
+/** Pesanan dalam bentuk halaman (dipakai juga panel admin). */
+export const orderView = (o: OwnOrder, kind: 'bank' | 'ewallet', mime: string | null) => ({
   id: o.id,
   number: o.number,
   packageId: o.packageId,
@@ -305,6 +308,13 @@ export async function handle<T>(
       if (Object.keys(patch).length > 0) await parent.updateChild(token, id, patch);
       const pin = asPin(body?.pin);
       if (pin) await parent.setPin(token, id, pin);
+      if (typeof body?.certificateName === 'string')
+        await parent.setCertificateName(
+          token,
+          id,
+          body.certificateName,
+          body.certificateConsent === true,
+        );
       const next = readDb();
       const child = next.children.find((c) => c.id === id && c.parentId === me.id);
       if (!child) throw notFound();
@@ -343,7 +353,7 @@ export async function handle<T>(
       packages: pkgs.map((p) => ({
         id: p.id,
         name: p.name,
-        description: '',
+        description: p.description ?? '',
         scope: 'all',
         books: [],
         durationDays: p.durationDays,
@@ -361,7 +371,7 @@ export async function handle<T>(
         provider: m.name,
         accountNumber: m.number,
         accountName: m.holder,
-        instructions: '',
+        instructions: m.instructions ?? '',
       })),
       entitlements: until
         ? [
@@ -376,7 +386,7 @@ export async function handle<T>(
           ]
         : [],
       access: { tier: until ? 'premium' : 'free', endsAt: forever ? null : (until ?? null) },
-      settings: { paywall: true, freeLevels: FREE_LEVELS, orderExpiryHours: 24 },
+      settings: db.settings.billing,
     });
   }
 

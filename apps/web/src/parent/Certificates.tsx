@@ -2,17 +2,20 @@ import type { Certificate, CertificateBook, ParentCertificates } from '@udakids/
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { errorMessage } from '../api/client';
+import { useSettings } from '../api/settings';
 import { useApiCall, useFetch } from '../auth/useApi';
 import { CertificatePrint, CertificateSheet } from '../components/certificate/CertificateSheet';
 import {
   downloadCertificateImage,
   printCertificate,
   sheetDataOf,
+  verifyUrlOf,
 } from '../components/certificate/sheet';
 import { Momo } from '../components/Momo';
 import { t } from '../i18n';
 import { formatDate as formatDay } from '../lib/format';
 import { Badge, Button, Card, Empty, Notice, PageHeader, Spinner } from '../ui/ui';
+import { CertificateNameForm } from './CertificateName';
 
 type Child = ParentCertificates['children'][number];
 
@@ -100,6 +103,10 @@ export function CertificatesPage() {
             child={child}
             busy={busy}
             onClaim={(book) => void claim(child, book)}
+            onNameSaved={(name) => {
+              setMessage({ tone: 'success', text: t('parent.cert.nameSaved', { name }) });
+              reload();
+            }}
           />
         ))
       )}
@@ -171,11 +178,16 @@ function ChildCertificates({
   child,
   busy,
   onClaim,
+  onNameSaved,
 }: {
   child: Child;
   busy: string | undefined;
   onClaim: (book: CertificateBook) => void;
+  onNameSaved: (name: string) => void;
 }) {
+  const settings = useSettings().certificate;
+  const sheetName =
+    settings.useFullName && child.certificateName ? child.certificateName : child.nickname;
   const issued = child.books.flatMap((b) => (b.certificate ? [b.certificate] : []));
   // Contoh lembar: buku dengan kemajuan terbanyak yang belum bersertifikat.
   const sample = [...child.books]
@@ -192,6 +204,19 @@ function ChildCertificates({
       }
     >
       <div className="cert-pa-child">
+        {settings.useFullName &&
+          (child.certificateName ? (
+            <p className="cert-pa-name-now">
+              {t('parent.cert.nameFull', { name: child.certificateName })}{' '}
+              <Link to={`/orang-tua/anak/${child.id}/ubah`}>{t('parent.cert.nameEdit')}</Link>
+            </p>
+          ) : (
+            <CertificateNameForm
+              childId={child.id}
+              nickname={child.nickname}
+              onSaved={onNameSaved}
+            />
+          ))}
         <h3>{t('parent.cert.issuedTitle')}</h3>
         {issued.length === 0 ? (
           <Empty>{t('parent.cert.noneIssued', { name: child.nickname })}</Empty>
@@ -199,7 +224,7 @@ function ChildCertificates({
           <ul className="cert-pa-grid">
             {issued.map((c) => (
               <li key={c.id} className="cert-pa-card">
-                <CertificateSheet data={sheetDataOf(c)} />
+                <CertificateSheet data={sheetDataOf(c, settings)} />
                 <div className="cert-pa-card-meta">
                   <strong>{c.bookTitle}</strong>
                   <span>
@@ -228,13 +253,14 @@ function ChildCertificates({
             </figcaption>
             <CertificateSheet
               data={{
-                childName: child.nickname,
+                childName: sheetName,
                 bookTitle: sample.bookTitle,
                 levels: sample.levelsTotal,
                 topics: sample.topicsTotal,
                 design: sample.design,
                 number: null,
                 issuedAt: null,
+                settings,
               }}
             />
           </figure>
@@ -251,6 +277,7 @@ export function CertificateView() {
     'parent',
     `/parent/certificates/${encodeURIComponent(id)}`,
   );
+  const settings = useSettings().certificate;
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState(false);
 
@@ -273,7 +300,7 @@ export function CertificateView() {
       </div>
     );
 
-  const sheet = sheetDataOf(data);
+  const sheet = sheetDataOf(data, settings);
   async function download() {
     setDownloading(true);
     setDownloadError(false);
@@ -319,7 +346,14 @@ export function CertificateView() {
           <dd>{formatDay(data.issuedAt)}</dd>
           <dt>{t('parent.cert.sourceLabel')}</dt>
           <dd>{t(`parent.cert.source.${data.source}`)}</dd>
+          <dt>{t('parent.cert.verify')}</dt>
+          <dd>
+            <a href={verifyUrlOf(data.id)} target="_blank" rel="noreferrer">
+              {verifyUrlOf(data.id).replace(/^https?:\/\//, '')}
+            </a>
+          </dd>
         </dl>
+        <p className="ui-hint">{t('parent.cert.verifyHint')}</p>
       </Card>
     </div>
   );

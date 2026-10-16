@@ -1,9 +1,14 @@
 import {
+  FOREVER_ISO,
+  mergeSettings,
+  type AppSettings,
+  type BillingPackage,
   type BookContent,
   type Certificate,
   type CertificateDesign,
   type MasteryState,
   type MomoColor,
+  type PaymentMethod,
   type Pin,
   type Stage,
 } from '@udakids/engine';
@@ -24,7 +29,7 @@ const BASE: BookContent[] = BASE_BOOKS;
 export const BOOKS: BookContent[] = structuredClone(BASE);
 
 export type ContentEdits = {
-  topics: Record<string, { title?: string; lesson?: string }>;
+  topics: Record<string, { title?: string; lesson?: string; tips?: string[] }>;
   levels: Record<string, { title?: string; isFree?: boolean }>;
 };
 
@@ -42,7 +47,15 @@ export function applyEdits(edits: ContentEdits): void {
   }
 }
 
-export type MockAdmin = { id: string; name: string; email: string; password: string };
+export type MockAdmin = {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  /** Akun staf yang dinonaktifkan tidak bisa masuk. Kosong berarti aktif. */
+  active?: boolean;
+  createdAt?: string;
+};
 export type MockAiJob = {
   id: string;
   adminName: string;
@@ -63,14 +76,18 @@ export type MockParent = {
   pendingEmail?: string | null;
   /** kode keluarga orang tua yang mengajaknya mendaftar */
   referredBy?: string | null;
+  /** Keluarga yang dinonaktifkan admin: orang tua dan anaknya tidak bisa masuk. Kosong berarti aktif. */
+  active?: boolean;
 };
 
 export type MockOrder = Order & { parentId: string; proofDataUrl: string | null };
 
-export type BillingEdits = {
-  packages: Record<string, { name?: string; listPrice?: number; price?: number; active?: boolean }>;
-  methods: Record<string, { name?: string; number?: string; holder?: string; active?: boolean }>;
+/** Suntingan paket dan rekening versi lama; dipindah ke `packages` dan `methods` saat data dibaca. */
+type LegacyBillingEdits = {
+  packages?: Record<string, Partial<BillingPackage>>;
+  methods?: Record<string, Partial<PaymentMethod>>;
 };
+
 export type MockChild = {
   id: string;
   parentId: string;
@@ -80,6 +97,23 @@ export type MockChild = {
   failedAttempts: number;
   lockCount: number;
   lockedUntil: number | null;
+  /** Anak yang dinonaktifkan admin tidak bisa masuk. Kosong berarti aktif. */
+  active?: boolean;
+  createdAt?: string;
+  /** Nama lengkap khusus sertifikat, diisi orang tua (opsional). */
+  certificateName?: string | null;
+  /** Waktu orang tua menyetujui nama lengkap disimpan untuk sertifikat. */
+  certificateConsentAt?: string | null;
+};
+
+/** Premium per anak yang diberikan admin. Satu baris per pemberian; `endsAt` null berarti selamanya. */
+export type MockGrant = {
+  id: string;
+  childId: string;
+  endsAt: string | null;
+  note: string;
+  grantedBy: string | null;
+  createdAt: string;
 };
 
 export type MockRound = {
@@ -110,7 +144,13 @@ export type MockDb = {
   orders: Record<string, MockOrder>;
   /** Premium keluarga dari pembelian paket: berlaku untuk semua anak orang tua itu */
   familyPremium: Record<string, string>;
-  billingEdits: BillingEdits;
+  /** Paket dan rekening yang dikelola admin (awalnya dari content/billing.json) */
+  packages: BillingPackage[];
+  methods: PaymentMethod[];
+  /** Pengaturan yang diubah admin di menu Pengaturan */
+  settings: AppSettings;
+  /** Riwayat Premium per anak dari admin */
+  premiumGrants: MockGrant[];
   children: MockChild[];
   /** id level yang pernah lulus, per anak */
   passedLevels: Record<string, string[]>;
@@ -218,13 +258,28 @@ function seed(): MockDb {
       },
     ],
     admins: [
-      { id: 'a-demo', name: 'Admin UdaKids', email: 'admin@udakids.local', password: 'admin12345' },
+      {
+        id: 'a-demo',
+        name: 'Admin UdaKids',
+        email: 'admin@udakids.local',
+        password: 'admin12345',
+        createdAt: '2026-09-15T08:00:00.000Z',
+      },
     ],
     contentEdits: { topics: {}, levels: {} },
     aiJobs: [],
     orders: seedOrders(),
     familyPremium: {},
-    billingEdits: { packages: {}, methods: {} },
+    packages: BILLING.packages.map((p) => ({ ...p, description: '' })),
+    methods: BILLING.methods.map((m) => ({ ...m, instructions: '' })),
+    settings: mergeSettings({
+      contact: {
+        adminWhatsapp: BILLING.adminWhatsapp,
+        adminMessage:
+          'Halo Admin UdaKids (Ridho Dwi Syahputra), saya ingin bertanya mengenai UdaKids.',
+      },
+    }),
+    premiumGrants: [],
     passedLevels: {},
     mastery: {},
     best: {},
@@ -243,8 +298,16 @@ export function readDb(): MockDb {
   try {
     const raw = localStorage.getItem(KEY);
     if (raw) {
-      const parsed = JSON.parse(raw) as Partial<MockDb>;
-      memory = { ...seed(), ...parsed } as MockDb;
+      const parsed = JSON.parse(raw) as Partial<MockDb> & { billingEdits?: LegacyBillingEdits };
+      const base = seed();
+      const { billingEdits: legacy, ...rest } = parsed;
+      memory = { ...base, ...rest } as MockDb;
+      memory.settings = mergeSettings(parsed.settings ?? base.settings);
+      // Data versi lama: paket dan rekening masih berupa suntingan di atas content/billing.json.
+      if (!parsed.packages)
+        memory.packages = base.packages.map((p) => ({ ...p, ...legacy?.packages?.[p.id] }));
+      if (!parsed.methods)
+        memory.methods = base.methods.map((m) => ({ ...m, ...legacy?.methods?.[m.id] }));
       for (const p of memory.parents) p.password ??= 'rahasia123';
       applyEdits(memory.contentEdits);
       return memory;
@@ -285,6 +348,25 @@ export const newId = (prefix: string) =>
  * Premium yang berlaku untuk seorang anak: yang paling akhir antara Premium anak (diatur admin) dan Premium
  * keluarga (dari pembelian paket). Null bila tidak ada yang aktif.
  */
+/** Premium anak dari admin = pemberian yang masih berlaku dengan tanggal paling akhir (selamanya menang). */
+export function syncChildPremium(db: MockDb, childId: string): void {
+  const live = db.premiumGrants.filter(
+    (g) => g.childId === childId && (g.endsAt === null || Date.parse(g.endsAt) > Date.now()),
+  );
+  if (live.length === 0) delete db.premiumUntil[childId];
+  else
+    db.premiumUntil[childId] = live.some((g) => g.endsAt === null)
+      ? FOREVER_ISO
+      : live
+          .map((g) => g.endsAt!)
+          .sort()
+          .at(-1)!;
+}
+
+/** Akun aktif bila tidak dinonaktifkan; keluarga nonaktif membuat anaknya ikut nonaktif. */
+export const isChildActive = (db: MockDb, child: MockChild) =>
+  child.active !== false && db.parents.find((p) => p.id === child.parentId)?.active !== false;
+
 export function premiumUntilOf(db: MockDb, childId: string): string | null {
   const child = db.children.find((c) => c.id === childId);
   const candidates = [

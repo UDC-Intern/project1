@@ -394,8 +394,48 @@ export const certificateSchema = z.object({
   issuedAt: z.string(),
   /** auto: terbit saat level terakhir lulus; claim: diambil anak atau orang tua; admin: diterbitkan admin */
   source: z.enum(['auto', 'claim', 'admin']),
+  /** Rata-rata skor terbaik semua level buku itu saat terbit. */
+  averageScore: z.number().int().nullable().optional(),
 });
 export type Certificate = z.infer<typeof certificateSchema>;
+
+/**
+ * Nama lengkap anak khusus untuk sertifikat (opsional, diisi orang tua). Huruf, spasi, titik, tanda petik, dan
+ * tanda hubung; spasi ganda dirapikan.
+ */
+export const certificateNameSchema = z
+  .string()
+  .trim()
+  .transform((v) => v.replace(/\s+/g, ' '))
+  .pipe(
+    z
+      .string()
+      .min(2, 'Nama minimal 2 huruf.')
+      .max(60, 'Nama maksimal 60 huruf.')
+      .regex(/^\p{L}[\p{L} .'’-]*$/u, 'Pakai huruf, spasi, titik, tanda petik, atau tanda hubung.'),
+  );
+
+/** Isian nama sertifikat di formulir: kosong berarti hapus (kembali ke nama panggilan). Pesan galat tetap spesifik. */
+export const certificateNameInputSchema = z.string().transform((v, ctx) => {
+  if (v.trim() === '') return '';
+  const parsed = certificateNameSchema.safeParse(v);
+  if (parsed.success) return parsed.data;
+  for (const issue of parsed.error.issues) ctx.addIssue({ code: 'custom', message: issue.message });
+  return z.NEVER;
+});
+
+/** `GET /certificates/verify/:id` (publik): bukti sertifikat asli tanpa membuka nama lengkap anak. */
+export const certificateVerifySchema = z.object({
+  id: z.string(),
+  /** Nama disamarkan, mis. "A** L******". */
+  name: z.string(),
+  bookTitle: z.string(),
+  topics: z.number().int(),
+  levels: z.number().int(),
+  issuedAt: z.string(),
+  issuer: z.string(),
+});
+export type CertificateVerify = z.infer<typeof certificateVerifySchema>;
 
 export const CERTIFICATE_BOOK_STATUSES = [
   'issued',
@@ -433,6 +473,8 @@ export const parentCertificatesSchema = z.object({
     z.object({
       id: z.string(),
       nickname: z.string(),
+      /** Nama lengkap untuk sertifikat yang diisi orang tua; null bila belum diisi. */
+      certificateName: z.string().nullable().optional(),
       momoColor: momoColorSchema,
       hasPremium: z.boolean(),
       books: z.array(certificateBookSchema),
@@ -515,6 +557,8 @@ export type AdminCatalog = z.infer<typeof adminCatalogSchema>;
 export const updateTopicBodySchema = z.object({
   title: z.string().trim().min(1).max(60).optional(),
   lesson: z.string().trim().min(1).max(600).optional(),
+  /** Hal penting topik ("Tahukah kamu?"), paling banyak 6 baris. */
+  tips: z.array(z.string().trim().min(1).max(200)).max(6).optional(),
 });
 export type UpdateTopicBody = z.infer<typeof updateTopicBodySchema>;
 

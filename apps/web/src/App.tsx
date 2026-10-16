@@ -1,15 +1,18 @@
 import { Navigate, Route, Routes, useParams } from 'react-router-dom';
 import { AdminAssistantPage } from './admin/AdminAssistantPage';
 import { AdminCertificatesPage } from './admin/AdminCertificatesPage';
-import { AdminContentPage } from './admin/AdminContentPage';
 import { AdminLayout } from './admin/AdminLayout';
-import { AdminMethodsPage } from './admin/AdminMethodsPage';
-import { AdminOrdersPage } from './admin/AdminOrdersPage';
-import { AdminPackagesPage } from './admin/AdminPackagesPage';
 import { AdminOverviewPage } from './admin/AdminOverviewPage';
 import { AdminPreviewPage } from './admin/AdminPreviewPage';
-import { AdminReportsPage } from './admin/AdminReportsPage';
-import { AdminUsersPage } from './admin/AdminUsersPage';
+import { OrdersPage } from './admin/billing/OrdersPage';
+import { PackagesPage } from './admin/billing/PackagesPage';
+import { PaymentMethodsPage } from './admin/billing/PaymentMethodsPage';
+import { SettingsPage } from './admin/billing/SettingsPage';
+import { CatalogPage } from './admin/catalog/CatalogPage';
+import { ChildReportPage } from './admin/reports/ChildReportPage';
+import { ReportsPage } from './admin/reports/ReportsPage';
+import { FamiliesPage } from './admin/users/FamiliesPage';
+import { StaffPage } from './admin/users/StaffPage';
 import { RequireRole } from './auth/RequireRole';
 import { ChildLayout } from './components/ChildLayout';
 import { BookPage } from './play/BookPage';
@@ -27,6 +30,7 @@ import { TopicPage } from './play/TopicPage';
 import { Landing } from './site/Landing';
 import { NotFound } from './site/NotFound';
 import { StylePage } from './site/StylePage';
+import { VerifyCertificate } from './site/VerifyCertificate';
 
 /** Alamat lama /play/main/:levelId diarahkan ke /play/latihan/:levelId. */
 function LegacyRoundRedirect() {
@@ -40,6 +44,8 @@ export function App() {
       <Routes>
         <Route path="/" element={<Landing />} />
         {import.meta.env.DEV && <Route path="/gaya" element={<StylePage />} />}
+        <Route path="/sertifikat/cek" element={<VerifyCertificate />} />
+        <Route path="/sertifikat/cek/:id" element={<VerifyCertificate />} />
 
         <Route path="/play/masuk" element={<ChildLogin />} />
         <Route path="/play" element={<RequireRole role="child" />}>
@@ -62,15 +68,19 @@ export function App() {
         <Route path="/admin" element={<RequireRole role="admin" />}>
           <Route element={<AdminLayout />}>
             <Route index element={<AdminOverviewPage />} />
-            <Route path="konten" element={<AdminContentPage />} />
+            <Route path="konten" element={<CatalogPage />} />
             <Route path="soal" element={<AdminPreviewPage />} />
             <Route path="asisten" element={<AdminAssistantPage />} />
-            <Route path="pengguna" element={<AdminUsersPage />} />
-            <Route path="laporan" element={<AdminReportsPage />} />
+            <Route path="keluarga" element={<FamiliesPage />} />
+            <Route path="pengguna" element={<Navigate to="/admin/keluarga" replace />} />
+            <Route path="staf" element={<StaffPage />} />
+            <Route path="laporan" element={<ReportsPage />} />
+            <Route path="laporan/anak/:id" element={<ChildReportPage />} />
             <Route path="sertifikat" element={<AdminCertificatesPage />} />
-            <Route path="transaksi" element={<AdminOrdersPage />} />
-            <Route path="paket" element={<AdminPackagesPage />} />
-            <Route path="rekening" element={<AdminMethodsPage />} />
+            <Route path="transaksi" element={<OrdersPage />} />
+            <Route path="paket" element={<PackagesPage />} />
+            <Route path="rekening" element={<PaymentMethodsPage />} />
+            <Route path="pengaturan" element={<SettingsPage />} />
           </Route>
         </Route>
 

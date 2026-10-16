@@ -1,27 +1,27 @@
+import { adminWhatsappHref } from '@udakids/engine';
 import { useLocation } from 'react-router-dom';
-import { BILLING } from '../content/billing';
+import { useSettings } from '../api/settings';
 import { t } from '../i18n';
 import './whatsapp.css';
 
 /**
- * Tombol "Hubungi admin" lewat WhatsApp, melayang di kanan bawah. Tampil di landing dan area orang
- * tua; tidak tampil di area anak dan admin.
+ * Tombol "Hubungi admin" lewat WhatsApp, melayang di kanan bawah. Nomor dan pesan pembuka diatur admin di
+ * menu Pengaturan. Tampil di landing dan area orang tua; tidak tampil di area anak dan admin, dan tidak tampil
+ * bila nomornya dikosongkan.
  */
 export function WhatsAppButton() {
   const { pathname } = useLocation();
+  const href = adminWhatsappHref(useSettings().contact);
   const hidden =
     pathname === '/play' ||
     pathname.startsWith('/play/') ||
     pathname === '/admin' ||
     pathname.startsWith('/admin/');
-  if (hidden || !BILLING.adminWhatsapp) return null;
-  const msg = encodeURIComponent(
-    'Halo Admin UdaKids (Ridho Dwi Syahputra), saya ingin bertanya mengenai UdaKids.',
-  );
+  if (hidden || !href) return null;
   return (
     <a
       className="wa-fab"
-      href={`https://wa.me/${BILLING.adminWhatsapp}?text=${msg}`}
+      href={href}
       target="_blank"
       rel="noopener noreferrer"
       aria-label={t('common.whatsapp.label')}

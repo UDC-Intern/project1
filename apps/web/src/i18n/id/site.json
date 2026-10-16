@@ -177,5 +177,21 @@
   "band.text": "Mulai dari level 1. Gratis untuk setiap keluarga.",
   "footer.child": "Anak main",
   "footer.parent": "Orang tua",
-  "footer.staff": "Staf"
+  "footer.staff": "Staf",
+  "verify.title": "Cek keaslian sertifikat",
+  "verify.lead": "Masukkan nomor yang tertulis di kanan bawah lembar sertifikat, atau pindai kode QR di lembar itu.",
+  "verify.label": "Nomor sertifikat",
+  "verify.check": "Cek",
+  "verify.format": "Nomor berbentuk CERT- diikuti 6 huruf atau angka, mis. CERT-7KQ2MX.",
+  "verify.loading": "Mencocokkan nomor…",
+  "verify.notFound": "Nomor {number} tidak terdaftar.",
+  "verify.notFoundHint": "Periksa lagi penulisan nomornya. Bila tetap tidak ditemukan, sertifikat ini tidak diterbitkan oleh kami.",
+  "verify.valid": "Sertifikat asli, diterbitkan oleh {issuer}",
+  "verify.number": "Nomor",
+  "verify.name": "Nama",
+  "verify.book": "Buku",
+  "verify.achievement": "Capaian",
+  "verify.achievementValue": "{levels} level di {topics} topik tuntas",
+  "verify.issued": "Terbit",
+  "verify.privacy": "Nama disamarkan untuk melindungi data anak. Cocokkan huruf depannya dengan nama di lembar."
 }

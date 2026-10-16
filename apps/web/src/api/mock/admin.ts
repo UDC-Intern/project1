@@ -6,28 +6,15 @@ import {
   updateTopicBodySchema,
   type AdminCatalog,
   type AdminOverview,
-  type AdminUsers,
-  type ChildReport,
-  type LevelStats,
   type PreviewResult,
   type UpdateLevelBody,
   type UpdateTopicBody,
 } from '@udakids/engine';
 import { ApiError } from '../client';
 import { adminFromToken } from './staff';
-import {
-  applyEdits,
-  BOOKS,
-  levelId,
-  newId,
-  premiumUntilOf,
-  readDb,
-  topicId,
-  writeDb,
-  type MockDb,
-} from './db';
+import { applyEdits, BOOKS, levelId, newId, readDb, topicId, writeDb, type MockDb } from './db';
 import { findLevel } from './levels';
-import { buildReport } from './parent';
+import { isLevelFree } from './settings';
 
 const notFound = (what: string) => new ApiError(404, { code: 'NOT_FOUND', message: what });
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -74,6 +61,7 @@ export async function overview(token: string | null): Promise<AdminOverview> {
 
 export async function catalog(token: string | null): Promise<AdminCatalog> {
   adminFromToken(token);
+  const db = readDb();
   return {
     books: BOOKS.map((b) => ({
       id: b.slug,
@@ -88,7 +76,7 @@ export async function catalog(token: string | null): Promise<AdminCatalog> {
           id: levelId(b.slug, t.code, l.number),
           number: l.number,
           title: l.title,
-          isFree: l.isFree,
+          isFree: isLevelFree(db, levelId(b.slug, t.code, l.number), l.number),
           generator: l.generator,
         })),
       })),
@@ -104,8 +92,9 @@ export async function updateTopic(token: string | null, id: string, body: Update
   const parsed = updateTopicBodySchema.safeParse(body);
   if (!parsed.success)
     throw new ApiError(400, { code: 'VALIDATION', message: 'Judul atau materi belum sesuai.' });
-  if (parsed.data.lesson) {
-    const issues = checkChildText(parsed.data.lesson);
+  for (const text of [parsed.data.lesson, ...(parsed.data.tips ?? [])]) {
+    if (!text) continue;
+    const issues = checkChildText(text);
     if (issues.length > 0)
       throw new ApiError(400, { code: 'VALIDATION', message: issues.join(' ') });
   }
@@ -192,87 +181,4 @@ export async function aiAssist(
 export async function aiJobs(token: string | null) {
   adminFromToken(token);
   return { jobs: readDb().aiJobs };
-}
-
-function planOf(db: MockDb, childId: string) {
-  const until = premiumUntilOf(db, childId);
-  return { plan: until ? ('premium' as const) : ('free' as const), until };
-}
-
-export async function users(token: string | null, query: string): Promise<AdminUsers> {
-  adminFromToken(token);
-  const db = readDb();
-  const q = query.trim().toLowerCase();
-  const rows = db.parents
-    .map((p) => ({
-      id: p.id,
-      name: p.name,
-      email: p.email,
-      familyCode: p.familyCode,
-      children: db.children
-        .filter((c) => c.parentId === p.id)
-        .map((c) => ({ id: c.id, nickname: c.nickname, ...planOf(db, c.id) })),
-    }))
-    .filter(
-      (p) =>
-        !q ||
-        p.name.toLowerCase().includes(q) ||
-        p.email.includes(q) ||
-        p.children.some((c) => c.nickname.toLowerCase().includes(q)),
-    );
-  return { parents: rows, total: rows.length };
-}
-
-export async function setPremium(token: string | null, childId: string, until: string) {
-  adminFromToken(token);
-  const db = readDb();
-  if (!db.children.some((c) => c.id === childId)) throw notFound('Anak tidak ketemu.');
-  if (!(Date.parse(until) > Date.now()))
-    throw new ApiError(400, {
-      code: 'VALIDATION',
-      message: 'Tanggal berakhir harus di masa depan.',
-    });
-  db.premiumUntil[childId] = until;
-  writeDb(db);
-}
-
-export async function revokePremium(token: string | null, childId: string) {
-  adminFromToken(token);
-  const db = readDb();
-  if (!db.children.some((c) => c.id === childId)) throw notFound('Anak tidak ketemu.');
-  delete db.premiumUntil[childId];
-  writeDb(db);
-}
-
-export async function childReport(token: string | null, childId: string): Promise<ChildReport> {
-  adminFromToken(token);
-  const db = readDb();
-  const child = db.children.find((c) => c.id === childId);
-  if (!child) throw notFound('Anak tidak ketemu.');
-  return buildReport(db, child);
-}
-
-export async function levelStats(token: string | null): Promise<LevelStats> {
-  adminFromToken(token);
-  const byLevel = new Map<string, { rounds: number; passed: number; score: number }>();
-  for (const r of allRounds(readDb())) {
-    const row = byLevel.get(r.levelId) ?? { rounds: 0, passed: 0, score: 0 };
-    row.rounds += 1;
-    row.score += r.result!.score;
-    if (r.result!.passed) row.passed += 1;
-    byLevel.set(r.levelId, row);
-  }
-  return {
-    levels: [...byLevel.entries()].map(([id, v]) => {
-      const found = findLevel(id);
-      return {
-        levelId: id,
-        levelTitle: found?.level.title ?? id,
-        topicTitle: found?.topic.title ?? id,
-        rounds: v.rounds,
-        passRate: Math.round((v.passed / v.rounds) * 100),
-        avgScore: Math.round(v.score / v.rounds),
-      };
-    }),
-  };
 }

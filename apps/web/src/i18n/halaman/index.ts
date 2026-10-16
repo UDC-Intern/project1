@@ -1,3 +1,4 @@
+import admin from './id/admin.json';
 import common from './id/common.json';
 import parent from './id/parent.json';
 import play from './id/play.json';
@@ -7,7 +8,7 @@ import staff from './id/staff.json';
 import { APP_NAME, CHARACTER_NAME } from '../../config/app';
 
 // Katalog teks halaman area orang tua dan beranda publik. Satu berkas per area, kunci "area.kunci".
-const namespaces = { common, staff, parent, play, site, rank };
+const namespaces = { common, staff, parent, play, site, rank, admin };
 type Namespaces = typeof namespaces;
 export type MessageKey = {
   [N in keyof Namespaces]: `${N & string}.${keyof Namespaces[N] & string}`;

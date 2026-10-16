@@ -1,9 +1,12 @@
-import { FREE_LEVELS, formatRupiah } from '@udakids/engine';
+import { formatRupiah } from '@udakids/engine';
+import { useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { publicPackages } from '../api/billing';
+import { useSettings } from '../api/settings';
 import { CertificateSheet } from '../components/certificate/CertificateSheet';
 import { Momo } from '../components/Momo';
 import { APP_NAME, CHARACTER_NAME } from '../config/app';
-import { BILLING } from '../content/billing';
+import { useAsync } from '../hooks/useAsync';
 import { BASE_BOOKS, TOTAL_LEVELS } from '../content/books';
 import { useT } from '../i18n';
 import { BookSlider } from './BookSlider';
@@ -115,17 +118,20 @@ function SubjectsSection() {
 
 function PricingSection() {
   const t = useT('site');
-  const packages = BILLING.packages.filter((p) => p.active).sort((a, b) => a.sort - b.sort);
+  const free = useSettings().billing.freeLevels;
+  // Paket dan harga dari menu admin (Paket), bukan angka tetap.
+  const load = useCallback(() => publicPackages(), []);
+  const packages = useAsync(load).data ?? [];
   return (
     <section id="harga" className="site-section pricing" aria-labelledby="harga-title">
       <h2 id="harga-title">{t('price.title')}</h2>
-      <p className="section-lead">{t('price.lead', { free: FREE_LEVELS })}</p>
+      <p className="section-lead">{t('price.lead', { free })}</p>
       <div className="price-grid">
         <article className="price-card is-free">
           <h3>{t('price.freeTitle')}</h3>
           <p className="price-amount">{t('price.freeAmount')}</p>
           <ul>
-            <li>{t('price.free1', { free: FREE_LEVELS })}</li>
+            <li>{t('price.free1', { free })}</li>
             <li>{t('price.free2')}</li>
             <li>{t('price.free3')}</li>
           </ul>
@@ -171,6 +177,7 @@ function PricingSection() {
 
 function NewFeaturesSection() {
   const t = useT('site');
+  const { certificate } = useSettings();
   return (
     <section id="fitur-baru" className="site-section news" aria-labelledby="news-title">
       <p className="news-kicker">{t('news.kicker')}</p>
@@ -235,6 +242,7 @@ function NewFeaturesSection() {
                 design: 'klasik',
                 number: null,
                 issuedAt: null,
+                settings: certificate,
               }}
             />
           </div>

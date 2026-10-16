@@ -28,6 +28,28 @@ export function levelsPassedIn(
   return bookLevelIds.filter((id) => passed.has(id)).length;
 }
 
+/** Rata-rata skor (dibulatkan), atau null bila belum ada skor. */
+export function meanScore(scores: readonly number[]): number | null {
+  if (scores.length === 0) return null;
+  return Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+}
+
+/**
+ * Nama di halaman cek keaslian: huruf pertama tiap kata, sisanya disamarkan, mis. "Ayu Lestari" menjadi
+ * "A** L******". Cukup untuk mencocokkan dengan lembar yang dipegang, tanpa membuka nama lengkap anak.
+ */
+export function maskName(name: string): string {
+  return name
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => {
+      const chars = [...word];
+      return chars[0] + '*'.repeat(chars.length - 1);
+    })
+    .join(' ');
+}
+
 /** Desain bingkai sertifikat. Admin memilih satu sebagai desain yang dipakai saat sertifikat terbit. */
 export const CERTIFICATE_DESIGNS = ['klasik', 'gonjong', 'sawah'] as const;
 export type CertificateDesign = (typeof CERTIFICATE_DESIGNS)[number];

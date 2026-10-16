@@ -2,7 +2,7 @@
 
 Aplikasi web belajar untuk anak SD Kelas 1 sampai 4. Anak berlatih Matematika dan Sains per topik dan level, ditemani robot
 Momo yang membacakan soal. Orang tua memantau perkembangan anak, membeli paket, dan mengunduh sertifikat. Admin mengelola
-konten, pengguna, transaksi, Premium, dan sertifikat.
+konten, keluarga, transaksi, Premium, sertifikat, dan pengaturan aplikasi.
 
 ## Fitur rilis 1.0
 
@@ -11,12 +11,16 @@ konten, pengguna, transaksi, Premium, dan sertifikat.
   Jago, papan peringkat, profil, dan sertifikat.
 - **Orang tua:** daftar, kelola sampai 3 profil anak, dasbor dan laporan per anak, paket dengan pembayaran transfer manual,
   riwayat transaksi, akun, dan menu Sertifikat.
-- **Admin:** konten, pratinjau soal generator, asisten AI untuk draf materi, pengguna dan Premium, laporan, transaksi,
-  paket, rekening, dan sertifikat.
-- **Paket:** 5 paket (Tunas, Kumbang, Tumbuh Bersama, Bintang Kecil, Teman Setia). Level 1 dan 2 tiap topik gratis, level
-  3 dan 4 Premium untuk semua anak di keluarga itu.
+- **Admin:** konten, pratinjau soal generator, asisten AI untuk draf materi, keluarga dan Premium per anak, staf, laporan,
+  transaksi, paket dan rekening yang bisa ditambah sendiri, sertifikat, **Pengaturan** (level gratis, WhatsApp, isi lembar
+  sertifikat), dan notifikasi.
+- **Paket:** 5 paket awal (Tunas, Kumbang, Tumbuh Bersama, Bintang Kecil, Teman Setia); admin bisa mengubah dan menambah.
+  Awalnya level 1 dan 2 tiap topik gratis, level berikutnya Premium untuk semua anak di keluarga itu; batasnya diatur di
+  Pengaturan.
 - **Sertifikat Juara Digital:** terbit otomatis dengan nomor `CERT-XXXXXX` saat anak Premium lulus semua level satu buku.
-  Bisa dicetak, disimpan sebagai PDF, atau diunduh sebagai gambar PNG. Admin memilih desain dan menerbitkan sertifikat
+  Bisa dicetak, disimpan sebagai PDF, atau diunduh sebagai gambar PNG. Orang tua boleh mengisi nama lengkap anak khusus
+  untuk sertifikat (dengan persetujuan), kode QR di lembar membuka halaman cek keaslian yang menyamarkan nama, dan isi
+  lembar (penerbit, judul, penanda tangan, kurikulum, skor) diatur admin. Admin memilih desain dan menerbitkan sertifikat
   yang tertunda.
 - **Suara:** setiap halaman anak membacakan isinya, tombol menyebut namanya saat diketuk.
 

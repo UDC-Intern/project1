@@ -1,4 +1,4 @@
-import type { CertificateBook, ChildCertificates } from '@udakids/engine';
+import type { CertificateBook, CertificateVerify, ChildCertificates } from '@udakids/engine';
 import { useSession } from '../auth/store';
 import { request } from './client';
 import * as mock from './mock/certificate';
@@ -16,6 +16,12 @@ export const myCertificate = (bookSlug: string): Promise<CertificateBook> =>
   isMocked('catalog')
     ? mock.myCertificate(token(), bookSlug)
     : request<CertificateBook>(`/certificates/books/${enc(bookSlug)}`);
+
+/** Cek keaslian (publik): nomor terdaftar atau 404, dengan nama anak disamarkan. */
+export const verifyCertificate = (id: string): Promise<CertificateVerify> =>
+  isMocked('catalog')
+    ? mock.verifyCertificate(id)
+    : request<CertificateVerify>(`/certificates/verify/${enc(id.trim().toUpperCase())}`);
 
 /** Mengambil sertifikat yang tertunda (buku tuntas, Premium aktif). */
 export const claimCertificate = (bookSlug: string): Promise<CertificateBook> =>

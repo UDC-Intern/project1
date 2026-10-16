@@ -7,6 +7,7 @@ import { ChildLogin } from '../src/play/ChildLogin';
 import { TopicPage } from '../src/play/TopicPage';
 import { ParentApp } from '../src/parent/ParentApp';
 import { AppShell } from '../src/ui/AppShell';
+import { Pager, pageList } from '../src/ui/Pager';
 import { Landing } from '../src/site/Landing';
 
 beforeEach(() => {
@@ -137,5 +138,22 @@ describe('contoh soal di halaman topik', () => {
     expect(container.querySelectorAll('.level-card')).toHaveLength(4);
     expect(container.querySelectorAll('.level-card.is-locked')).toHaveLength(3);
     expect(container.querySelector('.level-card.is-next')).not.toBeNull();
+  });
+});
+
+describe('paging tabel', () => {
+  it('nomor halaman memakai elipsis bila halaman banyak', () => {
+    expect(pageList(1, 5)).toEqual([1, 2, 3, 4, 5]);
+    expect(pageList(6, 12)).toEqual([1, '…', 5, 6, 7, '…', 12]);
+    expect(pageList(2, 12)).toEqual([1, 2, 3, '…', 12]);
+  });
+
+  it('menampilkan rentang data dan pindah halaman', () => {
+    const pages: number[] = [];
+    render(<Pager page={2} pageSize={20} total={45} onPage={(p) => pages.push(p)} />);
+    expect(screen.getByText('Menampilkan 21–40 dari 45')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Halaman berikutnya' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Halaman 1' }));
+    expect(pages).toEqual([3, 1]);
   });
 });

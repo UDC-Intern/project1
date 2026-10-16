@@ -2,6 +2,7 @@ import type { CertificateBook } from '@udakids/engine';
 import { useCallback, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { claimCertificate, myCertificate } from '../api/certificate';
+import { useSettings } from '../api/settings';
 import { useSession } from '../auth/store';
 import { CertificatePrint, CertificateSheet } from '../components/certificate/CertificateSheet';
 import { printCertificate, sheetDataOf, type SheetData } from '../components/certificate/sheet';
@@ -41,6 +42,7 @@ export function CertificatePage() {
   const t = useT('play');
   const { bookSlug = '' } = useParams();
   const name = useSession((s) => s.session?.name ?? '');
+  const settings = useSettings().certificate;
   const load = useCallback(() => myCertificate(bookSlug), [bookSlug]);
   const { data, error, loading, reload } = useAsync(load);
   const [claiming, setClaiming] = useState(false);
@@ -77,7 +79,7 @@ export function CertificatePage() {
     >
       <PageHead title={t('cert.title')} sub={data.bookTitle} back="/play" />
       {data.certificate ? (
-        <Issued sheet={sheetDataOf(data.certificate)} />
+        <Issued sheet={sheetDataOf(data.certificate, settings)} />
       ) : data.status === 'not_finished' ? (
         <NotFinished data={data} name={name} />
       ) : (
@@ -151,6 +153,7 @@ function Issued({ sheet }: { sheet: SheetData }) {
 }
 
 function NotFinished({ data, name }: { data: CertificateBook; name: string }) {
+  const settings = useSettings().certificate;
   const t = useT('play');
   const say = t('cert.progressSay', { passed: data.levelsPassed, total: data.levelsTotal });
   return (
@@ -183,6 +186,7 @@ function NotFinished({ data, name }: { data: CertificateBook; name: string }) {
             design: data.design,
             number: null,
             issuedAt: null,
+            settings,
           }}
         />
       </div>

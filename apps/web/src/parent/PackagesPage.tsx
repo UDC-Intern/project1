@@ -2,6 +2,7 @@ import { useState, type FormEvent, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { formatRupiah } from '@udakids/engine';
 import { errorMessage } from '../api/client';
+import { useSettings } from '../api/settings';
 import { useApiCall, useFetch } from '../auth/useApi';
 import { t } from '../i18n';
 import { Badge, Button, Card, Empty, Notice, PageHeader, RequiredNote, Spinner } from '../ui/ui';
@@ -185,6 +186,7 @@ export function PackagesPage() {
     !!data &&
     [...data.packages, ...data.entitlements].some((x) => x.scope === 'books' && x.books.length);
   const title = useBookTitles(needsTitles);
+  const group = useSettings().contact.groupWhatsapp;
 
   return (
     <>
@@ -212,6 +214,21 @@ export function PackagesPage() {
             <Notice tone="info">{t('parent.billing.free', { n: data.settings.freeLevels })}</Notice>
           ) : (
             <Notice tone="success">{t('parent.billing.allOpen')}</Notice>
+          )}
+          {group && (
+            <Notice tone="info">
+              <div className="pa-welcome">
+                <span>{t('parent.billing.group')}</span>
+                <a
+                  className="ui-btn ui-btn-secondary"
+                  href={group}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {t('parent.billing.groupJoin')}
+                </a>
+              </div>
+            </Notice>
           )}
 
           <Card title={t('parent.billing.mine')}>
