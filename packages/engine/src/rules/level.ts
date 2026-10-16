@@ -23,3 +23,6 @@ export function levelStatus(i: LevelStatusInput): LevelStatus {
   if (!i.isFree && !i.hasPremium) return 'premium';
   return i.passed ? 'passed' : 'open';
 }
+
+/** Level gratis di tiap topik: level 1 dan 2. Level berikutnya khusus Premium. */
+export const FREE_LEVELS = 2;

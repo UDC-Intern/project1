@@ -97,36 +97,51 @@ describe('mock katalog', () => {
     ]);
     expect(h.continue).toBeNull();
     const b = await book('matematika-kelas-1');
-    expect(b.topics.slice(0, 4).map((t) => t.code)).toEqual(['A', 'B', 'C', 'D']);
+    expect(b.topics[0]!.code).toBe('A');
     expect(b.topics.length).toBe(10);
     expect((await errorOf(book('tidak-ada'))).status).toBe(404);
   });
 
-  it('topik A: level 1 terbuka, level 2 dan 3 terkunci sampai level sebelumnya lulus', async () => {
+  it('topik A: level 1 terbuka, level berikutnya terkunci sampai level sebelumnya lulus', async () => {
     asAyu();
     const t = await topic('matematika-kelas-1:A');
-    expect(t.levels.map((l) => l.status)).toEqual(['open', 'locked', 'locked']);
+    expect(t.levels.map((l) => l.status)).toEqual(['open', 'locked', 'locked', 'locked']);
   });
 
-  it('setelah level 1 lulus, level 2 menjadi Premium tanpa langganan, dan terbuka dengan langganan', async () => {
+  it('level 1 dan 2 gratis; setelah level 2 lulus, level 3 menjadi Premium, dan terbuka dengan langganan', async () => {
     asAyu();
     const db = readDb();
     db.passedLevels[AYU] = ['matematika-kelas-1:A:1'];
     writeDb(db);
     expect((await topic('matematika-kelas-1:A')).levels.map((l) => l.status)).toEqual([
       'passed',
+      'open',
+      'locked',
+      'locked',
+    ]);
+    db.passedLevels[AYU] = ['matematika-kelas-1:A:1', 'matematika-kelas-1:A:2'];
+    writeDb(db);
+    expect((await topic('matematika-kelas-1:A')).levels.map((l) => l.status)).toEqual([
+      'passed',
+      'passed',
       'premium',
       'locked',
     ]);
     db.premiumUntil[AYU] = new Date(Date.now() + 86_400_000).toISOString();
     writeDb(db);
-    expect((await topic('matematika-kelas-1:A')).levels[1]!.status).toBe('open');
+    expect((await topic('matematika-kelas-1:A')).levels[2]!.status).toBe('open');
   });
 
-  it('topik B sampai D tampil segera hadir', async () => {
+  it('semua topik langsung terbuka: level 1 tiap topik bisa dimainkan tanpa menyelesaikan topik lain', async () => {
     asAyu();
-    for (const id of ['matematika-kelas-1:B', 'matematika-kelas-1:D', 'sains-kelas-1:C']) {
-      expect((await topic(id)).levels.every((l) => l.status === 'soon')).toBe(true);
+    for (const slug of ['matematika-kelas-1', 'matematika-kelas-3', 'sains-kelas-1']) {
+      const b = await book(slug);
+      expect(b.topics.length).toBe(10);
+      for (const t of b.topics) {
+        expect(t.levels).toHaveLength(slug === 'sains-kelas-1' && t.code === 'A' ? 3 : 4);
+        expect(t.levels[0]!.status).toBe('open');
+        expect(t.levels.some((l) => l.status === 'soon')).toBe(false);
+      }
     }
   });
 });
@@ -182,7 +197,7 @@ describe('halaman anak', () => {
     expect(screen.getByRole('button', { name: 'Dengarkan soal' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Mulai level 1' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Level 1: Membilang/ })).toBeInTheDocument();
-    expect(screen.getAllByText('Selesaikan level sebelumnya dulu')).toHaveLength(2);
+    expect(screen.getAllByText('Selesaikan level sebelumnya dulu')).toHaveLength(3);
   });
 
   it('beranda menampilkan Peta Belajar dengan pilihan Kelas 1 sampai 4', async () => {

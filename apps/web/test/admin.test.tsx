@@ -93,13 +93,13 @@ describe('mock admin: konten', () => {
     expect((await errorOf(updateTopic('tidak:ada', { title: 'x' }))).status).toBe(404);
   });
 
-  it('level 2 menjadi gratis membuatnya terbuka tanpa Premium setelah level 1 lulus', async () => {
-    await updateLevel('matematika-kelas-1:A:2', { isFree: true });
+  it('level 3 menjadi gratis membuatnya terbuka tanpa Premium setelah level 2 lulus', async () => {
+    await updateLevel('matematika-kelas-1:A:3', { isFree: true });
     const db = readDb();
-    db.passedLevels[AYU] = ['matematika-kelas-1:A:1'];
+    db.passedLevels[AYU] = ['matematika-kelas-1:A:1', 'matematika-kelas-1:A:2'];
     writeDb(db);
     asAyu();
-    expect((await topic('matematika-kelas-1:A')).levels[1]!.status).toBe('open');
+    expect((await topic('matematika-kelas-1:A')).levels[2]!.status).toBe('open');
     asAdmin();
     expect((await errorOf(updateLevel('matematika-kelas-1:A:1', { isFree: false }))).status).toBe(
       400,
@@ -125,13 +125,12 @@ describe('mock admin: pratinjau dan asisten', () => {
     expect(a.questions[0]).toHaveProperty('explanation');
   });
 
-  it('level tanpa generator ditolak dan level tidak dikenal 404', async () => {
-    expect((await errorOf(preview('matematika-kelas-1:B:1', 1))).status).toBe(409);
+  it('level tidak dikenal 404', async () => {
     expect((await errorOf(preview('tidak:ada:1', 1))).status).toBe(404);
   });
 
   it('asisten AI hanya mengembalikan draf teks dan mencatat permintaan', async () => {
-    const res = await aiAssist('sains-kelas-1:B', 'lesson');
+    const res = await aiAssist('sains-kelas-1:SB', 'lesson');
     expect(res.draft.length).toBeGreaterThan(20);
     expect(readDb().aiJobs).toHaveLength(1);
     expect(JSON.stringify(BOOKS)).not.toContain(res.draft);
@@ -139,13 +138,13 @@ describe('mock admin: pratinjau dan asisten', () => {
 });
 
 describe('mock admin: Premium dan laporan', () => {
-  it('mengaktifkan Premium membuka level 2 dan mengubah status paket orang tua', async () => {
+  it('mengaktifkan Premium membuka level 3 dan mengubah status paket orang tua', async () => {
     const db = readDb();
-    db.passedLevels[AYU] = ['matematika-kelas-1:A:1'];
+    db.passedLevels[AYU] = ['matematika-kelas-1:A:1', 'matematika-kelas-1:A:2'];
     writeDb(db);
 
     asAyu();
-    expect((await errorOf(startRound('matematika-kelas-1:A:2'))).body.code).toBe(
+    expect((await errorOf(startRound('matematika-kelas-1:A:3'))).body.code).toBe(
       'PREMIUM_REQUIRED',
     );
 
@@ -156,14 +155,14 @@ describe('mock admin: Premium dan laporan', () => {
     await setPremium(AYU, new Date(Date.now() + 30 * 86_400_000).toISOString());
 
     asAyu();
-    expect((await startRound('matematika-kelas-1:A:2')).questions).toHaveLength(10);
+    expect((await startRound('matematika-kelas-1:A:3')).questions).toHaveLength(10);
     asParent();
     expect((await plan()).children.find((c) => c.id === AYU)?.plan).toBe('premium');
 
     asAdmin();
     await revokePremium(AYU);
     asAyu();
-    expect((await errorOf(startRound('matematika-kelas-1:A:2'))).body.code).toBe(
+    expect((await errorOf(startRound('matematika-kelas-1:A:3'))).body.code).toBe(
       'PREMIUM_REQUIRED',
     );
   });

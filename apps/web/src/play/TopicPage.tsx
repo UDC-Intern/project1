@@ -13,6 +13,7 @@ import { useAsync } from '../hooks/useAsync';
 import { useT } from '../i18n';
 import { ErrorState, LoadingState } from '../ui/states';
 import { AutoSpeak } from './AutoSpeak';
+import { PremiumNotice } from './PremiumNotice';
 
 type Level = TopicDetail['levels'][number];
 type Example = NonNullable<TopicDetail['example']>;
@@ -213,6 +214,8 @@ export function TopicPage() {
           ))}
         </ol>
       </section>
+
+      {!open && data.levels.some((l) => l.status === 'premium') && <PremiumNotice />}
 
       <div className="topic-cta">
         {open ? (

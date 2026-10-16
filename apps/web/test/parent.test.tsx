@@ -89,7 +89,7 @@ describe('mock anak dan laporan', () => {
 
     const round = await startRound('matematika-kelas-1:A:1');
     const key = generateRound(
-      { generator: 'count', generatorParams: { max: 20 } },
+      { generator: 'count', generatorParams: { max: 10 } },
       seedFrom(round.roundId),
     );
     for (let i = 0; i < 10; i++)

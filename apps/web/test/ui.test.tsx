@@ -134,8 +134,8 @@ describe('contoh soal di halaman topik', () => {
     );
     await screen.findAllByText('Bilangan sampai 100');
     expect(container.querySelector('ol.level-path')).not.toBeNull();
-    expect(container.querySelectorAll('.level-card')).toHaveLength(3);
-    expect(container.querySelectorAll('.level-card.is-locked')).toHaveLength(2);
+    expect(container.querySelectorAll('.level-card')).toHaveLength(4);
+    expect(container.querySelectorAll('.level-card.is-locked')).toHaveLength(3);
     expect(container.querySelector('.level-card.is-next')).not.toBeNull();
   });
 });

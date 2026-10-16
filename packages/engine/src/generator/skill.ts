@@ -1,5 +1,17 @@
 import type { Rng } from '../rng.js';
 import { evalBool, evalNumber, ExprError, type Vars } from './expr-eval.js';
+import {
+  factsQuestion,
+  factsSupported,
+  manualQuestion,
+  manualSupported,
+  Reject,
+  reject,
+  soften,
+  type FactsParams,
+  type ManualItem,
+  type PartLike,
+} from './skill-parts.js';
 import type { Family, GeneratedQuestion } from './types.js';
 
 /**
@@ -8,7 +20,10 @@ import type { Family, GeneratedQuestion } from './types.js';
  * Seed yang sama memberi soal yang sama, jadi penilaian dapat membuat ulang soal tanpa menyimpan kunci.
  */
 
-export type SkillSpec = { family: 'expr' | 'mix'; params: Record<string, unknown> };
+export type SkillSpec = {
+  family: 'expr' | 'manual' | 'facts' | 'mix';
+  params: Record<string, unknown>;
+};
 
 type VarSpec = [number, number] | { values: number[] } | { range: [number, number]; step: number };
 type Distractor = string | { expr: string; tag?: string } | { num: string; den: string };
@@ -32,11 +47,6 @@ type ExprParams = {
   explain: string;
   labels?: Record<string, string>;
   labelSay?: Record<string, string>;
-};
-
-class Reject extends Error {}
-const reject = (why: string): never => {
-  throw new Reject(why);
 };
 
 const ROUND = 1e6;
@@ -90,45 +100,38 @@ export function numberWord(n: number): string {
   return `${numberWord(m)} juta${rest ? ` ${numberWord(rest)}` : ''}`;
 }
 
-/** Kata yang dihindari untuk anak diganti: "salah satu" menjadi "satu di antara", "salah" menjadi "keliru". */
-const soften = (text: string) =>
-  text
-    .replace(
-      /\bSalah satu(nya)?/g,
-      (_m, n: string | undefined) => `Satu di antara${n ? 'nya' : ''}`,
-    )
-    .replace(
-      /\bsalah satu(nya)?/g,
-      (_m, n: string | undefined) => `satu di antara${n ? 'nya' : ''}`,
-    )
-    .replace(/\bSalah\b/g, 'Keliru')
-    .replace(/\bsalah\b/g, 'keliru')
-    .replace(/\bGagal\b/g, 'Belum berhasil')
-    .replace(/\bgagal\b/g, 'belum berhasil');
-
 const TEMPLATE_RE = /\{(=[^}]+|w:[a-zA-Z_][a-zA-Z0-9_]*|[a-zA-Z_][a-zA-Z0-9_]*)\}/g;
 
 /** Jenis gambar pendukung yang bisa ditampilkan sebagai teks. */
 const TEXT_STIMULI = new Set(['text', 'equation']);
 
-/** Apakah seluruh gambar pendukung spesifikasi ini bisa ditampilkan? Dipakai saat mengimpor konten. */
+/** Apakah bagian soal ini bisa dibuat dan ditampilkan sebagai teks? Dipakai saat mengimpor konten. */
+export function partSupported(p: PartLike): boolean {
+  if (p.family === 'expr') {
+    const e = p.params as unknown as ExprParams;
+    return (
+      (e.stimulus ?? []).every(
+        (x) =>
+          typeof x === 'object' &&
+          x !== null &&
+          TEXT_STIMULI.has((x as { kind?: string }).kind ?? ''),
+      ) &&
+      // Isian pecahan atau desimal belum bisa diketik dengan papan angka.
+      !(e.mode === 'input' && (e.format ?? 'number') !== 'number')
+    );
+  }
+  if (p.family === 'manual') return manualSupported(p.params);
+  if (p.family === 'facts') return factsSupported(p.params);
+  return false;
+}
+
+/** Apakah seluruh spesifikasi ini bisa ditampilkan? */
 export function stimuliSupported(spec: SkillSpec): boolean {
   const parts =
     spec.family === 'mix'
-      ? ((spec.params.parts as { family: string; params: ExprParams }[] | undefined) ?? [])
-      : [{ family: spec.family, params: spec.params as ExprParams }];
-  return parts.every(
-    (p) =>
-      p.family === 'expr' &&
-      (p.params.stimulus ?? []).every(
-        (s) =>
-          typeof s === 'object' &&
-          s !== null &&
-          TEXT_STIMULI.has((s as { kind?: string }).kind ?? ''),
-      ) &&
-      // Isian pecahan atau desimal belum bisa diketik dengan papan angka.
-      !(p.params.mode === 'input' && (p.params.format ?? 'number') !== 'number'),
-  );
+      ? ((spec.params.parts as PartLike[] | undefined) ?? [])
+      : [{ family: spec.family, params: spec.params }];
+  return parts.length > 0 && parts.every(partSupported);
 }
 
 function orderDerived(derived: Record<string, string>, vars: Record<string, number>): void {
@@ -308,6 +311,14 @@ function exprQuestion(p: ExprParams, rng: Rng): GeneratedQuestion {
   };
 }
 
+function makePart(part: PartLike, rng: Rng): GeneratedQuestion {
+  if (part.family === 'expr') return exprQuestion(part.params as unknown as ExprParams, rng);
+  if (part.family === 'manual')
+    return manualQuestion(part.params as unknown as { items: ManualItem[] }, rng);
+  if (part.family === 'facts') return factsQuestion(part.params as unknown as FactsParams, rng);
+  return reject('bagian belum didukung');
+}
+
 export const skill: Family = (rng, _band, params) => {
   const spec = params as unknown as SkillSpec;
   for (let attempt = 0; attempt < 100; attempt++) {
@@ -321,10 +332,9 @@ export const skill: Family = (rng, _band, params) => {
         const total = parts.reduce((a, x) => a + (x.weight ?? 1), 0);
         let pickAt = (rng.int(0, 999_999) / 1_000_000) * total;
         const part = parts.find((x) => (pickAt -= x.weight ?? 1) < 0) ?? parts[parts.length - 1]!;
-        if (part.family !== 'expr') reject('bagian belum didukung');
-        return exprQuestion(part.params, rng);
+        return makePart(part, rng);
       }
-      return exprQuestion(spec.params as unknown as ExprParams, rng);
+      return makePart(spec, rng);
     } catch (err) {
       if (!(err instanceof Reject) && !(err instanceof ExprError)) throw err;
     }
