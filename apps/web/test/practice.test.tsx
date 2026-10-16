@@ -6,6 +6,7 @@ import { ApiError } from '../src/api/client';
 import { profile, topic } from '../src/api/catalog';
 import { leaderboard } from '../src/api/leaderboard';
 import { readDb, resetMockDb, writeDb } from '../src/api/mock/db';
+import { installAudioUnlock } from '../src/audio/speech';
 import { answer, finish, result, startRound } from '../src/api/practice';
 import { useSession } from '../src/auth/store';
 import { RoundPage } from '../src/play/RoundPage';
@@ -171,7 +172,30 @@ describe('mock peringkat dan profil', () => {
   });
 });
 
+const said: { text: string }[] = [];
+
 describe('halaman ronde', () => {
+  beforeEach(() => {
+    said.length = 0;
+    class Utterance {
+      lang = '';
+      rate = 1;
+      pitch = 1;
+      onend: (() => void) | null = null;
+      constructor(public text: string) {}
+    }
+    Object.defineProperty(window, 'SpeechSynthesisUtterance', {
+      value: Utterance,
+      configurable: true,
+    });
+    Object.defineProperty(window, 'speechSynthesis', {
+      value: { cancel: () => undefined, speak: (u: { text: string }) => said.push(u) },
+      configurable: true,
+    });
+    installAudioUnlock();
+    window.dispatchEvent(new Event('pointerdown'));
+  });
+
   it('menampilkan soal, menerima jawaban, dan memberi umpan balik tanpa kata salah', async () => {
     render(
       <MemoryRouter initialEntries={[`/play/latihan/${LEVEL1}`]}>
@@ -184,11 +208,15 @@ describe('halaman ronde', () => {
     const first = (await screen.findAllByRole('button')).filter((b) =>
       b.className.includes('choice'),
     )[0]!;
+    // Mengetuk pilihan langsung menjawab (tanpa tombol periksa) dan suara koreksi diputar saat itu juga.
+    expect(screen.queryByRole('button', { name: 'Periksa' })).toBeNull();
     fireEvent.click(first);
-    fireEvent.click(screen.getByRole('button', { name: 'Periksa' }));
     const status = await screen.findByRole('status');
     await waitFor(() => expect(status.textContent).toMatch(/Tepat|Belum tepat/));
     expect(status.textContent?.toLowerCase()).not.toContain('salah');
     expect(screen.getByRole('button', { name: 'Lanjut' })).toBeInTheDocument();
+    const spoken = said.map((u) => u.text);
+    expect(spoken.some((x) => /Tepat|Belum tepat/.test(x))).toBe(true);
+    expect(spoken.some((x) => x.length > 0 && !/salah/i.test(x))).toBe(true);
   });
 });

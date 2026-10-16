@@ -7,7 +7,10 @@ import { book, home, topic } from '../src/api/catalog';
 import { readDb, resetMockDb, writeDb } from '../src/api/mock/db';
 import { useSession } from '../src/auth/store';
 import { ChildLogin } from '../src/play/ChildLogin';
+import { installAudioUnlock } from '../src/audio/speech';
 import { PlayHome } from '../src/play/PlayHome';
+import { ProfilePage } from '../src/play/ProfilePage';
+import { TapVoice } from '../src/play/TapVoice';
 import { TopicPage } from '../src/play/TopicPage';
 
 const AYU = 'c-ayu';
@@ -95,7 +98,7 @@ describe('mock katalog', () => {
     expect(h.continue).toBeNull();
     const b = await book('matematika-kelas-1');
     expect(b.topics.slice(0, 4).map((t) => t.code)).toEqual(['A', 'B', 'C', 'D']);
-    expect(b.topics.length).toBeGreaterThan(30);
+    expect(b.topics.length).toBe(10);
     expect((await errorOf(book('tidak-ada'))).status).toBe(404);
   });
 
@@ -206,5 +209,43 @@ describe('halaman anak', () => {
       await screen.findByRole('button', { name: /Nilai tempat sampai 100.000/ }),
     ).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Mulai belajar' })).toBeInTheDocument();
+  });
+
+  it('profil: tanpa Hias Momo, pilihan warna tampil, dan ketukan bersuara', async () => {
+    const said: string[] = [];
+    class Utterance {
+      lang = '';
+      rate = 1;
+      pitch = 1;
+      onend: (() => void) | null = null;
+      constructor(public text: string) {}
+    }
+    Object.defineProperty(window, 'SpeechSynthesisUtterance', {
+      value: Utterance,
+      configurable: true,
+    });
+    Object.defineProperty(window, 'speechSynthesis', {
+      value: { cancel: () => undefined, speak: (u: { text: string }) => said.push(u.text) },
+      configurable: true,
+    });
+    installAudioUnlock();
+    window.dispatchEvent(new Event('pointerdown'));
+    useSession.setState({ session: { token: 'mock-child:' + AYU, role: 'child', name: 'Ayu' } });
+    render(
+      <MemoryRouter initialEntries={['/play/profil']}>
+        <TapVoice />
+        <Routes>
+          <Route path="/play/profil" element={<ProfilePage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    expect(await screen.findByRole('heading', { name: 'Ayu' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Hias Momo' })).toBeNull();
+    // Halaman langsung membacakan ringkasan profil.
+    await waitFor(() => expect(said.some((x) => x.startsWith('Ayu.'))).toBe(true));
+    fireEvent.click(screen.getByRole('button', { name: 'Biru' }));
+    expect(said).toContain('Biru');
+    fireEvent.click(screen.getByText('Total skor').closest('[role="button"]')!);
+    expect(said.some((x) => /Total skor/.test(x) && x !== said[0])).toBe(true);
   });
 });

@@ -29,6 +29,10 @@ const subjectIcon = (subject: string): FeatureIcon => (subject === 'science' ? '
 const topicCount = (b: (typeof BASE_BOOKS)[number]) => b.topics.length;
 const levelCount = (b: (typeof BASE_BOOKS)[number]) =>
   b.topics.reduce((n, t) => n + t.levels.length, 0);
+const bookGrade = (grade: string) => {
+  const m = grade.match(/^sd(\d+)$/);
+  return m ? `Kelas ${m[1]}` : grade === 'kelas-1' ? 'Kelas 1' : grade;
+};
 
 function AboutNameSection() {
   const t = useT('site');
@@ -332,8 +336,8 @@ export function Landing() {
                 <div className="book-spine" aria-hidden="true" />
                 <Icon name={subjectIcon(b.subject)} size={48} />
                 <h3>{b.title}</h3>
-                <p className="book-age">{t('books.age')}</p>
-                <p>{b.topics.map((topic) => topic.title).join(', ')}</p>
+                <p className="book-age">{bookGrade(b.grade)}</p>
+                <p className="book-desc">{b.topics.map((topic) => topic.title).join(', ')}</p>
                 <span className="book-levels">
                   {t('books.meta', { topics: topicCount(b), n: levelCount(b) })}
                 </span>

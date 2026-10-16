@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { topic as loadTopic } from '../api/catalog';
 import { ApiError } from '../api/client';
 import { answer as sendAnswer, finish, startRound } from '../api/practice';
+import { speak, stopSpeaking } from '../audio/speech';
 import { AnswerOptions } from '../components/AnswerOptions';
 import { CountObjects } from '../components/CountObjects';
 import { BackIcon, CheckIcon } from '../components/Icons';
@@ -16,12 +17,64 @@ import { useAsync } from '../hooks/useAsync';
 import { useT } from '../i18n';
 import { ErrorState, LoadingState } from '../ui/states';
 
-type Feedback = {
+type FeedbackData = {
   isCorrect: boolean;
   hint: string | null;
   correctAnswer: string | null;
   chosen: string;
 };
+
+/**
+ * Komponen feedback: footer tetap di bawah.
+ * Mengatur --feedback-h dan auto-scroll agar jawaban tidak tertutup.
+ */
+function FeedbackPanel({
+  feedback,
+  isLast,
+  busy,
+  onNext,
+}: {
+  feedback: FeedbackData;
+  isLast: boolean;
+  busy: boolean;
+  onNext: () => void;
+}) {
+  const t = useT('play');
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Pastikan umpan balik terlihat tanpa menimpa pilihan jawaban. Suaranya sudah diputar saat jawaban dinilai.
+  useEffect(() => {
+    if (typeof ref.current?.scrollIntoView === 'function') {
+      ref.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [feedback]);
+
+  return (
+    <div
+      ref={ref}
+      className={`feedback ${feedback.isCorrect ? 'is-right' : 'is-wrong'}`}
+      role="status"
+    >
+      <Momo mood={feedback.isCorrect ? 'happy' : 'curious'} size={72} />
+      <div className="feedback-body">
+        <div className="kid-say">
+          <p>{feedback.isCorrect ? t('feedback.correct') : t('feedback.retry')}</p>
+        </div>
+        {feedback.hint && (
+          <div className="feedback-show">{t('round.hint', { hint: feedback.hint })}</div>
+        )}
+        {feedback.correctAnswer && (
+          <div className="feedback-show">
+            {t('round.answer', { answer: feedback.correctAnswer })}
+          </div>
+        )}
+      </div>
+      <button type="button" className="kid-btn next-btn" disabled={busy} onClick={onNext} autoFocus>
+        {isLast ? t('round.finish') : t('next')}
+      </button>
+    </div>
+  );
+}
 
 export function RoundPage() {
   const t = useT('play');
@@ -37,7 +90,7 @@ export function RoundPage() {
   const [error, setError] = useState<string | null>(null);
   const [index, setIndex] = useState(0);
   const [results, setResults] = useState<boolean[]>([]);
-  const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const [feedback, setFeedback] = useState<FeedbackData | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [value, setValue] = useState('');
   const [busy, setBusy] = useState(false);
@@ -50,6 +103,15 @@ export function RoundPage() {
       setError(err instanceof ApiError ? err.message : t('error.generic')),
     );
   }, [levelId, t]);
+
+  const currentPrompt = round?.questions[index]?.prompt;
+  // Suara soal otomatis diputar saat soal baru tampil (auto-play D-047 / D-059)
+  useEffect(() => {
+    if (currentPrompt) {
+      speak(currentPrompt);
+      return () => stopSpeaking();
+    }
+  }, [index, currentPrompt]);
 
   if (error)
     return (
@@ -75,12 +137,24 @@ export function RoundPage() {
   const isNumber = question.type === 'number';
   const draft = isNumber ? value : (selected ?? '');
 
-  async function check() {
-    if (busy || feedback || draft === '') return;
+  async function check(given: string = draft) {
+    if (busy || feedback || given === '') return;
     setBusy(true);
     try {
-      const res = await sendAnswer(round!.roundId, { questionIndex: index, answer: draft });
-      setFeedback({ ...res, chosen: draft });
+      const res = await sendAnswer(round!.roundId, { questionIndex: index, answer: given });
+      // Suara koreksi langsung, tanpa jeda: benar dipuji, belum tepat disertai petunjuk dan jawabannya.
+      speak(
+        res.isCorrect
+          ? t('feedback.correct')
+          : [
+              t('feedback.retry'),
+              res.hint,
+              res.correctAnswer && t('round.answer', { answer: res.correctAnswer }),
+            ]
+              .filter(Boolean)
+              .join('. '),
+      );
+      setFeedback({ ...res, chosen: given });
       setResults((r) => [...r, res.isCorrect]);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : t('error.generic'));
@@ -137,19 +211,24 @@ export function RoundPage() {
         </div>
         {question.visual && <CountObjects visual={question.visual} />}
 
-        {isNumber ? (
-          <Keypad value={value} onChange={setValue} disabled={busy || feedback !== null} />
-        ) : (
-          <AnswerOptions
-            options={question.options ?? []}
-            selected={selected}
-            onSelect={setSelected}
-            disabled={busy || feedback !== null}
-            result={feedback}
-          />
-        )}
+        <div className="interaction">
+          {isNumber ? (
+            <Keypad value={value} onChange={setValue} disabled={busy || feedback !== null} />
+          ) : (
+            <AnswerOptions
+              options={question.options ?? []}
+              selected={selected}
+              onSelect={(v) => {
+                setSelected(v);
+                void check(v);
+              }}
+              disabled={busy || feedback !== null}
+              result={feedback}
+            />
+          )}
+        </div>
 
-        {!feedback && (
+        {!feedback && isNumber && (
           <button
             type="button"
             className="check-btn"
@@ -160,35 +239,17 @@ export function RoundPage() {
             <CheckIcon size={44} />
           </button>
         )}
-      </div>
 
-      {feedback && (
-        <div className={`feedback ${feedback.isCorrect ? 'is-right' : 'is-wrong'}`} role="status">
-          <Momo mood={feedback.isCorrect ? 'happy' : 'encourage'} size={72} />
-          <div className="feedback-body">
-            <div className="kid-say">
-              <p>{feedback.isCorrect ? t('feedback.correct') : t('feedback.retry')}</p>
-            </div>
-            {feedback.hint && (
-              <div className="feedback-show">{t('round.hint', { hint: feedback.hint })}</div>
-            )}
-            {feedback.correctAnswer && (
-              <div className="feedback-show">
-                {t('round.answer', { answer: feedback.correctAnswer })}
-              </div>
-            )}
-          </div>
-          <button
-            type="button"
-            className="kid-btn next-btn"
-            disabled={busy}
-            onClick={() => void next()}
-            autoFocus
-          >
-            {isLast ? t('round.finish') : t('next')}
-          </button>
-        </div>
-      )}
+        {feedback && (
+          <FeedbackPanel
+            key={index}
+            feedback={feedback}
+            isLast={isLast}
+            busy={busy}
+            onNext={() => void next()}
+          />
+        )}
+      </div>
     </main>
   );
 }

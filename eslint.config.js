@@ -9,7 +9,7 @@ export default tseslint.config(
       '**/dist/**',
       '**/coverage/**',
       'apps/api/drizzle/**',
-      
+
       '_ref_src/**',
       '_ref_content/**',
       '_ref_docs/**',

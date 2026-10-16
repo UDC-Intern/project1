@@ -44,6 +44,6 @@ describe('generator skill (materi kelas 1 sampai 4)', () => {
         }
       }
     }
-    expect(levels).toBeGreaterThan(900);
+    expect(levels).toBeGreaterThan(250);
   }, 180_000);
 });

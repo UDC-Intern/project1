@@ -1,5 +1,5 @@
 /**
- * Pilihan jawaban. Anak memilih dulu, lalu menekan tombol periksa. Setelah dinilai: tepat hijau,
+ * Pilihan jawaban. Mengetuk pilihan langsung menjawab, tanpa tombol periksa. Setelah dinilai: tepat hijau,
  * belum tepat kuning, dan jawaban yang benar ikut ditandai hijau. Tidak pernah merah.
  */
 export function AnswerOptions({

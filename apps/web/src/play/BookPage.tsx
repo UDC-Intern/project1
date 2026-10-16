@@ -5,6 +5,7 @@ import { PageHead } from '../components/PageHead';
 import { useAsync } from '../hooks/useAsync';
 import { ErrorState, LoadingState } from '../ui/states';
 import { TopicGrid } from './TopicGrid';
+import { AutoSpeak } from './AutoSpeak';
 
 export function BookPage() {
   const { slug = '' } = useParams();
@@ -16,6 +17,7 @@ export function BookPage() {
 
   return (
     <main className="library" data-mapel={data.book.subject === 'science' ? 'sains' : 'matematika'}>
+      <AutoSpeak text={data.book.title} />
       <PageHead title={data.book.title} />
       <TopicGrid topics={data.topics} />
     </main>

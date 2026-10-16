@@ -7,6 +7,7 @@ import { useAsync } from '../hooks/useAsync';
 import { useT } from '../i18n';
 import { formatDate } from '../lib/format';
 import { ErrorState, LoadingState } from '../ui/states';
+import { AutoSpeak } from './AutoSpeak';
 
 /** Sertifikat Juara Digital. Dicetak atau disimpan sebagai PDF lewat dialog cetak browser. */
 export function CertificatePage() {
@@ -28,6 +29,7 @@ export function CertificatePage() {
 
   return (
     <main className="library">
+      <AutoSpeak text={`${t('cert.title')}. ${data.childName}`} />
       <PageHead title={t('cert.title')} back="/play/profil" />
       <section className="uk-certificate" aria-label={t('cert.title')}>
         <Momo mood="happy" size={110} />

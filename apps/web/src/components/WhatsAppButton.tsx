@@ -15,10 +15,13 @@ export function WhatsAppButton() {
     pathname === '/admin' ||
     pathname.startsWith('/admin/');
   if (hidden || !BILLING.adminWhatsapp) return null;
+  const msg = encodeURIComponent(
+    'Halo Admin UdaKids (Ridho Dwi Syahputra), saya ingin bertanya mengenai UdaKids.',
+  );
   return (
     <a
       className="wa-fab"
-      href={`https://wa.me/${BILLING.adminWhatsapp}`}
+      href={`https://wa.me/${BILLING.adminWhatsapp}?text=${msg}`}
       target="_blank"
       rel="noopener noreferrer"
       aria-label={t('common.whatsapp.label')}
