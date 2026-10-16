@@ -17,8 +17,7 @@ import {
 import { parentLogin, staffLogin } from '../src/api/auth';
 import { ApiError } from '../src/api/client';
 import { topic } from '../src/api/catalog';
-import { certificate } from '../src/api/certificate';
-import { readDb, resetMockDb, writeDb, BOOKS, levelId } from '../src/api/mock/db';
+import { readDb, resetMockDb, writeDb, BOOKS } from '../src/api/mock/db';
 import { plan } from '../src/api/parent';
 import { startRound } from '../src/api/practice';
 import { useSession } from '../src/auth/store';
@@ -175,27 +174,6 @@ describe('mock admin: Premium dan laporan', () => {
     expect(rep.topics.length).toBeLessThanOrEqual(8);
     expect((await levelStats()).levels).toEqual([]);
     expect((await overview()).hardestTopics).toEqual([]);
-  });
-});
-
-describe('mock sertifikat', () => {
-  const allLevels = () =>
-    BOOKS[0]!.topics.flatMap((t) => t.levels.map((l) => levelId(BOOKS[0]!.slug, t.code, l.number)));
-
-  it('belum selesai 404, selesai tanpa Premium 403, dengan Premium terbit', async () => {
-    asAyu();
-    expect((await errorOf(certificate('matematika-kelas-1'))).status).toBe(404);
-
-    const db = readDb();
-    db.passedLevels[AYU] = allLevels();
-    writeDb(db);
-    expect((await errorOf(certificate('matematika-kelas-1'))).body.code).toBe('PREMIUM_REQUIRED');
-
-    db.premiumUntil[AYU] = new Date(Date.now() + 86_400_000).toISOString();
-    writeDb(db);
-    const cert = await certificate('matematika-kelas-1');
-    expect(cert).toMatchObject({ childName: 'Ayu', bookTitle: 'Matematika Kelas 1' });
-    expect((await errorOf(certificate('buku-lain'))).status).toBe(404);
   });
 });
 

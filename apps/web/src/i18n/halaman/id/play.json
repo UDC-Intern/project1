@@ -53,6 +53,8 @@
   "peta.legendListen": "Dengarkan arti tanda",
   "peta.legendSay": "Ini arti tanda di peta. Sekarang: topik yang kamu pelajari sekarang, ada Momo kamu di sana. Berikutnya: topik sesudahnya. Boleh lompat: topik yang sudah terbuka, boleh kamu pilih langsung. Centang hijau: topik yang sudah lulus. Gembok: topik yang masih terkunci.",
   "peta.summary": "{done} dari {total} topik lulus",
+  "peta.cert": "Sertifikat: {passed} dari {total} level lulus",
+  "peta.certDone": "Lihat sertifikatku",
   "peta.babDone": "Bab selesai",
   "peta.babDoneSay": "Bab ini sudah selesai. Hebat, kamu rajin berlatih!",
   "peta.babShow": "Lihat topik",

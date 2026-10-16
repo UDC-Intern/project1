@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { CERTIFICATE_DESIGNS } from '../rules/certificate.js';
 import {
   emailSchema,
   levelStatusSchema,
@@ -138,6 +139,11 @@ export const roundResultSchema = z.object({
     stageBefore: stageSchema,
     stageAfter: stageSchema,
   }),
+  /** Sertifikat yang terbit karena ronde ini menuntaskan buku. */
+  certificate: z
+    .object({ id: z.string(), bookSlug: z.string(), bookTitle: z.string() })
+    .nullable()
+    .optional(),
 });
 export type RoundResult = z.infer<typeof roundResultSchema>;
 
@@ -367,12 +373,100 @@ export const aiAssistBodySchema = z.object({
 export type AiAssistBody = z.infer<typeof aiAssistBodySchema>;
 export const aiAssistResultSchema = z.object({ jobId: z.string(), draft: z.string() });
 
+// ---- Sertifikat Juara Digital ----
+
+export const certificateDesignSchema = z.enum(CERTIFICATE_DESIGNS);
+
+/**
+ * Sertifikat yang sudah terbit. Nama anak dan judul buku disalin saat terbit, sehingga sertifikat tidak berubah bila
+ * profil anak diubah (admin bisa memperbaruinya).
+ */
 export const certificateSchema = z.object({
+  /** Nomor sertifikat, mis. CERT-7KQ2MX */
+  id: z.string(),
+  childId: z.string(),
   childName: z.string(),
+  bookSlug: z.string(),
   bookTitle: z.string(),
+  topics: z.number().int(),
+  levels: z.number().int(),
+  design: certificateDesignSchema,
   issuedAt: z.string(),
+  /** auto: terbit saat level terakhir lulus; claim: diambil anak atau orang tua; admin: diterbitkan admin */
+  source: z.enum(['auto', 'claim', 'admin']),
 });
 export type Certificate = z.infer<typeof certificateSchema>;
+
+export const CERTIFICATE_BOOK_STATUSES = [
+  'issued',
+  'ready',
+  'premium_required',
+  'not_finished',
+] as const;
+
+/** Kemajuan satu buku menuju sertifikat. `ready`: selesai dan Premium aktif, tinggal diambil. */
+export const certificateBookSchema = z.object({
+  bookSlug: z.string(),
+  bookTitle: z.string(),
+  subject: z.enum(['math', 'science']),
+  grade: z.number().int(),
+  topicsTotal: z.number().int(),
+  levelsPassed: z.number().int(),
+  levelsTotal: z.number().int(),
+  status: z.enum(CERTIFICATE_BOOK_STATUSES),
+  /** Desain yang dipakai bila sertifikat buku ini terbit sekarang (untuk contoh lembar). */
+  design: certificateDesignSchema,
+  certificate: certificateSchema.nullable(),
+});
+export type CertificateBook = z.infer<typeof certificateBookSchema>;
+
+/** `GET /certificates` (anak) */
+export const childCertificatesSchema = z.object({
+  hasPremium: z.boolean(),
+  books: z.array(certificateBookSchema),
+});
+export type ChildCertificates = z.infer<typeof childCertificatesSchema>;
+
+/** `GET /parent/certificates` */
+export const parentCertificatesSchema = z.object({
+  children: z.array(
+    z.object({
+      id: z.string(),
+      nickname: z.string(),
+      momoColor: momoColorSchema,
+      hasPremium: z.boolean(),
+      books: z.array(certificateBookSchema),
+    }),
+  ),
+});
+export type ParentCertificates = z.infer<typeof parentCertificatesSchema>;
+
+export const claimCertificateBodySchema = z.object({ childId: z.string(), bookSlug: z.string() });
+export type ClaimCertificateBody = z.infer<typeof claimCertificateBodySchema>;
+
+/** `GET /admin/certificates`: semua yang terbit, kandidat (lulus semua level tetapi belum terbit), desain aktif. */
+export const adminCertificatesSchema = z.object({
+  design: certificateDesignSchema,
+  certificates: z.array(
+    certificateSchema.extend({ parentName: z.string(), parentEmail: z.string() }),
+  ),
+  candidates: z.array(
+    z.object({
+      childId: z.string(),
+      childName: z.string(),
+      parentName: z.string(),
+      bookSlug: z.string(),
+      bookTitle: z.string(),
+      hasPremium: z.boolean(),
+      completedAt: z.string().nullable(),
+    }),
+  ),
+});
+export type AdminCertificates = z.infer<typeof adminCertificatesSchema>;
+export type AdminCertificate = AdminCertificates['certificates'][number];
+export type CertificateCandidate = AdminCertificates['candidates'][number];
+
+export const certificateDesignBodySchema = z.object({ design: certificateDesignSchema });
 
 export const premiumBodySchema = z.object({ until: z.iso.datetime() });
 export type PremiumBody = z.infer<typeof premiumBodySchema>;

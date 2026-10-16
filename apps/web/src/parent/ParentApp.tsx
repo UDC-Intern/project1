@@ -7,6 +7,7 @@ import { t } from '../i18n';
 import { AppShell, ShellIconSvg } from '../ui/AppShell';
 import { ChildReportPage } from './ChildReportPage';
 import { AccountPage } from './AccountPage';
+import { CertificatesPage, CertificateView } from './Certificates';
 import { ChildForm } from './ChildForm';
 import { Dashboard } from './Dashboard';
 import { OrderPage, OrdersPage } from './Orders';
@@ -69,6 +70,7 @@ function ParentLayout({ children }: { children: ReactNode }) {
       nav={[
         { to: '/orang-tua', label: t('parent.nav.home'), icon: 'home', end: true },
         { to: '/orang-tua/anak/baru', label: t('parent.dash.addChild'), icon: 'plus' },
+        { to: '/orang-tua/sertifikat', label: t('parent.nav.certificates'), icon: 'award' },
         { to: '/orang-tua/paket', label: t('parent.nav.packages'), icon: 'tag' },
         {
           to: '/orang-tua/transaksi',
@@ -130,6 +132,8 @@ export function ParentApp() {
       <Route path="anak/:id" element={guarded(<ChildReportPage />)} />
       <Route path="anak/:id/ubah" element={guarded(<ChildForm mode="edit" />)} />
       <Route path="anak/:id/sandi" element={guarded(<ChildForm mode="pin" />)} />
+      <Route path="sertifikat" element={guarded(<CertificatesPage />)} />
+      <Route path="sertifikat/:id" element={guarded(<CertificateView />)} />
       <Route path="paket" element={guarded(<PackagesPage />)} />
       <Route path="transaksi" element={guarded(<OrdersPage />)} />
       <Route path="transaksi/:id" element={guarded(<OrderPage />)} />

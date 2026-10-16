@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 import { speak } from '../../audio/speech';
-import { LockIcon, TrophyIcon } from '../../components/Icons';
+import { LockIcon, MedalIcon, TrophyIcon } from '../../components/Icons';
 import { Momo } from '../../components/Momo';
 import { t } from '../../i18n';
 import { RebungBand } from '../../site/Decor';
@@ -148,6 +149,15 @@ export function PetaBelajar({
   markNodes(shelves.map((s) => infos.get(s.code)!));
   const doneCount = shelves.filter((s) => infos.get(s.code)?.state === 'lulus').length;
   const allDone = shelves.length > 0 && doneCount === shelves.length;
+  const levels = shelves.flatMap((s) => s.skills);
+  const cert = (
+    <CertLink
+      slug={book.slug}
+      passed={levels.filter((k) => statuses[k.id] === 'passed').length}
+      total={levels.length}
+      done={allDone}
+    />
+  );
 
   // Panel awal: topik yang disarankan, atau topik pertama yang belum lulus.
   const fallback =
@@ -198,9 +208,9 @@ export function PetaBelajar({
     <div className={`peta${wide ? ' is-wide' : ''}`}>
       <div className="peta-babs" ref={babsRef}>
         {allDone ? (
-          <AllDone momoColor={momoColor} title={book.title} />
+          <AllDone momoColor={momoColor} title={book.title} cert={cert} />
         ) : (
-          <Summary done={doneCount} total={shelves.length} />
+          <Summary done={doneCount} total={shelves.length} cert={cert} />
         )}
         <section
           className={`peta-bab${complete ? ' is-complete' : ''}`}
@@ -286,7 +296,7 @@ export function PetaBelajar({
 }
 
 /** Ringkasan kemajuan buku (berapa topik lulus + bilah hijau) dan keterangan tanda peta dalam satu kartu. */
-function Summary({ done, total }: { done: number; total: number }) {
+function Summary({ done, total, cert }: { done: number; total: number; cert: ReactNode }) {
   const text = t('play.peta.summary', { done, total });
   return (
     <div className="peta-summary">
@@ -299,13 +309,42 @@ function Summary({ done, total }: { done: number; total: number }) {
         </span>
         <SpeakButton text={text} />
       </div>
+      {cert}
       <Legend />
     </div>
   );
 }
 
+/** Tautan ke Sertifikat Juara Digital buku ini: kemajuan level, atau lihat sertifikat bila semua lulus. */
+function CertLink({
+  slug,
+  passed,
+  total,
+  done,
+}: {
+  slug: string;
+  passed: number;
+  total: number;
+  done: boolean;
+}) {
+  return (
+    <Link className={`peta-cert${done ? ' is-done' : ''}`} to={`/play/sertifikat/${slug}`}>
+      <MedalIcon size={26} />
+      <span>{done ? t('play.peta.certDone') : t('play.peta.cert', { passed, total })}</span>
+    </Link>
+  );
+}
+
 /** Semua topik di buku ini lulus: perayaan dengan Momo bangga, pujian untuk usaha. */
-function AllDone({ momoColor, title }: { momoColor: string; title: string }) {
+function AllDone({
+  momoColor,
+  title,
+  cert,
+}: {
+  momoColor: string;
+  title: string;
+  cert: ReactNode;
+}) {
   const say = `${t('play.peta.allDone')} ${t('play.peta.allDoneBody', { book: title })}`;
   return (
     <div className="peta-alldone" role="status">
@@ -321,6 +360,7 @@ function AllDone({ momoColor, title }: { momoColor: string; title: string }) {
         </span>
         <SpeakButton text={say} />
       </div>
+      {cert}
     </div>
   );
 }

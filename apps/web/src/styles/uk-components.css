@@ -301,3 +301,9 @@ a.uk-card:hover {
 .uk-dialog {
   width: min(440px, 100%);
 }
+.uk-dialog--wide {
+  width: min(920px, 100%);
+  max-height: calc(100vh - 2 * var(--space-4));
+  overflow-y: auto;
+  box-sizing: border-box;
+}

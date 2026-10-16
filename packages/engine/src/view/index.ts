@@ -123,12 +123,15 @@ export type ChildInsights = {
     attempts: number | null;
   } | null;
   books: {
+    slug: string;
     domain: string;
     grade: string;
     title: string;
     percent: number;
     passed: number;
     levels: number;
+    /** Nomor sertifikat buku ini bila sudah terbit. */
+    certificateId: string | null;
   }[];
   recent: {
     skillId: string;

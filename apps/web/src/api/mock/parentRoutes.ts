@@ -1,5 +1,6 @@
 import {
   FOREVER_ISO,
+  FREE_LEVELS,
   PIN_PICTURES,
   type ChildInsights,
   type DayActivity,
@@ -10,7 +11,8 @@ import { ApiError } from '../client';
 import * as account from './account';
 import { parentFromToken } from './accounts';
 import * as billing from './billing';
-import { BOOKS, premiumUntilOf, readDb, topicId, type MockChild, type MockDb } from './db';
+import * as certificates from './certificate';
+import { BOOKS, gradeOf, premiumUntilOf, readDb, topicId, type MockChild, type MockDb } from './db';
 import * as parent from './parent';
 
 /**
@@ -158,12 +160,14 @@ function insightsOf(db: MockDb, child: MockChild, now = Date.now()): ChildInsigh
         0,
       );
       return {
+        slug: b.slug,
         domain: b.subject === 'science' ? 'sains' : 'math',
-        grade: 'sd1',
+        grade: `sd${gradeOf(b.slug)}`,
         title: b.title,
         percent: levels ? Math.round((passed / levels) * 100) : 0,
         passed,
         levels,
+        certificateId: certificates.certificateOf(db, child.id, b.slug)?.id ?? null,
       };
     }),
     recent: rounds.slice(0, 5).map((r) => {
@@ -372,7 +376,7 @@ export async function handle<T>(
           ]
         : [],
       access: { tier: until ? 'premium' : 'free', endsAt: forever ? null : (until ?? null) },
-      settings: { paywall: true, freeLevels: 1, orderExpiryHours: 24 },
+      settings: { paywall: true, freeLevels: FREE_LEVELS, orderExpiryHours: 24 },
     });
   }
 
@@ -403,6 +407,20 @@ export async function handle<T>(
       await billing.order(token, id);
       return send({ dataUrl: readDb().orders[id]?.proofDataUrl ?? null });
     }
+  }
+
+  if (seg[0] === 'parent' && seg[1] === 'certificates') {
+    if (seg.length === 2 && method === 'GET')
+      return send(await certificates.parentCertificates(token));
+    if (seg.length === 2 && method === 'POST')
+      return send(
+        await certificates.parentClaim(token, {
+          childId: String(body?.childId ?? ''),
+          bookSlug: String(body?.bookSlug ?? ''),
+        }),
+      );
+    if (seg.length === 3 && method === 'GET')
+      return send(await certificates.parentCertificate(token, decodeURIComponent(seg[2]!)));
   }
 
   if (seg[0] === 'parent' && seg[1] === 'account') {

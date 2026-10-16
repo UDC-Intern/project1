@@ -157,6 +157,8 @@ export async function deleteChild(token: string | null, childId: string): Promis
   delete db.premiumUntil[child.id];
   delete db.lastLevel[child.id];
   for (const [id, r] of Object.entries(db.rounds)) if (r.childId === child.id) delete db.rounds[id];
+  for (const [id, c] of Object.entries(db.certificates))
+    if (c.childId === child.id) delete db.certificates[id];
   writeDb(db);
 }
 

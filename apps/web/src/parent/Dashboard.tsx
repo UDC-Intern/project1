@@ -245,6 +245,10 @@ export function Dashboard() {
   const [picked, setPicked] = useState<string>();
   const kids = data?.children ?? [];
   const current = kids.find((c) => c.id === picked) ?? kids[0];
+  const certCount = kids.reduce(
+    (n, c) => n + c.insights.books.filter((b) => b.certificateId).length,
+    0,
+  );
   const showWelcome =
     !loading && !error && ((state?.welcome && !state.saved) || (data && kids.length === 0));
 
@@ -342,6 +346,24 @@ export function Dashboard() {
               </Link>
               <Link className="ui-btn ui-btn-ghost" to="/orang-tua/transaksi">
                 {t('parent.nav.orders')}
+              </Link>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="pa-billing-link">
+          <div className="pa-family-inner">
+            <div>
+              <h2 className="pa-family-title">{t('parent.cert.dashTitle')}</h2>
+              <p className="ui-muted">
+                {certCount
+                  ? t('parent.cert.dashHint', { n: certCount })
+                  : t('parent.cert.dashNone')}
+              </p>
+            </div>
+            <div className="ui-row">
+              <Link className="ui-btn ui-btn-secondary" to="/orang-tua/sertifikat">
+                {t('parent.nav.certificates')}
               </Link>
             </div>
           </div>

@@ -13,6 +13,7 @@ import {
 } from '@udakids/engine';
 import { ApiError } from '../client';
 import { childIdFromToken } from './auth';
+import { autoIssue } from './certificate';
 import { levelId, readDb, writeDb, type MockRound } from './db';
 import { findLevel, statusFor, topicIdOf } from './levels';
 
@@ -114,6 +115,7 @@ function resultOf(round: MockRound): RoundResult {
   const db = readDb();
   const r = round.result!;
   const next = found.topic.levels.find((l) => l.number === found.level.number + 1);
+  const cert = round.certificateId ? db.certificates[round.certificateId] : undefined;
   const nextFound = next ? findLevel(levelId(found.bookSlug, found.topic.code, next.number)) : null;
   return {
     roundId: round.id,
@@ -137,6 +139,7 @@ function resultOf(round: MockRound): RoundResult {
       stageBefore: round.stageBefore,
       stageAfter: db.mastery[round.childId]?.[topicIdOf(found)]?.visibleStage ?? 0,
     },
+    certificate: cert ? { id: cert.id, bookSlug: cert.bookSlug, bookTitle: cert.bookTitle } : null,
   };
 }
 
@@ -167,6 +170,8 @@ export async function finish(token: string | null, roundId: string): Promise<Rou
   if (passed) {
     const list = (db.passedLevels[childId] ??= []);
     if (!list.includes(round.levelId)) list.push(round.levelId);
+    // Level terakhir sebuah buku: sertifikat terbit otomatis bila Premium aktif.
+    stored.certificateId = autoIssue(db, childId, findLevel(round.levelId)!.bookSlug)?.id ?? null;
   }
   writeDb(db);
   return resultOf(stored);

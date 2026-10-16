@@ -1,18 +1,23 @@
+import type { ParentCertificates } from '@udakids/engine';
 import { useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { report } from '../api/parent';
+import { useFetch } from '../auth/useApi';
 import { Momo } from '../components/Momo';
 import { Plant } from '../components/Plant';
 import { useAsync } from '../hooks/useAsync';
-import { useT } from '../i18n';
+import { t as tt, useT } from '../i18n';
 import { formatDateTime, formatDuration } from '../lib/format';
 import { ErrorState, LoadingState } from '../ui/states';
+import { CertificateBooks } from './Certificates';
 
 export function ChildReportPage() {
   const t = useT('parent');
   const { id = '' } = useParams();
   const load = useCallback(() => report(id), [id]);
   const { data, error, loading, reload } = useAsync(load);
+  const certs = useFetch<ParentCertificates>('parent', '/parent/certificates');
+  const certChild = certs.data?.children.find((c) => c.id === id);
 
   if (loading) return <LoadingState />;
   if (error || !data) return <ErrorState onRetry={reload} />;
@@ -89,6 +94,13 @@ export function ChildReportPage() {
           </div>
         )}
       </section>
+
+      {certChild && (
+        <section className="uk-stack">
+          <h2>{tt('parent.cert.title')}</h2>
+          <CertificateBooks child={certChild} />
+        </section>
+      )}
 
       <section className="uk-stack">
         <h2>{t('report.suggestions')}</h2>

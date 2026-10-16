@@ -1,7 +1,14 @@
-import type { InsightRange, UpdateLevelBody, UpdateTopicBody } from '@udakids/engine';
+import type {
+  CertificateDesign,
+  ClaimCertificateBody,
+  InsightRange,
+  UpdateLevelBody,
+  UpdateTopicBody,
+} from '@udakids/engine';
 import { useSession } from '../auth/store';
 import * as http from './http/admin';
 import * as mock from './mock/admin';
+import * as certMock from './mock/certificate';
 import * as insightsMock from './mock/insights';
 import { isMocked } from './mode';
 
@@ -30,3 +37,14 @@ export const levelStats = () => (mocked() ? mock.levelStats(token()) : http.leve
 
 export const insights = (range: InsightRange = '7d') =>
   mocked() ? insightsMock.insights(token(), range) : http.insights(range);
+
+export const certificates = () =>
+  mocked() ? certMock.adminCertificates(token()) : http.certificates();
+export const issueCertificate = (body: ClaimCertificateBody) =>
+  mocked() ? certMock.adminIssue(token(), body) : http.issueCertificate(body);
+export const refreshCertificate = (id: string) =>
+  mocked() ? certMock.adminRefresh(token(), id) : http.refreshCertificate(id);
+export const deleteCertificate = (id: string) =>
+  mocked() ? certMock.adminDelete(token(), id) : http.deleteCertificate(id);
+export const setCertificateDesign = (design: CertificateDesign) =>
+  mocked() ? certMock.setDesign(token(), design) : http.setCertificateDesign(design);

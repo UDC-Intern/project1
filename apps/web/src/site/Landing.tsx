@@ -1,5 +1,6 @@
-import { formatRupiah } from '@udakids/engine';
+import { FREE_LEVELS, formatRupiah } from '@udakids/engine';
 import { Link } from 'react-router-dom';
+import { CertificateSheet } from '../components/certificate/CertificateSheet';
 import { Momo } from '../components/Momo';
 import { APP_NAME, CHARACTER_NAME } from '../config/app';
 import { BILLING } from '../content/billing';
@@ -118,13 +119,13 @@ function PricingSection() {
   return (
     <section id="harga" className="site-section pricing" aria-labelledby="harga-title">
       <h2 id="harga-title">{t('price.title')}</h2>
-      <p className="section-lead">{t('price.lead')}</p>
+      <p className="section-lead">{t('price.lead', { free: FREE_LEVELS })}</p>
       <div className="price-grid">
         <article className="price-card is-free">
           <h3>{t('price.freeTitle')}</h3>
           <p className="price-amount">{t('price.freeAmount')}</p>
           <ul>
-            <li>{t('price.free1')}</li>
+            <li>{t('price.free1', { free: FREE_LEVELS })}</li>
             <li>{t('price.free2')}</li>
             <li>{t('price.free3')}</li>
           </ul>
@@ -154,6 +155,7 @@ function PricingSection() {
               <ul>
                 <li>{t('price.allBooks')}</li>
                 <li>{t('price.family')}</li>
+                <li>{t('price.cert')}</li>
               </ul>
               <Link to="/orang-tua/daftar" className="site-btn ghost">
                 {t('price.buy')}
@@ -211,6 +213,31 @@ function NewFeaturesSection() {
             <li>{t('news.kids.point2', { n: MAX_CHILDREN })}</li>
             <li>{t('news.kids.point3')}</li>
           </ul>
+        </article>
+        <article className="news-card news-cert" aria-labelledby="news-cert-title">
+          <div className="news-cert-text">
+            <Icon name="trophy" size={56} />
+            <h3 id="news-cert-title">{t('news.cert.title')}</h3>
+            <p>{t('news.cert.text')}</p>
+            <ul className="news-list">
+              <li>{t('news.cert.point1')}</li>
+              <li>{t('news.cert.point2')}</li>
+              <li>{t('news.cert.point3')}</li>
+            </ul>
+          </div>
+          <div className="news-cert-sheet">
+            <CertificateSheet
+              data={{
+                childName: t('news.cert.sampleName'),
+                bookTitle: BASE_BOOKS[0]!.title,
+                levels: levelCount(BASE_BOOKS[0]!),
+                topics: topicCount(BASE_BOOKS[0]!),
+                design: 'klasik',
+                number: null,
+                issuedAt: null,
+              }}
+            />
+          </div>
         </article>
       </div>
     </section>

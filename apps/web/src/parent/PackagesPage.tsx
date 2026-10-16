@@ -146,6 +146,10 @@ function PackageCard({
         <dd>{scopeText(pkg.scope, pkg.books, title)}</dd>
         <dt>{t('parent.billing.duration')}</dt>
         <dd>{durationText(pkg.durationDays)}</dd>
+        <dt>{t('parent.billing.certificate')}</dt>
+        <dd>
+          <Link to="/orang-tua/sertifikat">{t('parent.billing.certificateValue')}</Link>
+        </dd>
       </dl>
       <div className="pa-price">
         {p.discountActive && (

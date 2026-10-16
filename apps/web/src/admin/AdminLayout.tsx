@@ -23,6 +23,7 @@ export function AdminLayout() {
         { group: t('group.people') },
         { to: '/admin/pengguna', label: t('nav.users'), icon: 'users' },
         { to: '/admin/laporan', label: t('nav.reports'), icon: 'report' },
+        { to: '/admin/sertifikat', label: t('nav.certificates'), icon: 'award' },
         { group: t('nav.group.sales') },
         { to: '/admin/transaksi', label: t('nav.orders'), icon: 'receipt' },
         { to: '/admin/paket', label: t('nav.packages'), icon: 'tag' },

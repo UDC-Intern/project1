@@ -10,7 +10,7 @@ import {
 } from '@udakids/engine';
 import { ApiError } from '../client';
 import { childIdFromToken } from './auth';
-import { BOOKS, levelId, premiumUntilOf, readDb, topicId, writeDb } from './db';
+import { BOOKS, gradeOf, levelId, premiumUntilOf, readDb, topicId, writeDb } from './db';
 import { findLevel } from './levels';
 
 const notFound = () => new ApiError(404, { code: 'NOT_FOUND', message: 'Tidak ketemu.' });
@@ -18,9 +18,6 @@ const notFound = () => new ApiError(404, { code: 'NOT_FOUND', message: 'Tidak ke
 function hasPremium(childId: string): boolean {
   return premiumUntilOf(readDb(), childId) !== null;
 }
-
-/** Kelas dari slug buku, mis. matematika-kelas-3. */
-const gradeOf = (slug: string) => Number(/kelas-(\d+)$/.exec(slug)?.[1] ?? 1);
 
 export async function home(token: string | null): Promise<CatalogHome> {
   const childId = childIdFromToken(token);

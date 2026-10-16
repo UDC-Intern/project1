@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes, useParams } from 'react-router-dom';
 import { AdminAssistantPage } from './admin/AdminAssistantPage';
+import { AdminCertificatesPage } from './admin/AdminCertificatesPage';
 import { AdminContentPage } from './admin/AdminContentPage';
 import { AdminLayout } from './admin/AdminLayout';
 import { AdminMethodsPage } from './admin/AdminMethodsPage';
@@ -66,6 +67,7 @@ export function App() {
             <Route path="asisten" element={<AdminAssistantPage />} />
             <Route path="pengguna" element={<AdminUsersPage />} />
             <Route path="laporan" element={<AdminReportsPage />} />
+            <Route path="sertifikat" element={<AdminCertificatesPage />} />
             <Route path="transaksi" element={<AdminOrdersPage />} />
             <Route path="paket" element={<AdminPackagesPage />} />
             <Route path="rekening" element={<AdminMethodsPage />} />

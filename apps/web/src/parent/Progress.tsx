@@ -327,7 +327,7 @@ export function ChildProgress({ child, actions }: { child: OverviewChild; action
               <h3 id={`books-${child.id}`}>{t('parent.ov.booksTitle')}</h3>
               <ul className="pd-books">
                 {ins.books.map((b) => (
-                  <li key={`${b.domain}/${b.grade}`} className="pd-book pd-rise">
+                  <li key={b.slug} className="pd-book pd-rise">
                     <Ring
                       percent={b.percent}
                       label={t('parent.ov.bookRing', { book: b.title, percent: b.percent })}
@@ -340,6 +340,14 @@ export function ChildProgress({ child, actions }: { child: OverviewChild; action
                       <span className="pd-meter" aria-hidden>
                         <span style={{ width: `${b.percent}%` }} />
                       </span>
+                      {b.certificateId && (
+                        <Link
+                          className="pd-cert-chip"
+                          to={`/orang-tua/sertifikat/${b.certificateId}`}
+                        >
+                          {t('parent.cert.bookChip')}
+                        </Link>
+                      )}
                     </div>
                   </li>
                 ))}

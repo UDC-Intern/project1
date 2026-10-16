@@ -2,14 +2,16 @@ import { MOMO_COLORS, type MomoColor } from '@udakids/engine';
 import { useCallback, useState, type KeyboardEvent, type MouseEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { profile, setMomo } from '../api/catalog';
+import { myCertificates } from '../api/certificate';
 import { speak } from '../audio/speech';
 import { Momo } from '../components/Momo';
-import { BackIcon, SpeakerIcon } from '../components/Icons';
+import { BackIcon, MedalIcon, SpeakerIcon } from '../components/Icons';
 import { useAsync } from '../hooks/useAsync';
 import { AutoSpeak } from './AutoSpeak';
 import { useT } from '../i18n';
 import { formatDateTime } from '../lib/format';
 import { ErrorState, LoadingState } from '../ui/states';
+import { SpeakButton } from './SpeakButton';
 
 type StatKind = 'points' | 'passed' | 'highest' | 'time' | 'played' | 'answered' | 'rank';
 
@@ -111,6 +113,55 @@ function MoonIcon({ size = 20 }: { size?: number }) {
 /** Bacakan isi satu kartu statistik: angka lalu keterangannya. */
 const readStat = (el: HTMLElement) =>
   speak([...el.querySelectorAll('span')].map((x) => x.textContent ?? '').join(' '));
+
+/** Sertifikatku: satu kartu per buku, menuju halaman sertifikat buku itu. */
+function MyCertificates() {
+  const t = useT('play');
+  const load = useCallback(() => myCertificates(), []);
+  const { data } = useAsync(load);
+  if (!data) return null;
+  return (
+    <section className="cert-kid-mine" id="sertifikat" aria-labelledby="cert-mine-title">
+      <div className="cert-kid-mine-head">
+        <h2 id="cert-mine-title">{t('cert.mine')}</h2>
+        <SpeakButton text={t('cert.mineSay')} />
+      </div>
+      <ul className="cert-kid-list">
+        {data.books.map((b) => {
+          const state =
+            b.status === 'issued'
+              ? t('cert.cardDone')
+              : b.status === 'ready'
+                ? t('cert.cardReady')
+                : b.status === 'premium_required'
+                  ? t('cert.cardParent')
+                  : t('cert.cardLevels', { passed: b.levelsPassed, total: b.levelsTotal });
+          const percent = b.levelsTotal ? (b.levelsPassed / b.levelsTotal) * 100 : 0;
+          return (
+            <li key={b.bookSlug}>
+              <Link
+                to={`/play/sertifikat/${b.bookSlug}`}
+                className={`cert-kid-item is-${b.status}`}
+                aria-label={t('cert.cardLabel', { book: b.bookTitle, state })}
+              >
+                <span className="cert-kid-medal">
+                  <MedalIcon size={34} />
+                </span>
+                <span className="cert-kid-item-body">
+                  <strong>{b.bookTitle}</strong>
+                  <span className="cert-kid-bar" aria-hidden="true">
+                    <span style={{ width: `${percent}%` }} />
+                  </span>
+                  <small>{state}</small>
+                </span>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
 
 export function ProfilePage() {
   const t = useT('play');
@@ -269,6 +320,8 @@ export function ProfilePage() {
           </span>
         </Link>
       </div>
+
+      <MyCertificates />
 
       {/* Riwayat latihan */}
       <section className="history">

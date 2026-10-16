@@ -16,6 +16,7 @@ import { ListenButton } from '../components/ListenButton';
 import { Momo } from '../components/Momo';
 import { PicturePin } from '../components/PicturePin';
 import { resetMockDb } from '../api/mock/db';
+import { demoFinishBook } from '../api/mock/demo';
 import { Plant } from '../components/Plant';
 import { useT } from '../i18n';
 import { EmptyState, ErrorState, LoadingState } from '../ui/states';
@@ -47,6 +48,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 export function StylePage() {
   const t = useT('site');
   const [pin, setPin] = useState<PinPicture[]>([]);
+  const [demo, setDemo] = useState('');
   return (
     <main style={{ maxWidth: 1000, margin: '0 auto', padding: 'var(--space-6) var(--space-4)' }}>
       <h1>{t('style.title')}</h1>
@@ -167,6 +169,31 @@ export function StylePage() {
           <span>
             Keluarga demo: kode RWJUVF, anak Ayu (apel, bintang, ikan) dan Bima (bola, awan, daun).
           </span>
+        </div>
+        <div className="uk-row">
+          <button
+            type="button"
+            className="uk-btn uk-btn--ghost"
+            onClick={() => {
+              const cert = demoFinishBook('c-ayu', 'matematika-kelas-1', true);
+              setDemo(
+                cert ? `Sertifikat ${cert.id} terbit untuk Ayu.` : 'Sertifikat Ayu sudah ada.',
+              );
+            }}
+          >
+            Demo sertifikat: Ayu tuntas Matematika Kelas 1 (Premium)
+          </button>
+          <button
+            type="button"
+            className="uk-btn uk-btn--ghost"
+            onClick={() => {
+              demoFinishBook('c-bima', 'sains-kelas-1', false);
+              setDemo('Bima tuntas Sains Kelas 1 tanpa Premium: lihat daftar Menunggu di admin.');
+            }}
+          >
+            Demo menunggu: Bima tuntas Sains Kelas 1 (tanpa Premium)
+          </button>
+          {demo && <span role="status">{demo}</span>}
         </div>
       </Section>
 

@@ -84,6 +84,21 @@ export const ClockIcon = (p: IconProps) => (
     <path d="M12 7v5l3 2" />
   </Svg>
 );
+/** Medali berpita: tanda Sertifikat Juara Digital. */
+export const MedalIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <circle cx="12" cy="9" r="6" />
+    <path d="M8.5 14L7 21l5-2.5 5 2.5-1.5-7" />
+    <path d="M12 6.5l.9 1.8 2 .3-1.4 1.4.3 2-1.8-1-1.8 1 .3-2-1.4-1.4 2-.3z" />
+  </Svg>
+);
+export const PrintIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M7 9V3h10v6" />
+    <rect x="3" y="9" width="18" height="8" rx="2" />
+    <path d="M7 14h10v7H7z" />
+  </Svg>
+);
 
 /** Bintang isi untuk poin: kunyit, dengan garis supaya tetap terlihat di latar terang. */
 export function StarIcon({ size = 20 }: { size?: number }) {

@@ -1,5 +1,7 @@
 import {
   type BookContent,
+  type Certificate,
+  type CertificateDesign,
   type MasteryState,
   type MomoColor,
   type Pin,
@@ -96,6 +98,8 @@ export type MockRound = {
     durationMs: number;
     passed: boolean;
   } | null;
+  /** Sertifikat yang terbit saat ronde ini selesai. */
+  certificateId?: string | null;
 };
 
 export type MockDb = {
@@ -119,6 +123,10 @@ export type MockDb = {
   premiumUntil: Record<string, string>;
   /** level terakhir yang dimainkan, per anak */
   lastLevel: Record<string, string>;
+  /** sertifikat yang sudah terbit, per nomor sertifikat */
+  certificates: Record<string, Certificate>;
+  /** desain yang dipakai saat sertifikat berikutnya terbit (dipilih admin) */
+  certificateDesign: CertificateDesign;
 };
 
 const KEY = 'udakids-mock-v1';
@@ -223,6 +231,8 @@ function seed(): MockDb {
     rounds: {},
     premiumUntil: {},
     lastLevel: {},
+    certificates: {},
+    certificateDesign: 'klasik',
   };
 }
 
@@ -260,6 +270,9 @@ export function resetMockDb(): void {
   applyEdits(memory.contentEdits);
   writeDb(memory);
 }
+
+/** Kelas dari slug buku, mis. matematika-kelas-3. */
+export const gradeOf = (slug: string) => Number(/kelas-(\d+)$/.exec(slug)?.[1] ?? 1);
 
 export const topicId = (bookSlug: string, code: string) => `${bookSlug}:${code}`;
 export const levelId = (bookSlug: string, code: string, n: number) => `${bookSlug}:${code}:${n}`;

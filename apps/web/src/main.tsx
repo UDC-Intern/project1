@@ -10,6 +10,7 @@ import './styles/peta.css';
 import './styles/site.css';
 import './styles/adminCharts.css';
 import './styles/billing.css';
+import './styles/certificate.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';

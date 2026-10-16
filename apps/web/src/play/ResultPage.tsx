@@ -2,7 +2,7 @@ import { shuffle } from '@udakids/engine';
 import { useCallback } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { result } from '../api/practice';
-import { ClockIcon, PlayIcon } from '../components/Icons';
+import { ClockIcon, MedalIcon, PlayIcon } from '../components/Icons';
 import { Momo } from '../components/Momo';
 import { Plant } from '../components/Plant';
 import { useAsync } from '../hooks/useAsync';
@@ -27,11 +27,12 @@ export function ResultPage() {
   const topicId = data.levelId.split(':').slice(0, 2).join(':');
   const grew = data.plant.stageAfter > data.plant.stageBefore;
   const next = data.nextLevel;
+  const cert = data.certificate;
 
   return (
     <main className="kid-screen">
       <AutoSpeak
-        text={`${t('result.summary', { correct: data.correct, total: TOTAL })} ${t(`praise.${group}.${praiseKey}`)}`}
+        text={`${cert ? `${t('cert.new')} ` : ''}${t('result.summary', { correct: data.correct, total: TOTAL })} ${t(`praise.${group}.${praiseKey}`)}`}
       />
       <section className={`result-card ${data.passed ? 'is-passed' : 'is-failed'}`}>
         <Momo mood={data.passed ? 'happy' : 'encourage'} size={120} />
@@ -45,6 +46,19 @@ export function ResultPage() {
           {t('result.time', { time: formatDuration(data.durationMs) })}
         </p>
         <p className="result-message">{t(`praise.${group}.${praiseKey}`)}</p>
+
+        {cert && (
+          <div className="cert-kid-new" role="status">
+            <MedalIcon size={44} />
+            <span>
+              <strong>{t('cert.new')}</strong>
+              {t('cert.newText', { book: cert.bookTitle })}
+            </span>
+            <Link className="kid-btn big-play" to={`/play/sertifikat/${cert.bookSlug}`}>
+              {t('cert.see')}
+            </Link>
+          </div>
+        )}
 
         <div className="result-plant">
           <Plant stage={data.plant.stageAfter} size={80} />
