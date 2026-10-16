@@ -2,8 +2,9 @@ import { z } from 'zod';
 import { FREE_LEVELS } from '../rules/level.js';
 
 /**
- * Pengaturan aplikasi yang diubah admin di menu Pengaturan: akses berbayar, kontak WhatsApp, dan isi lembar
- * sertifikat. Nilai awal ada di `DEFAULT_SETTINGS`; semua bagian aplikasi membaca dari sini, bukan dari konstanta.
+ * Pengaturan aplikasi yang diubah admin: akses berbayar, kontak WhatsApp, isi lembar sertifikat (menu Pengaturan),
+ * dan suara narasi (menu Audio Narasi). Nilai awal ada di `DEFAULT_SETTINGS`; semua bagian aplikasi membaca dari sini,
+ * bukan dari konstanta.
  */
 
 // ---- Akses berbayar ----
@@ -104,12 +105,29 @@ export const certificateSettingsSchema = z.strictObject({
 });
 export type CertificateSettings = z.infer<typeof certificateSettingsSchema>;
 
+// ---- Suara narasi ----
+
+export const voiceSettingsSchema = z.strictObject({
+  /** Mati: area anak tidak bersuara sama sekali (teks tetap tampil). */
+  enabled: z.boolean(),
+  /** Halaman anak membacakan isinya begitu tampil. Mati: hanya saat tombol dengar diketuk. */
+  autoRead: z.boolean(),
+  /** Kecepatan bicara (1 = normal). */
+  rate: z.number().min(0.6).max(1.4),
+  /** Tinggi nada (1 = normal). */
+  pitch: z.number().min(0.5).max(1.5),
+  /** Nama suara peramban yang diutamakan; kosong berarti suara bahasa Indonesia pertama. */
+  voiceName: z.string().trim().max(100),
+});
+export type VoiceSettings = z.infer<typeof voiceSettingsSchema>;
+
 // ---- Semua pengaturan ----
 
 export const appSettingsSchema = z.strictObject({
   billing: billingSettingsSchema,
   contact: contactSettingsSchema,
   certificate: certificateSettingsSchema,
+  voice: voiceSettingsSchema,
 });
 export type AppSettings = z.infer<typeof appSettingsSchema>;
 
@@ -130,6 +148,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
     showQr: true,
     useFullName: true,
   },
+  voice: { enabled: true, autoRead: true, rate: 0.92, pitch: 1.1, voiceName: '' },
 };
 
 /**
@@ -148,5 +167,6 @@ export function mergeSettings(stored: unknown): AppSettings {
     billing: part('billing', billingSettingsSchema),
     contact: part('contact', contactSettingsSchema),
     certificate: part('certificate', certificateSettingsSchema),
+    voice: part('voice', voiceSettingsSchema),
   };
 }

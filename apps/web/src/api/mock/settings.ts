@@ -2,6 +2,7 @@ import {
   billingSettingsSchema,
   certificateSettingsSchema,
   contactSettingsSchema,
+  voiceSettingsSchema,
   type AppSettings,
 } from '@udakids/engine';
 import { ApiError } from '../client';
@@ -26,6 +27,7 @@ const SCHEMAS = {
   billing: billingSettingsSchema,
   contact: contactSettingsSchema,
   certificate: certificateSettingsSchema,
+  voice: voiceSettingsSchema,
 } as const;
 export type SettingsPart = keyof typeof SCHEMAS;
 export const SETTINGS_PARTS = Object.keys(SCHEMAS) as SettingsPart[];

@@ -17,22 +17,6 @@ export const overview = () => request<AdminOverview>('/admin/overview');
 export const catalog = () => request<AdminCatalog>('/admin/catalog');
 export const preview = (levelId: string, seed: number) =>
   request<PreviewResult>(`/admin/preview?levelId=${enc(levelId)}&seed=${seed}`);
-export const aiAssist = (topicId: string, purpose: 'lesson' | 'curriculum') =>
-  request<{ jobId: string; draft: string }>('/admin/ai/assist', {
-    method: 'POST',
-    body: { topicId, purpose },
-  });
-export const aiJobs = () =>
-  request<{
-    jobs: {
-      id: string;
-      adminName: string;
-      topicTitle: string;
-      purpose: string;
-      model: string;
-      createdAt: string;
-    }[];
-  }>('/admin/ai/jobs');
 
 export const insights = (range: InsightRange) =>
   request<AdminInsights>(`/admin/insights?range=${range}`);

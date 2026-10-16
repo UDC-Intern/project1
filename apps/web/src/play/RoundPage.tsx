@@ -4,7 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { topic as loadTopic } from '../api/catalog';
 import { ApiError } from '../api/client';
 import { answer as sendAnswer, finish, startRound } from '../api/practice';
-import { speak, stopSpeaking } from '../audio/speech';
+import { speak, speakAuto, stopSpeaking } from '../audio/speech';
 import { AnswerOptions } from '../components/AnswerOptions';
 import { CountObjects } from '../components/CountObjects';
 import { BackIcon, CheckIcon } from '../components/Icons';
@@ -105,10 +105,10 @@ export function RoundPage() {
   }, [levelId, t]);
 
   const currentPrompt = round?.questions[index]?.prompt;
-  // Suara soal otomatis diputar saat soal baru tampil (auto-play D-047 / D-059)
+  // Suara soal otomatis diputar saat soal baru tampil (bila "bacakan otomatis" hidup).
   useEffect(() => {
     if (currentPrompt) {
-      speak(currentPrompt);
+      speakAuto(currentPrompt);
       return () => stopSpeaking();
     }
   }, [index, currentPrompt]);

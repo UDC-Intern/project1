@@ -2,14 +2,20 @@ import {
   FOREVER_ISO,
   PIN_PICTURES,
   WEEK_MS,
+  effectiveStatus,
   emailSchema,
+  generateRound,
+  hasGenerator,
+  illustrationRequestSchema,
   masteryStatus,
   passwordSchema,
+  type Illustration,
   type Pin,
   type PlanStatus,
 } from '@udakids/engine';
 import type {
   AdminChildReport,
+  AdminDashboard,
   AdminNotification,
   CatalogBook,
   ChildRow,
@@ -27,6 +33,7 @@ import type {
 import { ApiError } from '../client';
 import * as admin from './admin';
 import * as billing from './billing';
+import { bookProgress } from './certificate';
 import {
   BOOKS,
   isChildActive,
@@ -705,6 +712,171 @@ function notifications(): { items: AdminNotification[] } {
   return { items: items.sort((a, b) => b.at.localeCompare(a.at)).slice(0, 30) };
 }
 
+// ---- Ringkasan ----
+
+const RANGE_DAYS: Record<string, () => number> = {
+  '7d': () => 7,
+  '30d': () => 30,
+  month: () => new Date().getDate(),
+};
+
+/** Ringkasan yang melengkapi grafik `insights`: antrean kerja admin, kelulusan per buku, dan kabar terbaru. */
+function dashboard(params: URLSearchParams): AdminDashboard {
+  const db = readDb();
+  const range = params.get('range') ?? '7d';
+  const days = (RANGE_DAYS[range] ?? RANGE_DAYS['7d']!)();
+  const from = Date.now() - days * DAY_MS;
+  const rounds = finishedRounds(db).filter((r) => r.finishedAt! >= from);
+  const passRate = (list: typeof rounds) =>
+    list.length
+      ? Math.round((list.filter((r) => r.result!.passed).length / list.length) * 100)
+      : null;
+  const now = Date.now();
+  const orders = Object.values(db.orders);
+  const statusOf = (o: (typeof orders)[number]) => effectiveStatus(o, now);
+  let waiting = 0;
+  for (const child of db.children)
+    for (const book of BOOKS) {
+      const s = bookProgress(db, child.id, book).status;
+      if (s === 'ready' || s === 'premium_required') waiting += 1;
+    }
+  const parentName = (id: string) => db.parents.find((p) => p.id === id)?.name ?? '-';
+  return {
+    range,
+    rounds: rounds.length,
+    passRate: passRate(rounds),
+    counts: {
+      families: db.parents.length,
+      children: db.children.length,
+      premiumChildren: db.children.filter((c) => premiumUntilOf(db, c.id) !== null).length,
+      certificates: Object.keys(db.certificates).length,
+      waitingCertificates: waiting,
+      pendingOrders: orders.filter((o) => statusOf(o) === 'awaiting_review').length,
+      awaitingPayment: orders.filter((o) => statusOf(o) === 'awaiting_payment').length,
+      illustrationsToReview: db.illustrations.filter((i) => i.status === 'review').length,
+    },
+    books: BOOKS.map((book) => {
+      const mine = rounds.filter((r) => r.levelId.startsWith(`${book.slug}:`));
+      const total = book.topics.reduce((n, t) => n + t.levels.length, 0);
+      return {
+        slug: book.slug,
+        title: book.title,
+        rounds: mine.length,
+        learners: new Set(mine.map((r) => r.childId)).size,
+        passRate: passRate(mine),
+        finished: db.children.filter(
+          (c) =>
+            total > 0 &&
+            book.topics.every((t) =>
+              t.levels.every((l) =>
+                (db.passedLevels[c.id] ?? []).includes(levelId(book.slug, t.code, l.number)),
+              ),
+            ),
+        ).length,
+      };
+    }),
+    recentOrders: orders
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .slice(0, 5)
+      .map((o) => ({
+        id: o.id,
+        number: o.number,
+        parentName: parentName(o.parentId),
+        packageName: o.packageName,
+        total: o.total,
+        status: statusOf(o),
+        createdAt: o.createdAt,
+      })),
+  };
+}
+
+// ---- Media: pemakaian aset dan Ilustrasi AI ----
+
+let usageCache: { objects: Record<string, number> } | null = null;
+
+/** Berapa level yang memakai tiap benda hitung (dari soal generator, 3 seed per level). Dihitung sekali per sesi. */
+function assetUsage(): { objects: Record<string, number> } {
+  if (usageCache) return usageCache;
+  const objects: Record<string, number> = {};
+  for (const book of BOOKS)
+    for (const topic of book.topics)
+      for (const level of topic.levels) {
+        if (!hasGenerator(level.generator)) continue;
+        const items = new Set<string>();
+        for (const seed of [1, 2, 3])
+          for (const q of generateRound(
+            {
+              generator: level.generator!,
+              generatorParams: level.generatorParams as Record<string, unknown> | undefined,
+            },
+            seed,
+          ))
+            if (q.visual) items.add(q.visual.item);
+        for (const item of items) objects[item] = (objects[item] ?? 0) + 1;
+      }
+  usageCache = { objects };
+  return usageCache;
+}
+
+const ILLUSTRATION_ENGINE = 'Pustaka bentuk UdaKids (mode tiruan)';
+
+function illustrations(params: URLSearchParams): Illustration[] {
+  const status = params.get('status') ?? 'all';
+  return readDb()
+    .illustrations.filter((i) => status === 'all' || i.status === status)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+function createIllustration(token: string | null, body: Body | undefined): Illustration {
+  const me = adminFromToken(token);
+  const parsed = illustrationRequestSchema.safeParse(body);
+  if (!parsed.success)
+    throw new ApiError(
+      400,
+      { code: 'VALIDATION', message: 'Periksa lagi isian ilustrasi.' },
+      parsed.error.issues.map((i) => ({ path: i.path.join('.'), message: i.message })),
+    );
+  const db = readDb();
+  const made: Illustration = {
+    ...parsed.data,
+    id: newId('il'),
+    status: 'review',
+    engine: ILLUSTRATION_ENGINE,
+    createdBy: me.name,
+    createdAt: new Date().toISOString(),
+    reviewedAt: null,
+  };
+  db.illustrations.push(made);
+  writeDb(db);
+  return made;
+}
+
+function reviewIllustration(
+  token: string | null,
+  id: string,
+  body: Body | undefined,
+): Illustration {
+  adminFromToken(token);
+  const db = readDb();
+  const item = db.illustrations.find((i) => i.id === id);
+  if (!item) throw notFound('Ilustrasi tidak ketemu.');
+  const status = body?.status;
+  if (status !== 'approved' && status !== 'rejected' && status !== 'review')
+    throw invalid('Status tidak dikenal.', 'status');
+  item.status = status;
+  item.reviewedAt = status === 'review' ? null : new Date().toISOString();
+  writeDb(db);
+  return item;
+}
+
+function deleteIllustration(token: string | null, id: string) {
+  adminFromToken(token);
+  const db = readDb();
+  if (!db.illustrations.some((i) => i.id === id)) throw notFound('Ilustrasi tidak ketemu.');
+  db.illustrations = db.illustrations.filter((i) => i.id !== id);
+  writeDb(db);
+}
+
 /** Memetakan alamat ke fungsi tiruan. Alamat yang tidak dikenal dijawab 404. */
 export async function handle<T>(
   path: string,
@@ -795,6 +967,18 @@ export async function handle<T>(
   if (method === 'GET' && at('settings')) return send(await adminSettings(token));
   if (method === 'PUT' && at('settings', '*') && SETTINGS_PARTS.includes(seg[1] as SettingsPart))
     return send(await updateSettings(token, seg[1] as SettingsPart, body));
+
+  // Ringkasan
+  if (method === 'GET' && at('dashboard')) return send(dashboard(params));
+
+  // Media
+  if (method === 'GET' && at('media', 'usage')) return send(assetUsage());
+  if (method === 'GET' && at('illustrations')) return send(illustrations(params));
+  if (method === 'POST' && at('illustrations')) return send(createIllustration(token, body));
+  if (method === 'PATCH' && at('illustrations', '*'))
+    return send(reviewIllustration(token, seg[1]!, body));
+  if (method === 'DELETE' && at('illustrations', '*'))
+    return send(deleteIllustration(token, seg[1]!));
 
   // Notifikasi
   if (method === 'GET' && at('notifications')) return send(notifications());

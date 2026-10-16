@@ -37,7 +37,7 @@ import {
   sheetShapes,
   type SheetData,
 } from '../src/components/certificate/sheet';
-import { AdminCertificatesPage } from '../src/admin/AdminCertificatesPage';
+import { CertificatesPage as AdminCertificatesPage } from '../src/admin/content/CertificatesPage';
 import { CertificatesPage, CertificateView } from '../src/parent/Certificates';
 import { ChildForm } from '../src/parent/ChildForm';
 import { CertificatePage } from '../src/play/CertificatePage';

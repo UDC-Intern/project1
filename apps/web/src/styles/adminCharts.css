@@ -98,6 +98,8 @@
   gap: 10px;
 }
 .funnel-bar {
+  /* Batang pendek tetap memuat labelnya. */
+  min-width: fit-content;
   min-height: 36px;
   border-radius: 10px;
   color: #fff;

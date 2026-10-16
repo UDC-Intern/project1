@@ -869,3 +869,652 @@
     grid-column: 2;
   }
 }
+
+/* Ringkasan. */
+
+.dash-kpis {
+  margin-bottom: 12px;
+}
+
+.dash-notes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.dash-note {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid var(--ui-line);
+  border-radius: 14px;
+  background: var(--ui-surface);
+}
+
+.dash-note p {
+  margin: 0;
+  font-weight: 600;
+}
+
+.dash-note-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+}
+
+.dash-note.tone-sun .dash-note-icon {
+  color: var(--pd-sun);
+  background: var(--pd-sun-bg);
+}
+
+.dash-note.tone-coral .dash-note-icon {
+  color: var(--pd-coral);
+  background: var(--pd-coral-bg);
+}
+
+.dash-note.tone-leaf .dash-note-icon {
+  color: var(--pd-leaf);
+  background: var(--pd-leaf-bg);
+}
+
+.dash-note.tone-sky .dash-note-icon {
+  color: var(--pd-sky);
+  background: var(--pd-sky-bg);
+}
+
+.dash-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.dash-grid .ins-panel {
+  margin-bottom: 0;
+}
+
+.dash-panel.is-wide {
+  grid-column: 1 / -1;
+}
+
+.dash-panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.dash-panel-head h2 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.dash-books,
+.dash-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dash-books li {
+  display: grid;
+  gap: 4px;
+}
+
+.dash-book-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.dash-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--ui-line);
+}
+
+.dash-list li:last-child {
+  border-bottom: 0;
+}
+
+.dash-list li > div {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.dash-list li > div strong {
+  overflow-wrap: anywhere;
+}
+
+.dash-amount {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.dash-live-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--sawah);
+}
+
+@media (max-width: 900px) {
+  .dash-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Bank Soal & Latihan. */
+
+.sim-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.sim-layout .ui-card {
+  margin-bottom: 0;
+}
+
+.sim-levels {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 0;
+  border: 0;
+}
+
+.sim-levels legend {
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+
+.sim-level {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 6px 10px;
+  border: 1px solid var(--ui-line);
+  border-radius: 12px;
+  background: var(--ui-surface);
+  color: var(--ui-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sim-level.is-on {
+  border-color: var(--ui-primary);
+  background: var(--gonjong-soft);
+}
+
+.sim-level:focus-visible {
+  outline: 3px solid var(--kunyit);
+  outline-offset: 2px;
+}
+
+.sim-level-text {
+  display: grid;
+  min-width: 0;
+}
+
+.sim-level-text small {
+  color: var(--ui-muted);
+}
+
+.sim-seed {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.sim-seed .ui-field {
+  flex: 1;
+}
+
+.sim-seed .ui-btn {
+  margin-bottom: 26px;
+}
+
+.sim-layout .dir-tabs {
+  margin-bottom: 12px;
+}
+
+.sim-meta {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 6px 12px;
+  margin: 16px 0 0;
+  padding-top: 12px;
+  border-top: 1px dashed var(--ui-line);
+}
+
+.sim-meta dt {
+  color: var(--ui-muted);
+}
+
+.sim-meta dd {
+  margin: 0;
+}
+
+.sim-stage {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  padding: 16px;
+  border-radius: 20px;
+  background: var(--awan-2);
+  border: 1px solid var(--ui-line);
+}
+
+.sim-empty,
+.sim-result {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 32px 16px;
+  text-align: center;
+}
+
+.sim-empty p {
+  max-width: 34em;
+  margin: 0;
+  color: var(--ui-muted);
+}
+
+.sim-score {
+  font-family: var(--font-display);
+  font-size: 56px;
+  line-height: 1;
+}
+
+.sim-phone {
+  display: grid;
+  gap: 12px;
+  width: min(480px, 100%);
+  margin: 0 auto;
+  padding: 16px;
+  border-radius: 28px;
+  background: var(--awan);
+  box-shadow:
+    0 0 0 8px var(--malam),
+    0 12px 32px var(--bayangan);
+  font-family: var(--font-body);
+}
+
+.sim-question {
+  display: grid;
+  gap: 12px;
+}
+
+.sim-prompt {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.sim-prompt p {
+  flex: 1;
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.sim-listen {
+  flex: none;
+  min-width: 44px;
+}
+
+.sim-number {
+  display: grid;
+  gap: 10px;
+}
+
+.sim-phone .choices {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.sim-phone .choice {
+  min-height: 72px;
+}
+
+.sim-feedback {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 14px;
+}
+
+.sim-feedback p {
+  margin: 0;
+}
+
+.sim-feedback.is-right {
+  background: var(--sawah-soft);
+  color: var(--sawah-teks);
+}
+
+.sim-feedback.is-wrong {
+  background: var(--kunyit-soft);
+  color: var(--kunyit-teks);
+}
+
+.sim-next {
+  justify-self: end;
+}
+
+.sim-key {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sim-key > li {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid var(--ui-line);
+  background: var(--ui-surface);
+}
+
+.sim-key p {
+  margin: 0;
+}
+
+.sim-key-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sim-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sim-options li {
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--ui-line);
+}
+
+.sim-options li.is-answer {
+  border-color: var(--sawah);
+  background: var(--sawah-soft);
+  color: var(--sawah-teks);
+  font-weight: 700;
+}
+
+@media (max-width: 960px) {
+  .sim-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .sim-stage {
+    padding: 10px;
+  }
+  .sim-phone {
+    padding: 12px;
+    box-shadow: 0 0 0 4px var(--malam);
+  }
+  .sim-phone .choices {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Sertifikat Juara. */
+
+.certs-sheet {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.certs-sheet > div > p {
+  margin: 0 0 12px;
+}
+
+.certs-facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 6px 16px;
+  margin: 0;
+}
+
+.certs-facts dt {
+  color: var(--ui-muted);
+}
+
+.certs-facts dd {
+  margin: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.certs-search {
+  max-width: 460px;
+}
+
+@media (max-width: 900px) {
+  .certs-sheet {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .certs-facts {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+  .certs-facts dd {
+    margin-bottom: 6px;
+  }
+}
+
+/* Galeri Aset. */
+
+.gal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gal-tile {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  width: 100%;
+  height: 100%;
+  padding: 12px 10px;
+  border: 1px solid var(--ui-line);
+  border-radius: 14px;
+  background: var(--ui-surface);
+  color: var(--ui-ink);
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+
+.gal-tile:hover {
+  border-color: var(--ui-primary);
+}
+
+.gal-tile:focus-visible {
+  outline: 3px solid var(--kunyit);
+  outline-offset: 2px;
+}
+
+.gal-preview {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 104px;
+  border-radius: 10px;
+  background: var(--kertas-2);
+  overflow: hidden;
+}
+
+.gal-preview .cert-sheet {
+  box-shadow: none;
+}
+
+.gal-big {
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--kertas-2);
+  overflow: hidden;
+}
+
+.gal-big > * {
+  max-width: 100%;
+}
+
+/* Audio Narasi. */
+
+.nar-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+  margin-bottom: 16px;
+}
+
+.nar-layout .ui-card {
+  margin-bottom: 0;
+}
+
+.nar-lines,
+.nar-topics {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nar-lines li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--kertas-2);
+}
+
+.nar-topics > li {
+  display: grid;
+  gap: 6px;
+  padding: 12px 0;
+  border-bottom: 1px dashed var(--ui-line);
+}
+
+.nar-topics > li:last-child {
+  border-bottom: 0;
+}
+
+.nar-topics p {
+  margin: 0;
+}
+
+.nar-topic-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+}
+
+.nar-play {
+  min-height: 40px;
+}
+
+@media (max-width: 900px) {
+  .nar-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Ilustrasi AI. */
+
+.ill-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 380px);
+  gap: 24px;
+  align-items: start;
+}
+
+.ill-preview {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.ill-svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 14px;
+  border: 1px solid var(--ui-line);
+}
+
+.ill-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ill-card {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--ui-line);
+  border-radius: 16px;
+  background: var(--ui-surface);
+}
+
+.ill-card .ill-svg {
+  width: 100%;
+}
+
+.ill-card-body {
+  display: grid;
+  gap: 4px;
+  justify-items: start;
+}
+
+@media (max-width: 900px) {
+  .ill-layout {
+    grid-template-columns: 1fr;
+  }
+}

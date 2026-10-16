@@ -1,6 +1,7 @@
 import type { Visual } from '@udakids/engine';
 
-type Item = NonNullable<Visual>['item'];
+export type ObjectItem = NonNullable<Visual>['item'];
+type Item = ObjectItem;
 
 const COLORS: Record<Item, string> = {
   apple: '#c0392b',
@@ -11,7 +12,7 @@ const COLORS: Record<Item, string> = {
   book: '#8a6a3c',
 };
 
-const LABELS: Record<Item, string> = {
+export const OBJECT_LABELS: Record<Item, string> = {
   apple: 'apel',
   ball: 'bola',
   star: 'bintang',
@@ -20,7 +21,8 @@ const LABELS: Record<Item, string> = {
   book: 'buku',
 };
 
-function Shape({ item }: { item: Item }) {
+/** Bentuk satu benda dalam kotak 32 × 32 (dipakai soal hitung, Galeri Aset, dan Ilustrasi AI). */
+export function ObjectShape({ item }: { item: Item }) {
   const fill = COLORS[item];
   switch (item) {
     case 'star':
@@ -49,12 +51,12 @@ export function CountObjects({ visual }: { visual: Visual }) {
   const groups = visual.groups ?? [visual.count ?? 0];
   const total = groups.reduce((a, b) => a + b, 0);
   return (
-    <div className="uk-count" role="img" aria-label={`${total} ${LABELS[visual.item]}`}>
+    <div className="uk-count" role="img" aria-label={`${total} ${OBJECT_LABELS[visual.item]}`}>
       {groups.map((n, g) => (
         <div key={g} className="uk-count-group">
           {Array.from({ length: n }, (_, i) => (
             <svg key={i} width="36" height="36" viewBox="0 0 32 32" aria-hidden="true">
-              <Shape item={visual.item} />
+              <ObjectShape item={visual.item} />
             </svg>
           ))}
         </div>

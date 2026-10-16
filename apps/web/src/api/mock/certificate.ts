@@ -283,7 +283,8 @@ export async function adminCertificates(token: string | null): Promise<AdminCert
       .sort((a, b) => b.issuedAt.localeCompare(a.issuedAt))
       .map((c) => {
         const p = parentOf(c.childId);
-        return { ...c, parentName: p?.name ?? '-', parentEmail: p?.email ?? '-' };
+        const nickname = db.children.find((x) => x.id === c.childId)?.nickname;
+        return { ...c, parentName: p?.name ?? '-', parentEmail: p?.email ?? '-', nickname };
       }),
     candidates,
   };

@@ -1,9 +1,12 @@
 import { useEffect } from 'react';
-import { speak } from '../audio/speech';
+import { speakAuto } from '../audio/speech';
 
-/** Bacakan `text` begitu halaman tampil (dan setiap kali teksnya berganti). `null` = tidak membacakan. */
+/**
+ * Bacakan `text` begitu halaman tampil (dan setiap kali teksnya berganti). `null` = tidak membacakan. Mengikuti pengaturan
+ * "bacakan otomatis" di menu Audio Narasi.
+ */
 export function useAutoSpeak(text: string | null | undefined): void {
   useEffect(() => {
-    if (text) speak(text);
+    if (text) speakAuto(text);
   }, [text]);
 }

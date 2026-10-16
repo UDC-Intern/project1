@@ -322,6 +322,7 @@ export function Funnel({ steps }: { steps: { label: string; value: number }[] })
             <div
               className="funnel-bar"
               style={{ width: `${Math.max(8, (s.value / top) * 100)}%`, background: chartColor(i) }}
+              title={s.label}
             >
               <span>{s.label}</span>
             </div>

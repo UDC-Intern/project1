@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { FREE_LEVELS } from '../src/rules/level.js';
 import { maskName, meanScore } from '../src/rules/certificate.js';
 import { certificateNameInputSchema, certificateNameSchema } from '../src/schemas/api.js';
+import { illustrationRequestSchema } from '../src/schemas/media.js';
 import {
   DEFAULT_SETTINGS,
   adminWhatsappHref,
@@ -10,6 +11,7 @@ import {
   contactSettingsSchema,
   isFreeLevel,
   mergeSettings,
+  voiceSettingsSchema,
   whatsappFromPhone,
 } from '../src/schemas/settings.js';
 
@@ -122,5 +124,42 @@ describe('nama di sertifikat', () => {
   it('rata-rata skor dibulatkan; tanpa skor null', () => {
     expect(meanScore([90, 100, 81])).toBe(90);
     expect(meanScore([])).toBeNull();
+  });
+});
+
+describe('pengaturan suara narasi', () => {
+  it('nilai awal sama dengan suara lama; kecepatan dan nada dibatasi', () => {
+    expect(DEFAULT_SETTINGS.voice).toEqual({
+      enabled: true,
+      autoRead: true,
+      rate: 0.92,
+      pitch: 1.1,
+      voiceName: '',
+    });
+    expect(voiceSettingsSchema.safeParse({ ...DEFAULT_SETTINGS.voice, rate: 2 }).success).toBe(
+      false,
+    );
+    expect(voiceSettingsSchema.safeParse({ ...DEFAULT_SETTINGS.voice, pitch: 0.2 }).success).toBe(
+      false,
+    );
+    expect(mergeSettings({ voice: { rate: 1.2 } }).voice.rate).toBe(1.2);
+  });
+});
+
+describe('permintaan ilustrasi', () => {
+  const ok = {
+    kind: 'scene',
+    subject: 'apel merah',
+    theme: 'outdoor',
+    count: 5,
+    withMomo: true,
+    momoColor: 'blue',
+    variant: 1,
+  };
+  it('jumlah benda 1 sampai 12 dan jenis yang dikenal', () => {
+    expect(illustrationRequestSchema.safeParse(ok).success).toBe(true);
+    expect(illustrationRequestSchema.safeParse({ ...ok, count: 0 }).success).toBe(false);
+    expect(illustrationRequestSchema.safeParse({ ...ok, kind: 'video' }).success).toBe(false);
+    expect(illustrationRequestSchema.safeParse({ ...ok, extra: 1 }).success).toBe(false);
   });
 });

@@ -6,6 +6,7 @@ import {
   type BookContent,
   type Certificate,
   type CertificateDesign,
+  type Illustration,
   type MasteryState,
   type MomoColor,
   type PaymentMethod,
@@ -56,15 +57,6 @@ export type MockAdmin = {
   active?: boolean;
   createdAt?: string;
 };
-export type MockAiJob = {
-  id: string;
-  adminName: string;
-  topicTitle: string;
-  purpose: 'lesson' | 'curriculum';
-  model: string;
-  createdAt: string;
-};
-
 export type MockParent = {
   id: string;
   name: string;
@@ -140,7 +132,8 @@ export type MockDb = {
   parents: MockParent[];
   admins: MockAdmin[];
   contentEdits: ContentEdits;
-  aiJobs: MockAiJob[];
+  /** Ilustrasi AI dari menu Media & Audio (antrean tinjau dan yang sudah disetujui) */
+  illustrations: Illustration[];
   orders: Record<string, MockOrder>;
   /** Premium keluarga dari pembelian paket: berlaku untuk semua anak orang tua itu */
   familyPremium: Record<string, string>;
@@ -267,7 +260,7 @@ function seed(): MockDb {
       },
     ],
     contentEdits: { topics: {}, levels: {} },
-    aiJobs: [],
+    illustrations: [],
     orders: seedOrders(),
     familyPremium: {},
     packages: BILLING.packages.map((p) => ({ ...p, description: '' })),
@@ -298,9 +291,13 @@ export function readDb(): MockDb {
   try {
     const raw = localStorage.getItem(KEY);
     if (raw) {
-      const parsed = JSON.parse(raw) as Partial<MockDb> & { billingEdits?: LegacyBillingEdits };
+      const parsed = JSON.parse(raw) as Partial<MockDb> & {
+        billingEdits?: LegacyBillingEdits;
+        aiJobs?: unknown;
+      };
       const base = seed();
-      const { billingEdits: legacy, ...rest } = parsed;
+      // aiJobs: catatan asisten teks lama, diganti Ilustrasi AI.
+      const { billingEdits: legacy, aiJobs: _aiJobs, ...rest } = parsed;
       memory = { ...base, ...rest } as MockDb;
       memory.settings = mergeSettings(parsed.settings ?? base.settings);
       // Data versi lama: paket dan rekening masih berupa suntingan di atas content/billing.json.

@@ -1,10 +1,11 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { adminWhatsappHref, type AppSettings } from '@udakids/engine';
-import { aiAssist, catalog, overview, preview } from '../src/api/admin';
+import { adminWhatsappHref, type AppSettings, type Illustration } from '@udakids/engine';
+import { catalog, overview, preview } from '../src/api/admin';
 import type {
   AdminChildReport,
+  AdminDashboard,
   CatalogBook,
   ChildRow,
   ChildSummaryRow,
@@ -25,7 +26,13 @@ import { BOOKS, readDb, resetMockDb, writeDb } from '../src/api/mock/db';
 import { plan } from '../src/api/parent';
 import { startRound } from '../src/api/practice';
 import { useSession } from '../src/auth/store';
+import { AdminLayout } from '../src/admin/AdminLayout';
 import { SettingsPage } from '../src/admin/billing/SettingsPage';
+import { SimulatorPage } from '../src/admin/content/SimulatorPage';
+import { GalleryPage } from '../src/admin/media/GalleryPage';
+import { IllustrationsPage } from '../src/admin/media/IllustrationsPage';
+import { NarrationPage } from '../src/admin/media/NarrationPage';
+import { DashboardPage } from '../src/admin/overview/DashboardPage';
 import { CatalogPage } from '../src/admin/catalog/CatalogPage';
 import { FamiliesPage } from '../src/admin/users/FamiliesPage';
 import { Landing } from '../src/site/Landing';
@@ -490,12 +497,74 @@ describe('mock admin: pratinjau dan asisten', () => {
     expect(a.questions[0]).toHaveProperty('explanation');
     expect((await errorOf(preview('tidak:ada:1', 1))).status).toBe(404);
   });
+});
 
-  it('asisten AI hanya mengembalikan draf teks dan mencatat permintaan', async () => {
-    const res = await aiAssist('sains-kelas-1:SB', 'lesson');
-    expect(res.draft.length).toBeGreaterThan(20);
-    expect(readDb().aiJobs).toHaveLength(1);
-    expect(JSON.stringify(BOOKS)).not.toContain(res.draft);
+describe('mock admin: ringkasan dan media', () => {
+  it('ringkasan menghitung antrean kerja, Premium, dan kelulusan per buku', async () => {
+    asParent();
+    const o = await createOrder({ packageId: 'tunas', methodId: 'bca' });
+    await uploadProof(o.id, {
+      fileName: 'bukti.png',
+      mime: 'image/png',
+      size: 2048,
+      dataUrl: 'data:image/png;base64,iVBORw0KGgo=',
+    });
+    asAdmin();
+    const d = await adm<AdminDashboard>('/admin/dashboard?range=30d');
+    expect(d.counts).toMatchObject({ pendingOrders: 1, premiumChildren: 0, certificates: 0 });
+    expect(d.books.map((b) => b.slug)).toEqual(BOOKS.map((b) => b.slug));
+    expect(d.passRate).toBeNull();
+    expect(d.recentOrders[0]).toMatchObject({
+      parentName: 'Ridho Dwi Syahputra',
+      status: 'awaiting_review',
+    });
+  });
+
+  it('ilustrasi AI masuk antrean tinjau, lalu disetujui atau ditolak', async () => {
+    const bad = await errorOf(
+      adm('/admin/illustrations', 'POST', { kind: 'scene', subject: 'x', theme: 'outdoor' }),
+    );
+    expect(bad.status).toBe(400);
+    const made = await adm<Illustration>('/admin/illustrations', 'POST', {
+      kind: 'scene',
+      subject: 'apel merah',
+      theme: 'outdoor',
+      count: 5,
+      withMomo: true,
+      momoColor: 'blue',
+      variant: 1,
+    });
+    expect(made).toMatchObject({ status: 'review', createdBy: 'Admin UdaKids' });
+    expect(await adm<Illustration[]>('/admin/illustrations?status=approved')).toHaveLength(0);
+    await adm(`/admin/illustrations/${made.id}`, 'PATCH', { status: 'approved' });
+    expect(
+      (await adm<Illustration[]>('/admin/illustrations?status=approved')).map((i) => i.id),
+    ).toEqual([made.id]);
+    expect((await adm<AdminDashboard>('/admin/dashboard')).counts.illustrationsToReview).toBe(0);
+    expect(
+      (await errorOf(adm(`/admin/illustrations/${made.id}`, 'PATCH', { status: 'emas' }))).status,
+    ).toBe(400);
+    await adm(`/admin/illustrations/${made.id}`, 'DELETE');
+    expect(readDb().illustrations).toEqual([]);
+  });
+
+  it('pemakaian benda hitung dihitung dari soal generator', async () => {
+    const usage = await adm<{ objects: Record<string, number> }>('/admin/media/usage');
+    expect(Object.values(usage.objects).some((n) => n > 0)).toBe(true);
+  });
+
+  it('pengaturan suara narasi tersimpan dan diperiksa', async () => {
+    const s = await adm<AppSettings>('/admin/settings/voice', 'PUT', {
+      enabled: true,
+      autoRead: false,
+      rate: 1.1,
+      pitch: 1,
+      voiceName: '',
+    });
+    expect(s.voice).toMatchObject({ autoRead: false, rate: 1.1 });
+    expect(
+      (await errorOf(adm('/admin/settings/voice', 'PUT', { ...s.voice, rate: 3 }))).status,
+    ).toBe(400);
   });
 });
 
@@ -588,6 +657,106 @@ describe('halaman', () => {
     fireEvent.click(within(issuer.closest('form')!).getByRole('button', { name: 'Simpan' }));
     expect(await screen.findByText('Pengaturan sertifikat disimpan.')).toBeInTheDocument();
     expect(readDb().settings.certificate.issuer).toBe('Sekolah Ceria');
+  });
+
+  it('menu admin dikelompokkan: Konten & Kurikulum, Media & Audio, Pengguna & Akademik, Langganan', async () => {
+    render(
+      <MemoryRouter initialEntries={['/admin']}>
+        <Routes>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<p>isi</p>} />
+          </Route>
+        </Routes>
+      </MemoryRouter>,
+    );
+    const nav = document.body;
+    for (const label of [
+      'Silabus Belajar',
+      'Bank Soal & Latihan',
+      'Sertifikat Juara',
+      'Galeri Aset',
+      'Audio Narasi',
+      'Ilustrasi AI',
+      'Keluarga & Anak',
+      'Tim Staf & Akses',
+      'Laporan & Rapor Belajar',
+      'Transaksi & Bukti Bayar',
+      'Paket Langganan',
+      'Rekening & Pembayaran',
+      'Pengaturan Sistem',
+    ])
+      expect(within(nav).getByRole('link', { name: new RegExp(label) })).toBeInTheDocument();
+    expect(within(nav).getByRole('link', { name: /Sertifikat Juara/ })).toHaveAttribute(
+      'href',
+      '/admin/sertifikat',
+    );
+  });
+
+  it('Ringkasan: angka utama dan catatan tindak lanjut tampil', async () => {
+    render(
+      <MemoryRouter>
+        <DashboardPage />
+      </MemoryRouter>,
+    );
+    expect(await screen.findByText('Anak aktif')).toBeInTheDocument();
+    expect(screen.getByText('Kelulusan per buku')).toBeInTheDocument();
+    expect(screen.getByText('Tidak ada pekerjaan yang menunggu. Semua beres!')).toBeInTheDocument();
+  });
+
+  it('Bank Soal & Latihan: simulasi menjawab satu soal lalu kunci jawaban', async () => {
+    render(
+      <MemoryRouter>
+        <SimulatorPage />
+      </MemoryRouter>,
+    );
+    fireEvent.click(await screen.findByRole('button', { name: 'Mulai simulasi' }));
+    const stage = screen.getByRole('region', { name: 'Layar simulasi' });
+    const first = (await within(stage).findAllByRole('button')).find((b) =>
+      b.classList.contains('choice'),
+    );
+    if (first) fireEvent.click(first);
+    else {
+      fireEvent.click(within(stage).getByRole('button', { name: '1' }));
+      fireEvent.click(within(stage).getByRole('button', { name: 'Periksa' }));
+    }
+    expect(await within(stage).findByRole('status')).toHaveTextContent(/Tepat|Belum tepat/);
+    fireEvent.click(screen.getByRole('button', { name: 'Kunci jawaban' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Tampilkan 10 soal' }));
+    expect(await within(stage).findAllByText('Jawaban:', { exact: false })).toHaveLength(10);
+  });
+
+  it('Ilustrasi AI: buat dari formulir, setujui, lalu tampil di Galeri Aset', async () => {
+    const first = render(
+      <MemoryRouter>
+        <IllustrationsPage />
+      </MemoryRouter>,
+    );
+    fireEvent.click(await screen.findByRole('button', { name: /Buat ilustrasi/ }));
+    expect(await screen.findByText(/dibuat dan menunggu ditinjau/)).toBeInTheDocument();
+    fireEvent.click(await screen.findByRole('button', { name: 'Setujui' }));
+    expect(await screen.findByText(/disetujui dan tampil di Galeri Aset/)).toBeInTheDocument();
+    expect(readDb().illustrations[0]!.status).toBe('approved');
+    first.unmount();
+
+    render(
+      <MemoryRouter>
+        <GalleryPage />
+      </MemoryRouter>,
+    );
+    fireEvent.click(await screen.findByRole('tab', { name: /Ilustrasi AI/ }));
+    expect(await screen.findByText('apel merah di kebun')).toBeInTheDocument();
+  });
+
+  it('Audio Narasi: matikan bacaan otomatis lalu simpan', async () => {
+    render(
+      <MemoryRouter>
+        <NarrationPage />
+      </MemoryRouter>,
+    );
+    fireEvent.click(await screen.findByLabelText(/Bacakan halaman dan soal otomatis/));
+    fireEvent.click(screen.getByRole('button', { name: 'Simpan' }));
+    expect(await screen.findByText('Pengaturan suara disimpan.')).toBeInTheDocument();
+    expect(readDb().settings.voice.autoRead).toBe(false);
   });
 
   it('Konten: level 3 dijadikan gratis ditandai sebagai pengecualian', async () => {

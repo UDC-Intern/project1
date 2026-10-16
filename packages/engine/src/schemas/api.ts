@@ -365,14 +365,6 @@ export const previewResultSchema = z.object({
 });
 export type PreviewResult = z.infer<typeof previewResultSchema>;
 
-export const aiAssistBodySchema = z.object({
-  topicId: z.string(),
-  purpose: z.enum(['lesson', 'curriculum']),
-  note: z.string().trim().max(300).optional(),
-});
-export type AiAssistBody = z.infer<typeof aiAssistBodySchema>;
-export const aiAssistResultSchema = z.object({ jobId: z.string(), draft: z.string() });
-
 // ---- Sertifikat Juara Digital ----
 
 export const certificateDesignSchema = z.enum(CERTIFICATE_DESIGNS);
@@ -490,7 +482,12 @@ export type ClaimCertificateBody = z.infer<typeof claimCertificateBodySchema>;
 export const adminCertificatesSchema = z.object({
   design: certificateDesignSchema,
   certificates: z.array(
-    certificateSchema.extend({ parentName: z.string(), parentEmail: z.string() }),
+    certificateSchema.extend({
+      parentName: z.string(),
+      parentEmail: z.string(),
+      /** Nama panggilan anak saat ini, untuk membedakan sertifikat bernama lengkap. */
+      nickname: z.string().optional(),
+    }),
   ),
   candidates: z.array(
     z.object({

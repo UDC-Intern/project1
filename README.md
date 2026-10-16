@@ -11,9 +11,10 @@ konten, keluarga, transaksi, Premium, sertifikat, dan pengaturan aplikasi.
   Jago, papan peringkat, profil, dan sertifikat.
 - **Orang tua:** daftar, kelola sampai 3 profil anak, dasbor dan laporan per anak, paket dengan pembayaran transfer manual,
   riwayat transaksi, akun, dan menu Sertifikat.
-- **Admin:** konten, pratinjau soal generator, asisten AI untuk draf materi, keluarga dan Premium per anak, staf, laporan,
-  transaksi, paket dan rekening yang bisa ditambah sendiri, sertifikat, **Pengaturan** (level gratis, WhatsApp, isi lembar
-  sertifikat), dan notifikasi.
+- **Admin:** menu dikelompokkan menjadi Konten & Kurikulum (Silabus Belajar, Bank Soal & Latihan sebagai simulator kuis,
+  Sertifikat Juara), Media & Audio (Galeri Aset, Audio Narasi, Ilustrasi AI), Pengguna & Akademik (Keluarga & Anak, Tim
+  Staf & Akses, Laporan & Rapor Belajar), dan Langganan & Pembayaran (Transaksi & Bukti Bayar, Paket Langganan, Rekening &
+  Pembayaran, Pengaturan Sistem), ditambah Ringkasan bergrafik dan notifikasi.
 - **Paket:** 5 paket awal (Tunas, Kumbang, Tumbuh Bersama, Bintang Kecil, Teman Setia); admin bisa mengubah dan menambah.
   Awalnya level 1 dan 2 tiap topik gratis, level berikutnya Premium untuk semua anak di keluarga itu; batasnya diatur di
   Pengaturan.

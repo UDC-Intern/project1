@@ -186,3 +186,37 @@ export type CatalogBook = {
     }[];
   }[];
 };
+
+/** `GET /admin/dashboard?range=`: antrean kerja admin, kelulusan per buku, dan pesanan terbaru. */
+export type AdminDashboard = {
+  range: string;
+  rounds: number;
+  passRate: number | null;
+  counts: {
+    families: number;
+    children: number;
+    premiumChildren: number;
+    certificates: number;
+    waitingCertificates: number;
+    pendingOrders: number;
+    awaitingPayment: number;
+    illustrationsToReview: number;
+  };
+  books: {
+    slug: string;
+    title: string;
+    rounds: number;
+    learners: number;
+    passRate: number | null;
+    finished: number;
+  }[];
+  recentOrders: {
+    id: string;
+    number: string;
+    parentName: string;
+    packageName: string;
+    total: number;
+    status: string;
+    createdAt: string;
+  }[];
+};

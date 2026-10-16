@@ -1,14 +1,16 @@
 import { Navigate, Route, Routes, useParams } from 'react-router-dom';
-import { AdminAssistantPage } from './admin/AdminAssistantPage';
-import { AdminCertificatesPage } from './admin/AdminCertificatesPage';
 import { AdminLayout } from './admin/AdminLayout';
-import { AdminOverviewPage } from './admin/AdminOverviewPage';
-import { AdminPreviewPage } from './admin/AdminPreviewPage';
 import { OrdersPage } from './admin/billing/OrdersPage';
 import { PackagesPage } from './admin/billing/PackagesPage';
 import { PaymentMethodsPage } from './admin/billing/PaymentMethodsPage';
 import { SettingsPage } from './admin/billing/SettingsPage';
 import { CatalogPage } from './admin/catalog/CatalogPage';
+import { CertificatesPage } from './admin/content/CertificatesPage';
+import { SimulatorPage } from './admin/content/SimulatorPage';
+import { GalleryPage } from './admin/media/GalleryPage';
+import { IllustrationsPage } from './admin/media/IllustrationsPage';
+import { NarrationPage } from './admin/media/NarrationPage';
+import { DashboardPage } from './admin/overview/DashboardPage';
 import { ChildReportPage } from './admin/reports/ChildReportPage';
 import { ReportsPage } from './admin/reports/ReportsPage';
 import { FamiliesPage } from './admin/users/FamiliesPage';
@@ -67,16 +69,19 @@ export function App() {
         <Route path="/masuk/staf" element={<StaffLogin />} />
         <Route path="/admin" element={<RequireRole role="admin" />}>
           <Route element={<AdminLayout />}>
-            <Route index element={<AdminOverviewPage />} />
+            <Route index element={<DashboardPage />} />
             <Route path="konten" element={<CatalogPage />} />
-            <Route path="soal" element={<AdminPreviewPage />} />
-            <Route path="asisten" element={<AdminAssistantPage />} />
+            <Route path="soal" element={<SimulatorPage />} />
+            <Route path="sertifikat" element={<CertificatesPage />} />
+            <Route path="galeri" element={<GalleryPage />} />
+            <Route path="narasi" element={<NarrationPage />} />
+            <Route path="ilustrasi" element={<IllustrationsPage />} />
+            <Route path="asisten" element={<Navigate to="/admin/ilustrasi" replace />} />
             <Route path="keluarga" element={<FamiliesPage />} />
             <Route path="pengguna" element={<Navigate to="/admin/keluarga" replace />} />
             <Route path="staf" element={<StaffPage />} />
             <Route path="laporan" element={<ReportsPage />} />
             <Route path="laporan/anak/:id" element={<ChildReportPage />} />
-            <Route path="sertifikat" element={<AdminCertificatesPage />} />
             <Route path="transaksi" element={<OrdersPage />} />
             <Route path="paket" element={<PackagesPage />} />
             <Route path="rekening" element={<PaymentMethodsPage />} />

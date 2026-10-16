@@ -12,7 +12,7 @@ import {
 } from '@udakids/engine';
 import { ApiError } from '../client';
 import { adminFromToken } from './staff';
-import { applyEdits, BOOKS, levelId, newId, readDb, topicId, writeDb, type MockDb } from './db';
+import { applyEdits, BOOKS, levelId, readDb, topicId, writeDb, type MockDb } from './db';
 import { findLevel } from './levels';
 import { isLevelFree } from './settings';
 
@@ -145,40 +145,4 @@ export async function preview(
     seed,
     questions: questions.map((q, index) => ({ ...q, index, audioUrl: null })),
   };
-}
-
-const MODEL = 'gemini (data tiruan)';
-
-export async function aiAssist(
-  token: string | null,
-  topicIdArg: string,
-  purpose: 'lesson' | 'curriculum',
-): Promise<{ jobId: string; draft: string }> {
-  const admin = adminFromToken(token);
-  const [slug, code] = topicIdArg.split(':');
-  const topic = BOOKS.find((b) => b.slug === slug)?.topics.find((t) => t.code === code);
-  if (!topic) throw notFound('Topik tidak ketemu.');
-
-  const draft =
-    purpose === 'lesson'
-      ? `${topic.lesson} Coba ceritakan ulang dengan contoh dari rumah. Ajak anak menunjuk benda satu per satu.`
-      : `Tujuan topik ${topic.title}: anak mengenal konsep dasarnya lewat gambar. Level 1 memperkenalkan, level 2 melatih, level 3 menerapkan.`;
-
-  const db = readDb();
-  const job = {
-    id: newId('j'),
-    adminName: admin.name,
-    topicTitle: topic.title,
-    purpose,
-    model: MODEL,
-    createdAt: new Date().toISOString(),
-  };
-  db.aiJobs.unshift(job);
-  writeDb(db);
-  return { jobId: job.id, draft };
-}
-
-export async function aiJobs(token: string | null) {
-  adminFromToken(token);
-  return { jobs: readDb().aiJobs };
 }
