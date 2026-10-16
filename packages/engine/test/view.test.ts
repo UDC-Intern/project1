@@ -8,9 +8,7 @@ import {
   emailChangeRequestSchema,
   formatAverage,
   formatClock,
-  momoHex,
   parentProfileSchema,
-  parseMomoLook,
   passwordChangeSchema,
 } from '../src/index.js';
 
@@ -54,17 +52,5 @@ describe('skema formulir', () => {
     expect(
       passwordChangeSchema.safeParse({ currentPassword: 'a', password: 'pendek' }).success,
     ).toBe(false);
-  });
-});
-
-describe('tampilan Momo', () => {
-  it('warna palet atau hex, data rusak menjadi polos', () => {
-    expect(momoHex('biru')).toBe('#4f8ff7');
-    expect(momoHex('#AABBCC')).toBeUndefined();
-    expect(momoHex('#aabbcc')).toBe('#aabbcc');
-    expect(momoHex(null)).toBeUndefined();
-    expect(parseMomoLook(null)).toBeNull();
-    expect(parseMomoLook({ model: 'tidak-ada' })).toBeNull();
-    expect(parseMomoLook({ model: 'kucing', accessory: 'topi' })?.model).toBe('kucing');
   });
 });

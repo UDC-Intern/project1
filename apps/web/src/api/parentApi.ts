@@ -1,5 +1,5 @@
 import { request } from './client';
-import { handle } from './mock/ref';
+import { handle } from './mock/parentRoutes';
 import { isMocked } from './mode';
 
 type Options = {

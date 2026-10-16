@@ -291,12 +291,7 @@ export function Dashboard() {
                   className={`pd-tab${c.id === current?.id ? ' is-on' : ''}`}
                   onClick={() => setPicked(c.id)}
                 >
-                  <Momo
-                    color={c.momoColor as Color}
-                    look={c.momoLook ?? null}
-                    mood="happy"
-                    size={32}
-                  />
+                  <Momo color={c.momoColor as Color} mood="happy" size={32} />
                   {c.nickname}
                 </button>
               ))}

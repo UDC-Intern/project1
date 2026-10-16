@@ -1,15 +1,8 @@
 import type { MomoColor } from '@udakids/engine';
-import { createContext, type ReactNode } from 'react';
 import { CHARACTER_NAME } from '../config/app';
 
 export type MomoMood =
   'neutral' | 'happy' | 'encourage' | 'proud' | 'curious' | 'idle' | 'sleepy' | 'oops';
-
-/** Tampilan Momo milik anak yang sedang bermain. Momo awal hanya berganti warna, jadi nilainya belum dipakai. */
-const OwnLook = createContext<unknown>(null);
-export function OwnMomoLook({ look, children }: { look: unknown; children: ReactNode }) {
-  return <OwnLook.Provider value={look}>{children}</OwnLook.Provider>;
-}
 
 /** Robot kecil buatan sendiri. Warna badan lewat CSS (currentColor), ekspresi lewat mulut dan alis. */
 export function Momo({
@@ -20,11 +13,6 @@ export function Momo({
   color?: MomoColor | string;
   mood?: MomoMood;
   size?: number;
-  /** Hiasan tambahan; belum dipakai. */
-  look?: unknown;
-  /** Momo milik anak yang sedang bermain. */
-  own?: boolean;
-  label?: string;
 }) {
   const face =
     mood === 'proud'

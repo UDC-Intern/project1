@@ -114,52 +114,6 @@ export function Ring({
   );
 }
 
-/** Batang harian generik: tinggi = nilai; `title` per batang untuk pembaca layar. */
-export function DayBars({
-  data,
-  label,
-  format = (n: number) => n.toLocaleString('id-ID'),
-  height = 160,
-  dayLabel,
-  labelEvery,
-}: {
-  data: { date: string; value: number }[];
-  label: string;
-  format?: (n: number) => string;
-  height?: number;
-  dayLabel: (date: string, index: number) => string;
-  /** Tampilkan label sumbu setiap n batang (bawaan: otomatis untuk > 14 batang). */
-  labelEvery?: number;
-}) {
-  const on = useMounted();
-  const max = Math.max(1, ...data.map((d) => d.value));
-  const every = labelEvery ?? (data.length > 14 ? Math.ceil(data.length / 7) : 1);
-  return (
-    <ol className="ch-bars" style={{ height }} aria-label={label}>
-      {data.map((d, i) => (
-        <li
-          key={d.date}
-          aria-label={`${dayLabel(d.date, i)}: ${format(d.value)}`}
-          className="ch-bar"
-        >
-          <span className="ch-bar-track" aria-hidden>
-            <span
-              className="ch-bar-fill"
-              style={{
-                height: on ? `${d.value ? Math.max(4, (d.value / max) * 100) : 0}%` : '0%',
-                transitionDelay: `${Math.min(i, 20) * 25}ms`,
-              }}
-            />
-          </span>
-          <span className="ch-bar-day" aria-hidden>
-            {i % every === 0 || i === data.length - 1 ? dayLabel(d.date, i) : ''}
-          </span>
-        </li>
-      ))}
-    </ol>
-  );
-}
-
 /** Bar horizontal (proporsi), mis. status pesanan atau buku terpopuler. */
 export function Meter({
   value,

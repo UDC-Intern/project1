@@ -6,7 +6,6 @@ import {
   childUpdateSchema,
   type Color,
   type PinPicture,
-  type MomoLook,
   MAX_CHILDREN_PER_PARENT,
 } from '@udakids/engine';
 import { errorMessage } from '../api/client';
@@ -43,7 +42,6 @@ function Form({
   const [color, setColor] = useState<Color>(
     child && isColor(child.momoColor) ? child.momoColor : MOMO_COLORS[0],
   );
-  const look: MomoLook | null = child?.momoLook ?? null;
   const [pin, setPin] = useState<PinPicture[] | null>(null);
   const [classCode] = useState(child?.classCode ?? '');
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -57,7 +55,7 @@ function Form({
     e.preventDefault();
     setError(undefined);
     const input = {
-      ...(withProfile && { nickname, momoColor: color, momoLook: look }),
+      ...(withProfile && { nickname, momoColor: color }),
       ...(withPin && pin && { pin }),
       // Kode kelas (D-022): kosong saat membuat = tanpa kelas; dikosongkan saat mengubah = keluar kelas.
       ...(withProfile &&
@@ -191,7 +189,7 @@ function Form({
           <aside className="cf-side" aria-label={t('parent.form.preview')}>
             <div className="cf-preview">
               <span className="cf-preview-label">{t('parent.form.preview')}</span>
-              <Momo color={color} look={look} mood="happy" size={132} />
+              <Momo color={color} mood="happy" size={132} />
               <strong className="cf-preview-name">
                 {nickname.trim() || t('parent.form.previewName')}
               </strong>

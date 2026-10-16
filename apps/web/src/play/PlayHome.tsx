@@ -107,7 +107,7 @@ export function PlayHome() {
   const top = (
     <header className="kid-top">
       <Link to="/play/profil" className="me-chip" aria-label={t('play.home.profile', { name })}>
-        <Momo own color={momoColor} mood="happy" size={44} />
+        <Momo color={momoColor} mood="happy" size={44} />
         <span className="me-name">{name}</span>
         <span className="me-points">
           <StarIcon />
@@ -179,7 +179,7 @@ export function PlayHome() {
 
       {target && (
         <section className="continue-card">
-          <Momo own color={momoColor} mood="happy" size={96} />
+          <Momo color={momoColor} mood="happy" size={96} />
           <div className="continue-body">
             <div className="kid-say">
               <SpeakButton text={target.say} />

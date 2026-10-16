@@ -1,0 +1,7 @@
+{
+  "steps.label": "Langkah {n} dari {total}",
+  "steps.account": "Isi data",
+  "steps.child": "Profil anak",
+  "steps.verify": "Cek email",
+  "steps.done": "Semua langkah selesai"
+}

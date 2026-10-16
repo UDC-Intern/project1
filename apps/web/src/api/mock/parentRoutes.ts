@@ -188,7 +188,6 @@ function profileOf(db: MockDb, child: MockChild) {
     id: child.id,
     nickname: child.nickname,
     momoColor: child.momoColor,
-    momoLook: null,
     classId: null,
     className: null,
     classCode: null,
