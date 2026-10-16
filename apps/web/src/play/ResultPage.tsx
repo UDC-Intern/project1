@@ -9,6 +9,7 @@ import { useAsync } from '../hooks/useAsync';
 import { useT } from '../i18n';
 import { formatDuration } from '../lib/format';
 import { ErrorState, LoadingState } from '../ui/states';
+import { AutoSpeak } from './AutoSpeak';
 
 const TOTAL = 10;
 
@@ -29,6 +30,9 @@ export function ResultPage() {
 
   return (
     <main className="kid-screen">
+      <AutoSpeak
+        text={`${t('result.summary', { correct: data.correct, total: TOTAL })} ${t(`praise.${group}.${praiseKey}`)}`}
+      />
       <section className={`result-card ${data.passed ? 'is-passed' : 'is-failed'}`}>
         <Momo mood={data.passed ? 'happy' : 'encourage'} size={120} />
         <h1 className="sr-only">{t('result.title')}</h1>

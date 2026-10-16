@@ -12,6 +12,7 @@ import { PageHead } from '../components/PageHead';
 import { useAsync } from '../hooks/useAsync';
 import { useT } from '../i18n';
 import { ErrorState, LoadingState } from '../ui/states';
+import { AutoSpeak } from './AutoSpeak';
 
 type Level = TopicDetail['levels'][number];
 type Example = NonNullable<TopicDetail['example']>;
@@ -176,6 +177,7 @@ export function TopicPage() {
       className="library topic-page"
       data-mapel={bookSlug.startsWith('sains') ? 'sains' : 'matematika'}
     >
+      <AutoSpeak text={`${data.topic.title}. ${intro}`} />
       <PageHead title={data.topic.title} back={`/play/buku/${bookSlug}`} />
 
       <section className="lesson" aria-labelledby="lesson-title">

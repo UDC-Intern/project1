@@ -579,13 +579,26 @@
   margin: 4px 0 0;
   font-size: 1.3rem;
 }
-.book-card p {
+.book-card .book-desc,
+.book-card p:not(.book-age) {
   margin: 0;
   color: var(--s-muted);
+  /* Batasi deskripsi topik ke maksimal 3 baris agar kartu tidak terlalu tinggi */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.5;
+  max-height: 4.6em;
 }
-.book-age {
+
+.book-card .book-age {
+  display: block;
   font-weight: 800;
   color: var(--tone-text) !important;
+  margin: 2px 0 6px;
 }
 .book-levels {
   align-self: flex-start;
@@ -873,16 +886,25 @@
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 12px;
-  padding: 24px clamp(16px, 4vw, 48px);
+  align-items: center;
+  gap: 16px;
+  padding: 28px clamp(16px, 4vw, 48px) calc(84px + env(safe-area-inset-bottom));
   border-top: 1px solid var(--garis);
   color: var(--s-muted);
   font-weight: 700;
 }
 .site-footer nav {
   display: flex;
-  gap: 18px;
+  gap: 20px;
   flex-wrap: wrap;
+  align-items: center;
+  margin-right: 170px; /* Jarak aman agar link tidak pernah tertutup FAB WhatsApp */
+}
+@media (max-width: 640px) {
+  .site-footer nav {
+    margin-right: 0;
+    margin-bottom: 40px;
+  }
 }
 .site-footer a {
   color: var(--s-ink);

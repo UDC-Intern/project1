@@ -4,6 +4,7 @@ import { profile } from '../api/catalog';
 import { useSession } from '../auth/store';
 import { OwnMomoLook } from './Momo';
 import { useOwnMomo } from '../play/momoStore';
+import { TapVoice } from '../play/TapVoice';
 
 /**
  * Pembungkus area anak. Tiap halaman menaruh kepalanya sendiri (kid-top di beranda, PageHead di halaman lain).
@@ -28,6 +29,7 @@ export function ChildLayout() {
   return (
     <OwnMomoLook look={look}>
       <div className="kid-app">
+        <TapVoice />
         <Outlet />
       </div>
     </OwnMomoLook>

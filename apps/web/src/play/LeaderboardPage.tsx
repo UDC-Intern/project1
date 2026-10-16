@@ -10,6 +10,7 @@ import { useT } from '../i18n';
 import { formatDuration } from '../lib/format';
 import { Dialog } from '../ui/Dialog';
 import { ErrorState, LoadingState } from '../ui/states';
+import { AutoSpeak } from './AutoSpeak';
 
 const MODES: LeaderboardMode[] = ['average', 'total', 'mock'];
 
@@ -74,6 +75,7 @@ export function LeaderboardPage() {
 
   return (
     <main className="library board-page">
+      {data && <AutoSpeak text={`${t('rank.title')}. ${say}`} />}
       <PageHead title={t('rank.title')} />
 
       <nav className="rank-modes" aria-label={t('rank.modes')}>

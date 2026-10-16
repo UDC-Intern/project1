@@ -794,6 +794,15 @@ a.level-card:active {
   gap: 18px;
   width: 100%;
 }
+/* Wrapper pilihan jawaban: padding bawah dinamis mengikuti tinggi feedback (agar tidak tertutup) */
+.interaction {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: var(--feedback-h, 0px);
+}
+
 .item-prompt {
   display: flex;
   align-items: center;
@@ -922,23 +931,48 @@ a.level-card:active {
 }
 
 .feedback {
-  position: fixed;
-  left: 50%;
+  position: static;
+  left: auto;
   right: auto;
-  transform: translateX(-50%);
-  bottom: 16px;
-  width: min(1000px, calc(100% - 32px));
+  bottom: auto;
+  transform: none;
+  width: 100%;
+  max-width: 860px;
+  margin: 24px auto 0;
   box-sizing: border-box;
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 16px;
-  padding: 14px 18px;
+  padding: 16px 20px;
   background: var(--kertas);
   border: 4px solid var(--garis-tegas);
   border-radius: 28px;
-  box-shadow: 0 8px 0 var(--garis-tegas);
+  box-shadow: 0 6px 0 var(--garis-tegas);
   z-index: 10;
-  flex-wrap: wrap;
+  animation: feedback-in 0.2s ease-out;
+}
+@keyframes feedback-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (max-width: 640px) {
+  .feedback {
+    grid-template-columns: auto minmax(0, 1fr);
+    padding: 14px;
+    gap: 12px;
+  }
+  .feedback .next-btn {
+    grid-column: 1 / -1;
+    width: 100%;
+    margin-top: 6px;
+  }
 }
 .feedback.is-right {
   background: var(--sawah-soft);
@@ -1474,11 +1508,97 @@ a.level-card:active {
   background: var(--kunyit-soft);
   border-color: var(--kunyit);
 }
+/* ── Navigasi Kelas (Jenjang) Anak ── */
 .grade-chips {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   overflow-x: auto;
-  padding: 4px 2px 8px;
+  scrollbar-width: thin;
+  padding: 8px 4px 14px;
+  margin: 12px 0 8px;
+  align-items: center;
+}
+.grade-chip {
+  flex: none;
+  min-height: 52px;
+  padding: 0 24px;
+  border: 3px solid var(--malam);
+  border-radius: 999px;
+  background: var(--kertas);
+  font-family: var(--font-display, inherit);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--malam);
+  cursor: pointer;
+  box-shadow: 0 4px 0 var(--malam);
+  transition:
+    transform 0.1s ease,
+    box-shadow 0.1s ease,
+    background 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.grade-chip:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 var(--malam);
+  background: var(--awan);
+}
+.grade-chip:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 var(--malam);
+}
+.grade-chip.is-on {
+  background: var(--gonjong);
+  border-color: var(--malam);
+  color: #ffffff;
+  box-shadow: 0 4px 0 var(--malam);
+}
+.grade-chip.is-on:hover {
+  background: var(--gonjong-tekan, #b02a19);
+}
+.grade-chip:focus-visible {
+  outline: 4px solid var(--kunyit);
+  outline-offset: 3px;
+}
+
+/* ── Tab Buku / Mata Pelajaran ── */
+.book-tabs {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 6px 0 12px;
+}
+.book-tab {
+  min-height: 48px;
+  padding: 0 22px;
+  border: 3px solid var(--malam);
+  border-radius: 16px;
+  background: var(--kertas);
+  font-family: var(--font-display, inherit);
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--malam);
+  cursor: pointer;
+  box-shadow: 0 3px 0 var(--malam);
+  transition:
+    transform 0.1s ease,
+    box-shadow 0.1s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.book-tab:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 var(--malam);
+}
+.book-tab.is-on {
+  background: var(--kunyit);
+  color: var(--on-kunyit);
+}
+.book-tab:focus-visible {
+  outline: 4px solid var(--gonjong);
+  outline-offset: 2px;
 }
 
 /* ── Peringkat: mode, mahkota, detail, kartu posisi sendiri ── */
@@ -1553,4 +1673,324 @@ a.level-card:active {
   border: 3px solid var(--gonjong);
   border-radius: 20px;
   font-weight: 700;
+}
+
+/* ── Profil anak (/play/profil) ── */
+.profile-page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 16px clamp(12px, 3vw, 24px) 48px;
+}
+.profile-page .profile-hero {
+  border: 3.5px solid var(--garis-tegas);
+  border-radius: 28px;
+  background: #fef6e9;
+  box-shadow: 0 4px 0 var(--garis-tegas);
+  padding: 24px clamp(18px, 4vw, 36px);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 28px;
+  margin-bottom: 24px;
+}
+.profile-avatar {
+  flex: none;
+  width: 136px;
+  height: 136px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 3.5px solid var(--garis-tegas);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.05);
+}
+.profile-id {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.profile-id h1 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 2.6rem);
+  font-weight: 900;
+  color: var(--malam);
+  letter-spacing: -0.02em;
+}
+.profile-sub {
+  margin: 0 0 16px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--malam-muted, #666);
+}
+.profile-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.profile-speaker {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #f59f00 !important;
+  border: 3px solid var(--garis-tegas) !important;
+  color: #1a1a1a !important;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 3px 0 var(--garis-tegas) !important;
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.08s ease;
+  padding: 0;
+}
+.profile-speaker:hover {
+  transform: translateY(-1px);
+}
+.profile-speaker:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--garis-tegas) !important;
+}
+.profile-board-btn {
+  background: #d93829 !important;
+  color: #ffffff !important;
+  border: 3px solid var(--garis-tegas) !important;
+  border-radius: 14px !important;
+  font-weight: 800 !important;
+  padding: 10px 22px !important;
+  box-shadow: 0 3px 0 var(--garis-tegas) !important;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.profile-actions .kid-btn.secondary {
+  background: #ffffff !important;
+  color: #1a1a1a !important;
+  border: 3px solid var(--garis-tegas) !important;
+  border-radius: 14px !important;
+  font-weight: 800 !important;
+  padding: 10px 20px !important;
+  box-shadow: 0 3px 0 var(--garis-tegas) !important;
+  white-space: nowrap;
+}
+.profile-actions .kid-btn.secondary.is-active {
+  background: var(--awan) !important;
+  border-color: #d93829 !important;
+}
+.mode-toggle-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  white-space: nowrap;
+}
+
+/* Grid 7 stat profil persis referensi Image 4 */
+.profile-stats.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.profile-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  padding: 18px 14px;
+  border: 3px solid var(--garis-tegas);
+  border-radius: 20px;
+  box-shadow: 0 4px 0 var(--garis-tegas);
+  text-decoration: none;
+  color: var(--malam);
+}
+.profile-stat .stat-icon {
+  margin-bottom: 2px;
+}
+.profile-stat .profile-value {
+  font-size: 1.85rem;
+  font-weight: 900;
+  line-height: 1.1;
+  color: var(--malam);
+}
+.profile-stat .profile-label {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--malam);
+  opacity: 0.85;
+}
+/* Warna-warni latar belakang & ikon sesuai referensi */
+.profile-stat.is-points {
+  background: #fff9db;
+}
+.profile-stat.is-points .stat-icon {
+  color: #f59f00;
+}
+.profile-stat.is-passed {
+  background: #e6fcf5;
+}
+.profile-stat.is-passed .stat-icon {
+  color: #2b8a3e;
+}
+.profile-stat.is-highest {
+  background: #e7f5ff;
+}
+.profile-stat.is-highest .stat-icon {
+  color: #1971c2;
+}
+.profile-stat.is-time {
+  background: #fff4e6;
+}
+.profile-stat.is-time .stat-icon {
+  color: #d9480f;
+}
+.profile-stat.is-played {
+  background: #e6fcf5;
+}
+.profile-stat.is-played .stat-icon {
+  color: #0ca678;
+}
+.profile-stat.is-answered {
+  background: #fff0f6;
+}
+.profile-stat.is-answered .stat-icon {
+  color: #d6336c;
+}
+.profile-stat.is-rank {
+  background: #fff5f5;
+  grid-column: 1 / 2;
+}
+.profile-stat.is-rank .stat-icon {
+  color: #e03131;
+}
+
+@media (max-width: 768px) {
+  .profile-stats.profile-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .profile-stat.is-rank {
+    grid-column: 1 / -1;
+  }
+  .profile-page .profile-hero {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .profile-id .profile-actions {
+    justify-content: center;
+  }
+}
+@media (max-width: 480px) {
+  .profile-stats.profile-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Riwayat latihan */
+.history {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.history h2 {
+  font-size: 1.3rem;
+  margin: 0;
+}
+.history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.history-row {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  align-items: center;
+  gap: 14px;
+  background: var(--kertas);
+  border: 3px solid var(--garis-tegas);
+  border-radius: 20px;
+  padding: 10px 14px;
+}
+.history-score {
+  font-size: 1.7rem;
+  font-weight: 900;
+  text-align: center;
+  border-radius: 14px;
+  padding: 4px 0;
+}
+.history-row.is-passed .history-score {
+  background: var(--sawah-soft);
+  color: var(--kid-good);
+}
+.history-row.is-failed .history-score {
+  background: var(--kunyit-soft);
+  color: var(--kunyit-teks, var(--malam));
+}
+.history-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.history-main small {
+  color: var(--malam-muted);
+  font-size: 0.875rem;
+}
+.history-badge {
+  font-weight: 800;
+  font-size: 0.9rem;
+  border-radius: 999px;
+  padding: 4px 12px;
+  white-space: nowrap;
+}
+.history-row.is-passed .history-badge {
+  background: var(--kid-good);
+  color: var(--on-sawah);
+}
+.history-row.is-failed .history-badge {
+  background: var(--kid-bad);
+  color: var(--on-kunyit, var(--malam));
+}
+
+/* Ganti warna Momo (swatches) */
+.swatches-box {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.swatches-box h2 {
+  font-size: 1.3rem;
+  margin: 0;
+}
+.swatch-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.swatch-btn {
+  border: 4px solid var(--garis-tegas);
+  border-radius: 20px;
+  background: var(--kertas);
+  cursor: pointer;
+  padding: 6px;
+  box-shadow: 0 4px 0 var(--garis-tegas);
+  transition:
+    transform 0.08s,
+    box-shadow 0.08s;
+}
+.swatch-btn[aria-pressed='true'] {
+  border-color: var(--gonjong);
+  background: var(--gonjong-soft);
+  box-shadow: 0 4px 0 var(--gonjong);
+}
+.swatch-btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--garis-tegas);
+}
+.swatch-btn[aria-pressed='true']:active {
+  box-shadow: 0 1px 0 var(--gonjong);
 }

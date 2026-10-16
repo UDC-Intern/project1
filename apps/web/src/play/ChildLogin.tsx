@@ -10,6 +10,7 @@ import { Momo } from '../components/Momo';
 import { PicturePin } from '../components/PicturePin';
 import { APP_NAME } from '../config/app';
 import { useT } from '../i18n';
+import { AutoSpeak } from './AutoSpeak';
 
 type Profile = Awaited<ReturnType<typeof familyProfiles>>['profiles'][number];
 const CODE_LENGTH = 6;
@@ -91,6 +92,7 @@ export function ChildLogin() {
         </Link>
       </header>
       <main className="kid-screen kid-login">
+        <AutoSpeak text={say} />
         <Momo
           color={chosen?.momoColor ?? 'blue'}
           mood={message ? 'encourage' : 'happy'}

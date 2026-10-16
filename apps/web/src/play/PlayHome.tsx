@@ -11,6 +11,7 @@ import { ErrorState, LoadingState } from '../ui/states';
 import { PetaBelajar } from './peta/PetaBelajar';
 import type { PlayStatus, Shelf } from './peta/types';
 import { SpeakButton } from './SpeakButton';
+import { AutoSpeak } from './AutoSpeak';
 
 const GRADE_KEY = 'udakids.library.grade';
 const BOOK_KEY = 'udakids.library.book';
@@ -174,6 +175,7 @@ export function PlayHome() {
   return (
     <main className="home" data-mapel={active?.subject === 'science' ? 'sains' : 'matematika'}>
       {top}
+      {target && <AutoSpeak text={target.say} />}
 
       {target && (
         <section className="continue-card">
