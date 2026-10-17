@@ -2,17 +2,25 @@ import { describe, expect, it } from 'vitest';
 import {
   BANK_MAX_QUESTIONS,
   BANK_MIN_QUESTIONS,
+  SUBJECT_PRESETS,
   bankFromLevel,
   bankIssues,
   bankQuestionSchema,
   bankToLevel,
+  bookContentSchema,
   bookInputSchema,
   bookSlugOf,
   bookTitleOf,
+  catalogHomeSchema,
+  certificateBookSchema,
   generateRound,
   levelSource,
   nextTopicCode,
   questionBankSchema,
+  subjectCodeOf,
+  subjectDomainOf,
+  subjectNameOf,
+  subjectSlugOf,
   topicInputSchema,
   type BankQuestion,
 } from '../src/index.js';
@@ -38,6 +46,132 @@ describe('nama buku dan kode topik', () => {
     expect(nextTopicCode([])).toBe('T1');
     expect(nextTopicCode(['A', 'KB'])).toBe('T1');
     expect(nextTopicCode(['T1', 't2'])).toBe('T3');
+  });
+});
+
+describe('mata pelajaran dinamis', () => {
+  it('alamat rapi dari nama bahasa Indonesia atau Inggris', () => {
+    expect(subjectSlugOf('Matematika')).toBe('matematika');
+    expect(subjectSlugOf('math')).toBe('matematika');
+    expect(subjectSlugOf('Mathematics')).toBe('matematika');
+    expect(subjectSlugOf('Science')).toBe('sains');
+    expect(subjectSlugOf('Sains')).toBe('sains');
+    expect(subjectSlugOf('Bahasa Inggris')).toBe('bahasa-inggris');
+    expect(subjectSlugOf('English')).toBe('bahasa-inggris');
+    expect(subjectSlugOf('  Seni   Budaya ')).toBe('seni-budaya');
+    expect(subjectSlugOf('Seni & Budaya')).toBe('seni-dan-budaya');
+    expect(subjectSlugOf('Pendidikan Kewarganegaraan (PKn)')).toBe(
+      'pendidikan-kewarganegaraan-pkn',
+    );
+    expect(subjectSlugOf('Pelajaran Pengantar Kimia')).toBe('pelajaran-pengantar-kimia');
+    expect(subjectSlugOf('Éducation')).toBe('education');
+    expect(subjectSlugOf('!!!')).toBe('');
+  });
+
+  it('nama tampilan: nama ketikan dijaga, kode dan alamat dirapikan', () => {
+    expect(subjectNameOf('math')).toBe('Matematika');
+    expect(subjectNameOf('science')).toBe('Sains');
+    expect(subjectNameOf('english')).toBe('Bahasa Inggris');
+    expect(subjectNameOf('seni-budaya')).toBe('Seni Budaya');
+    expect(subjectNameOf('coding')).toBe('Coding');
+    expect(subjectNameOf('IPS')).toBe('IPS');
+    expect(subjectNameOf('  Seni   Budaya ')).toBe('Seni Budaya');
+  });
+
+  it('nilai yang disimpan: kode lama untuk Matematika dan Sains, selain itu nama rapi', () => {
+    expect(subjectCodeOf('Matematika')).toBe('math');
+    expect(subjectCodeOf('math')).toBe('math');
+    expect(subjectCodeOf('Sains')).toBe('science');
+    expect(subjectCodeOf('science')).toBe('science');
+    expect(subjectCodeOf('bahasa inggris')).toBe('Bahasa Inggris');
+    expect(subjectCodeOf('coding')).toBe('Coding');
+    expect(subjectCodeOf('IPS')).toBe('IPS');
+    // Nilai yang sudah tersimpan tidak berubah bila dirapikan lagi.
+    for (const stored of ['math', 'science', 'Bahasa Inggris', 'Coding', 'IPS'])
+      expect(subjectCodeOf(stored)).toBe(stored);
+    for (const preset of SUBJECT_PRESETS) expect(subjectCodeOf(preset)).toBe(preset);
+  });
+
+  it('kunci mapel untuk keanggotaan dan laporan', () => {
+    expect(subjectDomainOf('math')).toBe('math');
+    expect(subjectDomainOf('science')).toBe('sains');
+    expect(subjectDomainOf('Bahasa Inggris')).toBe('bahasa-inggris');
+  });
+
+  it('alamat dan judul buku untuk mapel baru', () => {
+    expect(bookSlugOf('Bahasa Inggris', 5)).toBe('bahasa-inggris-kelas-5');
+    expect(bookSlugOf('english', 5)).toBe('bahasa-inggris-kelas-5');
+    expect(bookSlugOf('Seni Budaya', 3)).toBe('seni-budaya-kelas-3');
+    expect(bookTitleOf('Bahasa Inggris', 5)).toBe('Bahasa Inggris Kelas 5');
+    expect(bookTitleOf('coding', 4)).toBe('Coding Kelas 4');
+  });
+
+  it('skema menerima mapel baru di buku masukan, konten, dan jawaban API', () => {
+    const topic = {
+      title: 'Greetings',
+      lesson: 'Kita belajar menyapa teman dalam bahasa Inggris.',
+      tips: [],
+      levels: [{ title: 'Hello' }],
+    };
+    for (const subject of ['Bahasa Inggris', 'Coding', 'Seni Budaya', 'IPS'])
+      expect(bookInputSchema.safeParse({ subject, grade: 5, title: 'Buku', topic }).success).toBe(
+        true,
+      );
+    expect(
+      bookInputSchema.safeParse({ subject: '!!!', grade: 5, title: 'Buku', topic }).success,
+    ).toBe(false);
+    expect(
+      bookInputSchema.safeParse({ subject: 'x'.repeat(41), grade: 5, title: 'Buku', topic })
+        .success,
+    ).toBe(false);
+
+    const content = {
+      slug: 'bahasa-inggris-kelas-5',
+      grade: 'sd5',
+      subject: 'Bahasa Inggris',
+      title: 'Bahasa Inggris Kelas 5',
+      sort: 150,
+      topics: [
+        {
+          code: 'T1',
+          title: 'Greetings',
+          sort: 1,
+          lesson: topic.lesson,
+          levels: [{ number: 1, title: 'Hello', isFree: true, generator: null }],
+        },
+      ],
+    };
+    expect(bookContentSchema.safeParse(content).success).toBe(true);
+    expect(bookContentSchema.safeParse({ ...content, subject: '' }).success).toBe(false);
+
+    const home = {
+      continue: null,
+      books: [
+        {
+          slug: content.slug,
+          title: content.title,
+          subject: 'Bahasa Inggris',
+          grade: 5,
+          topicsTotal: 1,
+          topicsStarted: 0,
+        },
+      ],
+    };
+    expect(catalogHomeSchema.safeParse(home).success).toBe(true);
+    expect(
+      certificateBookSchema.safeParse({
+        bookSlug: content.slug,
+        bookTitle: content.title,
+        subject: 'Bahasa Inggris',
+        grade: 5,
+        topicsTotal: 1,
+        levelsPassed: 0,
+        levelsTotal: 1,
+        status: 'not_finished',
+        design: 'klasik',
+        certificate: null,
+      }).success,
+    ).toBe(true);
   });
 });
 
@@ -87,7 +221,7 @@ describe('topik dan buku masukan admin', () => {
     const book = { subject: 'math', grade: 5, title: 'Matematika Kelas 5', topic };
     expect(bookInputSchema.safeParse(book).success).toBe(true);
     expect(bookInputSchema.safeParse({ ...book, grade: 7 }).success).toBe(false);
-    expect(bookInputSchema.safeParse({ ...book, subject: 'seni' }).success).toBe(false);
+    expect(bookInputSchema.safeParse({ ...book, subject: '   ' }).success).toBe(false);
     expect(bookInputSchema.safeParse({ ...book, topic: undefined }).success).toBe(false);
     expect(bookInputSchema.safeParse({ ...book, extra: 1 }).success).toBe(false);
   });

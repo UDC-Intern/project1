@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { LevelQuestions } from '../src/api/mock/syllabus';
 import type { CatalogBook } from '../src/api/adminTypes';
 import { ApiError } from '../src/api/client';
@@ -10,6 +10,7 @@ import { BOOKS, applyEdits, readDb, resetMockDb, writeDb } from '../src/api/mock
 import { startRound } from '../src/api/practice';
 import { CatalogPage } from '../src/admin/catalog/CatalogPage';
 import { useSession } from '../src/auth/store';
+import * as i18n from '../src/i18n';
 
 const ADMIN = 'mock-admin:a-demo';
 const adm = <T,>(path: string, method = 'GET', body?: Record<string, unknown>) =>
@@ -536,6 +537,34 @@ describe('Silabus Belajar: halaman', () => {
     const stored = (saved?.generatorParams as { params: { items: { answer: number }[] } }).params
       .items;
     expect(stored.map((q) => q.answer)).toEqual([0, 0, 1, 0]);
+  });
+
+  it('mengetik di satu soal tidak menggambar ulang kartu soal lainnya', async () => {
+    await adm('/admin/books/matematika-kelas-1/topics', 'POST', newTopic());
+    renderPage();
+    const book = await firstBook();
+    fireEvent.click(within(book).getByRole('button', { name: 'Ubah topik Mengenal bentuk' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Tulis soal level 1' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Soal level 1: Bentuk dasar' });
+    const first = await within(dialog).findByLabelText('Pertanyaan 1');
+
+    // Tiap kali sebuah kartu digambar, judul "Soal n" dibuat ulang lewat t(); kartu yang tidak digambar tidak memanggilnya.
+    const spy = vi.spyOn(i18n, 't');
+    const drawn = (n: number) =>
+      spy.mock.calls.filter(
+        ([key, params]) =>
+          key === 'admin.bank.question' && (params as { n?: number } | undefined)?.n === n,
+      ).length;
+    for (const text of ['B', 'Bo', 'Bol', 'Bola'])
+      fireEvent.change(first, { target: { value: text } });
+    expect(first).toHaveValue('Bola');
+    expect(drawn(1)).toBeGreaterThan(0);
+    for (const other of [2, 3, 4]) expect(drawn(other)).toBe(0);
+
+    // Mengubah daftar (tambah soal) tetap menggambar kartu baru.
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Tambah soal' }));
+    expect(drawn(5)).toBeGreaterThan(0);
+    spy.mockRestore();
   });
 
   it('tambah buku lewat dialog; pasangan mapel dan kelas yang sudah ada ditolak', async () => {

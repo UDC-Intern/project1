@@ -941,6 +941,113 @@
   gap: 0 12px;
 }
 
+/* Pilihan tanda tangan di dialog "Atur isi lembar": pilihan bentuk, kanvas tulis, dan unggah foto. */
+
+.sign-editor {
+  display: grid;
+  gap: 10px;
+  margin: 2px 0 12px;
+}
+
+/* Tiga pilihan memenuhi lebar kelompok isian; tulisan boleh turun baris di layar sempit. */
+.sign-editor .ui-seg {
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.sign-editor .ui-seg-btn {
+  flex: 1 1 auto;
+  padding: 6px 8px;
+  line-height: 1.2;
+  text-align: center;
+  white-space: normal;
+}
+
+.sign-draw,
+.sign-upload {
+  display: grid;
+  gap: 8px;
+}
+
+/* Kanvas tulis 350 × 120 (digambar 700 × 240): garis bantu di bawah, tulisan petunjuk hilang saat mulai menggores. */
+.sign-pad {
+  position: relative;
+  width: 100%;
+  border: 1.5px dashed var(--ui-line-strong);
+  border-radius: 12px;
+  background: var(--ui-surface);
+  overflow: hidden;
+}
+
+.sign-pad::after {
+  content: '';
+  position: absolute;
+  inset: auto 14px 28px;
+  border-top: 1.5px solid var(--ui-line);
+  pointer-events: none;
+}
+
+.sign-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  cursor: crosshair;
+  /* Sentuhan di kanvas menggores, bukan menggulir halaman. */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.sign-canvas:focus-visible {
+  outline: 3px solid var(--kunyit);
+  outline-offset: 2px;
+}
+
+.sign-placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--ui-muted);
+  font-size: 14px;
+  pointer-events: none;
+}
+
+/* Berkas dipilih lewat tombol; kolom aslinya disembunyikan tetapi tetap dikenal pembaca layar. */
+.sign-file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Hasil unggahan di atas papan kotak-kotak supaya latar yang sudah transparan terlihat. */
+.sign-thumb {
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+  margin: 0;
+}
+
+.sign-thumb img {
+  max-width: min(100%, 260px);
+  max-height: 96px;
+  padding: 8px;
+  border: 1px solid var(--ui-line);
+  border-radius: 10px;
+  background: conic-gradient(
+      var(--awan-2) 25%,
+      var(--kertas) 0 50%,
+      var(--awan-2) 0 75%,
+      var(--kertas) 0
+    )
+    0 0 / 16px 16px;
+  object-fit: contain;
+}
+
 /* Bilah tombol dialog: tetap terlihat di dasar saat isian digulir; geser sejauh padding dialog agar rata tepinya. */
 .dlg-actions {
   position: sticky;

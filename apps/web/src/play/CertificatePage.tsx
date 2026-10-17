@@ -11,6 +11,7 @@ import { Momo } from '../components/Momo';
 import { PageHead } from '../components/PageHead';
 import { useAsync } from '../hooks/useAsync';
 import { t as tt, useT } from '../i18n';
+import { mapelOf } from '../lib/mapel';
 import { ErrorState, LoadingState } from '../ui/states';
 import { AutoSpeak } from './AutoSpeak';
 import { rememberBook } from './libraryChoice';
@@ -73,10 +74,7 @@ export function CertificatePage() {
   }
 
   return (
-    <main
-      className="library cert-kid"
-      data-mapel={data.subject === 'science' ? 'sains' : 'matematika'}
-    >
+    <main className="library cert-kid" data-mapel={mapelOf(data.subject)}>
       <PageHead title={t('cert.title')} sub={data.bookTitle} back="/play" />
       {data.certificate ? (
         <Issued sheet={sheetDataOf(data.certificate, settings)} />

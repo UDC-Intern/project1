@@ -36,7 +36,7 @@ export const topicContentSchema = z.object({
 export const bookContentSchema = z.object({
   slug: z.string().regex(/^[a-z0-9-]+$/),
   grade: z.string(),
-  subject: z.enum(['math', 'science']),
+  subject: z.string().trim().min(1).max(40),
   title: z.string().trim().min(1).max(60),
   sort: z.number().int(),
   topics: z.array(topicContentSchema).min(1).max(60),

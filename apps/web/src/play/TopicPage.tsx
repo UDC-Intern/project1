@@ -11,6 +11,7 @@ import { Momo } from '../components/Momo';
 import { PageHead } from '../components/PageHead';
 import { useAsync } from '../hooks/useAsync';
 import { useT } from '../i18n';
+import { mapelOfSlug } from '../lib/mapel';
 import { ErrorState, LoadingState } from '../ui/states';
 import { AutoSpeak } from './AutoSpeak';
 import { BOOK_KEY, remember } from './libraryChoice';
@@ -180,10 +181,7 @@ export function TopicPage() {
   const tips = sentences.slice(1);
 
   return (
-    <main
-      className="library topic-page"
-      data-mapel={bookSlug.startsWith('sains') ? 'sains' : 'matematika'}
-    >
+    <main className="library topic-page" data-mapel={mapelOfSlug(bookSlug)}>
       <AutoSpeak text={`${data.topic.title}. ${intro}`} />
       <PageHead title={data.topic.title} />
 

@@ -79,7 +79,7 @@ html {
   color: var(--malam);
 }
 
-/* Warna mapel aktif: pasang data-mapel="matematika" atau "sains" pada pembungkus halaman. */
+/* Warna mapel aktif: pasang data-mapel="matematika", "sains", atau "umum" (mapel lain) pada pembungkus halaman. */
 [data-mapel='matematika'] {
   --m: #c8321f;
   --m-soft: #fdecea;
@@ -93,4 +93,11 @@ html {
   --m-text: #2b7a3d;
   --on-m: #ffffff;
   --m-tekan: #1d5a2b;
+}
+[data-mapel='umum'] {
+  --m: #1f6fc5;
+  --m-soft: #e4f0fd;
+  --m-text: #17589e;
+  --on-m: #ffffff;
+  --m-tekan: #134f8f;
 }

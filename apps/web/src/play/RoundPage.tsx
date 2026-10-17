@@ -15,6 +15,7 @@ import { RoundProgress } from '../components/RoundProgress';
 import { Stopwatch } from '../components/Stopwatch';
 import { useAsync } from '../hooks/useAsync';
 import { useT } from '../i18n';
+import { mapelOfSlug } from '../lib/mapel';
 import { ErrorState, LoadingState } from '../ui/states';
 
 type FeedbackData = {
@@ -184,7 +185,7 @@ export function RoundPage() {
   const topicTitle = meta.data?.topic.title;
 
   return (
-    <main className="practice" data-mapel={levelId.startsWith('sains') ? 'sains' : 'matematika'}>
+    <main className="practice" data-mapel={mapelOfSlug(levelId)}>
       <header className="practice-head">
         <Link to={`/play/topik/${topicId}`} className="kid-link" aria-label={t('round.quit')}>
           <BackIcon size={30} />

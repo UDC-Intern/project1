@@ -152,7 +152,7 @@ export const catalogHomeSchema = z.object({
     z.object({
       slug: z.string(),
       title: z.string(),
-      subject: z.enum(['math', 'science']),
+      subject: z.string().trim().min(1).max(40),
       /** Kelas 1 sampai 4. */
       grade: z.number().int().min(1).max(6),
       topicsTotal: z.number().int(),
@@ -164,7 +164,11 @@ export const catalogHomeSchema = z.object({
 export type CatalogHome = z.infer<typeof catalogHomeSchema>;
 
 export const bookDetailSchema = z.object({
-  book: z.object({ slug: z.string(), title: z.string(), subject: z.enum(['math', 'science']) }),
+  book: z.object({
+    slug: z.string(),
+    title: z.string(),
+    subject: z.string().trim().min(1).max(40),
+  }),
   topics: z.array(
     z.object({
       id: z.string(),
@@ -440,7 +444,7 @@ export const CERTIFICATE_BOOK_STATUSES = [
 export const certificateBookSchema = z.object({
   bookSlug: z.string(),
   bookTitle: z.string(),
-  subject: z.enum(['math', 'science']),
+  subject: z.string().trim().min(1).max(40),
   grade: z.number().int(),
   topicsTotal: z.number().int(),
   levelsPassed: z.number().int(),

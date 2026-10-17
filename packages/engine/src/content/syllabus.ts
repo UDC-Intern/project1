@@ -7,24 +7,95 @@ import { checkChildText } from './validate-question.js';
  * formulir admin (pemeriksaan langsung) dan oleh server atau data tiruan (pemeriksaan akhir).
  */
 
-export const SYLLABUS_SUBJECTS = ['math', 'science'] as const;
-export type SyllabusSubject = (typeof SYLLABUS_SUBJECTS)[number];
-
 export const SYLLABUS_GRADES = [1, 2, 3, 4, 5, 6] as const;
 export const MAX_LEVELS_PER_TOPIC = 12;
 export const MAX_TOPICS_PER_BOOK = 60;
 export const MAX_TIPS = 6;
 
-const SUBJECT_NAME: Record<SyllabusSubject, string> = { math: 'Matematika', science: 'Sains' };
-const SUBJECT_SLUG: Record<SyllabusSubject, string> = { math: 'matematika', science: 'sains' };
+// ---- Mata pelajaran ----
+//
+// Mapel tidak dibatasi daftar tetap. Matematika dan Sains tersimpan sebagai kode lama ('math', 'science') supaya
+// konten yang sudah ada tetap sah; mapel lain tersimpan sebagai namanya ("Bahasa Inggris", "Seni Budaya", "IPS").
+// Alamat buku diturunkan dari nama itu, jadi satu mapel selalu mendapat alamat yang sama.
+
+/** Mapel yang selalu ditawarkan di formulir tambah buku, walau belum punya buku. Nilainya seperti yang disimpan. */
+export const SUBJECT_PRESETS = ['math', 'science', 'Bahasa Inggris'] as const;
+
+/** Nama bahasa Inggris atau kode lama → alamat bahasa Indonesia. */
+const SLUG_ALIASES: Record<string, string> = {
+  math: 'matematika',
+  maths: 'matematika',
+  mathematics: 'matematika',
+  science: 'sains',
+  english: 'bahasa-inggris',
+  indonesian: 'bahasa-indonesia',
+};
+
+/** Alamat yang namanya sudah pasti rapi (dipakai bila nama diketik huruf kecil semua). */
+const KNOWN_NAMES: Record<string, string> = {
+  matematika: 'Matematika',
+  sains: 'Sains',
+  'bahasa-inggris': 'Bahasa Inggris',
+  'bahasa-indonesia': 'Bahasa Indonesia',
+};
+
+/** Huruf kecil, tanpa aksen, selain huruf dan angka menjadi satu tanda hubung ("Seni & Budaya" → "seni-dan-budaya"). */
+const slugify = (text: string) =>
+  text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/&/g, ' dan ')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+/**
+ * Alamat rapi sebuah mapel dari nama atau kodenya, dalam bahasa Indonesia atau Inggris: "Math" dan "Matematika" →
+ * "matematika", "Science" → "sains", "Bahasa Inggris" dan "English" → "bahasa-inggris". Kosong bila tidak ada huruf
+ * atau angka sama sekali.
+ */
+export function subjectSlugOf(nameOrSlug: string): string {
+  const slug = slugify(nameOrSlug);
+  return SLUG_ALIASES[slug] ?? slug;
+}
+
+/**
+ * Nama tampilan sebuah mapel dari nilai yang tersimpan. Nama yang diketik admin dipakai apa adanya ("IPS", "Seni
+ * Budaya"); kode atau alamat huruf kecil dirapikan ("math" → "Matematika", "seni-budaya" → "Seni Budaya").
+ */
+export function subjectNameOf(subject: string): string {
+  const text = subject.trim().replace(/\s+/g, ' ');
+  const known = KNOWN_NAMES[subjectSlugOf(text)];
+  if (known) return known;
+  if (/[A-Z]/.test(text)) return text;
+  return text
+    .split(/[-\s]+/)
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
+
+/** Nilai `subject` yang disimpan: 'math' atau 'science' untuk dua mapel lama, selain itu nama yang rapi. */
+export function subjectCodeOf(nameOrSlug: string): string {
+  const slug = subjectSlugOf(nameOrSlug);
+  if (slug === 'matematika') return 'math';
+  if (slug === 'sains') return 'science';
+  return subjectNameOf(nameOrSlug);
+}
+
+/** Kunci mapel di data keanggotaan dan laporan: 'math', 'sains', atau alamat mapel lain. */
+export function subjectDomainOf(subject: string): string {
+  const slug = subjectSlugOf(subject);
+  return slug === 'matematika' ? 'math' : slug;
+}
 
 /** Nama buku bawaan untuk mapel dan kelas, mis. "Matematika Kelas 5". */
-export const bookTitleOf = (subject: SyllabusSubject, grade: number) =>
-  `${SUBJECT_NAME[subject]} Kelas ${grade}`;
+export const bookTitleOf = (subject: string, grade: number) =>
+  `${subjectNameOf(subject)} Kelas ${grade}`;
 
 /** Alamat buku: satu buku untuk satu pasangan mapel dan kelas, mis. "matematika-kelas-5". */
-export const bookSlugOf = (subject: SyllabusSubject, grade: number) =>
-  `${SUBJECT_SLUG[subject]}-kelas-${grade}`;
+export const bookSlugOf = (subject: string, grade: number) =>
+  `${subjectSlugOf(subject)}-kelas-${grade}`;
 
 /** Kode topik berikutnya yang belum dipakai: T1, T2, dan seterusnya. */
 export function nextTopicCode(used: readonly string[]): string {
@@ -78,7 +149,13 @@ export const topicInputSchema = z
 export type TopicInput = z.infer<typeof topicInputSchema>;
 
 export const bookInputSchema = z.strictObject({
-  subject: z.enum(SYLLABUS_SUBJECTS),
+  /** Nama atau kode mapel; alamat bukunya diturunkan dari sini (lihat `subjectSlugOf`). */
+  subject: z
+    .string()
+    .trim()
+    .min(1, 'Pilih atau tulis nama mata pelajaran.')
+    .max(40, 'Nama mata pelajaran maksimal 40 huruf.')
+    .refine((v) => subjectSlugOf(v) !== '', 'Nama mata pelajaran harus memuat huruf atau angka.'),
   grade: z.number().int().min(1).max(6),
   title: z
     .string()

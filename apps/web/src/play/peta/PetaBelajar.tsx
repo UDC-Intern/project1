@@ -4,6 +4,7 @@ import { speak } from '../../audio/speech';
 import { LockIcon, MedalIcon, TrophyIcon } from '../../components/Icons';
 import { Momo } from '../../components/Momo';
 import { t } from '../../i18n';
+import { mapelOfSlug } from '../../lib/mapel';
 import { RebungBand } from '../../site/Decor';
 import { SpeakButton } from '../SpeakButton';
 import { PetaPanel } from './PetaPanel';
@@ -214,7 +215,7 @@ export function PetaBelajar({
         )}
         <section
           className={`peta-bab${complete ? ' is-complete' : ''}`}
-          data-mapel={book.slug.startsWith('sains') ? 'sains' : 'matematika'}
+          data-mapel={mapelOfSlug(book.slug)}
           aria-label={book.title}
         >
           <header className="peta-bab-head">

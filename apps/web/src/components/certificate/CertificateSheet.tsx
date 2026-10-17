@@ -80,6 +80,18 @@ function ShapeSvg({ s, palette }: { s: Shape; palette: Record<Ink, string> }) {
         </text>
       );
     }
+    case 'image':
+      return (
+        <image
+          href={s.href}
+          x={s.x}
+          y={s.y}
+          width={s.w}
+          height={s.h}
+          preserveAspectRatio="xMidYMid meet"
+          style={{ opacity: s.opacity }}
+        />
+      );
     case 'group':
       return (
         <g transform={`translate(${s.x} ${s.y}) scale(${s.scale})`}>

@@ -14,13 +14,28 @@ export const SHEET_H = 794;
 
 /** Nama warna di lembar. Nilainya token CSS, jadi lembar mengikuti token desain. */
 export type Ink =
-  'paper' | 'ink' | 'muted' | 'frame' | 'deep' | 'accent' | 'soft' | 'ribbon' | 'momo';
+  | 'paper'
+  | 'ink'
+  | 'muted'
+  | 'frame'
+  | 'deep'
+  | 'accent'
+  | 'soft'
+  | 'ribbon'
+  | 'gold'
+  | 'goldDeep'
+  | 'goldSoft'
+  | 'goldText';
 
 const COMMON = {
   paper: '--kertas',
   ink: '--malam',
   muted: '--malam-muted',
-  momo: '--uk-momo-blue',
+  // Stempel digital selalu emas, apa pun desain lembarnya.
+  gold: '--kunyit',
+  goldDeep: '--kunyit-tekan',
+  goldSoft: '--kunyit-soft',
+  goldText: '--kunyit-teks',
 } as const;
 
 export const PALETTES: Record<CertificateDesign, Record<Ink, string>> = {
@@ -73,6 +88,7 @@ export type Shape =
   | (Paint & { kind: 'rect'; x: number; y: number; w: number; h: number; r?: number })
   | (Paint & { kind: 'circle'; cx: number; cy: number; r: number })
   | (Paint & { kind: 'path'; d: string })
+  | { kind: 'image'; href: string; x: number; y: number; w: number; h: number; opacity?: number }
   | TextShape
   | { kind: 'group'; x: number; y: number; scale: number; children: Shape[] };
 
@@ -165,32 +181,88 @@ export function starPath(cx: number, cy: number, outer: number, inner: number): 
   return `${d}Z`;
 }
 
-/** Momo (robot biru) dalam satuan 100, digeser ke (x, y) dan diperkecil ke `size` px. */
-function momo(x: number, y: number, size: number): Shape {
-  return {
-    kind: 'group',
-    x,
-    y,
-    scale: size / 100,
-    children: [
-      { kind: 'path', d: 'M50 8V20', stroke: 'momo', width: 4 },
-      { kind: 'circle', cx: 50, cy: 8, r: 5, fill: 'momo' },
-      { kind: 'rect', x: 16, y: 20, w: 68, h: 62, r: 18, fill: 'momo' },
-      { kind: 'rect', x: 24, y: 28, w: 52, h: 46, r: 14, fill: 'paper' },
-      { kind: 'circle', cx: 38, cy: 44, r: 4.5, fill: 'ink' },
-      { kind: 'circle', cx: 62, cy: 44, r: 4.5, fill: 'ink' },
-      { kind: 'path', d: 'M40 56Q50 67 60 56', stroke: 'ink', width: 3.5 },
-      { kind: 'rect', x: 8, y: 46, w: 8, h: 16, r: 4, fill: 'momo' },
-      { kind: 'rect', x: 84, y: 46, w: 8, h: 16, r: 4, fill: 'momo' },
-    ],
-  };
+/** Segel bergerigi: `teeth` ujung, bergantian antara jari-jari luar dan dalam. */
+export function scallopPath(
+  cx: number,
+  cy: number,
+  outer: number,
+  inner: number,
+  teeth: number,
+): string {
+  let d = '';
+  for (let i = 0; i < teeth * 2; i++) {
+    const r = i % 2 === 0 ? outer : inner;
+    const a = (i * Math.PI) / teeth - Math.PI / 2;
+    d += `${i === 0 ? 'M' : 'L'}${(cx + r * Math.cos(a)).toFixed(1)} ${(cy + r * Math.sin(a)).toFixed(1)}`;
+  }
+  return `${d}Z`;
+}
+
+/** Jari-jari segel (px) di lembar, dipakai untuk menempatkannya di samping tanda tangan. */
+export const SEAL_RADIUS = 56;
+
+/** Stempel digital resmi: segel emas bergerigi dengan bintang, nama penerbit, dan dua pita di bawahnya. */
+function seal(cx: number, cy: number, issuer: string, label: string): Shape[] {
+  const tail = (side: 1 | -1): Shape => ({
+    kind: 'path',
+    d: `M${cx + side * 30} ${cy + 40}L${cx + side * 50} ${cy + 100}L${cx + side * 33} ${cy + 93}L${cx + side * 24} ${cy + 108}L${cx + side * 6} ${cy + 48}Z`,
+    fill: 'ribbon',
+  });
+  return [
+    tail(-1),
+    tail(1),
+    {
+      kind: 'path',
+      d: scallopPath(cx, cy, SEAL_RADIUS, SEAL_RADIUS - 5, 28),
+      fill: 'gold',
+      stroke: 'goldDeep',
+      width: 2,
+    },
+    { kind: 'circle', cx, cy, r: 46, stroke: 'paper', width: 2.5 },
+    { kind: 'circle', cx, cy, r: 41, fill: 'goldSoft', stroke: 'goldDeep', width: 1.5 },
+    { kind: 'path', d: starPath(cx, cy - 13, 14, 6), fill: 'goldDeep' },
+    {
+      kind: 'text',
+      x: cx,
+      y: cy + 11,
+      text: issuer.toUpperCase(),
+      size: 11,
+      font: 'body',
+      weight: 700,
+      fill: 'goldText',
+      anchor: 'middle',
+      spacing: 1,
+      maxWidth: 58,
+    },
+    {
+      kind: 'text',
+      x: cx,
+      y: cy + 26,
+      text: label,
+      size: 10,
+      font: 'body',
+      weight: 700,
+      fill: 'goldText',
+      anchor: 'middle',
+      spacing: 2,
+      maxWidth: 52,
+    },
+  ];
 }
 
 const CX = SHEET_W / 2;
 
+/** Ukuran tempat gambar tanda tangan (sama dengan perbandingan kanvas tulis 350 × 120). */
+export const SIGNATURE_W = 200;
+export const SIGNATURE_H = 72;
+/** Jarak mendatar dari tengah tanda tangan ke tengah segel. */
+const SEAL_GAP = 160;
+
 /** Semua bentuk satu lembar sertifikat, berurutan dari belakang ke depan. */
 export function sheetShapes(data: SheetData): Shape[] {
   const s = data.settings;
+  // Gambar tanda tangan hanya dipakai bila jenisnya bukan bawaan; kosong berarti goresan bawaan.
+  const signature = s.signatureType !== 'default' ? s.signatureImage : '';
   const sample = data.number === null;
   const qr = !sample && !!data.verifyUrl;
   const text = (x: Omit<TextShape, 'kind' | 'anchor'> & { anchor?: TextShape['anchor'] }) =>
@@ -359,67 +431,32 @@ export function sheetShapes(data: SheetData): Shape[] {
         ]
       : []),
 
-    // Tanda tangan kiri: Momo, teman belajar.
-    momo(CX - 316 - 32, 538, 64),
-    { kind: 'path', d: `M${CX - 401} 612H${CX - 231}`, stroke: 'muted', width: 1.5 },
-    text({
-      x: CX - 316,
-      y: 642,
-      text: s.signer1Name,
-      size: 24,
-      font: 'display',
-      weight: 700,
-      fill: 'ink',
-      maxWidth: 220,
-    }),
-    ...(s.signer1Role
+    // Tanda tangan penyelenggara di kanan bawah: gambar (coretan atau unggahan) atau goresan bawaan.
+    ...(signature
       ? [
-          text({
-            x: CX - 316,
-            y: 666,
-            text: s.signer1Role,
-            size: 16,
-            font: 'body',
-            weight: 400,
-            fill: 'muted',
-            maxWidth: 220,
-          }),
+          {
+            kind: 'image' as const,
+            href: signature,
+            x: right - SIGNATURE_W / 2,
+            y: 536,
+            w: SIGNATURE_W,
+            h: SIGNATURE_H,
+          },
         ]
-      : []),
-
-    // Stempel di tengah.
+      : [
+          {
+            kind: 'path' as const,
+            d: `M${right - 70} 598c14-26 30-30 36-8s-4 22 10 6 22-26 30-6 4 14 18 2 16-12 24-4`,
+            stroke: 'deep' as const,
+            width: 3,
+          },
+        ]),
     {
-      kind: 'path',
-      d: `M${CX - 33} 636L${CX - 55} 704L${CX - 37} 696L${CX - 27} 712L${CX - 9} 650Z`,
-      fill: 'ribbon',
+      kind: 'path' as const,
+      d: `M${right - 95} 612H${right + 95}`,
+      stroke: 'muted' as const,
+      width: 1.5,
     },
-    {
-      kind: 'path',
-      d: `M${CX + 33} 636L${CX + 55} 704L${CX + 37} 696L${CX + 27} 712L${CX + 9} 650Z`,
-      fill: 'ribbon',
-    },
-    { kind: 'circle', cx: CX, cy: 600, r: 58, fill: 'frame' },
-    { kind: 'circle', cx: CX, cy: 600, r: 49, stroke: 'paper', width: 2, dash: 4 },
-    { kind: 'path', d: starPath(CX, 590, 24, 10), fill: 'paper' },
-    text({
-      x: CX,
-      y: 630,
-      text: t('common.cert.seal'),
-      size: 15,
-      font: 'body',
-      weight: 700,
-      fill: 'paper',
-      spacing: 3,
-    }),
-
-    // Tanda tangan kanan.
-    {
-      kind: 'path',
-      d: `M${right - 70} 598c14-26 30-30 36-8s-4 22 10 6 22-26 30-6 4 14 18 2 16-12 24-4`,
-      stroke: 'deep',
-      width: 3,
-    },
-    { kind: 'path', d: `M${right - 85} 612H${right + 85}`, stroke: 'muted', width: 1.5 },
     text({
       x: right,
       y: 642,
@@ -444,6 +481,9 @@ export function sheetShapes(data: SheetData): Shape[] {
           }),
         ]
       : []),
+
+    // Stempel digital resmi (opsional) di samping kiri tanda tangan.
+    ...(s.showStamp ? seal(right - SEAL_GAP, 594, s.issuer, t('common.cert.seal')) : []),
 
     // Kode QR menuju halaman cek keaslian.
     ...(qr
@@ -540,11 +580,22 @@ function roundRect(
   ctx.closePath();
 }
 
-/** Menggambar daftar bentuk di kanvas dengan warna token yang berlaku di halaman. */
+/** Memuat satu gambar (Data URL) sampai siap digambar di kanvas; gagal berarti gambar dilewati. */
+export function loadImage(href: string): Promise<HTMLImageElement | null> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = href;
+  });
+}
+
+/** Menggambar daftar bentuk di kanvas dengan warna token yang berlaku di halaman. `images`: gambar yang sudah dimuat. */
 export function drawShapes(
   ctx: CanvasRenderingContext2D,
   shapes: Shape[],
   palette: Record<Ink, string>,
+  images: ReadonlyMap<string, CanvasImageSource> = new Map(),
 ) {
   const css = getComputedStyle(document.documentElement);
   const color = (ink: Ink) => css.getPropertyValue(palette[ink]).trim() || 'black';
@@ -596,6 +647,18 @@ export function drawShapes(
         else ctx.fillText(s.text, 0, 0);
         break;
       }
+      case 'image': {
+        const img = images.get(s.href);
+        if (!img) break;
+        if (s.opacity !== undefined) ctx.globalAlpha = s.opacity;
+        // Muat di dalam kotak tanpa mengubah perbandingan, rata di tengah dan bawah (di atas garis tanda tangan).
+        const natural = img as { width: number; height: number };
+        const scale = Math.min(s.w / natural.width, s.h / natural.height);
+        const w = natural.width * scale;
+        const h = natural.height * scale;
+        ctx.drawImage(img, s.x + (s.w - w) / 2, s.y + (s.h - h) / 2, w, h);
+        break;
+      }
       case 'group':
         ctx.translate(s.x, s.y);
         ctx.scale(s.scale, s.scale);
@@ -626,8 +689,19 @@ export async function downloadCertificateImage(data: SheetData): Promise<void> {
     ),
   );
 
+  const shapes = sheetShapes(data);
+  // Gambar (mis. tanda tangan) harus selesai dimuat sebelum digambar; kalau tidak, kanvas menggambarnya kosong.
+  const images = new Map<string, CanvasImageSource>();
+  const hrefs = [...new Set(shapes.flatMap((sh) => (sh.kind === 'image' ? [sh.href] : [])))];
+  await Promise.all(
+    hrefs.map(async (href) => {
+      const img = await loadImage(href);
+      if (img) images.set(href, img);
+    }),
+  );
+
   ctx.scale(scale, scale);
-  drawShapes(ctx, sheetShapes(data), PALETTES[data.design]);
+  drawShapes(ctx, shapes, PALETTES[data.design], images);
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
   if (!blob) throw new Error('Gambar belum bisa dibuat.');
 

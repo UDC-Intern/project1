@@ -1,7 +1,9 @@
 import { useId, useState } from 'react';
+import { subjectNameOf } from '@udakids/engine';
 import type { CatalogBook, CatalogLevel, CatalogTopic } from '../../api/adminTypes';
 import { useApiCall } from '../../auth/useApi';
-import { t, type MessageKey } from '../../i18n';
+import { t } from '../../i18n';
+import { mapelOf } from '../../lib/mapel';
 import { ShellIconSvg } from '../../ui/AppShell';
 import { Badge, Button } from '../../ui/ui';
 import { ActionNotice, ConfirmDialog, Icon, useAction } from '../common';
@@ -136,18 +138,13 @@ export function BookCard({
               strokeLinejoin="round"
             />
           </svg>
-          <span
-            className={`syl-book-icon${book.subject === 'science' ? ' is-science' : ''}`}
-            aria-hidden
-          >
+          <span className={`syl-book-icon is-${mapelOf(book.subject)}`} aria-hidden>
             <ShellIconSvg name="book" size={22} />
           </span>
           <span className="syl-book-title">
             <strong>{book.title}</strong>
             <span className="syl-book-badges">
-              <Badge tone="muted">
-                {t(`admin.catalog.book.subject.${book.subject}` as MessageKey)}
-              </Badge>
+              <Badge tone="muted">{subjectNameOf(book.subject)}</Badge>
               <Badge tone="muted">{t('admin.catalog.book.grade', { n: book.grade })}</Badge>
               <span className="ui-muted">
                 {t('admin.catalog.book.counts', { topics: book.topics.length, levels })}

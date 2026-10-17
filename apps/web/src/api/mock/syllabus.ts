@@ -13,6 +13,7 @@ import {
   levelSource,
   nextTopicCode,
   questionBankSchema,
+  subjectCodeOf,
   topicInputSchema,
   type BankQuestion,
   type BookContent,
@@ -183,7 +184,9 @@ export async function addBook(token: string | null, body: unknown): Promise<Cata
   adminFromToken(token);
   const parsed = bookInputSchema.safeParse(body);
   if (!parsed.success) throw invalid(parsed.error);
-  const { subject, grade, title, topic } = parsed.data;
+  const { grade, title, topic } = parsed.data;
+  // Matematika dan Sains tersimpan sebagai kode lama; mapel lain sebagai namanya yang rapi.
+  const subject = subjectCodeOf(parsed.data.subject);
   const slug = bookSlugOf(subject, grade);
   if (BOOKS.some((b) => b.slug === slug))
     throw conflict('Buku untuk mapel dan kelas ini sudah ada. Tambahkan topik ke buku itu.');
@@ -193,7 +196,8 @@ export async function addBook(token: string | null, body: unknown): Promise<Cata
     grade: grade === 1 ? 'kelas-1' : `sd${grade}`,
     subject,
     title,
-    sort: 100 + grade * 10 + (subject === 'math' ? 0 : 1),
+    // Dalam satu kelas: Matematika, lalu Sains, lalu mapel lain menurut urutan dibuat.
+    sort: 100 + grade * 10 + (subject === 'math' ? 0 : subject === 'science' ? 1 : 2),
     topics: [topicOf(topic, codeFor(undefined, topic.code), 1)],
   });
   return save(db);

@@ -8,6 +8,7 @@ import {
   adminWhatsappHref,
   billingSettingsSchema,
   certificateSettingsSchema,
+  SIGNATURE_IMAGE_MAX,
   contactSettingsSchema,
   isFreeLevel,
   mergeSettings,
@@ -77,6 +78,60 @@ describe('pengaturan lembar sertifikat', () => {
         .success,
     ).toBe(false);
   });
+
+  it('hanya satu penanda tangan: bagian kiri (Momo) tidak ada lagi di skema', () => {
+    expect(DEFAULT_SETTINGS.certificate).not.toHaveProperty('signer1Name');
+    expect(
+      certificateSettingsSchema.safeParse({
+        ...DEFAULT_SETTINGS.certificate,
+        signer1Name: 'Momo',
+        signer1Role: 'Teman Belajar',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('tanda tangan dan stempel: nilai awal bawaan, stempel menyala', () => {
+    expect(DEFAULT_SETTINGS.certificate).toMatchObject({
+      signatureType: 'default',
+      signatureImage: '',
+      showStamp: true,
+    });
+    // Pengaturan yang belum punya ketiga isian ini mendapat nilai awalnya.
+    const { signatureType, signatureImage, showStamp, ...old } = DEFAULT_SETTINGS.certificate;
+    void [signatureType, signatureImage, showStamp];
+    expect(certificateSettingsSchema.parse(old)).toEqual(DEFAULT_SETTINGS.certificate);
+  });
+
+  it('gambar tanda tangan hanya PNG, JPG, atau WebP berbentuk Data URL dan tidak terlalu besar', () => {
+    const png = 'data:image/png;base64,iVBORw0KGgo=';
+    const ok = (signatureImage: string, signatureType = 'upload') =>
+      certificateSettingsSchema.safeParse({
+        ...DEFAULT_SETTINGS.certificate,
+        signatureType,
+        signatureImage,
+      }).success;
+    expect(ok(png, 'draw')).toBe(true);
+    expect(ok('data:image/jpeg;base64,/9j/4AAQSkZJRg==')).toBe(true);
+    expect(ok('data:image/webp;base64,UklGRg==')).toBe(true);
+    expect(ok('')).toBe(true);
+    for (const bad of [
+      'data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=',
+      'data:text/html;base64,PGh0bWw+',
+      'https://contoh.id/ttd.png',
+      'javascript:alert(1)',
+      'data:image/png;base64,',
+      'data:image/png;base64,abc def',
+    ])
+      expect(ok(bad)).toBe(false);
+    const big = 'data:image/png;base64,' + 'A'.repeat(SIGNATURE_IMAGE_MAX);
+    expect(ok(big)).toBe(false);
+    expect(
+      certificateSettingsSchema.safeParse({
+        ...DEFAULT_SETTINGS.certificate,
+        signatureType: 'ukir',
+      }).success,
+    ).toBe(false);
+  });
 });
 
 describe('mergeSettings', () => {
@@ -96,6 +151,24 @@ describe('mergeSettings', () => {
     expect(merged.certificate.issuer).toBe('Sekolah Ceria');
     expect(merged.certificate).not.toHaveProperty('bebas');
     expect(mergeSettings(undefined)).toEqual(DEFAULT_SETTINGS);
+  });
+
+  it('pengaturan lama dengan penanda tangan kiri tetap terbaca: isian itu dibuang, sisanya dipertahankan', () => {
+    const merged = mergeSettings({
+      certificate: {
+        issuer: 'Sekolah Ceria',
+        signer1Name: 'Momo',
+        signer1Role: 'Teman Belajar',
+        signer2Name: 'Bu Rina',
+      },
+    });
+    expect(merged.certificate).toMatchObject({
+      issuer: 'Sekolah Ceria',
+      signer2Name: 'Bu Rina',
+      signatureType: 'default',
+      showStamp: true,
+    });
+    expect(merged.certificate).not.toHaveProperty('signer1Name');
   });
 });
 

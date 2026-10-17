@@ -21,8 +21,9 @@ konten, keluarga, transaksi, Premium, sertifikat, dan pengaturan aplikasi.
 - **Sertifikat Juara Digital:** terbit otomatis dengan nomor `CERT-XXXXXX` saat anak Premium lulus semua level satu buku.
   Bisa dicetak, disimpan sebagai PDF, atau diunduh sebagai gambar PNG. Orang tua boleh mengisi nama lengkap anak khusus
   untuk sertifikat (dengan persetujuan), kode QR di lembar membuka halaman cek keaslian yang menyamarkan nama, dan isi
-  lembar (penerbit, judul, penanda tangan, kurikulum, skor) diatur admin. Admin memilih desain dan menerbitkan sertifikat
-  yang tertunda.
+  lembar (penerbit, judul, penanda tangan, kurikulum, skor) diatur admin, termasuk tanda tangan (goresan bawaan, ditulis di
+  kanvas, atau foto/scan dengan latar yang dibersihkan otomatis) dan stempel digital emas. Admin memilih desain dan
+  menerbitkan sertifikat yang tertunda.
 - **Suara:** setiap halaman anak membacakan isinya, tombol menyebut namanya saat diketuk.
 
 ## Status

@@ -13,6 +13,7 @@ import { t } from '../../i18n';
 import { Dialog } from '../../ui/Dialog';
 import { Button, Checkbox, TextField } from '../../ui/ui';
 import { ActionNotice, useAction } from '../common';
+import { SignatureEditor } from './SignatureEditor';
 
 const SAMPLE_NUMBER = 'CERT-7KQ2MX';
 const FORM_ID = 'cert-sheet-form';
@@ -98,16 +99,6 @@ export function CertificateSheetDialog({
             <fieldset className="certs-editor-group">
               <legend>{t('admin.certSettings.groupSigners')}</legend>
               <div className="certs-editor-pair">
-                {field('signer1Name', t('admin.certSettings.signer1Name'), 40)}
-                {field(
-                  'signer1Role',
-                  t('admin.certSettings.role'),
-                  40,
-                  undefined,
-                  t('admin.certSettings.signer1Role'),
-                )}
-              </div>
-              <div className="certs-editor-pair">
                 {field(
                   'signer2Name',
                   t('admin.certSettings.signer2Name'),
@@ -122,6 +113,18 @@ export function CertificateSheetDialog({
                   t('admin.certSettings.signer2Role'),
                 )}
               </div>
+              <SignatureEditor
+                value={{ type: form.signatureType, image: form.signatureImage }}
+                onChange={(v) =>
+                  setForm((f) => ({ ...f, signatureType: v.type, signatureImage: v.image }))
+                }
+              />
+              <Checkbox
+                label={t('admin.certSettings.showStamp')}
+                checked={form.showStamp}
+                onChange={(e) => set('showStamp', e.target.checked)}
+              />
+              <p className="ui-hint">{t('admin.certSettings.showStampHint')}</p>
             </fieldset>
             <fieldset className="certs-editor-group">
               <legend>{t('admin.certSettings.groupShow')}</legend>

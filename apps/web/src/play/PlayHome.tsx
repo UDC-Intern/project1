@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { subjectNameOf } from '@udakids/engine';
 import { book, home, profile } from '../api/catalog';
 import { speak } from '../audio/speech';
 import { DoorIcon, PlayIcon, StarIcon, TrophyIcon } from '../components/Icons';
@@ -7,6 +8,7 @@ import { Momo } from '../components/Momo';
 import { useSession } from '../auth/store';
 import { useAsync } from '../hooks/useAsync';
 import { t } from '../i18n';
+import { mapelOf } from '../lib/mapel';
 import { ErrorState, LoadingState } from '../ui/states';
 import { PetaBelajar } from './peta/PetaBelajar';
 import type { PlayStatus, Shelf } from './peta/types';
@@ -173,7 +175,7 @@ export function PlayHome() {
   );
 
   return (
-    <main className="home" data-mapel={active?.subject === 'science' ? 'sains' : 'matematika'}>
+    <main className="home" data-mapel={mapelOf(active?.subject)}>
       {top}
       {target && <AutoSpeak text={target.say} />}
 
@@ -229,7 +231,7 @@ export function PlayHome() {
                 remember(BOOK_KEY, b.slug);
               }}
             >
-              {b.subject === 'science' ? t('play.domain.sains') : t('play.domain.math')}
+              {subjectNameOf(b.subject)}
             </button>
           ))}
         </nav>

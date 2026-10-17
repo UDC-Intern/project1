@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { memo, useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import {
   BANK_GOOD_QUESTIONS,
   BANK_MAX_CHOICES,
@@ -21,8 +21,41 @@ type LevelQuestions = { items: BankQuestion[]; min: number; good: number; max: n
 const blank = (): BankQuestion => ({ prompt: '', choices: ['', '', ''], answer: 0, hint: '' });
 const START_COUNT = BANK_MIN_QUESTIONS;
 
+const NO_ISSUES: readonly string[] = [];
+
+type QuestionCardProps = {
+  index: number;
+  question: BankQuestion;
+  issues: readonly string[];
+  /** Penangan di bawah ini harus stabil (dari `useCallback`) supaya kartu tidak digambar ulang tanpa perlu. */
+  onChange: (index: number, q: BankQuestion) => void;
+  onDuplicate: (index: number) => void;
+  onRemove: (index: number) => void;
+  canRemove: boolean;
+  canDuplicate: boolean;
+  inputRef?: (el: HTMLInputElement | null) => void;
+};
+
+const sameIssues = (a: readonly string[], b: readonly string[]) =>
+  a === b || (a.length === b.length && a.every((m, i) => m === b[i]));
+
+/**
+ * Kartu hanya digambar ulang bila soalnya sendiri, nomornya, galatnya, atau batas tombolnya berubah. Mengetik di
+ * satu soal membuat objek soal itu baru, sedangkan objek soal lain tetap sama, jadi kartu lain tidak ikut bekerja.
+ */
+const sameCard = (a: QuestionCardProps, b: QuestionCardProps) =>
+  a.index === b.index &&
+  a.question === b.question &&
+  a.canRemove === b.canRemove &&
+  a.canDuplicate === b.canDuplicate &&
+  a.onChange === b.onChange &&
+  a.onDuplicate === b.onDuplicate &&
+  a.onRemove === b.onRemove &&
+  a.inputRef === b.inputRef &&
+  sameIssues(a.issues, b.issues);
+
 /** Satu soal: pertanyaan, pilihan jawaban (satu benar), dan petunjuk. */
-function QuestionCard({
+const QuestionCard = memo(function QuestionCard({
   index,
   question,
   issues,
@@ -32,19 +65,9 @@ function QuestionCard({
   canRemove,
   canDuplicate,
   inputRef,
-}: {
-  index: number;
-  question: BankQuestion;
-  issues: string[];
-  onChange: (q: BankQuestion) => void;
-  onDuplicate: () => void;
-  onRemove: () => void;
-  canRemove: boolean;
-  canDuplicate: boolean;
-  inputRef?: (el: HTMLInputElement | null) => void;
-}) {
+}: QuestionCardProps) {
   const n = index + 1;
-  const set = (patch: Partial<BankQuestion>) => onChange({ ...question, ...patch });
+  const set = (patch: Partial<BankQuestion>) => onChange(index, { ...question, ...patch });
   const setChoice = (i: number, text: string) =>
     set({ choices: question.choices.map((c, k) => (k === i ? text : c)) });
   const removeChoice = (i: number) =>
@@ -68,7 +91,7 @@ function QuestionCard({
             disabled={!canDuplicate}
             aria-label={t('admin.bank.duplicate', { n })}
             title={t('admin.bank.duplicate', { n })}
-            onClick={onDuplicate}
+            onClick={() => onDuplicate(index)}
           >
             <Icon name="copy" />
           </Button>
@@ -78,7 +101,7 @@ function QuestionCard({
             disabled={!canRemove}
             aria-label={t('admin.bank.remove', { n })}
             title={t('admin.bank.remove', { n })}
-            onClick={onRemove}
+            onClick={() => onRemove(index)}
           >
             <Icon name="trash" />
           </Button>
@@ -158,7 +181,7 @@ function QuestionCard({
       )}
     </li>
   );
-}
+}, sameCard);
 
 /**
  * Bank soal sebuah level buatan admin (`GET`, `PUT`, `DELETE /admin/levels/:id/questions`): soal pilihan ganda
@@ -206,8 +229,20 @@ export function QuestionBankDialog({
   const percent = Math.min(100, Math.round((complete / BANK_GOOD_QUESTIONS) * 100));
   const hasBank = level.source === 'bank';
 
-  const setItem = (i: number, q: BankQuestion) =>
-    setItems((xs) => xs.map((x, k) => (k === i ? q : x)));
+  // Penangan stabil: memakai pembaruan fungsional, jadi tidak bergantung pada daftar soal yang sedang tampil.
+  const setItem = useCallback(
+    (i: number, q: BankQuestion) => setItems((xs) => xs.map((x, k) => (k === i ? q : x))),
+    [],
+  );
+  const duplicateItem = useCallback(
+    (i: number) =>
+      setItems((xs) => [...xs.slice(0, i + 1), structuredClone(xs[i]!), ...xs.slice(i + 1)]),
+    [],
+  );
+  const removeItem = useCallback((i: number) => setItems((xs) => xs.filter((_, k) => k !== i)), []);
+  const setFirstInput = useCallback((el: HTMLInputElement | null) => {
+    firstInput.current = el;
+  }, []);
 
   function close() {
     if (dirty && !confirmAction(t('admin.bank.discard'))) return;
@@ -272,25 +307,13 @@ export function QuestionBankDialog({
                     key={i}
                     index={i}
                     question={q}
-                    issues={tried ? (check.byQuestion.get(i) ?? []) : []}
-                    onChange={(next) => setItem(i, next)}
-                    onDuplicate={() =>
-                      setItems((xs) => [
-                        ...xs.slice(0, i + 1),
-                        structuredClone(q),
-                        ...xs.slice(i + 1),
-                      ])
-                    }
-                    onRemove={() => setItems((xs) => xs.filter((_, k) => k !== i))}
+                    issues={tried ? (check.byQuestion.get(i) ?? NO_ISSUES) : NO_ISSUES}
+                    onChange={setItem}
+                    onDuplicate={duplicateItem}
+                    onRemove={removeItem}
                     canRemove={items.length > 1}
                     canDuplicate={items.length < BANK_MAX_QUESTIONS}
-                    inputRef={
-                      i === 0
-                        ? (el) => {
-                            firstInput.current = el;
-                          }
-                        : undefined
-                    }
+                    inputRef={i === 0 ? setFirstInput : undefined}
                   />
                 ))}
               </ol>

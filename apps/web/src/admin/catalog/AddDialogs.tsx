@@ -1,16 +1,16 @@
-import { useState, type FormEvent } from 'react';
+import { useMemo, useState, type FormEvent } from 'react';
 import {
   SYLLABUS_GRADES,
-  SYLLABUS_SUBJECTS,
+  SUBJECT_PRESETS,
   bookInputSchema,
   bookSlugOf,
   bookTitleOf,
   nextTopicCode,
-  type SyllabusSubject,
+  subjectCodeOf,
 } from '@udakids/engine';
 import type { CatalogBook } from '../../api/adminTypes';
 import { useApiCall } from '../../auth/useApi';
-import { t, type MessageKey } from '../../i18n';
+import { t } from '../../i18n';
 import { Dialog } from '../../ui/Dialog';
 import { Button, Notice, SelectField, TextField } from '../../ui/ui';
 import { ActionNotice, useAction } from '../common';
@@ -22,6 +22,7 @@ import {
   type FieldIssue,
   type TopicDraft,
 } from './TopicForm';
+import { CUSTOM_SUBJECT, subjectOptions } from './subjects';
 
 /** Daftar isu isian di atas tombol simpan, setelah pengguna mencoba menyimpan. */
 function IssueList({ issues }: { issues: readonly FieldIssue[] }) {
@@ -91,7 +92,10 @@ export function AddTopicDialog({
   );
 }
 
-/** `POST /admin/books`: buku baru untuk satu pasangan mapel dan kelas, langsung dengan topik pertamanya. */
+/**
+ * `POST /admin/books`: buku baru untuk satu pasangan mapel dan kelas, langsung dengan topik pertamanya. Mapel dipilih
+ * dari yang sudah ada (ditambah mapel standar) atau ditulis sendiri lewat "tambah mata pelajaran lainnya".
+ */
 export function AddBookDialog({
   books,
   onClose,
@@ -103,15 +107,28 @@ export function AddBookDialog({
 }) {
   const call = useApiCall('staff');
   const action = useAction();
-  const [subject, setSubject] = useState<SyllabusSubject>('math');
+  const choices = useMemo(
+    () => [
+      ...subjectOptions(books),
+      { value: CUSTOM_SUBJECT, label: t('admin.catalog.addBook.subjectCustom') },
+    ],
+    [books],
+  );
+  const [choice, setChoice] = useState<string>(SUBJECT_PRESETS[0]);
+  const [customName, setCustomName] = useState('');
   const [grade, setGrade] = useState(5);
   // Judul mengikuti mapel dan kelas sampai pengguna mengetiknya sendiri.
   const [title, setTitle] = useState<string | null>(null);
   const [topic, setTopic] = useState<TopicDraft>(newTopicDraft);
   const [tried, setTried] = useState(false);
 
-  const shownTitle = title ?? bookTitleOf(subject, grade);
-  const exists = books.some((b) => b.slug === bookSlugOf(subject, grade));
+  const custom = choice === CUSTOM_SUBJECT;
+  const typed = custom ? customName.trim() : choice;
+  // Nilai yang disimpan: kode lama untuk Matematika dan Sains, selain itu nama yang rapi.
+  const subject = typed ? subjectCodeOf(typed) : '';
+  const shownTitle = title ?? (subject ? bookTitleOf(subject, grade) : '');
+  const slug = subject ? bookSlugOf(subject, grade) : '';
+  const exists = !!slug && books.some((b) => b.slug === slug);
   const payload = { subject, grade, title: shownTitle, topic: topicPayload(topic) };
   const parsed = bookInputSchema.safeParse(payload);
   const issues: FieldIssue[] = [
@@ -123,6 +140,8 @@ export function AddBookDialog({
     ...topicIssues(topic, 'topic.'),
     ...(exists ? [{ path: 'exists', message: t('admin.catalog.addBook.exists') }] : []),
   ];
+  const issueAt = (path: string) =>
+    tried ? issues.find((i) => i.path === path)?.message : undefined;
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -140,15 +159,12 @@ export function AddBookDialog({
         <p className="ui-muted" style={{ marginBottom: 14 }}>
           {t('admin.catalog.addBook.hint')}
         </p>
-        <div className="adm-fields">
+        <div className="adm-fields syl-subject-fields">
           <SelectField
             label={t('admin.catalog.addBook.subject')}
-            value={subject}
-            onChange={(v) => setSubject(v as SyllabusSubject)}
-            options={SYLLABUS_SUBJECTS.map((s) => ({
-              value: s,
-              label: t(`admin.catalog.book.subject.${s}` as MessageKey),
-            }))}
+            value={choice}
+            onChange={setChoice}
+            options={choices}
           />
           <SelectField
             label={t('admin.catalog.addBook.grade')}
@@ -161,12 +177,25 @@ export function AddBookDialog({
             error={exists ? t('admin.catalog.addBook.exists') : undefined}
           />
         </div>
+        {custom && (
+          <TextField
+            label={t('admin.catalog.addBook.customName')}
+            hint={slug ? t('admin.catalog.addBook.customHint', { slug }) : undefined}
+            placeholder={t('admin.catalog.addBook.customPlaceholder')}
+            required
+            autoFocus
+            maxLength={40}
+            value={customName}
+            error={issueAt('subject')}
+            onChange={(e) => setCustomName(e.target.value)}
+          />
+        )}
         <TextField
           label={t('admin.catalog.addBook.name')}
           required
           maxLength={60}
           value={shownTitle}
-          error={tried ? issues.find((i) => i.path === 'title')?.message : undefined}
+          error={issueAt('title')}
           onChange={(e) => setTitle(e.target.value)}
         />
         <fieldset className="syl-form-group">

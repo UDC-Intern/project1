@@ -89,10 +89,18 @@ tambahannya selesai). API NestJS dan database dibangun di M6 sampai M11 dengan k
   tertukar), dibuat dari sumber acak dan dijamin unik.
 - **Isi lembar (A4 mendatar):** kepala (penerbit dan kalimat kecil), judul dan sub-judul, nama di sertifikat, kalimat
   pujian usaha ("atas ketekunannya berlatih dan menyelesaikan seluruh 40 level di 10 topik buku"), judul buku, baris
-  keterangan (kurikulum dan rata-rata skor, bila diaktifkan), stempel JUARA, dua penanda tangan, kode QR, tanggal
-  terbit, dan nomor sertifikat. Teks tetap lembar (penerbit, judul, penanda tangan, kurikulum, tampil/sembunyi skor dan
-  QR) dari Pengaturan, bukan tertulis di kode; awalnya "UdaKids · Belajar bersama Momo", "SERTIFIKAT Juara Digital", Momo
-  (Teman Belajar) dan Tim UdaKids (Pengelola). Tanpa data pribadi lain.
+  keterangan (kurikulum dan rata-rata skor, bila diaktifkan), satu penanda tangan di kanan bawah (tanda tangan di atas
+  garis, nama, dan jabatan), stempel digital resmi (segel emas dengan nama penerbit dan "JUARA") di samping tanda tangan
+  bila dinyalakan, kode QR, tanggal terbit, dan nomor sertifikat. Teks tetap lembar (penerbit, judul, penanda tangan,
+  kurikulum, tampil/sembunyi skor, QR, dan stempel) dari Pengaturan, bukan tertulis di kode; awalnya "UdaKids · Belajar
+  bersama Momo", "SERTIFIKAT Juara Digital", dan Tim UdaKids (Pengelola). Tanpa data pribadi lain.
+- **Tanda tangan:** tiga pilihan di dialog Atur isi lembar. *Goresan bawaan* (bentuk tetap); *Tulis / gambar* (kanvas
+  350 × 120 yang bisa digores dengan mouse atau sentuhan, hasilnya PNG transparan yang langsung tampil di pratinjau);
+  *Unggah foto / scan* (PNG, JPG, atau WebP sampai 5 MB). Foto yang diunggah diperiksa: tolak bila hampir tanpa tinta
+  (kurang dari 0,5% piksel gelap) atau hampir seluruhnya gelap (lebih dari 70%, seperti foto biasa); piksel latar
+  terang (kecerahan di atas 220) dijadikan transparan dengan tepi dilunakkan, gambar dipotong rapat ke goresan dan
+  dikecilkan sampai muat di 700 × 240. Hasilnya disimpan sebagai Data URL PNG, JPG, atau WebP (SVG ditolak) paling
+  banyak 300.000 karakter. Gambar tiap pilihan diingat selama dialog terbuka.
 - **Nama di sertifikat:** nama panggilan sering pendek atau lucu, sehingga lembarnya kurang meyakinkan. Orang tua boleh
   mengisi nama lengkap anak khusus untuk sertifikat (2 sampai 60 huruf; huruf, spasi, titik, tanda petik, tanda hubung) di
   formulir ubah anak atau di halaman Sertifikat. Karena itu data pribadi anak, mengisinya pertama kali butuh centang
@@ -129,10 +137,10 @@ sama lewat `useSettings()`, sehingga perubahan langsung berlaku tanpa memuat ula
 | ------------ | ----- | ---------- |
 | `billing`    | Kunci berbayar (hidup/mati) dan level gratis per topik (1 sampai 12, awalnya 2), diatur di Silabus Belajar; batas bayar pesanan (1 sampai 168 jam, awalnya 24), diatur di Pengaturan Sistem. Menyimpan satu isian tidak mengubah yang lain | Status level anak, landing, halaman Paket dan Silabus Belajar admin, masa berlaku pesanan baru |
 | `contact`    | Nomor atau link WhatsApp admin (nomor HP 08… diubah menjadi `https://wa.me/62…`, hanya domain WhatsApp), pesan pembuka (maks 200 huruf), link grup WhatsApp orang tua (hanya `chat.whatsapp.com`, opsional) | Tombol "Hubungi admin" (kosong berarti tombol disembunyikan), halaman Paket orang tua |
-| `certificate`| Penerbit, kalimat kecil kepala, judul, sub-judul, dua penanda tangan beserta jabatannya, keterangan kurikulum, tampilkan rata-rata skor, tampilkan kode QR, pakai nama lengkap dari orang tua | Lembar sertifikat (anak, orang tua, admin, landing), halaman cek keaslian |
+| `certificate`| Penerbit, kalimat kecil kepala, judul, sub-judul, satu penanda tangan beserta jabatannya, jenis tanda tangan (`default`, `draw`, `upload`) dan gambarnya, pasang stempel digital, keterangan kurikulum, tampilkan rata-rata skor, tampilkan kode QR, pakai nama lengkap dari orang tua | Lembar sertifikat (anak, orang tua, admin, landing), halaman cek keaslian |
 | `voice`      | Suara aktif, bacakan otomatis saat halaman/soal tampil, kecepatan (0,6 sampai 1,4, awalnya 0,92), nada (0,5 sampai 1,5, awalnya 1,1), suara peramban yang diutamakan. Diatur di menu Audio Narasi | Semua suara di area anak; pratinjau admin memakai isian yang belum disimpan |
 
-Dialog Atur isi lembar (latar diburamkan) menampilkan pratinjau lembar langsung dari isian (data contoh) sebelum
+Dialog Atur isi lembar (latar gelap pekat, tanpa buram supaya gulir tetap ringan) menampilkan pratinjau lembar langsung dari isian (data contoh) sebelum
 disimpan; Simpan menutup dialog dan ringkasan "Lembar yang berlaku" langsung memakai isi baru, Batal tidak menyimpan
 apa pun. Pilihan desain ada di halaman yang sama. Pengecualian per level ada di topiknya di Silabus Belajar dan ditandai
 "Pengecualian"; pengecualian yang kembali sama dengan aturan akses otomatis dihapus.
@@ -212,7 +220,10 @@ Hal berikut **tidak** dibangun di rilis 1.0. Struktur data dan modul disiapkan a
    level tersulit, jawaban keliru terbanyak, dan pesanan terbaru. Rentang 7 hari, 30 hari, atau bulan ini.
 2. Silabus Belajar: kartu **Akses berbayar** (kunci berbayar hidup/mati dan jumlah level gratis per topik, dengan contoh
    satu topik); di bawahnya tiap buku bisa dilipat. **Tambah buku** membuat buku untuk satu pasangan mapel dan kelas yang
-   belum ada, langsung dengan topik pertamanya; **Tambah topik** menambah topik (kode, judul, materi, "Tahukah kamu?", level).
+   belum ada, langsung dengan topik pertamanya. Mapel tidak dibatasi: dropdown menawarkan Matematika, Sains, Bahasa
+   Inggris, mapel lain yang sudah punya buku, dan "+ Tambah mata pelajaran lainnya…" untuk menulis nama mapel baru (mis.
+   Coding, Seni Budaya); mapel baru memberi alamat buku seperti `seni-budaya-kelas-5` dan otomatis ada di dropdown pada
+   buku berikutnya. **Tambah topik** menambah topik (kode, judul, materi, "Tahukah kamu?", level).
    Topik dibuka untuk mengubah judul, materi, judul level, dan akses tiap level (Gratis/Premium; yang menyimpang dari
    aturan ditandai "Pengecualian"), menambah level di akhir (paling banyak 12), dan menghapus topik atau level buatan admin
    yang belum dikerjakan anak. Level buatan admin memakai **bank soal tulisan admin**: pertanyaan dan pilihan jawaban,
@@ -317,7 +328,7 @@ Pengalihan: `/play/*` tanpa sesi anak ke `/play/masuk`. `/orang-tua/*` tanpa ses
   | `--gonjong` (`-tekan`, `-soft`)     | `#C8321F`             | Warna merek: tombol utama, logo, sorotan. Bukan tanda kesalahan             |
   | `--kunyit` (`-tekan`, `-soft`, `-teks`) | `#F5B301`         | Poin, bintang, sertifikat, dan jawaban belum tepat (bingkai kuning + petunjuk) |
   | `--sawah` (`-tekan`, `-soft`)       | `#167A48`             | Jawaban tepat, level lulus, kemajuan                                       |
-  | `--m` (data-mapel)                  | merah / hijau         | Warna mapel aktif: Matematika `#C8321F`, Sains `#2B7A3D`                   |
+  | `--m` (data-mapel)                  | merah / hijau / biru  | Warna mapel aktif: Matematika `#C8321F`, Sains `#2B7A3D`, mapel lain `#1F6FC5` |
   | `--bahaya`                          | `#B3261E`             | **Hanya area orang tua dan admin** untuk tindakan hapus. Tidak pernah untuk jawaban anak |
 
   Tombol berbentuk anak tangga: bayangan padat 5 px di bawahnya (`--shadow-tekan`) yang hilang saat ditekan, tanpa garis
@@ -462,7 +473,7 @@ Isi awal paket dan rekening dari `content/billing.json`.
 
 | Tabel  | Kolom (selain `id uuid pk`) |
 | ------ | --------------------------- |
-| books  | `slug` text unik (`matematika-kelas-1`), `grade` text, `subject` text (`math`/`science`), `title` text, `sort` int |
+| books  | `slug` text unik (`matematika-kelas-1`, `bahasa-inggris-kelas-5`), `grade` text, `subject` text (`math`, `science`, atau nama mapel buatan admin, paling banyak 40 huruf; alamat buku diturunkan dari namanya), `title` text, `sort` int |
 | topics | `book_id` fk cascade, `code` text (1 sampai 4 huruf/angka), `title` text, `lesson` text, `tips` jsonb (hal penting untuk "Tahukah kamu?"), `lesson_audio_hash` text boleh kosong, `sort` int; unik (`book_id`, `code`) |
 | levels | `topic_id` fk cascade, `number` int 1 sampai 12, `title` text, `is_free` boolean, `generator` text (nama family generator), `generator_params` jsonb, `questions_per_round` int default 10, `pass_score` int default 70, `max_wrong` int default 3; unik (`topic_id`, `number`) |
 
@@ -584,6 +595,7 @@ sampai M9), bukan hanya disembunyikan di tampilan.
 | 1      | M0             | Dokumen produk dan keputusan arsitektur (tanpa kode)                                                  | Selesai |
 | 1      | M1 sampai M5   | Semua tampilan tiga peran dengan data tiruan di browser (mode mock), mengikuti kontrak                | Selesai |
 | 1      | Tambahan M5    | Paket dan pembayaran manual, Kelas 1 sampai 4 dan Peta Belajar, area anak bersuara, 2 level gratis + 2 Premium, Sertifikat Juara Digital | Selesai |
+| 1      | Tambahan M5g   | Mapel dinamis di Tambah buku (mapel sendiri, otomatis masuk dropdown); lembar sertifikat dengan satu tanda tangan kanan bawah (kanvas tulis, unggah foto dengan latar transparan otomatis, goresan bawaan) dan stempel digital emas; gulir dan pengetikan di admin lebih ringan (render CSS di luar layar, latar dialog tanpa buram, kartu soal tidak digambar ulang saat soal lain diketik) | Selesai |
 | 1      | Tambahan M5f   | Silabus Belajar bisa menambah buku, topik, dan level (bank soal tulisan admin), aturan level gratis pindah ke sana dari Pengaturan Sistem; dropdown bergaya menggantikan daftar bawaan peramban; tombol aksi tabel menempati kolom tetap | Selesai |
 | 1      | Tambahan M5e   | Isi lembar sertifikat dipindah ke dialog di Sertifikat Juara (Pengaturan Sistem tinggal akses berbayar, WhatsApp, data contoh); chip saring berwarna status dengan jumlah, badge seragam, tombol aksi tabel ringkas | Selesai |
 | 1      | Tambahan M5d   | Data contoh mode tiruan (puluhan keluarga, anak, staf, transaksi, ribuan ronde, sertifikat, ilustrasi) yang bisa dimuat ulang atau dihapus di Pengaturan Sistem; paging di semua daftar admin dan riwayat transaksi orang tua; tombol kembali Detail Topik ke Peta Belajar | Selesai |

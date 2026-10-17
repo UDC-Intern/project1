@@ -1,6 +1,7 @@
 import {
   FOREVER_ISO,
   PIN_PICTURES,
+  subjectDomainOf,
   type ChildInsights,
   type DayActivity,
   type Order as OwnOrder,
@@ -162,7 +163,7 @@ function insightsOf(db: MockDb, child: MockChild, now = Date.now()): ChildInsigh
       );
       return {
         slug: b.slug,
-        domain: b.subject === 'science' ? 'sains' : 'math',
+        domain: subjectDomainOf(b.subject),
         grade: `sd${gradeOf(b.slug)}`,
         title: b.title,
         percent: levels ? Math.round((passed / levels) * 100) : 0,
@@ -272,8 +273,8 @@ export async function handle<T>(
   if (url === '/catalog') {
     return send({
       catalogs: BOOKS.map((b) => ({
-        domain: b.subject === 'science' ? 'sains' : 'math',
-        grade: 'sd1',
+        domain: subjectDomainOf(b.subject),
+        grade: `sd${gradeOf(b.slug)}`,
         title: b.title,
       })),
     });

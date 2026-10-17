@@ -292,14 +292,13 @@ a.uk-card:hover {
 .uk-dialog-backdrop {
   position: fixed;
   inset: 0;
-  background: var(--overlay);
-  /* Latar di belakang dialog diburamkan supaya fokus ke isi dialog. */
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
+  /* Warna pekat tanpa buram: backdrop-filter membuat dialog yang bisa digulir terasa berat. */
+  background: rgba(15, 23, 42, 0.75);
   display: grid;
   place-items: center;
   padding: var(--space-4);
   z-index: 20;
+  contain: layout style;
 }
 .uk-dialog {
   width: min(440px, 100%);
@@ -309,4 +308,6 @@ a.uk-card:hover {
   max-height: calc(100vh - 2 * var(--space-4));
   overflow-y: auto;
   box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }

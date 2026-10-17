@@ -200,7 +200,7 @@ export type CatalogTopic = {
 export type CatalogBook = {
   slug: string;
   title: string;
-  subject: 'math' | 'science';
+  subject: string;
   grade: number;
   /** Buku buatan admin (bisa dihapus bila belum dikerjakan anak). */
   custom: boolean;

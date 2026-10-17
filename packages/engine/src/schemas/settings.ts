@@ -81,6 +81,22 @@ export function adminWhatsappHref(c: Pick<ContactSettings, 'adminWhatsapp' | 'ad
 
 const line = (min: number, max: number) => z.string().trim().min(min).max(max);
 
+/** Jenis tanda tangan di lembar: goresan bawaan, coretan di kanvas, atau foto/scan yang diunggah. */
+export const SIGNATURE_TYPES = ['default', 'draw', 'upload'] as const;
+export type SignatureType = (typeof SIGNATURE_TYPES)[number];
+
+/** Panjang paling besar Data URL tanda tangan (karakter), kira-kira 220 KB: cukup untuk PNG 700 × 240. */
+export const SIGNATURE_IMAGE_MAX = 300_000;
+
+/** Data URL gambar raster (bukan SVG, supaya tidak bisa membawa skrip atau alamat luar); kosong berarti tanpa gambar. */
+const signatureImage = z
+  .string()
+  .max(SIGNATURE_IMAGE_MAX, 'Gambar tanda tangan terlalu besar.')
+  .refine(
+    (v) => v === '' || /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(v),
+    'Tanda tangan harus berupa gambar PNG, JPG, atau WebP.',
+  );
+
 export const certificateSettingsSchema = z.strictObject({
   /** Nama penerbit di kepala lembar dan di tanda tangan tim, mis. "UdaKids". */
   issuer: line(2, 40),
@@ -88,10 +104,7 @@ export const certificateSettingsSchema = z.strictObject({
   tagline: line(0, 50),
   title: line(2, 24),
   subtitle: line(0, 32),
-  /** Penanda tangan kiri (di atas garisnya tampil Momo). */
-  signer1Name: line(2, 40),
-  signer1Role: line(0, 40),
-  /** Penanda tangan kanan (di atas garisnya tampil tanda tangan). */
+  /** Satu-satunya penanda tangan, di kanan bawah lembar (di atas garisnya tampil tanda tangan). */
   signer2Name: line(2, 60),
   signer2Role: line(0, 40),
   /** Keterangan kurikulum di bawah judul buku, mis. "Sesuai Kurikulum Merdeka". Kosong: tidak tampil. */
@@ -102,6 +115,12 @@ export const certificateSettingsSchema = z.strictObject({
   showQr: z.boolean(),
   /** Pakai nama lengkap yang diisi orang tua bila ada; selain itu nama panggilan. */
   useFullName: z.boolean(),
+  /** Jenis tanda tangan yang tampil. 'default': goresan bawaan; 'draw' dan 'upload': memakai `signatureImage`. */
+  signatureType: z.enum(SIGNATURE_TYPES).optional().default('default'),
+  /** Gambar tanda tangan (Data URL PNG, JPG, atau WebP) dari kanvas atau unggahan. Kosong: goresan bawaan. */
+  signatureImage: signatureImage.optional().default(''),
+  /** Pasang stempel digital resmi (segel emas) di samping tanda tangan. */
+  showStamp: z.boolean().optional().default(true),
 });
 export type CertificateSettings = z.infer<typeof certificateSettingsSchema>;
 
@@ -139,14 +158,15 @@ export const DEFAULT_SETTINGS: AppSettings = {
     tagline: 'Belajar bersama Momo',
     title: 'SERTIFIKAT',
     subtitle: 'JUARA DIGITAL',
-    signer1Name: 'Momo',
-    signer1Role: 'Teman Belajar',
     signer2Name: 'Tim UdaKids',
     signer2Role: 'Pengelola',
     curriculum: '',
     showScore: true,
     showQr: true,
     useFullName: true,
+    signatureType: 'default',
+    signatureImage: '',
+    showStamp: true,
   },
   voice: { enabled: true, autoRead: true, rate: 0.92, pitch: 1.1, voiceName: '' },
 };
