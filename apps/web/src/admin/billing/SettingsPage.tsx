@@ -7,7 +7,7 @@ import { currentSettings, settingsChanged } from '../../api/settings';
 import { useApiCall, useFetch } from '../../auth/useApi';
 import { t, type MessageKey } from '../../i18n';
 import { Button, Card, formatDate, PageHeader, TextField } from '../../ui/ui';
-import { ActionNotice, confirmAction, Loadable, notifyOrdersChanged, useAction } from '../common';
+import { ActionNotice, Loadable, notifyOrdersChanged, useAction, useConfirm } from '../common';
 
 /** Simpan satu bagian pengaturan; halaman lain yang memakainya ikut diperbarui. */
 function useSave<K extends keyof AppSettings>(part: K, success: string) {
@@ -117,7 +117,17 @@ function ContactForm({ initial }: { initial: ContactSettings }) {
 function DemoDataCard() {
   const call = useApiCall('staff');
   const action = useAction();
+  const { ask, dialog } = useConfirm();
   const info = useFetch<DemoDataSummary>('staff', '/admin/demo-data');
+
+  async function clearAll() {
+    const yes = await ask({
+      title: t('admin.demo.clearTitle'),
+      message: t('admin.demo.clearConfirm'),
+      confirmLabel: t('admin.demo.clearYes'),
+    });
+    if (yes) await change('DELETE', t('admin.demo.cleared'));
+  }
 
   async function change(method: 'POST' | 'DELETE', done: string) {
     const out = await action.run(() => call<DemoDataSummary>('/admin/demo-data', { method }), done);
@@ -161,14 +171,7 @@ function DemoDataCard() {
                   {d.loaded ? t('admin.demo.reload') : t('admin.demo.load')}
                 </Button>
                 {d.loaded && (
-                  <Button
-                    variant="danger"
-                    disabled={action.busy}
-                    onClick={() => {
-                      if (confirmAction(t('admin.demo.clearConfirm')))
-                        void change('DELETE', t('admin.demo.cleared'));
-                    }}
-                  >
+                  <Button variant="danger" disabled={action.busy} onClick={() => void clearAll()}>
                     {t('admin.demo.clear')}
                   </Button>
                 )}
@@ -177,6 +180,7 @@ function DemoDataCard() {
           );
         }}
       </Loadable>
+      {dialog}
     </Card>
   );
 }

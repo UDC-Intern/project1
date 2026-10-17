@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useState, type CSSProperties, type ReactNode } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from 'react';
 import { errorMessage } from '../api/client';
 import { t } from '../i18n';
 import { Badge, Button, Dialog as UiDialog, formatDate, Notice, Spinner } from '../ui/ui';
@@ -195,13 +202,15 @@ export const childReportPath = (id: string) => `/admin/laporan/anak/${encodeURIC
 
 /**
  * Konfirmasi bergaya (pop-up, bukan kotak bawaan peramban) sebelum menghapus atau mengosongkan sesuatu.
- * Tombol utama berwarna merah lembut; Esc atau Batal menutup tanpa melakukan apa-apa.
+ * Dua pilihan jelas (ya atau tidak); tombol "ya" berwarna merah lembut. Esc, ketuk di luar kotak, atau tombol
+ * "tidak" menutup tanpa melakukan apa-apa.
  */
 export function ConfirmDialog({
   open,
   title,
   message,
   confirmLabel,
+  cancelLabel,
   busy,
   onConfirm,
   onCancel,
@@ -210,6 +219,7 @@ export function ConfirmDialog({
   title: string;
   message: ReactNode;
   confirmLabel: string;
+  cancelLabel?: string;
   busy?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
@@ -223,7 +233,7 @@ export function ConfirmDialog({
       actions={
         <>
           <Button variant="ghost" onClick={onCancel}>
-            {t('admin.cancel')}
+            {cancelLabel ?? t('admin.cancel')}
           </Button>
           <Button variant="danger" disabled={busy} onClick={onConfirm}>
             {confirmLabel}
@@ -236,13 +246,61 @@ export function ConfirmDialog({
   );
 }
 
-/** Konfirmasi sebelum aksi berbahaya (window.confirm; aman bila tidak tersedia). */
-export function confirmAction(message: string): boolean {
-  try {
-    return window.confirm(message);
-  } catch {
-    return false;
-  }
+export type AskOptions = {
+  title: string;
+  message: ReactNode;
+  /** Teks tombol "ya"; bawaannya "Ya, lanjutkan". */
+  confirmLabel?: string;
+  /** Teks tombol "tidak"; bawaannya "Tidak". */
+  cancelLabel?: string;
+};
+
+/**
+ * Tanya dulu sebelum aksi yang tidak bisa dibatalkan, lewat pop-up bergaya aplikasi (bukan `window.confirm`):
+ * `if (!(await ask({ title, message }))) return;`. Render `dialog` sekali di komponen. Pertanyaan baru menutup
+ * yang masih terbuka (dijawab "tidak"), begitu pula saat komponen dilepas.
+ */
+export function useConfirm() {
+  const [pending, setPending] = useState<AskOptions | null>(null);
+  const resolver = useRef<((ok: boolean) => void) | null>(null);
+
+  const settle = useCallback((ok: boolean) => {
+    const resolve = resolver.current;
+    resolver.current = null;
+    setPending(null);
+    resolve?.(ok);
+  }, []);
+
+  const ask = useCallback(
+    (options: AskOptions) =>
+      new Promise<boolean>((resolve) => {
+        resolver.current?.(false);
+        resolver.current = resolve;
+        setPending(options);
+      }),
+    [],
+  );
+
+  useEffect(
+    () => () => {
+      resolver.current?.(false);
+      resolver.current = null;
+    },
+    [],
+  );
+
+  const dialog = (
+    <ConfirmDialog
+      open={pending !== null}
+      title={pending?.title ?? ''}
+      message={pending?.message}
+      confirmLabel={pending?.confirmLabel ?? t('admin.confirmYes')}
+      cancelLabel={pending?.cancelLabel ?? t('admin.confirmNo')}
+      onConfirm={() => settle(true)}
+      onCancel={() => settle(false)}
+    />
+  );
+  return { ask, dialog };
 }
 
 export const percent = (v: number | null | undefined) =>

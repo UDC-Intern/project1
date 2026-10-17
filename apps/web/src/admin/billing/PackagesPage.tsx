@@ -17,11 +17,11 @@ import {
 import {
   ActionNotice,
   ActiveBadge,
-  confirmAction,
   Icon,
   Loadable,
   RowActions,
   useAction,
+  useConfirm,
 } from '../common';
 
 type Form = {
@@ -252,11 +252,17 @@ export function PackagesPage() {
   const list = useFetch<PackageRow[]>('staff', '/admin/packages');
   const call = useApiCall('staff');
   const action = useAction();
+  const { ask, dialog } = useConfirm();
   const [editing, setEditing] = useState<PackageRow | null>(null);
   const [deleted, setDeleted] = useState<string>();
 
   async function remove(p: PackageRow) {
-    if (!confirmAction(t('admin.pkg.deleteConfirm', { name: p.name }))) return;
+    const yes = await ask({
+      title: t('admin.pkg.deleteTitle'),
+      message: t('admin.pkg.deleteConfirm', { name: p.name }),
+      confirmLabel: t('admin.pkg.deleteYes'),
+    });
+    if (!yes) return;
     setDeleted(undefined);
     const out = await action.run(() =>
       call<{ deleted: boolean; deactivated: boolean }>(`/admin/packages/${p.id}`, {
@@ -349,6 +355,7 @@ export function PackagesPage() {
         }}
         onCancel={() => setEditing(null)}
       />
+      {dialog}
     </>
   );
 }

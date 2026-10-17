@@ -18,13 +18,13 @@ import {
 } from '../../ui/ui';
 import {
   ActionNotice,
-  confirmAction,
   FilterChips,
   Icon,
   Loadable,
   notifyOrdersChanged,
   RowActions,
   useAction,
+  useConfirm,
 } from '../common';
 
 /** Pesanan di panel admin: pesanan orang tua ditambah nama dan email orang tuanya. */
@@ -91,20 +91,21 @@ function OrderDetail({
 }) {
   const call = useApiCall('staff');
   const action = useAction();
+  const { ask, dialog } = useConfirm();
   const [reason, setReason] = useState('');
   const canApprove = order.status !== 'paid' && order.status !== 'cancelled';
   const canReject = order.status === 'awaiting_review' || order.status === 'awaiting_payment';
 
   async function approve() {
-    if (
-      !confirmAction(
-        t('admin.order.approveConfirm', {
-          number: order.number,
-          amount: formatRupiah(order.amount),
-        }),
-      )
-    )
-      return;
+    const yes = await ask({
+      title: t('admin.order.approveTitle'),
+      message: t('admin.order.approveConfirm', {
+        number: order.number,
+        amount: formatRupiah(order.amount),
+      }),
+      confirmLabel: t('admin.order.approveYes'),
+    });
+    if (!yes) return;
     const out = await action.run(
       () => call<OrderRow>(`/admin/orders/${order.id}/approve`, { method: 'POST', body: {} }),
       t('admin.order.approved', { number: order.number }),
@@ -229,6 +230,7 @@ function OrderDetail({
           )}
         </div>
       )}
+      {dialog}
     </Card>
   );
 }

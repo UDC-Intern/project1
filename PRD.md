@@ -269,6 +269,10 @@ Hal berikut **tidak** dibangun di rilis 1.0. Struktur data dan modul disiapkan a
     sejajar antarbaris.
 11. Semua pilihan satu dari beberapa memakai dropdown bergaya (bukan daftar bawaan peramban) yang bisa dipakai dengan
     papan ketik; sakelar, pilihan segmen, stepper, kotak centang, dan bulatan pilihan juga bergaya seragam.
+12. Pertanyaan "yakin?" sebelum aksi yang tidak bisa dibatalkan (hapus paket, rekening, ilustrasi, atau data contoh,
+    setujui pembayaran, tutup dialog soal yang belum disimpan, ganti soal dengan contoh baru) tampil sebagai pop-up
+    bergaya aplikasi dengan dua pilihan jelas ("Ya, ..." dan "Tidak"), bukan kotak bawaan peramban ("localhost says").
+    Esc atau ketuk di luar kotak sama dengan "Tidak"; fokus awal ada di pilihan yang aman.
 
 ## 7. Daftar Halaman
 
@@ -608,6 +612,7 @@ sampai M9), bukan hanya disembunyikan di tampilan.
 | 1      | M0             | Dokumen produk dan keputusan arsitektur (tanpa kode)                                                  | Selesai |
 | 1      | M1 sampai M5   | Semua tampilan tiga peran dengan data tiruan di browser (mode mock), mengikuti kontrak                | Selesai |
 | 1      | Tambahan M5    | Paket dan pembayaran manual, Kelas 1 sampai 4 dan Peta Belajar, area anak bersuara, 2 level gratis + 2 Premium, Sertifikat Juara Digital | Selesai |
+| 1      | Tambahan M5i   | Semua pertanyaan konfirmasi memakai pop-up Ya atau Tidak bergaya aplikasi, tidak ada lagi kotak bawaan peramban (hapus paket, rekening, ilustrasi, data contoh; setujui pembayaran; tutup atau ganti soal yang belum disimpan) | Selesai |
 | 1      | Tambahan M5h   | Stempel sertifikat: pilih yang sudah ada (segel bawaan atau riwayat unggahan) atau unggah baru; heatmap Jam ramai 24 jam dengan popover angka; soal di semua level bisa disesuaikan admin (20 soal contoh dari generator menjadi bank soal); simbol matematika dibacakan sebagai kata; desain sertifikat bernama Kuning, Merah, Hijau | Selesai |
 | 1      | Tambahan M5g   | Mapel dinamis di Tambah buku (mapel sendiri, otomatis masuk dropdown); lembar sertifikat dengan satu tanda tangan kanan bawah (kanvas tulis, unggah foto dengan latar transparan otomatis, goresan bawaan) dan stempel digital emas; gulir dan pengetikan di admin lebih ringan (render CSS di luar layar, latar dialog tanpa buram, kartu soal tidak digambar ulang saat soal lain diketik) | Selesai |
 | 1      | Tambahan M5f   | Silabus Belajar bisa menambah buku, topik, dan level (bank soal tulisan admin), aturan level gratis pindah ke sana dari Pengaturan Sistem; dropdown bergaya menggantikan daftar bawaan peramban; tombol aksi tabel menempati kolom tetap | Selesai |

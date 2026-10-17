@@ -28,7 +28,7 @@ import {
   SelectField,
   TextField,
 } from '../../ui/ui';
-import { ActionNotice, FilterChips, Loadable, confirmAction, useAction } from '../common';
+import { ActionNotice, FilterChips, Loadable, useAction, useConfirm } from '../common';
 
 const START: IllustrationRequest = {
   kind: 'scene',
@@ -58,6 +58,7 @@ export function IllustrationsPage() {
   const call = useApiCall('staff');
   const action = useAction();
   const review = useAction();
+  const { ask, dialog } = useConfirm();
   const [form, setForm] = useState<IllustrationRequest>(START);
   const [filter, setFilter] = useState<IllustrationStatus | 'all'>('review');
   const all = useFetch<IllustrationRow[]>('staff', '/admin/illustrations?status=all');
@@ -96,7 +97,12 @@ export function IllustrationsPage() {
     if (ok) all.reload();
   }
   async function remove(row: IllustrationRow) {
-    if (!confirmAction(t('admin.ill.deleteConfirm', { subject: row.subject }))) return;
+    const yes = await ask({
+      title: t('admin.ill.deleteTitle'),
+      message: t('admin.ill.deleteConfirm', { subject: row.subject }),
+      confirmLabel: t('admin.ill.deleteYes'),
+    });
+    if (!yes) return;
     const ok = await review.run(
       () => call(`/admin/illustrations/${row.id}`, { method: 'DELETE' }).then(() => true),
       t('admin.ill.deleted', { subject: row.subject }),
@@ -322,6 +328,7 @@ export function IllustrationsPage() {
         </Loadable>
         <ListPager paged={paged} sizes={PAGE_SIZES} />
       </Card>
+      {dialog}
     </>
   );
 }

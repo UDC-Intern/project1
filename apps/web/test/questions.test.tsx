@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   BANK_DRAFT_SIZE,
   bankFromGenerator,
@@ -367,5 +367,81 @@ describe('Silabus Belajar: menyesuaikan soal level otomatis', () => {
     await waitFor(() => expect(choices()).not.toBe(before));
     expect(dialog.querySelectorAll('.bank-q')).toHaveLength(20);
     expect(readDb().contentEdits.questions).toBeUndefined();
+  }, 40_000);
+});
+
+describe('Silabus Belajar: pop-up ya atau tidak di dialog soal (bukan kotak bawaan peramban)', () => {
+  const HINT = 'input[aria-label="Petunjuk saat belum tepat (opsional) 1"]';
+  const nativeConfirm = vi.fn(() => true);
+  beforeEach(() => {
+    nativeConfirm.mockClear();
+    vi.spyOn(window, 'confirm').mockImplementation(nativeConfirm);
+  });
+  afterEach(() => {
+    expect(nativeConfirm).not.toHaveBeenCalled();
+    vi.restoreAllMocks();
+  });
+
+  it('menutup dialog yang soalnya diubah: Tidak tetap mengedit, Ya menutup', async () => {
+    renderPage();
+    fireEvent.click(await openLevel1());
+    const dialog = await screen.findByRole('dialog', { name: /^Soal level 1:/ });
+    await within(dialog).findByText('20 dari 20 soal sudah lengkap');
+
+    fireEvent.change(dialog.querySelector(HINT)!, { target: { value: 'Hitung pelan-pelan, ya.' } });
+    fireEvent.click(buttonByText(dialog, 'Tutup'));
+    const ask = await screen.findByRole('dialog', { name: 'Tutup tanpa menyimpan?' });
+    expect(
+      within(ask).getByText('Soal yang diubah belum disimpan. Tutup tanpa menyimpan?'),
+    ).toBeInTheDocument();
+    fireEvent.click(within(ask).getByRole('button', { name: 'Tidak, lanjut mengedit' }));
+    await waitFor(() =>
+      expect(screen.queryByRole('dialog', { name: 'Tutup tanpa menyimpan?' })).toBeNull(),
+    );
+    expect(screen.getByRole('dialog', { name: /^Soal level 1:/ })).toBeInTheDocument();
+    expect((dialog.querySelector(HINT) as HTMLInputElement).value).toBe('Hitung pelan-pelan, ya.');
+
+    fireEvent.click(buttonByText(dialog, 'Tutup'));
+    const again = await screen.findByRole('dialog', { name: 'Tutup tanpa menyimpan?' });
+    fireEvent.click(within(again).getByRole('button', { name: 'Ya, tutup' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(readDb().contentEdits.questions).toBeUndefined();
+  }, 40_000);
+
+  it('menutup dialog tanpa perubahan tidak bertanya apa pun', async () => {
+    renderPage();
+    fireEvent.click(await openLevel1());
+    const dialog = await screen.findByRole('dialog', { name: /^Soal level 1:/ });
+    await within(dialog).findByText('20 dari 20 soal sudah lengkap');
+    fireEvent.click(buttonByText(dialog, 'Tutup'));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+  }, 40_000);
+
+  it('Ambil contoh baru setelah mengubah soal bertanya dulu: Tidak mempertahankan, Ya mengganti', async () => {
+    renderPage();
+    fireEvent.click(await openLevel1());
+    const dialog = await screen.findByRole('dialog', { name: /^Soal level 1:/ });
+    await within(dialog).findByText('20 dari 20 soal sudah lengkap');
+    const choices = () =>
+      [...dialog.querySelectorAll<HTMLInputElement>('.bank-q .bank-choice input[type="text"]')]
+        .map((el) => el.value)
+        .join('|');
+
+    fireEvent.change(dialog.querySelector(HINT)!, { target: { value: 'Petunjuk saya.' } });
+    const before = choices();
+    fireEvent.click(buttonByText(dialog, 'Ambil contoh baru'));
+    const ask = await screen.findByRole('dialog', { name: 'Ganti dengan soal contoh baru?' });
+    fireEvent.click(within(ask).getByRole('button', { name: 'Tidak, pakai soal saya' }));
+    await waitFor(() =>
+      expect(screen.queryByRole('dialog', { name: 'Ganti dengan soal contoh baru?' })).toBeNull(),
+    );
+    expect((dialog.querySelector(HINT) as HTMLInputElement).value).toBe('Petunjuk saya.');
+    expect(choices()).toBe(before);
+
+    fireEvent.click(buttonByText(dialog, 'Ambil contoh baru'));
+    const again = await screen.findByRole('dialog', { name: 'Ganti dengan soal contoh baru?' });
+    fireEvent.click(within(again).getByRole('button', { name: 'Ya, ganti soal' }));
+    await waitFor(() => expect(choices()).not.toBe(before));
+    expect((dialog.querySelector(HINT) as HTMLInputElement).value).not.toBe('Petunjuk saya.');
   }, 40_000);
 });

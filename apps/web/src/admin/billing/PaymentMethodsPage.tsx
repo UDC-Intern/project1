@@ -18,11 +18,11 @@ import {
 import {
   ActionNotice,
   ActiveBadge,
-  confirmAction,
   Icon,
   Loadable,
   RowActions,
   useAction,
+  useConfirm,
 } from '../common';
 
 type Kind = PaymentMethodRow['kind'];
@@ -176,10 +176,16 @@ export function PaymentMethodsPage() {
   const list = useFetch<PaymentMethodRow[]>('staff', '/admin/payment-methods');
   const call = useApiCall('staff');
   const action = useAction();
+  const { ask, dialog } = useConfirm();
   const [editing, setEditing] = useState<PaymentMethodRow | null>(null);
 
   async function remove(m: PaymentMethodRow) {
-    if (!confirmAction(t('admin.pay.deleteConfirm', { name: `${m.name} ${m.number}` }))) return;
+    const yes = await ask({
+      title: t('admin.pay.deleteTitle'),
+      message: t('admin.pay.deleteConfirm', { name: `${m.name} ${m.number}` }),
+      confirmLabel: t('admin.pay.deleteYes'),
+    });
+    if (!yes) return;
     const out = await action.run(
       () => call(`/admin/payment-methods/${m.id}`, { method: 'DELETE' }).then(() => true),
       t('admin.pay.deleted', { name: m.name }),
@@ -270,6 +276,7 @@ export function PaymentMethodsPage() {
         }}
         onCancel={() => setEditing(null)}
       />
+      {dialog}
     </>
   );
 }

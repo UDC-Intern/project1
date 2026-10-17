@@ -16,7 +16,7 @@ import { CountObjects } from '../../components/CountObjects';
 import { t } from '../../i18n';
 import { Dialog } from '../../ui/Dialog';
 import { Badge, Button, Notice, TextField } from '../../ui/ui';
-import { ActionNotice, ConfirmDialog, Icon, Loadable, confirmAction, useAction } from '../common';
+import { ActionNotice, ConfirmDialog, Icon, Loadable, useAction, useConfirm } from '../common';
 
 type LevelQuestions = {
   items: BankQuestion[];
@@ -223,6 +223,7 @@ export function QuestionBankDialog({
 }) {
   const call = useApiCall('staff');
   const action = useAction();
+  const { ask, dialog } = useConfirm();
   const loaded = useFetch<LevelQuestions>(
     'staff',
     `/admin/levels/${encodeURIComponent(level.id)}/questions`,
@@ -273,8 +274,16 @@ export function QuestionBankDialog({
     firstInput.current = el;
   }, []);
 
-  function close() {
-    if (dirty && !confirmAction(t('admin.bank.discard'))) return;
+  async function close() {
+    if (dirty) {
+      const yes = await ask({
+        title: t('admin.bank.discardTitle'),
+        message: t('admin.bank.discard'),
+        confirmLabel: t('admin.bank.discardYes'),
+        cancelLabel: t('admin.bank.discardNo'),
+      });
+      if (!yes) return;
+    }
     onClose();
   }
 
@@ -308,7 +317,15 @@ export function QuestionBankDialog({
 
   /** Ambil 20 soal contoh baru dari generator bawaan (urutan acak berbeda); belum disimpan. */
   async function regenerate() {
-    if (dirty && !confirmAction(t('admin.bank.regenerateConfirm'))) return;
+    if (dirty) {
+      const yes = await ask({
+        title: t('admin.bank.regenerateTitle'),
+        message: t('admin.bank.regenerateConfirm'),
+        confirmLabel: t('admin.bank.regenerateYes'),
+        cancelLabel: t('admin.bank.regenerateNo'),
+      });
+      if (!yes) return;
+    }
     const seed = Math.floor(Math.random() * 1_000_000) + 1;
     const out = await action.run(() =>
       call<LevelQuestions>(`${endpoint}?from=generator&seed=${seed}`),
@@ -462,6 +479,7 @@ export function QuestionBankDialog({
         onConfirm={() => void clear()}
         onCancel={() => setClearing(false)}
       />
+      {dialog}
     </>
   );
 }
