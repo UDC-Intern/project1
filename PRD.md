@@ -240,7 +240,8 @@ Hal berikut **tidak** dibangun di rilis 1.0. Struktur data dan modul disiapkan a
    dihapus. **Soal di semua level bisa disesuaikan:** tombol "Sesuaikan soal" di level otomatis membuka dialog bank soal
    berisi 20 soal contoh dari generator level itu (bisa diambil ulang dengan "Ambil contoh baru"); soal isian angka menjadi
    pilihan ganda, gambar benda hitung ikut tersalin. Admin mengubah kalimat, pilihan, jawaban benar, dan petunjuk, lalu
-   menyimpan; sejak itu level memakai bank tersebut, dan "Kembalikan ke soal bawaan" memulihkan generator aslinya. Level
+   menyimpan; gambar tiap soal juga bisa diubah (benda hitung: jenis benda dan jumlahnya, hingga tiga kelompok; gambar dari
+   Galeri Aset atau Ilustrasi AI yang disetujui; unggahan sendiri PNG, JPG, atau WebP sampai 3 MB; atau tanpa gambar); sejak itu level memakai bank tersebut, dan "Kembalikan ke soal bawaan" memulihkan generator aslinya. Level
    yang ruang soalnya kecil bisa menghasilkan kurang dari 20 soal berbeda.
 3. Bank Soal & Latihan: pilih buku, topik, level, dan seed. Mode simulasi memutar ronde 10 soal seperti anak (dibacakan,
    dijawab, umpan balik dan petunjuk, hasil lulus/belum); mode kunci menampilkan 10 soal beserta jawaban dan petunjuk.
@@ -503,7 +504,7 @@ dan web (mode mock) menghasilkan soal yang identik. Satu soal berbentuk:
 
 ```ts
 { index: 0..9, type: 'choice' | 'number' | 'true_false', prompt: string,
-  visual: { item, count?, groups? } | null, options: string[] | null,
+  visual: { item, count?, groups? } | { kind: 'image', url, label? } | null, options: string[] | null,
   answer: string, explanation: string }   // answer dan explanation hanya di server
 ```
 
@@ -612,6 +613,7 @@ sampai M9), bukan hanya disembunyikan di tampilan.
 | 1      | M0             | Dokumen produk dan keputusan arsitektur (tanpa kode)                                                  | Selesai |
 | 1      | M1 sampai M5   | Semua tampilan tiga peran dengan data tiruan di browser (mode mock), mengikuti kontrak                | Selesai |
 | 1      | Tambahan M5    | Paket dan pembayaran manual, Kelas 1 sampai 4 dan Peta Belajar, area anak bersuara, 2 level gratis + 2 Premium, Sertifikat Juara Digital | Selesai |
+| 1      | Tambahan M5j   | Gambar tiap soal bisa diubah admin di dialog Sesuaikan soal: ganti jenis benda hitung dan jumlahnya (satu sampai tiga kelompok) dengan pratinjau langsung, pilih gambar dari Galeri Aset atau Ilustrasi AI yang disetujui, unggah gambar sendiri (PNG, JPG, WebP, maks 3 MB, dikecilkan otomatis), atau lepas gambar; anak melihat gambar itu di soalnya | Selesai |
 | 1      | Tambahan M5i   | Semua pertanyaan konfirmasi memakai pop-up Ya atau Tidak bergaya aplikasi, tidak ada lagi kotak bawaan peramban (hapus paket, rekening, ilustrasi, data contoh; setujui pembayaran; tutup atau ganti soal yang belum disimpan) | Selesai |
 | 1      | Tambahan M5h   | Stempel sertifikat: pilih yang sudah ada (segel bawaan atau riwayat unggahan) atau unggah baru; heatmap Jam ramai 24 jam dengan popover angka; soal di semua level bisa disesuaikan admin (20 soal contoh dari generator menjadi bank soal); simbol matematika dibacakan sebagai kata; desain sertifikat bernama Kuning, Merah, Hijau | Selesai |
 | 1      | Tambahan M5g   | Mapel dinamis di Tambah buku (mapel sendiri, otomatis masuk dropdown); lembar sertifikat dengan satu tanda tangan kanan bawah (kanvas tulis, unggah foto dengan latar transparan otomatis, goresan bawaan) dan stempel digital emas; gulir dan pengetikan di admin lebih ringan (render CSS di luar layar, latar dialog tanpa buram, kartu soal tidak digambar ulang saat soal lain diketik) | Selesai |

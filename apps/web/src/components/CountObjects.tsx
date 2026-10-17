@@ -1,6 +1,6 @@
-import type { Visual } from '@udakids/engine';
+import { objectsTotal, type CountItem, type Visual } from '@udakids/engine';
 
-export type ObjectItem = NonNullable<Visual>['item'];
+export type ObjectItem = CountItem;
 type Item = ObjectItem;
 
 const COLORS: Record<Item, string> = {
@@ -45,11 +45,37 @@ export function ObjectShape({ item }: { item: Item }) {
   }
 }
 
-/** Gambar objek untuk soal hitung. Satu kelompok (count) atau beberapa kelompok (groups). */
-export function CountObjects({ visual }: { visual: Visual }) {
+/**
+ * Gambar yang menyertai soal. Benda hitung: satu kelompok (count) atau beberapa kelompok (groups) dari benda vektor
+ * yang digandakan. Gambar utuh (galeri aset, ilustrasi AI, atau unggahan admin): satu <img> yang muat di layar.
+ */
+export function CountObjects({
+  visual,
+  maxHeight = 180,
+}: {
+  visual: Visual;
+  /** Tinggi paling besar gambar utuh (px); benda hitung tidak terpengaruh. */
+  maxHeight?: number;
+}) {
   if (!visual) return null;
+  if (visual.kind === 'image')
+    return (
+      <img
+        src={visual.url}
+        alt={visual.label || 'Gambar soal'}
+        decoding="async"
+        style={{
+          maxHeight,
+          maxWidth: '100%',
+          objectFit: 'contain',
+          borderRadius: 8,
+          margin: '8px auto',
+          display: 'block',
+        }}
+      />
+    );
   const groups = visual.groups ?? [visual.count ?? 0];
-  const total = groups.reduce((a, b) => a + b, 0);
+  const total = objectsTotal(visual);
   return (
     <div className="uk-count" role="img" aria-label={`${total} ${OBJECT_LABELS[visual.item]}`}>
       {groups.map((n, g) => (

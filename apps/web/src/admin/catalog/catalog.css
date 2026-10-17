@@ -596,25 +596,90 @@
   background: var(--sawah-soft);
 }
 
+/* Editor gambar di tiap kartu soal: pratinjau, pilihan benda dan jumlah, serta tombol sumber gambar. */
 .bank-visual {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px 12px;
-  padding: 8px 12px;
+  display: grid;
+  gap: 10px;
+  padding: 10px 12px;
   border: 1px dashed var(--ui-line-strong);
   border-radius: 12px;
   background: var(--ui-bg);
+  min-width: 0;
 }
 
-.bank-visual .uk-count {
-  transform-origin: left center;
-  transform: scale(0.7);
-  margin: -8px 0;
+.bank-visual-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
 }
 
-.bank-visual small {
-  flex: 1 1 160px;
+.bank-visual-preview {
+  display: grid;
+  place-items: center;
+  padding: 8px;
+  border-radius: 10px;
+  background: var(--ui-surface);
+  overflow: hidden;
+}
+
+.bank-visual-preview .uk-count {
+  justify-content: center;
+  gap: 8px;
+}
+
+.bank-visual-preview .uk-count-group {
+  gap: 2px;
+  padding: 6px;
+}
+
+.bank-visual-preview .uk-count svg {
+  width: 28px;
+  height: 28px;
+}
+
+.bank-visual-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+  align-items: start;
+}
+
+.bank-visual-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ui-ink);
+}
+
+.bank-visual-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.bank-visual-actions > small {
+  flex: 1 1 140px;
+}
+
+.bank-visual-actions .ui-btn[aria-pressed='true'] {
+  background: var(--ui-primary);
+  color: var(--ui-primary-ink);
+}
+
+.bank-pick-hint {
+  margin: 0 0 12px;
+}
+
+.bank-pick-grid {
+  margin-top: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+}
+
+.bank-pick-actions {
+  margin-top: 16px;
+  justify-content: flex-end;
 }
 
 /* Aksi di sisi kiri bilah tombol dialog soal (ambil contoh baru, kembalikan, kosongkan). */

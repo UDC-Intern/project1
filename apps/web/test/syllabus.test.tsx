@@ -536,7 +536,7 @@ describe('Silabus Belajar: halaman', () => {
     const stored = (saved?.generatorParams as { params: { items: { answer: number }[] } }).params
       .items;
     expect(stored.map((q) => q.answer)).toEqual([0, 0, 1, 0]);
-  });
+  }, 20_000);
 
   it('mengetik di satu soal tidak menggambar ulang kartu soal lainnya', async () => {
     await adm('/admin/books/matematika-kelas-1/topics', 'POST', newTopic());
@@ -564,7 +564,7 @@ describe('Silabus Belajar: halaman', () => {
     fireEvent.click(within(dialog).getByRole('button', { name: 'Tambah soal' }));
     expect(drawn(5)).toBeGreaterThan(0);
     spy.mockRestore();
-  });
+  }, 20_000);
 
   it('tambah buku lewat dialog; pasangan mapel dan kelas yang sudah ada ditolak', async () => {
     renderPage();

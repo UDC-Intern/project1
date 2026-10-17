@@ -1,152 +1,24 @@
-import {
-  CERTIFICATE_DESIGNS,
-  MOMO_COLORS,
-  PIN_PICTURES,
-  type Illustration as IllustrationRow,
-  type Stage,
-} from '@udakids/engine';
-import { useMemo, useRef, useState, type ReactNode } from 'react';
-import { useSettings } from '../../api/settings';
-import { useFetch } from '../../auth/useApi';
-import { CertificateSheet } from '../../components/certificate/CertificateSheet';
-import { OBJECT_LABELS, ObjectShape, type ObjectItem } from '../../components/CountObjects';
-import { Illustration } from '../../components/Illustration';
-import { Momo } from '../../components/Momo';
-import { PinPictureIcon } from '../../components/PicturePin';
-import { Plant } from '../../components/Plant';
+import { useRef, useState } from 'react';
 import { t, type MessageKey } from '../../i18n';
 import { ShellIconSvg } from '../../ui/AppShell';
 import { Dialog } from '../../ui/Dialog';
 import { Button, Empty, PageHeader } from '../../ui/ui';
 import { FilterChips } from '../common';
-
-type Category = 'objects' | 'pins' | 'momo' | 'plants' | 'certificates' | 'ai';
-const CATEGORIES: Category[] = ['objects', 'pins', 'momo', 'plants', 'certificates', 'ai'];
-
-type Asset = {
-  key: string;
-  category: Category;
-  name: string;
-  code: string;
-  meta: string;
-  render: (size: number) => ReactNode;
-};
-
-const PIN_LABELS: Record<string, string> = {
-  apple: 'Apel',
-  star: 'Bintang',
-  fish: 'Ikan',
-  flower: 'Bunga',
-  ball: 'Bola',
-  cat: 'Kucing',
-  house: 'Rumah',
-  cloud: 'Awan',
-  leaf: 'Daun',
-};
-const MOMO_LABELS: Record<string, string> = {
-  blue: 'Biru',
-  green: 'Hijau',
-  yellow: 'Kuning',
-  orange: 'Oranye',
-  pink: 'Merah muda',
-  teal: 'Hijau tosca',
-};
-const PLANT_LABELS = ['Benih', 'Tunas', 'Pohon', 'Pohon berbuah'];
-
-function objectSvg(item: ObjectItem, size: number) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 32 32" role="img" aria-label={OBJECT_LABELS[item]}>
-      <ObjectShape item={item} />
-    </svg>
-  );
-}
+import {
+  GALLERY_CATEGORIES,
+  useGalleryAssets,
+  type GalleryAsset,
+  type GalleryCategory,
+} from './galleryAssets';
+import { svgMarkup } from './svgImage';
 
 /** Galeri Aset: semua gambar yang dipakai aplikasi, dari benda soal hitung sampai ilustrasi AI yang disetujui. */
 export function GalleryPage() {
-  const usage = useFetch<{ objects: Record<string, number> }>('staff', '/admin/media/usage');
-  const approved = useFetch<IllustrationRow[]>('staff', '/admin/illustrations?status=approved');
-  const settings = useSettings().certificate;
-  const [category, setCategory] = useState<Category | 'all'>('all');
+  const { assets } = useGalleryAssets();
+  const [category, setCategory] = useState<GalleryCategory | 'all'>('all');
   const [query, setQuery] = useState('');
-  const [open, setOpen] = useState<Asset>();
+  const [open, setOpen] = useState<GalleryAsset>();
   const big = useRef<HTMLDivElement>(null);
-
-  const assets = useMemo<Asset[]>(() => {
-    const list: Asset[] = [];
-    for (const item of Object.keys(OBJECT_LABELS) as ObjectItem[])
-      list.push({
-        key: `objects:${item}`,
-        category: 'objects',
-        name: OBJECT_LABELS[item],
-        code: item,
-        meta: usage.data
-          ? t('admin.gallery.usedIn', { n: usage.data.objects[item] ?? 0 })
-          : t('admin.gallery.counting'),
-        render: (size) => objectSvg(item, size),
-      });
-    for (const pin of PIN_PICTURES)
-      list.push({
-        key: `pins:${pin}`,
-        category: 'pins',
-        name: PIN_LABELS[pin] ?? pin,
-        code: pin,
-        meta: t('admin.gallery.pinMeta'),
-        render: (size) => <PinPictureIcon name={pin} size={size} />,
-      });
-    for (const color of MOMO_COLORS)
-      list.push({
-        key: `momo:${color}`,
-        category: 'momo',
-        name: `Momo ${MOMO_LABELS[color] ?? color}`,
-        code: color,
-        meta: t('admin.gallery.momoMeta'),
-        render: (size) => <Momo color={color} mood="happy" size={size} />,
-      });
-    ([0, 1, 2, 3] as Stage[]).forEach((stage) =>
-      list.push({
-        key: `plants:${stage}`,
-        category: 'plants',
-        name: PLANT_LABELS[stage]!,
-        code: `stage-${stage}`,
-        meta: t('admin.gallery.plantMeta'),
-        render: (size) => <Plant stage={stage} size={size} />,
-      }),
-    );
-    for (const design of CERTIFICATE_DESIGNS)
-      list.push({
-        key: `certificates:${design}`,
-        category: 'certificates',
-        name: t(`admin.certs.design.${design}` as MessageKey),
-        code: design,
-        meta: t('admin.gallery.certMeta'),
-        render: (size) => (
-          <div style={{ width: size * 1.4 }}>
-            <CertificateSheet
-              data={{
-                childName: t('admin.certSettings.sampleName'),
-                bookTitle: t('admin.certSettings.sampleBook'),
-                levels: 40,
-                topics: 10,
-                design,
-                number: null,
-                issuedAt: null,
-                settings,
-              }}
-            />
-          </div>
-        ),
-      });
-    for (const img of approved.data ?? [])
-      list.push({
-        key: `ai:${img.id}`,
-        category: 'ai',
-        name: img.subject,
-        code: img.id,
-        meta: t('admin.gallery.aiMeta', { by: img.createdBy }),
-        render: (size) => <Illustration request={img} size={size * 1.4} />,
-      });
-    return list;
-  }, [usage.data, approved.data, settings]);
 
   const q = query.trim().toLowerCase();
   const shown = assets.filter(
@@ -154,19 +26,12 @@ export function GalleryPage() {
       (category === 'all' || a.category === category) &&
       (!q || a.name.toLowerCase().includes(q) || a.code.toLowerCase().includes(q)),
   );
-  const count = (c: Category) => assets.filter((a) => a.category === c).length;
+  const count = (c: GalleryCategory) => assets.filter((a) => a.category === c).length;
 
-  function downloadSvg(a: Asset) {
+  function downloadSvg(a: GalleryAsset) {
     const svg = big.current?.querySelector('svg');
     if (!svg) return;
-    const clone = svg.cloneNode(true) as SVGSVGElement;
-    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-    const css = getComputedStyle(document.documentElement);
-    // Token warna (var(--…)) diganti nilainya supaya berkas tetap berwarna di luar aplikasi.
-    const text = clone.outerHTML.replace(/var\((--[\w-]+)\)/g, (m, name: string) => {
-      const v = css.getPropertyValue(name).trim();
-      return v || m;
-    });
+    const text = svgMarkup(svg);
     const url = URL.createObjectURL(new Blob([text], { type: 'image/svg+xml' }));
     const link = document.createElement('a');
     link.href = url;
@@ -185,7 +50,7 @@ export function GalleryPage() {
           label={t('admin.gallery.categories')}
           value={category}
           onChange={setCategory}
-          items={(['all', ...CATEGORIES] as const).map((c) => ({
+          items={(['all', ...GALLERY_CATEGORIES] as const).map((c) => ({
             key: c,
             label: t(`admin.gallery.cat.${c}` as MessageKey),
             count: c === 'all' ? assets.length : count(c),

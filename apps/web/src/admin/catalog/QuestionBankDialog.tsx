@@ -12,11 +12,12 @@ import {
 } from '@udakids/engine';
 import type { CatalogBook, CatalogLevel } from '../../api/adminTypes';
 import { useApiCall, useFetch } from '../../auth/useApi';
-import { CountObjects } from '../../components/CountObjects';
 import { t } from '../../i18n';
 import { Dialog } from '../../ui/Dialog';
 import { Badge, Button, Notice, TextField } from '../../ui/ui';
 import { ActionNotice, ConfirmDialog, Icon, Loadable, useAction, useConfirm } from '../common';
+import { ImagePickerDialog } from './ImagePickerDialog';
+import { VisualEditor } from './VisualEditor';
 
 type LevelQuestions = {
   items: BankQuestion[];
@@ -44,6 +45,8 @@ type QuestionCardProps = {
   onChange: (index: number, q: BankQuestion) => void;
   onDuplicate: (index: number) => void;
   onRemove: (index: number) => void;
+  /** Buka pemilih gambar dari galeri untuk soal ini. */
+  onPickImage: (index: number) => void;
   canRemove: boolean;
   canDuplicate: boolean;
   inputRef?: (el: HTMLInputElement | null) => void;
@@ -64,6 +67,7 @@ const sameCard = (a: QuestionCardProps, b: QuestionCardProps) =>
   a.onChange === b.onChange &&
   a.onDuplicate === b.onDuplicate &&
   a.onRemove === b.onRemove &&
+  a.onPickImage === b.onPickImage &&
   a.inputRef === b.inputRef &&
   sameIssues(a.issues, b.issues);
 
@@ -75,12 +79,19 @@ const QuestionCard = memo(function QuestionCard({
   onChange,
   onDuplicate,
   onRemove,
+  onPickImage,
   canRemove,
   canDuplicate,
   inputRef,
 }: QuestionCardProps) {
   const n = index + 1;
   const set = (patch: Partial<BankQuestion>) => onChange(index, { ...question, ...patch });
+  const setVisual = (visual: BankQuestion['visual']) => {
+    const next = { ...question };
+    if (visual) next.visual = visual;
+    else delete next.visual;
+    onChange(index, next);
+  };
   const setChoice = (i: number, text: string) =>
     set({ choices: question.choices.map((c, k) => (k === i ? text : c)) });
   const removeChoice = (i: number) =>
@@ -120,15 +131,12 @@ const QuestionCard = memo(function QuestionCard({
           </Button>
         </span>
       </div>
-      {question.visual && (
-        <div className="bank-visual">
-          <CountObjects visual={question.visual} />
-          <small className="ui-hint">{t('admin.bank.visualNote')}</small>
-          <Button variant="ghost" size="sm" onClick={() => set({ visual: undefined })}>
-            {t('admin.bank.visualRemove')}
-          </Button>
-        </div>
-      )}
+      <VisualEditor
+        n={n}
+        visual={question.visual ?? undefined}
+        onChange={setVisual}
+        onGallery={() => onPickImage(index)}
+      />
       <div className="ui-field">
         <label htmlFor={`bank-prompt-${n}`}>{t('admin.bank.prompt')}</label>
         <input
@@ -234,6 +242,8 @@ export function QuestionBankDialog({
   const [clearing, setClearing] = useState(false);
   const [reverting, setReverting] = useState(false);
   const [draft, setDraft] = useState(false);
+  /** Nomor soal (mulai 0) yang sedang memilih gambar dari galeri; null bila pemilih tertutup. */
+  const [picking, setPicking] = useState<number | null>(null);
   /** Jumlah soal contoh terakhir yang diambil dari generator (untuk catatan "hanya sekian soal berbeda"). */
   const [drawn, setDrawn] = useState(0);
   const firstInput = useRef<HTMLInputElement | null>(null);
@@ -270,6 +280,7 @@ export function QuestionBankDialog({
     [],
   );
   const removeItem = useCallback((i: number) => setItems((xs) => xs.filter((_, k) => k !== i)), []);
+  const pickImage = useCallback((i: number) => setPicking(i), []);
   const setFirstInput = useCallback((el: HTMLInputElement | null) => {
     firstInput.current = el;
   }, []);
@@ -390,6 +401,7 @@ export function QuestionBankDialog({
                     onChange={setItem}
                     onDuplicate={duplicateItem}
                     onRemove={removeItem}
+                    onPickImage={pickImage}
                     canRemove={items.length > 1}
                     canDuplicate={items.length < BANK_MAX_QUESTIONS}
                     inputRef={i === 0 ? setFirstInput : undefined}
@@ -461,6 +473,16 @@ export function QuestionBankDialog({
           )}
         </Loadable>
       </Dialog>
+      {picking !== null && items[picking] && (
+        <ImagePickerDialog
+          n={picking + 1}
+          onClose={() => setPicking(null)}
+          onPick={({ url, label }) => {
+            setItem(picking, { ...items[picking]!, visual: { kind: 'image', url, label } });
+            setPicking(null);
+          }}
+        />
+      )}
       <ConfirmDialog
         open={reverting}
         title={t('admin.bank.revertTitle', { n: level.number })}

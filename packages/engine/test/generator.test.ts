@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { generateRound, hasGenerator, ROUND_SIZE, bandOf } from '../src/generator/index.js';
 import { validateQuestion } from '../src/content/validate-question.js';
+import { objectsTotal } from '../src/schemas/domain.js';
 import { createRng } from '../src/rng.js';
 
 const LEVELS = [
@@ -25,10 +26,8 @@ describe('generator soal', () => {
           );
         if (q.type === 'number') expect(q.options).toBeNull();
         else expect(q.options).toContain(q.answer);
-        if (q.visual) {
-          const total = q.visual.groups
-            ? q.visual.groups.reduce((a, b) => a + b, 0)
-            : (q.visual.count ?? 0);
+        if (q.visual && q.visual.kind !== 'image') {
+          const total = objectsTotal(q.visual);
           expect(total).toBeGreaterThanOrEqual(1);
           expect(total).toBeLessThanOrEqual(20);
         }

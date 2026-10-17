@@ -202,7 +202,7 @@ export const bankQuestionSchema = z
     answer: z.number().int().min(0),
     /** Petunjuk saat anak belum tepat; kosong memakai kalimat bawaan. */
     hint: z.string().trim().max(240, 'Petunjuk maksimal 240 huruf.'),
-    /** Gambar benda hitung yang menyertai soal; hanya ada pada soal yang disalin dari generator, tidak diketik admin. */
+    /** Gambar yang menyertai soal: benda hitung (jenis dan jumlah) atau gambar utuh dari galeri atau unggahan. */
     visual: visualSchema.optional(),
   })
   .superRefine((q, ctx) => {

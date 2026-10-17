@@ -1,4 +1,4 @@
-import type { QuestionType, Visual } from '../schemas/domain.js';
+import { objectsTotal, type QuestionType, type Visual } from '../schemas/domain.js';
 
 export type QuestionDraft = {
   type: QuestionType;
@@ -80,10 +80,8 @@ export function validateQuestion(q: QuestionDraft): ValidationResult {
   if (!q.explanation || q.explanation.trim().length === 0)
     issues.push('Petunjuk (explanation) kosong.');
 
-  if (q.visual) {
-    const total = q.visual.groups
-      ? q.visual.groups.reduce((a, b) => a + b, 0)
-      : (q.visual.count ?? 0);
+  if (q.visual && q.visual.kind !== 'image') {
+    const total = objectsTotal(q.visual);
     if (total < 1) issues.push('Gambar objek tidak punya jumlah.');
     if (total > MAX_VISUAL_OBJECTS)
       issues.push(`Objek bergambar lebih dari ${MAX_VISUAL_OBJECTS}.`);

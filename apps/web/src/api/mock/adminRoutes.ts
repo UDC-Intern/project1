@@ -782,7 +782,7 @@ function assetUsage(): { objects: Record<string, number> } {
             },
             seed,
           ))
-            if (q.visual) items.add(q.visual.item);
+            if (q.visual && q.visual.kind !== 'image') items.add(q.visual.item);
         for (const item of items) objects[item] = (objects[item] ?? 0) + 1;
       }
   usageCache = { objects };
