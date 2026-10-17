@@ -159,7 +159,7 @@ export function StaffPage() {
       <Card title={t('admin.staff.listTitle')}>
         <ActionNotice error={action.error} done={action.done} />
         <Loadable loading={staff.loading} error={staff.error} hasData={!!staff.data}>
-          {() => <Table rows={staff.data!} columns={columns} rowKey={(u) => u.id} />}
+          {() => <Table rows={staff.data!} columns={columns} rowKey={(u) => u.id} pageSize={10} />}
         </Loadable>
       </Card>
       <CreateStaff onCreated={(u) => staff.setData((xs) => [...(xs ?? []), u])} />

@@ -6,7 +6,7 @@ import { t, type MessageKey } from '../i18n';
 import { Badge, Button } from '../ui/ui';
 import type { BookRef } from './billingTypes';
 
-/** Bagian bersama halaman paket & transaksi orang tua (D-036). */
+/** Bagian bersama halaman paket & transaksi orang tua. */
 
 export const formatDay = (v: string) =>
   new Date(v).toLocaleDateString('id-ID', { dateStyle: 'long' });

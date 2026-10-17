@@ -3,7 +3,7 @@ import { t } from '../i18n';
 import { formatDate } from './ui';
 import './plan.css';
 
-/** Badge status langganan (D-041): Premium / Paket buku / Free, dengan asal & masa berlaku. */
+/** Badge status langganan: Premium / Paket buku / Free, dengan asal & masa berlaku. */
 export function PlanBadge({ plan, detail = false }: { plan: PlanStatus; detail?: boolean }) {
   const label =
     plan.tier === 'premium'

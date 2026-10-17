@@ -337,10 +337,12 @@ export function OrdersPage() {
         <Loadable loading={list.loading} error={list.error} hasData={!!list.data}>
           {() => (
             <Table
+              key={filter}
               rows={list.data!}
               columns={columns}
               rowKey={(o) => o.id}
               empty={t('admin.order.empty')}
+              pageSize={10}
             />
           )}
         </Loadable>

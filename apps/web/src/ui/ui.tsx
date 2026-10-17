@@ -7,6 +7,7 @@ import type {
 } from 'react';
 import { useEffect, useId, useRef, useState } from 'react';
 import { t } from '../i18n';
+import { ListPager, usePaged } from './Pager';
 import './ui.css';
 
 /** Komponen dasar untuk area orang dewasa (admin, fasilitator, orang tua). */
@@ -358,41 +359,48 @@ export type Column<T> = {
   width?: string;
 };
 
+/** Tabel sederhana. Dengan `pageSize`, baris dibagi per halaman dan pager tampil di bawahnya. */
 export function Table<T>({
   rows,
   columns,
   rowKey,
   empty,
+  pageSize,
 }: {
   rows: T[];
   columns: Column<T>[];
   rowKey: (row: T) => string;
   empty?: ReactNode;
+  pageSize?: number;
 }) {
+  const paged = usePaged(rows, pageSize ?? Number.POSITIVE_INFINITY);
   if (rows.length === 0) return <Empty>{empty ?? t('common.empty')}</Empty>;
   return (
-    <div className="ui-table-wrap">
-      <table className="ui-table">
-        <thead>
-          <tr>
-            {columns.map((c) => (
-              <th key={c.key} style={c.width ? { width: c.width } : undefined}>
-                {c.label}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={rowKey(r)}>
+    <>
+      <div className="ui-table-wrap">
+        <table className="ui-table">
+          <thead>
+            <tr>
               {columns.map((c) => (
-                <td key={c.key}>{c.render(r)}</td>
+                <th key={c.key} style={c.width ? { width: c.width } : undefined}>
+                  {c.label}
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {paged.items.map((r) => (
+              <tr key={rowKey(r)}>
+                {columns.map((c) => (
+                  <td key={c.key}>{c.render(r)}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {pageSize !== undefined && <ListPager paged={paged} />}
+    </>
   );
 }
 

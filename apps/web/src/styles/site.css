@@ -1,5 +1,5 @@
 /* Situs publik (landing) + halaman masuk/daftar orang dewasa.
-   Warna diarahkan ke token UdaKids (D-107, src/styles/uk-tokens.css): tanpa ungu, tanpa tepi hitam tebal. */
+   Warna diarahkan ke token UdaKids (src/styles/uk-tokens.css): tanpa ungu, tanpa tepi hitam tebal. */
 .site,
 .auth-page {
   --s-bg: var(--awan);
@@ -21,7 +21,7 @@
   --s-radius: var(--radius-lg);
   --s-font: var(--font-body);
   /* Teks di atas isian kuat langit/jeruk/toska. Belum ada token on-langit/on-jeruk/on-toska, jadi memakai
-     on-gonjong: putih di tema terang, gelap di tema gelap (≥ 4,5:1 di keduanya, D-110). */
+     on-gonjong: putih di tema terang, gelap di tema gelap (≥ 4,5:1 di keduanya). */
   --s-on-strong: var(--on-gonjong);
 }
 
@@ -56,7 +56,7 @@
   gap: 8px;
   min-height: 52px;
   padding: 0 22px;
-  /* Tombol "anak tangga" UdaKids (D-107): sudut 16 px, bayangan padat, tanpa tepi tebal, bukan pil. */
+  /* Tombol "anak tangga" UdaKids: sudut 16 px, bayangan padat, tanpa tepi tebal, bukan pil. */
   border-radius: var(--radius-md);
   background: var(--gonjong);
   color: var(--on-gonjong);
@@ -395,7 +395,7 @@
   box-shadow: var(--shadow-tekan) color-mix(in srgb, var(--tone) 68%, black);
 }
 
-/* Fitur terbaru: afiliasi & batas 7 anak (D-063) */
+/* Fitur terbaru: afiliasi dan batas anak per akun */
 .news-kicker {
   margin: 0 auto 6px;
   width: fit-content;
@@ -1086,7 +1086,7 @@
   box-shadow: var(--shadow-kartu);
   padding: clamp(18px, 3vw, 28px);
 }
-/* Tombol "anak tangga" (D-107): sudut radius-md + bayangan padat, bukan pil bertepi tebal. */
+/* Tombol "anak tangga": sudut radius-md + bayangan padat, bukan pil bertepi tebal. */
 .auth-wrap .ui-btn-primary {
   min-height: 48px;
   border-radius: var(--radius-md);
@@ -1334,7 +1334,7 @@
   }
 }
 
-/* ================================================================== D-033: rak buku bergeser + statistik langsung */
+/* ================================================================== rak buku bergeser + statistik langsung */
 .book-slider {
   position: relative;
 }
@@ -1504,7 +1504,7 @@
   }
 }
 
-/* Harga (D-038): kartu gratis + paket dari database. */
+/* Harga: kartu gratis + paket dari database. */
 .price-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 360px));
@@ -1573,7 +1573,7 @@
   color: var(--s-muted);
 }
 
-/* 10 Besar Global realtime (D-045) */
+/* 10 Besar Global realtime */
 .topten-card {
   background: var(--kertas);
   border: 2px solid var(--s-line);
@@ -1685,7 +1685,7 @@
   margin: 12px 0 0;
 }
 
-/* 10 Besar: tab papan + podium 1–2–3 + daftar 4–10 (D-073) */
+/* 10 Besar: tab papan + podium 1–2–3 + daftar 4–10 */
 .topten-tabs,
 .topten-periods {
   display: flex;
@@ -1721,7 +1721,7 @@
   border-color: var(--kunyit-tekan);
   color: var(--on-kunyit);
 }
-/* Peringkat Mock Test (D-074) */
+/* Peringkat Mock Test */
 .mt-rule {
   margin: 4px 0 0;
   font-size: 0.9rem;
@@ -1852,7 +1852,7 @@
   color: var(--malam-muted);
   font-weight: 600;
 }
-/* Terakhir bermain (D-116). */
+/* Terakhir bermain. */
 .tp-last,
 .tl-last {
   display: inline-flex;
@@ -1873,7 +1873,7 @@
   color: var(--gonjong-teks);
   white-space: nowrap;
 }
-/* Papan rata-rata: angka besar = nilai peringkat (D-045), bukan rata-rata asli — selalu diberi label. */
+/* Papan rata-rata: angka besar = nilai peringkat, bukan rata-rata asli — selalu diberi label. */
 .tp-metric-label,
 .tl-metric small {
   color: var(--malam-muted);
@@ -1919,7 +1919,7 @@
   letter-spacing: 0.01em;
 }
 
-/* "Kenapa namanya UdaKids?" (D-107) */
+/* "Kenapa namanya UdaKids?" */
 .about-name .uk-rebung {
   max-width: 480px;
   margin: 0 auto 20px;

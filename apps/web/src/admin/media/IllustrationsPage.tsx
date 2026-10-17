@@ -16,6 +16,7 @@ import { OBJECT_LABELS } from '../../components/CountObjects';
 import { t, type MessageKey } from '../../i18n';
 import { ShellIconSvg } from '../../ui/AppShell';
 import { CountUp, Kpi } from '../../ui/charts';
+import { ListPager, usePaged } from '../../ui/Pager';
 import {
   Badge,
   Button,
@@ -39,6 +40,9 @@ const START: IllustrationRequest = {
   variant: 1,
 };
 
+/** Kartu per halaman: kelipatan 4 dan 3 supaya kisi penuh di layar lebar maupun sedang. */
+const PAGE_SIZES = [12, 24, 48];
+
 const STATUS_TONE: Record<IllustrationStatus, 'warning' | 'success' | 'muted'> = {
   review: 'warning',
   approved: 'success',
@@ -61,7 +65,12 @@ export function IllustrationsPage() {
     setForm((f) => ({ ...f, [k]: v }));
   const rows = all.data ?? [];
   const shown = rows.filter((r) => filter === 'all' || r.status === filter);
+  const paged = usePaged(shown, PAGE_SIZES[0]);
   const countOf = (s: IllustrationStatus) => rows.filter((r) => r.status === s).length;
+  const show = (s: IllustrationStatus | 'all') => {
+    setFilter(s);
+    paged.setPage(1);
+  };
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -70,7 +79,7 @@ export function IllustrationsPage() {
       t('admin.ill.made', { subject: form.subject.trim() }),
     );
     if (out) {
-      setFilter('review');
+      show('review');
       set('variant', Math.min(12, form.variant + 1));
       all.reload();
     }
@@ -249,7 +258,7 @@ export function IllustrationsPage() {
               role="tab"
               aria-selected={filter === s}
               className={`ins-chip${filter === s ? ' is-on' : ''}`}
-              onClick={() => setFilter(s)}
+              onClick={() => show(s)}
             >
               {t(`admin.ill.status.${s}` as MessageKey)}
               <span className="dir-count">{s === 'all' ? rows.length : countOf(s)}</span>
@@ -263,7 +272,7 @@ export function IllustrationsPage() {
               <Empty>{t('admin.ill.empty')}</Empty>
             ) : (
               <ul className="ill-grid">
-                {shown.map((row) => (
+                {paged.items.map((row) => (
                   <li key={row.id} className="ill-card">
                     <Illustration request={row} size={260} />
                     <div className="ill-card-body">
@@ -309,6 +318,7 @@ export function IllustrationsPage() {
             )
           }
         </Loadable>
+        <ListPager paged={paged} sizes={PAGE_SIZES} />
       </Card>
     </>
   );

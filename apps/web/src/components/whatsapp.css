@@ -1,4 +1,4 @@
-/* Tombol "Hubungi admin" WhatsApp — melayang di kanan bawah (D-064). */
+/* Tombol "Hubungi admin" WhatsApp — melayang di kanan bawah. */
 .wa-fab {
   position: fixed;
   right: max(20px, env(safe-area-inset-right));
@@ -10,7 +10,7 @@
   gap: 8px;
   min-height: 48px;
   padding: 0 16px 0 12px;
-  /* Hijau sawah (bukan hijau merek WhatsApp) supaya kontras teks terjaga di tema terang & gelap (D-110). */
+  /* Hijau sawah (bukan hijau merek WhatsApp) supaya kontras teks terjaga di tema terang & gelap. */
   border-radius: var(--radius-md);
   background: var(--sawah);
   color: var(--on-sawah);

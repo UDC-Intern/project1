@@ -1,4 +1,4 @@
-/* Warna grafik (D-110). Nada ikon KPI memakai token merek; seri data memakai palet kategori --viz-* yang
+/* Warna grafik. Nada ikon KPI memakai token merek; seri data memakai palet kategori --viz-* yang
    sudah divalidasi buta warna untuk tema terang (permukaan #ffffff) dan gelap (#1e252c). Urutan slot tetap —
    urutan itulah yang menjaga jarak warna antar-seri bersebelahan. Tanpa ungu. */
 :root {

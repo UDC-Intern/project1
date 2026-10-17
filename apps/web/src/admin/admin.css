@@ -80,6 +80,8 @@
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-weight: 700;
   letter-spacing: 0.08em;
+  /* Nomor pesanan, kode keluarga, dan nomor rekening tidak dipotong di tengah. */
+  white-space: nowrap;
 }
 
 .adm-meter {
@@ -494,7 +496,7 @@
 
 .dir-tr {
   display: grid;
-  grid-template-columns: 1.1fr 1.1fr 1.4fr 0.55fr 0.85fr minmax(330px, 2.6fr);
+  grid-template-columns: 1fr 1.2fr 1.4fr 0.8fr 0.8fr minmax(300px, 2.2fr);
   gap: 10px;
   align-items: center;
   padding: 10px 12px;
@@ -827,6 +829,36 @@
   .adm-cert-preview {
     position: static;
   }
+}
+
+/* Data contoh (mode tiruan): jumlah baris per jenis data. */
+
+.adm-demo-counts {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+}
+
+.adm-demo-counts li {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--ui-line);
+  border-radius: 12px;
+  background: var(--ui-bg);
+}
+
+.adm-demo-counts strong {
+  font-size: 1.15rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.adm-demo-counts span {
+  color: var(--ui-muted);
 }
 
 /* Daftar level di editor konten. */

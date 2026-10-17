@@ -9,14 +9,16 @@ import {
   type ContactSettings,
 } from '@udakids/engine';
 import { certificates } from '../../api/admin';
+import type { DemoDataSummary } from '../../api/adminTypes';
+import { isMocked } from '../../api/mode';
 import { settingsChanged } from '../../api/settings';
 import { useApiCall, useFetch } from '../../auth/useApi';
 import { CertificateSheet } from '../../components/certificate/CertificateSheet';
 import { verifyUrlOf } from '../../components/certificate/sheet';
 import { useAsync } from '../../hooks/useAsync';
-import { t } from '../../i18n';
-import { Button, Card, Checkbox, PageHeader, TextField } from '../../ui/ui';
-import { ActionNotice, Loadable, useAction } from '../common';
+import { t, type MessageKey } from '../../i18n';
+import { Button, Card, Checkbox, formatDate, PageHeader, TextField } from '../../ui/ui';
+import { ActionNotice, confirmAction, Loadable, notifyOrdersChanged, useAction } from '../common';
 
 /** Simpan satu bagian pengaturan; halaman lain yang memakainya ikut diperbarui. */
 function useSave<K extends keyof AppSettings>(part: K, success: string) {
@@ -249,7 +251,75 @@ function CertificateForm({
   );
 }
 
-/** Pengaturan: akses berbayar, kontak WhatsApp, dan isi lembar sertifikat. */
+/** Data contoh mode tiruan: muat ulang dengan tanggal hari ini, atau hapus untuk melihat halaman yang masih kosong. */
+function DemoDataCard() {
+  const call = useApiCall('staff');
+  const action = useAction();
+  const info = useFetch<DemoDataSummary>('staff', '/admin/demo-data');
+
+  async function change(method: 'POST' | 'DELETE', done: string) {
+    const out = await action.run(() => call<DemoDataSummary>('/admin/demo-data', { method }), done);
+    if (out) {
+      info.setData(out);
+      notifyOrdersChanged();
+    }
+  }
+
+  return (
+    <Card title={t('admin.demo.title')}>
+      <ActionNotice error={action.error} done={action.done} />
+      <p className="ui-muted">{t('admin.demo.hint')}</p>
+      <Loadable loading={info.loading} error={info.error} hasData={!!info.data}>
+        {() => {
+          const d = info.data!;
+          return (
+            <>
+              <p>
+                <strong>
+                  {d.loaded
+                    ? t('admin.demo.loadedAt', { date: formatDate(d.at) })
+                    : t('admin.demo.empty')}
+                </strong>
+              </p>
+              {d.loaded && (
+                <ul className="adm-demo-counts" aria-label={t('admin.demo.counts')}>
+                  {(Object.keys(d.counts) as (keyof DemoDataSummary['counts'])[]).map((k) => (
+                    <li key={k}>
+                      <strong>{d.counts[k].toLocaleString('id-ID')}</strong>
+                      <span>{t(`admin.demo.count.${k}` as MessageKey)}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <div className="ui-row">
+                <Button
+                  disabled={action.busy}
+                  onClick={() => void change('POST', t('admin.demo.reloaded'))}
+                >
+                  {d.loaded ? t('admin.demo.reload') : t('admin.demo.load')}
+                </Button>
+                {d.loaded && (
+                  <Button
+                    variant="danger"
+                    disabled={action.busy}
+                    onClick={() => {
+                      if (confirmAction(t('admin.demo.clearConfirm')))
+                        void change('DELETE', t('admin.demo.cleared'));
+                    }}
+                  >
+                    {t('admin.demo.clear')}
+                  </Button>
+                )}
+              </div>
+            </>
+          );
+        }}
+      </Loadable>
+    </Card>
+  );
+}
+
+/** Pengaturan: akses berbayar, kontak WhatsApp, isi lembar sertifikat, dan data contoh (mode tiruan). */
 export function SettingsPage() {
   const s = useFetch<AppSettings>('staff', '/admin/settings');
   // Pratinjau lembar memakai desain yang sedang aktif (dipilih di halaman Sertifikat).
@@ -267,6 +337,7 @@ export function SettingsPage() {
           </>
         )}
       </Loadable>
+      {isMocked('admin') && <DemoDataCard />}
     </>
   );
 }

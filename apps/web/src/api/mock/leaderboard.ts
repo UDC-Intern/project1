@@ -11,8 +11,10 @@ import { childIdFromToken } from './auth';
 import { readDb } from './db';
 
 export const BOARD_SIZE = 25;
+/** Mulai jumlah anak ini, papan hanya berisi anak sungguhan (mis. data contoh sudah dimuat). */
+const MIN_REAL = 10;
 
-// Anak tiruan supaya papan terlihat ramai di mode demo.
+/** Anak tiruan supaya papan tidak sepi saat data masih sedikit (tanpa data contoh). */
 const FAKES: {
   id: string;
   nickname: string;
@@ -177,7 +179,8 @@ function rows(bookSlug: string | null): Row[] {
       bestMs: Math.round(f.timeMs * factor * 0.4),
     };
   });
-  return [...real.filter((r) => r.rounds > 0), ...fakes];
+  const played = real.filter((r) => r.rounds > 0);
+  return played.length >= MIN_REAL ? played : [...played, ...fakes];
 }
 
 function build(mode: Exclude<LeaderboardMode, 'mock'>, bookSlug: string | null) {

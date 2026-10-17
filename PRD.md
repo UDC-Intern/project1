@@ -240,8 +240,8 @@ Router: React Router 6. Bagian dinamis ditulis `:param`. URL halaman berbahasa I
 | Gaya (dev)          | `/gaya`                       | Katalog token dan komponen, setel ulang data tiruan, bantuan demo sertifikat. Hanya saat `import.meta.env.DEV` | Tidak        |
 | Masuk anak          | `/play/masuk`                 | Kode keluarga, pilih profil, sandi gambar                                             | Tidak        |
 | Beranda anak        | `/play`                       | Lanjutkan, pilihan kelas dan mapel, Peta Belajar, tautan sertifikat buku              | Anak         |
-| Buku                | `/play/buku/:slug`            | Daftar topik dengan tanaman                                                           | Anak         |
-| Topik               | `/play/topik/:id`             | Materi (dibacakan), contoh soal, 4 kartu level, kartu Premium                         | Anak         |
+| Buku (alamat lama)  | `/play/buku/:slug`            | Dialihkan ke Peta Belajar `/play` dengan buku itu terpilih                            | Anak         |
+| Topik               | `/play/topik/:id`             | Materi (dibacakan), contoh soal, 4 kartu level, kartu Premium. Tombol kembali membuka Peta Belajar buku topik itu | Anak         |
 | Ronde               | `/play/latihan/:levelId`      | Pemain soal (alamat lama `/play/main/:levelId` dialihkan ke sini)                     | Anak         |
 | Hasil               | `/play/hasil/:roundId`        | Skor, benar, waktu, pujian, sertifikat baru, tombol lanjut atau coba lagi             | Anak         |
 | Peringkat anak      | `/play/peringkat`             | Tiga mode, total dan per buku, sorot diri sendiri                                     | Anak         |
@@ -561,6 +561,7 @@ sampai M9), bukan hanya disembunyikan di tampilan.
 | 1      | M0             | Dokumen produk dan keputusan arsitektur (tanpa kode)                                                  | Selesai |
 | 1      | M1 sampai M5   | Semua tampilan tiga peran dengan data tiruan di browser (mode mock), mengikuti kontrak                | Selesai |
 | 1      | Tambahan M5    | Paket dan pembayaran manual, Kelas 1 sampai 4 dan Peta Belajar, area anak bersuara, 2 level gratis + 2 Premium, Sertifikat Juara Digital | Selesai |
+| 1      | Tambahan M5d   | Data contoh mode tiruan (puluhan keluarga, anak, staf, transaksi, ribuan ronde, sertifikat, ilustrasi) yang bisa dimuat ulang atau dihapus di Pengaturan Sistem; paging di semua daftar admin dan riwayat transaksi orang tua; tombol kembali Detail Topik ke Peta Belajar | Selesai |
 | 1      | Tambahan M5c   | Navigasi admin baru (Konten & Kurikulum, Media & Audio, Pengguna & Akademik, Langganan & Pembayaran), Ringkasan baru, Bank Soal & Latihan (simulator kuis), Sertifikat Juara terhubung Pengaturan, Galeri Aset, Audio Narasi, Ilustrasi AI | Selesai |
 | 1      | Tambahan M5b   | Menu Pengaturan admin (level gratis, WhatsApp, lembar sertifikat), nama sertifikat dengan persetujuan orang tua, kode QR dan cek keaslian, panel admin lengkap (Keluarga, Staf, Laporan, Paket dan Rekening yang bisa ditambah, notifikasi) | Selesai |
 | 2      | M6             | API fondasi: NestJS, database, seed, guard                                                            | Belum   |
@@ -597,4 +598,8 @@ sampai M9), bukan hanya disembunyikan di tampilan.
 - Judul topik Matematika A tetap "Bilangan sampai 100" (Kurikulum Merdeka Kelas 1 SD).
 - Nama model gambar tidak ditulis di PRD karena cepat berubah; dipilih saat M10. Mode tiruan menyusun ilustrasi dari
   pustaka bentuk sendiri (selalu sama untuk permintaan yang sama) agar alurnya bisa dicoba tanpa biaya.
+- Mode tiruan memuat data contoh saat aplikasi pertama dibuka: 49 keluarga, sekitar 97 anak, 31 staf, sekitar 100
+  transaksi dengan semua status, ribuan ronde, sertifikat terbit dan menunggu, ilustrasi, dan pemberian Premium. Semua
+  id berawalan `demo-`, isinya selalu sama, dan tanggalnya dihitung mundur dari saat dimuat. Admin bisa memuat ulang
+  atau menghapusnya di Pengaturan Sistem tanpa menyentuh data buatan sendiri. Seed database di M6 memakai isi yang sama.
 - Waktu ditampilkan sesuai zona waktu perangkat (umumnya WIB).

@@ -123,10 +123,12 @@ function LevelStats() {
       <Loadable loading={stats.loading} error={stats.error} hasData={!!stats.data}>
         {() => (
           <Table
+            key={`${sort}|${book}|${answeredOnly}`}
             rows={rows}
             columns={columns}
             rowKey={(s) => s.id}
             empty={t('admin.report.levelsEmpty')}
+            pageSize={10}
           />
         )}
       </Loadable>
@@ -171,6 +173,7 @@ function ChildrenStats() {
             columns={columns}
             rowKey={(c) => c.id}
             empty={t('admin.report.childrenEmpty')}
+            pageSize={10}
           />
         )}
       </Loadable>

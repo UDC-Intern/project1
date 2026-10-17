@@ -53,9 +53,18 @@ const ROUND = 1e6;
 const clean = (x: number) => Math.round(x * ROUND) / ROUND;
 const shownExactly = (v: number) => Math.abs(clean(v) * 1000 - Math.round(clean(v) * 1000)) < 1e-6;
 
+/** Pemformat dipakai ulang: membuat `Intl.NumberFormat` baru di tiap panggilan membuat pembuatan soal lambat. */
+const formatters = new Map<number, Intl.NumberFormat>();
+
 /** Angka gaya Indonesia: 12.500 dan 0,25. */
-export const formatId = (n: number, maxDecimals = 3) =>
-  clean(n).toLocaleString('id-ID', { maximumFractionDigits: maxDecimals });
+export const formatId = (n: number, maxDecimals = 3) => {
+  let format = formatters.get(maxDecimals);
+  if (!format) {
+    format = new Intl.NumberFormat('id-ID', { maximumFractionDigits: maxDecimals });
+    formatters.set(maxDecimals, format);
+  }
+  return format.format(clean(n));
+};
 
 const gcd = (a: number, b: number): number => (b === 0 ? Math.abs(a) : gcd(b, a % b));
 const simplify = (n: number, d: number): [number, number] => {
@@ -148,6 +157,21 @@ function orderDerived(derived: Record<string, string>, vars: Record<string, numb
     }
   }
   if (pending.length > 0) reject('variabel turunan melingkar');
+}
+
+const dupUnits = new Map<string, RegExp>();
+
+/** Satuan yang tertulis dua kali berturut-turut ("5 cm cm"), dibuat sekali per satuan. */
+function dupUnitPattern(unit: string): RegExp {
+  let re = dupUnits.get(unit);
+  if (!re) {
+    re = new RegExp(
+      `(${unit.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})(\\s+\\1)+(?![\\p{L}\\d])`,
+      'gu',
+    );
+    dupUnits.set(unit, re);
+  }
+  return re;
 }
 
 function exprQuestion(p: ExprParams, rng: Rng): GeneratedQuestion {
@@ -246,12 +270,7 @@ function exprQuestion(p: ExprParams, rng: Rng): GeneratedQuestion {
   }
 
   const unitWord = p.unit?.trim();
-  const dupUnit = unitWord
-    ? new RegExp(
-        `(${unitWord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})(\\s+\\1)+(?![\\p{L}\\d])`,
-        'gu',
-      )
-    : undefined;
+  const dupUnit = unitWord ? dupUnitPattern(unitWord) : undefined;
   const fill = (text: string) => {
     const out = text.replace(TEMPLATE_RE, (_, name: string) => {
       if (name === 'answer') return answerText;

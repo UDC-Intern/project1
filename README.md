@@ -53,7 +53,10 @@ cp .env.example .env      # PowerShell: Copy-Item .env.example .env
 pnpm dev                  # web http://localhost:6006
 ```
 
-`VITE_MOCK_MODULES=*` (bawaan) membuat semua modul memakai data tiruan. Untuk mengulang data, buka
+`VITE_MOCK_MODULES=*` (bawaan) membuat semua modul memakai data tiruan. Saat pertama dibuka, aplikasi memuat **data
+contoh** (49 keluarga, sekitar 97 anak, 31 staf, sekitar 100 transaksi, ribuan ronde, sertifikat, dan ilustrasi) supaya
+semua halaman bisa dicoba dengan isi yang ramai. Data contoh bisa dimuat ulang dengan tanggal hari ini atau dihapus di
+admin, **Pengaturan Sistem → Data contoh**; data buatan sendiri tidak ikut terhapus. Untuk mengulang semua data, buka
 `http://localhost:6006/gaya` lalu klik "Setel ulang data tiruan".
 
 ## Akun demo (mode mock)
@@ -63,6 +66,9 @@ pnpm dev                  # web http://localhost:6006
 | Anak      | `/play/masuk`, kode `RWJUVF`, Ayu (apel, bintang, ikan) atau Bima (bola, awan, daun)   |
 | Orang tua | `/orang-tua/masuk`, `ridhodwi330@gmail.com` / `rahasia123`                            |
 | Admin     | `/masuk/staf`, `admin@udakids.local` / `admin12345`                                   |
+| Anak (data contoh) | kode `CERDAS`: Nara (apel, bintang, ikan) sudah punya sertifikat Matematika Kelas 1, Sakti (bola, awan, daun), Lili (kucing, rumah, bunga) |
+| Orang tua (data contoh) | `rina.kusumawati@example.com` / `rahasia123` (12 transaksi); orang tua contoh lain juga memakai `rahasia123` |
+| Staf (data contoh) | mis. `nadia.paramitha@udakids.local` / `staf12345`                               |
 
 Untuk mencoba sertifikat tanpa memainkan semua level, buka `/gaya` (hanya saat `pnpm dev`) lalu klik "Demo sertifikat"
 (Ayu menuntaskan Matematika Kelas 1 dengan Premium) atau "Demo menunggu" (Bima menuntaskan Sains Kelas 1 tanpa Premium,

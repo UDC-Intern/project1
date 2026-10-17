@@ -110,7 +110,7 @@ function ChildActions({ child, onDeleted }: { child: OverviewChild; onDeleted: (
 type BillingLite = { entitlements: { name: string; endsAt: string | null }[] };
 
 /**
- * Pengingat masa paket (D-043): berakhir ≤ 7 hari lagi, atau sudah berakhir dalam 30 hari terakhir dan
+ * Pengingat masa paket: berakhir ≤ 7 hari lagi, atau sudah berakhir dalam 30 hari terakhir dan
  * tidak ada paket lain yang aktif. Progres anak tidak pernah hilang.
  */
 export function expiryNotice(ents: BillingLite['entitlements'], now = Date.now()) {
@@ -182,7 +182,7 @@ function FamilyHero({
               {t('parent.dash.addChild')}
             </Link>
           ) : (
-            // Batas 7 anak (D-063): tombol tetap ada, tetapi membuka pop-up "buat akun terpisah".
+            // Batas anak per akun: tombol tetap ada, tetapi membuka pop-up "buat akun terpisah".
             <Button variant="secondary" onClick={onLimit}>
               {t('parent.dash.addChild')}
             </Button>

@@ -11,6 +11,7 @@ import type {
 } from '../../api/adminTypes';
 import { useApiCall, useFetch } from '../../auth/useApi';
 import { t, type MessageKey } from '../../i18n';
+import { formatDate as formatDay } from '../../lib/format';
 import { ShellIconSvg } from '../../ui/AppShell';
 import { Kpi } from '../../ui/charts';
 import { Pager } from '../../ui/Pager';
@@ -555,7 +556,7 @@ export function FamiliesPage() {
                         </small>
                       </span>
                       <span role="cell" data-label={t('admin.dir.cLast')}>
-                        {c.lastActiveAt ? formatDate(c.lastActiveAt) : '—'}
+                        {c.lastActiveAt ? formatDay(c.lastActiveAt) : '—'}
                       </span>
                       <span role="cell" data-label={t('admin.dir.cActions')}>
                         {childActions(c)}

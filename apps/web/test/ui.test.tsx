@@ -8,6 +8,7 @@ import { TopicPage } from '../src/play/TopicPage';
 import { ParentApp } from '../src/parent/ParentApp';
 import { AppShell } from '../src/ui/AppShell';
 import { Pager, pageList } from '../src/ui/Pager';
+import { Table } from '../src/ui/ui';
 import { Landing } from '../src/site/Landing';
 
 beforeEach(() => {
@@ -155,5 +156,35 @@ describe('paging tabel', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Halaman berikutnya' }));
     fireEvent.click(screen.getByRole('button', { name: 'Halaman 1' }));
     expect(pages).toEqual([3, 1]);
+  });
+
+  const ROWS = Array.from({ length: 23 }, (_, i) => ({ id: `r${i + 1}`, name: `Baris ${i + 1}` }));
+  const table = (rows: typeof ROWS) => (
+    <Table
+      rows={rows}
+      rowKey={(r) => r.id}
+      columns={[{ key: 'name', label: 'Nama', render: (r) => r.name }]}
+      pageSize={10}
+    />
+  );
+
+  it('tabel panjang dibagi per halaman, bisa pindah halaman dan ganti ukuran', () => {
+    render(table(ROWS));
+    expect(screen.getByText('Baris 10')).toBeInTheDocument();
+    expect(screen.queryByText('Baris 11')).toBeNull();
+    expect(screen.getByText('Menampilkan 1–10 dari 23')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Halaman 3' }));
+    expect(screen.getByText('Baris 23')).toBeInTheDocument();
+    expect(screen.queryByText('Baris 1')).toBeNull();
+    fireEvent.change(screen.getByRole('combobox', { name: /Per halaman/ }), {
+      target: { value: '50' },
+    });
+    expect(screen.getAllByRole('row')).toHaveLength(24);
+  });
+
+  it('tabel pendek tanpa pager', () => {
+    render(table(ROWS.slice(0, 4)));
+    expect(screen.getAllByRole('row')).toHaveLength(5);
+    expect(screen.queryByRole('navigation', { name: 'Halaman' })).toBeNull();
   });
 });

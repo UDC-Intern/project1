@@ -50,6 +50,7 @@ export function OrdersPage() {
             rows={data ?? []}
             rowKey={(o) => o.id}
             empty={t('parent.orders.empty')}
+            pageSize={10}
             columns={[
               {
                 key: 'number',

@@ -178,7 +178,7 @@ function PackageCard({
   );
 }
 
-/** Paket & pembayaran: level gratis, paket aktif, daftar paket, pilih cara bayar (D-036). */
+/** Paket & pembayaran: level gratis, paket aktif, daftar paket, pilih cara bayar. */
 export function PackagesPage() {
   const { data, error, loading, reload } = useFetch<BillingOverview>('parent', '/parent/billing');
   const [selected, setSelected] = useState<string>();

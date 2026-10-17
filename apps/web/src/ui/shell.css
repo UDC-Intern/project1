@@ -15,7 +15,7 @@
   background: var(--ui-bg, var(--awan));
   transition: grid-template-columns 0.22s ease;
 }
-/* Sidebar gelap (admin): permukaan --malam di tema terang, sumur --awan-2 di tema gelap (D-110). */
+/* Sidebar gelap (admin): permukaan --malam di tema terang, sumur --awan-2 di tema gelap. */
 .shell-dark {
   --shell-base: var(--malam);
   --shell-on: var(--kertas);

@@ -28,6 +28,7 @@ import { formatDate, formatDateTime } from '../../lib/format';
 import { ShellIconSvg } from '../../ui/AppShell';
 import { CountUp, Kpi } from '../../ui/charts';
 import { Dialog } from '../../ui/Dialog';
+import { ListPager, usePaged } from '../../ui/Pager';
 import { ErrorState, LoadingState } from '../../ui/states';
 import { Badge, Button, Card, Empty, Notice, PageHeader, TextField } from '../../ui/ui';
 
@@ -56,6 +57,17 @@ export function CertificatesPage() {
   const [removing, setRemoving] = useState<AdminCertificate>();
   const [confirm, setConfirm] = useState('');
   const [downloadError, setDownloadError] = useState(false);
+
+  const q = query.trim().toLowerCase();
+  const list = (data?.certificates ?? []).filter(
+    (c) =>
+      !q ||
+      [c.id, c.childName, c.parentName, c.parentEmail, c.bookTitle].some((v) =>
+        v.toLowerCase().includes(q),
+      ),
+  );
+  const waiting = usePaged(data?.candidates ?? []);
+  const issued = usePaged(list);
 
   async function run(action: () => Promise<string>) {
     setMessage(undefined);
@@ -131,14 +143,6 @@ export function CertificatesPage() {
       </>
     );
 
-  const q = query.trim().toLowerCase();
-  const list = data.certificates.filter(
-    (c) =>
-      !q ||
-      [c.id, c.childName, c.parentName, c.parentEmail, c.bookTitle].some((v) =>
-        v.toLowerCase().includes(q),
-      ),
-  );
   const fullNames = data.certificates.filter(usesFullName).length;
   const viewingSheet = viewing ? sheetDataOf(viewing, settings) : null;
   const yes = (on: boolean) => (on ? t('admin.certs.on') : t('admin.certs.off'));
@@ -287,7 +291,7 @@ export function CertificatesPage() {
                 </tr>
               </thead>
               <tbody>
-                {data.candidates.map((c) => (
+                {waiting.items.map((c) => (
                   <tr key={`${c.childId}:${c.bookSlug}`}>
                     <td>{c.childName}</td>
                     <td>{c.parentName}</td>
@@ -307,6 +311,7 @@ export function CertificatesPage() {
             </table>
           </div>
         )}
+        <ListPager paged={waiting} />
       </section>
 
       <section className="ui-card" aria-labelledby="certs-list">
@@ -340,7 +345,7 @@ export function CertificatesPage() {
                 </tr>
               </thead>
               <tbody>
-                {list.map((c) => (
+                {issued.items.map((c) => (
                   <tr key={c.id}>
                     <td>
                       <code className="adm-code-small">{c.id}</code>
@@ -388,6 +393,7 @@ export function CertificatesPage() {
             </table>
           </div>
         )}
+        <ListPager paged={issued} />
       </section>
 
       {viewing && viewingSheet && (

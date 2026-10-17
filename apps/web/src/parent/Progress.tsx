@@ -14,14 +14,14 @@ import { CountUp, Kpi, Ring, useMounted } from '../ui/charts';
 import { PlanBadge } from '../ui/PlanBadge';
 import { formatDate } from '../ui/ui';
 
-/** Data `GET /parent/overview` (D-038). */
+/** Data `GET /parent/overview`. */
 export type OverviewChild = {
   id: string;
   nickname: string;
   momoColor: string;
   lastActiveAt: string | null;
   className: string | null;
-  /** Status Free / Premium (D-041). */
+  /** Status Free / Premium. */
   plan?: PlanStatus;
   insights: ChildInsights;
 };

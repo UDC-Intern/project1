@@ -325,6 +325,7 @@ export function PackagesPage() {
               columns={columns}
               rowKey={(p) => p.id}
               empty={t('admin.pkg.empty')}
+              pageSize={10}
             />
           )}
         </Loadable>

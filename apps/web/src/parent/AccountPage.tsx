@@ -22,7 +22,7 @@ import {
 } from '../ui/ui';
 import { fieldErrors, serverFieldErrors } from './form';
 
-/** Data akun orang tua dari GET /parent/account (D-064). */
+/** Data akun orang tua dari GET /parent/account. */
 export type ParentAccount = {
   name: string;
   email: string;

@@ -1,5 +1,5 @@
-import { useCallback, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { book, home, profile } from '../api/catalog';
 import { speak } from '../audio/speech';
 import { DoorIcon, PlayIcon, StarIcon, TrophyIcon } from '../components/Icons';
@@ -29,21 +29,27 @@ export function PlayHome() {
   const navigate = useNavigate();
   const name = useSession((s) => s.session?.name ?? '');
   const signOut = useSession((s) => s.signOut);
+  // Alamat lama /play/buku/:slug mengirim bukunya lewat state navigasi.
+  const routedBook = (useLocation().state as { book?: string } | null)?.book;
 
   const loadHome = useCallback(() => home(), []);
   const loadMe = useCallback(() => profile(), []);
   const h = useAsync(loadHome);
   const me = useAsync(loadMe);
   const [grade, setGrade] = useState(() => Number(remembered(GRADE_KEY)) || 0);
-  const [bookSlug, setBookSlug] = useState(() => remembered(BOOK_KEY));
+  const [bookSlug, setBookSlug] = useState(() => routedBook ?? remembered(BOOK_KEY));
+  useEffect(() => {
+    if (routedBook) remember(BOOK_KEY, routedBook);
+  }, [routedBook]);
 
   const books = useMemo(() => h.data?.books ?? [], [h.data]);
   const grades = useMemo(
     () => [...new Set(books.map((b) => b.grade))].sort((a, b) => a - b),
     [books],
   );
+  // Buku yang terakhir dibuka (mis. dari Detail Topik) menentukan kelasnya, supaya kembali ke peta yang sama.
   const savedBook = books.find((b) => b.slug === bookSlug);
-  const activeGrade = grades.includes(grade) ? grade : (savedBook?.grade ?? grades[0] ?? 1);
+  const activeGrade = savedBook?.grade ?? (grades.includes(grade) ? grade : (grades[0] ?? 1));
   const gradeBooks = books.filter((b) => b.grade === activeGrade);
   const active =
     gradeBooks.find((b) => b.slug === bookSlug) ??
@@ -74,6 +80,17 @@ export function PlayHome() {
     const next = topics.find((tp) => tp.levels.some((l) => l.status === 'open'))?.code;
     return { shelves: list, statuses: map, nextCode: next };
   }, [detail.data]);
+
+  // Di layar sempit deretan kelas bisa digeser: kelas yang aktif digeser ke tengah supaya terlihat.
+  const gradeNav = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const nav = gradeNav.current;
+    const chip = nav?.querySelector<HTMLElement>('.is-on');
+    if (!nav || !chip) return;
+    const a = nav.getBoundingClientRect();
+    const b = chip.getBoundingClientRect();
+    nav.scrollLeft += b.left - a.left - (a.width - b.width) / 2;
+  }, [activeGrade, grades.length]);
 
   const chooseGrade = (g: number) => {
     speak(gradeLabel(g));
@@ -182,7 +199,7 @@ export function PlayHome() {
       )}
 
       {grades.length > 1 && (
-        <nav className="grade-chips" aria-label={t('play.library.grades')}>
+        <nav ref={gradeNav} className="grade-chips" aria-label={t('play.library.grades')}>
           {grades.map((g) => (
             <button
               key={g}

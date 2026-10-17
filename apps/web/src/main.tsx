@@ -15,9 +15,13 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { App } from './App';
+import { isMocked } from './api/mode';
+import { ensureDemoData } from './api/mock/demoData';
 import { installAudioUnlock } from './audio/speech';
 
 installAudioUnlock();
+// Mode tiruan: isi data contoh (keluarga, transaksi, ronde, sertifikat) supaya semua halaman bisa dicoba.
+if (isMocked('admin')) ensureDemoData();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

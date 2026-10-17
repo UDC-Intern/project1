@@ -1,4 +1,53 @@
+import { useState } from 'react';
 import { t } from '../i18n';
+import './pager.css';
+
+const SIZES = [10, 20, 50];
+
+/**
+ * Paging di sisi klien untuk daftar yang dimuat utuh: baris untuk halaman yang sedang dibuka. Kembali ke halaman 1
+ * bila jumlah baris berubah (mis. saringan diganti).
+ */
+export function usePaged<T>(rows: readonly T[], initialSize = SIZES[0]!) {
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(initialSize);
+  const [seen, setSeen] = useState(rows.length);
+  if (seen !== rows.length) {
+    setSeen(rows.length);
+    setPage(1);
+  }
+  const pages = Math.max(1, Math.ceil(rows.length / pageSize));
+  const current = Math.min(page, pages);
+  // Ukuran tak terbatas (tanpa paging): selalu dari baris pertama.
+  const start = current === 1 ? 0 : (current - 1) * pageSize;
+  return {
+    items: rows.slice(start, start + pageSize),
+    page: current,
+    pageSize,
+    total: rows.length,
+    setPage,
+    setPageSize: (n: number) => {
+      setPageSize(n);
+      setPage(1);
+    },
+  };
+}
+export type Paged = Omit<ReturnType<typeof usePaged>, 'items'>;
+
+/** Pager untuk `usePaged`. Tidak tampil bila semua baris muat di satu halaman ukuran terkecil. */
+export function ListPager({ paged, sizes = SIZES }: { paged: Paged; sizes?: number[] }) {
+  if (paged.total <= sizes[0]!) return null;
+  return (
+    <Pager
+      page={paged.page}
+      pageSize={paged.pageSize}
+      total={paged.total}
+      onPage={paged.setPage}
+      onPageSize={paged.setPageSize}
+      sizes={sizes}
+    />
+  );
+}
 
 /** Nomor halaman dengan elipsis: 1 … 4 5 6 … 12. */
 export function pageList(page: number, pages: number): (number | '…')[] {
@@ -29,6 +78,8 @@ export function Pager({
   onPageSize?: (n: number) => void;
   sizes?: number[];
 }) {
+  // Ukuran yang sedang dipakai selalu ada di pilihan (mis. 12 kartu per halaman).
+  const options = sizes.includes(pageSize) ? sizes : [...sizes, pageSize].sort((a, b) => a - b);
   const pages = Math.max(1, Math.ceil(total / pageSize));
   const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const to = Math.min(total, page * pageSize);
@@ -77,7 +128,7 @@ export function Pager({
         <label className="pager-size">
           {t('common.pager.perPage')}
           <select value={pageSize} onChange={(e) => onPageSize(Number(e.target.value))}>
-            {sizes.map((n) => (
+            {options.map((n) => (
               <option key={n} value={n}>
                 {n}
               </option>

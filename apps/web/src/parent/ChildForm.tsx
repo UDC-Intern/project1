@@ -38,7 +38,7 @@ function Form({
 }: {
   mode: ChildFormMode;
   child?: ChildProfile;
-  /** Banyak anak di akun (mode new): info "3 dari 7 anak". */
+  /** Banyak anak di akun (mode new): info "2 dari 3 anak". */
   count?: number;
 }) {
   const navigate = useNavigate();
@@ -105,7 +105,7 @@ function Form({
       navigate('/orang-tua', { state: { saved: saved?.nickname ?? nickname, welcome } });
     } catch (err) {
       setBusy(false);
-      // Batas 7 anak tercapai (mis. anak ditambahkan dari perangkat lain) → pop-up akun terpisah (D-063).
+      // Batas anak per akun tercapai (mis. anak ditambahkan dari perangkat lain) → pop-up akun terpisah.
       if (isChildLimitError(err)) {
         setError(t('parent.dash.childLimit', { n: MAX_CHILDREN_PER_PARENT }));
         setLimitOpen(true);
@@ -248,7 +248,7 @@ function Form({
   );
 }
 
-/** Akun sudah punya 7 anak: tanpa formulir, pop-up "buat akun terpisah" langsung terbuka. */
+/** Akun sudah mencapai batas anak: tanpa formulir, pop-up "buat akun terpisah" langsung terbuka. */
 function LimitReached() {
   const [open, setOpen] = useState(true);
   return (
@@ -270,7 +270,7 @@ export function ChildForm({ mode }: { mode: ChildFormMode }) {
   const { id } = useParams();
   const list = useFetch<ChildProfile[]>('parent', '/parent/children');
   if (mode === 'new') {
-    // Batas 7 anak per akun (D-063): tunggu daftar anak, lalu beri tahu sebelum orang tua mengisi formulir.
+    // Batas anak per akun: tunggu daftar anak, lalu beri tahu sebelum orang tua mengisi formulir.
     if (list.loading && !list.data) return <Spinner label={t('parent.loading')} />;
     const count = list.data?.length ?? 0;
     if (count >= MAX_CHILDREN_PER_PARENT) return <LimitReached />;

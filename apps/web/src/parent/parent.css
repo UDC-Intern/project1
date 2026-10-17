@@ -1,4 +1,4 @@
-/* Area orang tua. Memakai token warna dari .ui-shell (ui.css) dan token UdaKids (uk-tokens.css, D-110):
+/* Area orang tua. Memakai token warna dari .ui-shell (ui.css) dan token UdaKids (uk-tokens.css):
    tanpa ungu/krem; teks di atas isian berwarna memakai pasangan on-*. */
 .pa-brand {
   display: inline-flex;
@@ -542,7 +542,7 @@
 @media (max-width: 600px) {
 }
 
-/* ---------------------------------------------------------------- dasbor progres (D-038) */
+/* ---------------------------------------------------------------- dasbor progres */
 .pd {
   display: grid;
   gap: 18px;
@@ -581,7 +581,7 @@
 .pd-hero-art {
   align-self: center;
 }
-/* "1 dari 7 anak terdaftar" di atas latar gonjong: chip on-gonjong transparan agar terbaca (D-063). */
+/* "1 dari 3 anak terdaftar" di atas latar gonjong: chip on-gonjong transparan agar terbaca. */
 .pd-hero p.pd-hero-count {
   display: inline-flex;
   margin: 0 0 14px;
@@ -1026,7 +1026,7 @@
   font-weight: 700;
 }
 
-/* Verifikasi email (D-044) */
+/* Verifikasi email */
 .pa-otp {
   font-size: 28px;
   font-weight: 800;
@@ -1040,7 +1040,7 @@
   margin-top: 8px;
 }
 
-/* Wizard keluarga: penjelasan 3 langkah (D-045) */
+/* Wizard keluarga: penjelasan 3 langkah */
 .pa-steps-hint {
   margin: 0 0 14px;
   padding: 10px 12px;
@@ -1051,7 +1051,7 @@
   line-height: 1.45;
 }
 
-/* Hias Momo di formulir anak (D-051) */
+/* Hias Momo di formulir anak */
 .pa-momo-extra {
   margin: 8px 0 14px;
   padding: 10px 12px;
@@ -1063,7 +1063,7 @@
   font-weight: 700;
 }
 
-/* Batas 7 anak (D-063) */
+/* Batas anak per akun */
 .pd-limit {
   margin: 0;
   max-width: 28em;
@@ -1071,7 +1071,7 @@
   color: var(--kunyit-teks);
 }
 
-/* Afiliasi orang tua (D-063) */
+/* Afiliasi orang tua */
 .aff {
   display: grid;
   gap: 18px;
@@ -1464,7 +1464,7 @@
   }
 }
 
-/* Lupa password & Akun saya (D-064) */
+/* Lupa password & Akun saya */
 .pa-forgot {
   margin: -4px 0 12px;
   text-align: right;
@@ -1475,7 +1475,7 @@
   gap: 8px;
 }
 
-/* Akun saya (D-064). Kelas acct-* sendiri: .pa-account sudah dipakai untuk nomor rekening. */
+/* Akun saya. Kelas acct-* sendiri: .pa-account sudah dipakai untuk nomor rekening. */
 .acct {
   display: grid;
   gap: 16px;
@@ -1583,7 +1583,7 @@
   }
 }
 
-/* Kartu ajak teman di dasbor (D-063/D-064) */
+/* Kartu ajak teman di dasbor */
 .pd-ref {
   display: grid;
   grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
@@ -1931,7 +1931,7 @@ p.cf-count {
   font-weight: 600;
 }
 
-/* Daftar/masuk dengan Google (D-066) */
+/* Daftar/masuk dengan Google */
 .pa-google {
   display: grid;
   gap: 12px;

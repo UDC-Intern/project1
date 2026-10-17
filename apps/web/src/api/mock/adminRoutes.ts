@@ -34,8 +34,10 @@ import { ApiError } from '../client';
 import * as admin from './admin';
 import * as billing from './billing';
 import { bookProgress } from './certificate';
+import { clearDemoData, demoSummary, reloadDemoData } from './demoData';
 import {
   BOOKS,
+  ILLUSTRATION_ENGINE,
   isChildActive,
   levelId,
   newId,
@@ -818,8 +820,6 @@ function assetUsage(): { objects: Record<string, number> } {
   return usageCache;
 }
 
-const ILLUSTRATION_ENGINE = 'Pustaka bentuk UdaKids (mode tiruan)';
-
 function illustrations(params: URLSearchParams): Illustration[] {
   const status = params.get('status') ?? 'all';
   return readDb()
@@ -982,6 +982,11 @@ export async function handle<T>(
 
   // Notifikasi
   if (method === 'GET' && at('notifications')) return send(notifications());
+
+  // Data contoh (hanya mode tiruan)
+  if (method === 'GET' && at('demo-data')) return send(demoSummary());
+  if (method === 'POST' && at('demo-data')) return send(reloadDemoData());
+  if (method === 'DELETE' && at('demo-data')) return send(clearDemoData());
 
   throw notFound();
 }

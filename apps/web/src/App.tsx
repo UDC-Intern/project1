@@ -17,7 +17,6 @@ import { FamiliesPage } from './admin/users/FamiliesPage';
 import { StaffPage } from './admin/users/StaffPage';
 import { RequireRole } from './auth/RequireRole';
 import { ChildLayout } from './components/ChildLayout';
-import { BookPage } from './play/BookPage';
 import { CertificatePage } from './play/CertificatePage';
 import { ParentApp } from './parent/ParentApp';
 import { WhatsAppButton } from './components/WhatsAppButton';
@@ -40,6 +39,12 @@ function LegacyRoundRedirect() {
   return <Navigate to={`/play/latihan/${levelId}`} replace />;
 }
 
+/** Alamat lama /play/buku/:slug: Peta Belajar buku itu di beranda anak. */
+function LegacyBookRedirect() {
+  const { slug = '' } = useParams();
+  return <Navigate to="/play" replace state={{ book: slug }} />;
+}
+
 export function App() {
   return (
     <>
@@ -53,7 +58,7 @@ export function App() {
         <Route path="/play" element={<RequireRole role="child" />}>
           <Route element={<ChildLayout />}>
             <Route index element={<PlayHome />} />
-            <Route path="buku/:slug" element={<BookPage />} />
+            <Route path="buku/:slug" element={<LegacyBookRedirect />} />
             <Route path="topik/:id" element={<TopicPage />} />
             <Route path="latihan/:levelId" element={<RoundPage />} />
             <Route path="main/:levelId" element={<LegacyRoundRedirect />} />

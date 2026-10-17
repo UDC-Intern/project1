@@ -461,116 +461,17 @@ button.kid-card[aria-disabled='true'] {
     text-align: center;
     padding: 16px;
   }
+  /* Dalam kolom, flex-basis menjadi tinggi: kembalikan ke tinggi isi supaya kartu tidak memanjang. */
+  .continue-body,
+  .continue-actions {
+    flex: 0 0 auto;
+  }
   .continue-body .kid-say {
     justify-content: center;
   }
   .continue-actions,
   .continue-actions .big-play {
     width: 100%;
-  }
-}
-
-/* Kartu topik */
-.topic-grid {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 12px;
-}
-.topic-card {
-  height: 100%;
-  box-sizing: border-box;
-  display: grid;
-  grid-template-columns: auto 1fr;
-  grid-template-rows: 1fr auto;
-  column-gap: 10px;
-  row-gap: 8px;
-  padding: 12px 14px;
-  border: 3px solid var(--garis-tegas);
-  border-radius: 22px;
-  background: var(--kertas);
-  color: inherit;
-  text-decoration: none;
-  box-shadow: 0 4px 0 var(--garis-tegas);
-  min-height: 96px;
-  cursor: pointer;
-  transition:
-    transform 0.08s ease,
-    box-shadow 0.08s ease;
-}
-.topic-card:active {
-  transform: translateY(3px);
-  box-shadow: 0 1px 0 var(--garis-tegas);
-}
-.topic-num {
-  width: 36px;
-  height: 36px;
-  display: grid;
-  place-items: center;
-  border-radius: 12px;
-  background: var(--gonjong-soft);
-  font-weight: 900;
-}
-.topic-title {
-  font-weight: 800;
-  line-height: 1.25;
-  align-self: center;
-  min-width: 0;
-  overflow-wrap: anywhere;
-  hyphens: auto;
-}
-.topic-foot {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 800;
-  font-size: 0.95rem;
-}
-.topic-bar {
-  flex: 1;
-  height: 10px;
-  border-radius: var(--radius-pill);
-  background: var(--garis);
-  overflow: hidden;
-}
-.topic-bar > span {
-  display: block;
-  height: 100%;
-  background: var(--sawah);
-  border-radius: inherit;
-}
-.topic-count {
-  font-variant-numeric: tabular-nums;
-}
-.topic-plant {
-  grid-row: 1 / span 1;
-}
-.topic-card.is-next {
-  border-color: var(--gonjong);
-  box-shadow: 0 4px 0 var(--gonjong);
-  background: var(--gonjong-soft);
-}
-.topic-card.is-next .topic-num {
-  background: var(--gonjong);
-  color: var(--on-gonjong);
-}
-.topic-card.is-done {
-  background: var(--sawah-soft);
-  border-color: var(--sawah);
-  box-shadow: 0 4px 0 var(--sawah);
-}
-@media (max-width: 640px) {
-  .topic-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-  }
-}
-@media (max-width: 360px) {
-  .topic-grid {
-    grid-template-columns: 1fr;
   }
 }
 
@@ -1393,8 +1294,7 @@ a.level-card:active {
     animation: none;
   }
   .kid-btn,
-  .choice,
-  .topic-card {
+  .choice {
     transition: none;
   }
 }

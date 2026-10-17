@@ -23,16 +23,26 @@ function daysOf(range: InsightRange, now: number): string[] {
   return Array.from({ length: count }, (_, i) => dayKey(now - (count - 1 - i) * DAY));
 }
 
+/** Soal ronde dibuat ulang sekali per level + seed (data contoh berisi ribuan ronde). */
+const questionCache = new Map<string, ReturnType<typeof generateRound>>();
+
 function questionOf(round: MockRound, index: number) {
-  const found = findLevel(round.levelId);
-  if (!found?.level.generator) return null;
-  return generateRound(
-    {
-      generator: found.level.generator,
-      generatorParams: found.level.generatorParams as Record<string, unknown> | undefined,
-    },
-    round.seed,
-  )[index];
+  const key = `${round.levelId}|${round.seed}`;
+  let questions = questionCache.get(key);
+  if (!questions) {
+    const found = findLevel(round.levelId);
+    if (!found?.level.generator) return null;
+    questions = generateRound(
+      {
+        generator: found.level.generator,
+        generatorParams: found.level.generatorParams as Record<string, unknown> | undefined,
+      },
+      round.seed,
+    );
+    if (questionCache.size > 20_000) questionCache.clear();
+    questionCache.set(key, questions);
+  }
+  return questions[index];
 }
 
 function real(db: MockDb, days: string[]) {

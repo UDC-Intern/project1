@@ -1,5 +1,5 @@
 import type { TopicDetail } from '@udakids/engine';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { topic } from '../api/catalog';
 import { AnswerOptions } from '../components/AnswerOptions';
@@ -13,6 +13,7 @@ import { useAsync } from '../hooks/useAsync';
 import { useT } from '../i18n';
 import { ErrorState, LoadingState } from '../ui/states';
 import { AutoSpeak } from './AutoSpeak';
+import { BOOK_KEY, remember } from './libraryChoice';
 import { PremiumNotice } from './PremiumNotice';
 
 type Level = TopicDetail['levels'][number];
@@ -163,12 +164,17 @@ export function TopicPage() {
   const { id = '' } = useParams();
   const load = useCallback(() => topic(id), [id]);
   const { data, error, loading, reload } = useAsync(load);
+  const bookSlug = data?.topic.bookSlug;
+
+  // Tombol kembali membuka Peta Belajar di beranda: buku topik ini yang tampil di sana.
+  useEffect(() => {
+    if (bookSlug) remember(BOOK_KEY, bookSlug);
+  }, [bookSlug]);
 
   if (loading) return <LoadingState />;
-  if (error || !data) return <ErrorState onRetry={reload} />;
+  if (error || !data || !bookSlug) return <ErrorState onRetry={reload} />;
 
   const open = data.levels.find((l) => l.status === 'open');
-  const bookSlug = data.topic.bookSlug;
   const sentences = data.topic.lesson.split(/(?<=[.!?])\s+/).filter(Boolean);
   const intro = sentences[0] ?? data.topic.lesson;
   const tips = sentences.slice(1);
@@ -179,7 +185,7 @@ export function TopicPage() {
       data-mapel={bookSlug.startsWith('sains') ? 'sains' : 'matematika'}
     >
       <AutoSpeak text={`${data.topic.title}. ${intro}`} />
-      <PageHead title={data.topic.title} back={`/play/buku/${bookSlug}`} />
+      <PageHead title={data.topic.title} />
 
       <section className="lesson" aria-labelledby="lesson-title">
         <div className="lesson-head">

@@ -187,6 +187,22 @@ export type CatalogBook = {
   }[];
 };
 
+/** `GET|POST|DELETE /admin/demo-data` (mode tiruan): jumlah baris data contoh yang sedang dimuat. */
+export type DemoDataSummary = {
+  loaded: boolean;
+  at: string | null;
+  counts: {
+    families: number;
+    children: number;
+    staff: number;
+    orders: number;
+    rounds: number;
+    certificates: number;
+    illustrations: number;
+    grants: number;
+  };
+};
+
 /** `GET /admin/dashboard?range=`: antrean kerja admin, kelulusan per buku, dan pesanan terbaru. */
 export type AdminDashboard = {
   range: string;

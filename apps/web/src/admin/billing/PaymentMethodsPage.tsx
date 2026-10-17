@@ -246,6 +246,7 @@ export function PaymentMethodsPage() {
               columns={columns}
               rowKey={(m) => m.id}
               empty={t('admin.pay.empty')}
+              pageSize={10}
             />
           )}
         </Loadable>

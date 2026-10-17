@@ -5,13 +5,13 @@ import { setSession } from '../auth/session';
 import { t } from '../i18n';
 import { Button, Dialog } from '../ui/ui';
 
-/** Server menolak karena akun sudah punya 7 anak aktif (D-063): `{ reason: 'child_limit' }`. */
+/** Server menolak karena akun sudah mencapai batas anak aktif: `{ reason: 'child_limit' }`. */
 export const isChildLimitError = (err: unknown) =>
   err instanceof ApiError && err.body.reason === 'child_limit';
 
 export const atChildLimit = (count: number) => count >= MAX_CHILDREN_PER_PARENT;
 
-/** "3 dari 7 anak terdaftar" — info batas yang selalu terlihat di dasbor. */
+/** "2 dari 3 anak terdaftar" — info batas yang selalu terlihat di dasbor. */
 export function ChildCount({ count, className }: { count: number; className?: string }) {
   const n = MAX_CHILDREN_PER_PARENT;
   return (
@@ -22,7 +22,7 @@ export function ChildCount({ count, className }: { count: number; className?: st
 }
 
 /**
- * Pop-up saat akun sudah punya 7 anak: anak ke-8 tidak bisa ditambahkan/ditautkan, jadi orang tua diarahkan
+ * Pop-up saat akun sudah mencapai batas anak: anak berikutnya tidak bisa ditambahkan/ditautkan, jadi orang tua diarahkan
  * membuat akun orang tua terpisah (email lain). Tombol utama keluar dari sesi orang tua lalu membuka daftar.
  */
 export function ChildLimitDialog({ open, onClose }: { open: boolean; onClose: () => void }) {

@@ -160,7 +160,12 @@ export type MockDb = {
   certificates: Record<string, Certificate>;
   /** desain yang dipakai saat sertifikat berikutnya terbit (dipilih admin) */
   certificateDesign: CertificateDesign;
+  /** Data contoh (`demoData.ts`): versi yang dimuat dan kapan; `at` kosong berarti sudah dihapus admin. */
+  demo?: { version: number; at: string | null };
 };
+
+/** Pembuat gambar di menu Ilustrasi AI selama mode tiruan. */
+export const ILLUSTRATION_ENGINE = 'Pustaka bentuk UdaKids (mode tiruan)';
 
 const KEY = 'udakids-mock-v1';
 

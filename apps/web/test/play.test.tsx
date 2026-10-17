@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it } from 'vitest';
+import { App } from '../src/App';
 import { childLogin, familyProfiles } from '../src/api/auth';
 import { ApiError } from '../src/api/client';
 import { book, home, topic } from '../src/api/catalog';
@@ -224,6 +225,51 @@ describe('halaman anak', () => {
       await screen.findByRole('button', { name: /Nilai tempat sampai 100.000/ }),
     ).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Mulai belajar' })).toBeInTheDocument();
+  });
+
+  it('kembali dari halaman topik membuka Peta Belajar buku topik itu, bukan daftar kartu', async () => {
+    useSession.setState({ session: { token: `mock-child:${AYU}`, role: 'child', name: 'Ayu' } });
+    try {
+      localStorage.clear();
+    } catch {
+      /* abaikan */
+    }
+    render(
+      <MemoryRouter initialEntries={['/play/topik/matematika-kelas-4:A']}>
+        <Routes>
+          <Route path="/play" element={<PlayHome />} />
+          <Route path="/play/topik/:id" element={<TopicPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    const back = await screen.findByRole('link', { name: 'Kembali' });
+    expect(back).toHaveAttribute('href', '/play');
+    fireEvent.click(back);
+    expect(await screen.findByRole('button', { name: 'Kelas 4' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(
+      await screen.findByRole('button', { name: /Nilai tempat sampai 100.000/ }),
+    ).toBeInTheDocument();
+  });
+
+  it('alamat lama /play/buku/:slug membuka Peta Belajar buku itu', async () => {
+    useSession.setState({ session: { token: `mock-child:${AYU}`, role: 'child', name: 'Ayu' } });
+    try {
+      localStorage.clear();
+    } catch {
+      /* abaikan */
+    }
+    render(
+      <MemoryRouter initialEntries={['/play/buku/matematika-kelas-3']}>
+        <App />
+      </MemoryRouter>,
+    );
+    expect(await screen.findByRole('button', { name: 'Kelas 3' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
   });
 
   it('profil: tanpa Hias Momo, pilihan warna tampil, dan ketukan bersuara', async () => {

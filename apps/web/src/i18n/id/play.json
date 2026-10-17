@@ -27,8 +27,6 @@
   "home.hello": "Halo, {name}!",
   "home.topics": "{started} dari {total} topik sudah dimulai",
   "home.continue": "Lanjutkan belajar",
-  "book.progress": "{passed} dari {total} level lulus",
-  "topic.back": "Kembali ke buku",
   "level.title": "Level {n}: {title}",
   "level.passed": "Sudah lulus",
   "level.play": "Ayo main",

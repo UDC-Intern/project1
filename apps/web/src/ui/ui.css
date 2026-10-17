@@ -1,4 +1,4 @@
-/* Area orang dewasa: rapi, kontras tinggi, bisa dipakai dengan mouse saja. Token UdaKids (D-107). */
+/* Area orang dewasa: rapi, kontras tinggi, bisa dipakai dengan mouse saja. Token UdaKids. */
 .ui-shell {
   --ui-bg: var(--awan);
   --ui-surface: var(--kertas);
@@ -9,7 +9,7 @@
   --ui-primary-ink: var(--on-gonjong);
   --ui-success: var(--sawah);
   --ui-warning: var(--kunyit-teks);
-  /* Bahaya & info ikut tema (D-110): teks gonjong/langit, kontras ≥ 4,5:1 di terang & gelap. */
+  /* Bahaya & info ikut tema: teks gonjong/langit, kontras ≥ 4,5:1 di terang & gelap. */
   --ui-danger: var(--gonjong-teks);
   --ui-info: var(--langit-teks);
   min-height: 100vh;
