@@ -2,7 +2,7 @@ import { voiceSettingsSchema, type AppSettings, type VoiceSettings } from '@udak
 import { useEffect, useState, type FormEvent } from 'react';
 import type { CatalogBook } from '../../api/adminTypes';
 import { settingsChanged } from '../../api/settings';
-import { indonesianVoices, speak, stopSpeaking } from '../../audio/speech';
+import { indonesianVoices, speak, stopSpeaking, watchVoices } from '../../audio/speech';
 import { useApiCall, useFetch } from '../../auth/useApi';
 import { t, translate } from '../../i18n';
 import { ShellIconSvg } from '../../ui/AppShell';
@@ -31,15 +31,22 @@ const duration = (s: number) =>
     ? t('admin.voice.sec', { n: s })
     : t('admin.voice.min', { m: Math.floor(s / 60), s: s % 60 });
 
+/** Suara bahasa Indonesia peramban; daftarnya dimuat tak serempak, jadi dibaca ulang sampai muncul (lihat `watchVoices`). */
 function useVoices() {
   const [voices, setVoices] = useState(indonesianVoices);
-  useEffect(() => {
-    const synth = typeof window !== 'undefined' ? window.speechSynthesis : undefined;
-    if (!synth) return;
-    const update = () => setVoices(indonesianVoices());
-    synth.addEventListener?.('voiceschanged', update);
-    return () => synth.removeEventListener?.('voiceschanged', update);
-  }, []);
+  useEffect(
+    () =>
+      watchVoices(() => {
+        const next = indonesianVoices();
+        // Isi sama: pertahankan larik lama supaya halaman tidak digambar ulang setiap 250 ms.
+        setVoices((prev) =>
+          prev.length === next.length && prev.every((v, i) => v.name === next[i]!.name)
+            ? prev
+            : next,
+        );
+      }),
+    [],
+  );
   return voices;
 }
 

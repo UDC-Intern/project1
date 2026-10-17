@@ -47,16 +47,45 @@ export function stopSpeaking(): void {
   }
 }
 
-/** Suara bahasa Indonesia yang tersedia di peramban ini (untuk pilihan di menu Audio Narasi). */
+/** Kode bahasa Indonesia di suara peramban: "id-ID", "id_ID", atau kode lama "in-ID" (sebagian peramban Android). */
+const isIndonesian = (lang: string) => /^(id|in|ind)([-_]|$)/i.test(lang);
+
+/** Suara bahasa Indonesia yang tersedia di peramban ini (untuk pilihan di menu Audio Narasi), tanpa nama kembar. */
 export function indonesianVoices(): { name: string; lang: string }[] {
   try {
     const s = synth();
+    const seen = new Set<string>();
     return (s ? voicesOf(s) : [])
-      .filter((v) => v.lang.toLowerCase().startsWith('id'))
+      .filter((v) => isIndonesian(v.lang) && !seen.has(v.name) && !!seen.add(v.name))
       .map((v) => ({ name: v.name, lang: v.lang }));
   } catch {
     return [];
   }
+}
+
+const VOICE_POLL_MS = 250;
+const VOICE_POLLS = 20;
+
+/**
+ * Peramban memuat daftar suara secara tak serempak: panggilan `getVoices()` pertama sering kosong, dan `voiceschanged`
+ * hanya terjadi sekali dalam hitungan milidetik, kadang sebelum halaman sempat mendengarkan. Maka `onChange` dipanggil
+ * sekarang, setiap kali `voiceschanged`, dan tiap 250 ms selama 5 detik pertama; pemanggil membaca ulang daftarnya.
+ * Mengembalikan fungsi untuk berhenti.
+ */
+export function watchVoices(onChange: () => void): () => void {
+  const s = synth();
+  if (!s) return () => undefined;
+  s.addEventListener?.('voiceschanged', onChange);
+  onChange();
+  let n = 0;
+  const timer = window.setInterval(() => {
+    onChange();
+    if (++n >= VOICE_POLLS) window.clearInterval(timer);
+  }, VOICE_POLL_MS);
+  return () => {
+    s.removeEventListener?.('voiceschanged', onChange);
+    window.clearInterval(timer);
+  };
 }
 
 /** Daftar suara peramban; peramban lama tanpa getVoices dianggap tidak punya pilihan suara. */
@@ -67,7 +96,7 @@ function pickVoice(s: Synth, name: string): SpeechSynthesisVoice | undefined {
   const voices = voicesOf(s);
   return (
     (name ? voices.find((v) => v.name === name) : undefined) ??
-    voices.find((v) => v.lang.toLowerCase().startsWith('id'))
+    voices.find((v) => isIndonesian(v.lang))
   );
 }
 

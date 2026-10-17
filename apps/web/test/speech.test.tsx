@@ -1,6 +1,16 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { NarrationPage } from '../src/admin/media/NarrationPage';
 import { readDb, resetMockDb, writeDb } from '../src/api/mock/db';
-import { installAudioUnlock, speak, speakAuto } from '../src/audio/speech';
+import {
+  indonesianVoices,
+  installAudioUnlock,
+  speak,
+  speakAuto,
+  watchVoices,
+} from '../src/audio/speech';
+import { useSession } from '../src/auth/store';
 
 const said: { text: string; rate: number; pitch: number }[] = [];
 
@@ -76,5 +86,115 @@ describe('suara narasi mengikuti Audio Narasi', () => {
     speakAuto('Soal pertama');
     speak('Tombol');
     expect(said.map((s) => s.text)).toEqual(['Tombol']);
+  });
+});
+
+type FakeVoice = { name: string; lang: string };
+
+/** Mesin suara tiruan yang daftar suaranya bisa diisi belakangan, seperti peramban yang memuatnya tak serempak. */
+function fakeSynth(initial: FakeVoice[] = []) {
+  const listeners = new Set<() => void>();
+  const synth = {
+    voices: initial,
+    cancel: () => undefined,
+    speak: () => undefined,
+    getVoices() {
+      return synth.voices;
+    },
+    addEventListener: (_: string, fn: () => void) => listeners.add(fn),
+    removeEventListener: (_: string, fn: () => void) => listeners.delete(fn),
+    listeners,
+    fire: () => listeners.forEach((fn) => fn()),
+  };
+  Object.defineProperty(window, 'speechSynthesis', { value: synth, configurable: true });
+  return synth;
+}
+
+describe('daftar suara bahasa Indonesia', () => {
+  it('mengenali kode id-ID, id_ID, dan kode lama in-ID; menolak bahasa lain dan nama kembar', () => {
+    fakeSynth([
+      { name: 'A', lang: 'id-ID' },
+      { name: 'B', lang: 'id_ID' },
+      { name: 'C', lang: 'in-ID' },
+      { name: 'D', lang: 'ID' },
+      { name: 'E', lang: 'en-US' },
+      { name: 'F', lang: 'ms-MY' },
+      { name: 'G', lang: 'inh-RU' },
+      { name: 'A', lang: 'id-ID' },
+    ]);
+    expect(indonesianVoices().map((v) => v.name)).toEqual(['A', 'B', 'C', 'D']);
+  });
+
+  it('tanpa mesin suara atau getVoices: daftar kosong tanpa galat', () => {
+    Object.defineProperty(window, 'speechSynthesis', { value: undefined, configurable: true });
+    delete (window as { speechSynthesis?: unknown }).speechSynthesis;
+    expect(indonesianVoices()).toEqual([]);
+    Object.defineProperty(window, 'speechSynthesis', { value: {}, configurable: true });
+    expect(indonesianVoices()).toEqual([]);
+  });
+
+  describe('watchVoices', () => {
+    afterEach(() => vi.useRealTimers());
+
+    it('dibaca sekarang, saat voiceschanged, dan berkala selama 5 detik walau peristiwanya terlewat', () => {
+      vi.useFakeTimers();
+      const synth = fakeSynth();
+      const seen = vi.fn();
+      const stop = watchVoices(seen);
+      expect(seen).toHaveBeenCalledTimes(1);
+      synth.fire();
+      expect(seen).toHaveBeenCalledTimes(2);
+      vi.advanceTimersByTime(250);
+      expect(seen).toHaveBeenCalledTimes(3);
+      vi.advanceTimersByTime(5000);
+      // 20 kali bacaan berkala, lalu berhenti sendiri.
+      expect(seen).toHaveBeenCalledTimes(2 + 20);
+      vi.advanceTimersByTime(5000);
+      expect(seen).toHaveBeenCalledTimes(2 + 20);
+      stop();
+    });
+
+    it('berhenti dan melepas pendengar saat dibersihkan; tanpa mesin suara tidak melakukan apa pun', () => {
+      vi.useFakeTimers();
+      const synth = fakeSynth();
+      const seen = vi.fn();
+      const stop = watchVoices(seen);
+      expect(synth.listeners.size).toBe(1);
+      stop();
+      expect(synth.listeners.size).toBe(0);
+      vi.advanceTimersByTime(3000);
+      expect(seen).toHaveBeenCalledTimes(1);
+
+      delete (window as { speechSynthesis?: unknown }).speechSynthesis;
+      const none = vi.fn();
+      watchVoices(none)();
+      expect(none).not.toHaveBeenCalled();
+    });
+  });
+
+  it('Audio Narasi: suara yang baru muncul tanpa peristiwa voiceschanged tetap masuk pilihan', async () => {
+    const synth = fakeSynth();
+    useSession.setState({ session: { token: 'mock-admin:a-demo', role: 'admin', name: 'Admin' } });
+    render(
+      <MemoryRouter>
+        <NarrationPage />
+      </MemoryRouter>,
+    );
+    await screen.findByRole('combobox', { name: 'Suara' });
+    expect(await screen.findByText(/Belum ada suara bahasa Indonesia/)).toBeInTheDocument();
+    // Suara dimuat peramban belakangan dan peristiwanya sudah lewat: halaman tetap membacanya ulang.
+    synth.voices = [
+      { name: 'Microsoft Andika - Indonesian (Indonesia)', lang: 'id-ID' },
+      { name: 'Microsoft David - English (United States)', lang: 'en-US' },
+    ];
+    await waitFor(() => expect(screen.queryByText(/Belum ada suara bahasa Indonesia/)).toBeNull(), {
+      timeout: 3000,
+    });
+    fireEvent.click(screen.getByRole('combobox', { name: 'Suara' }));
+    const options = within(screen.getByRole('listbox')).getAllByRole('option');
+    expect(options.map((o) => o.textContent)).toEqual([
+      'Otomatis (suara Indonesia pertama)',
+      'Microsoft Andika - Indonesian (Indonesia) (id-ID)',
+    ]);
   });
 });
