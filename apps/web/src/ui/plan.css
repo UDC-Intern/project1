@@ -3,11 +3,12 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 4px;
+  /* Ukuran sama dengan badge status (.ui-badge). */
   padding: 3px 10px;
   border-radius: 999px;
-  font-size: 13px;
-  font-weight: 800;
-  line-height: 1.4;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
   white-space: nowrap;
 }
 .plan-badge small {

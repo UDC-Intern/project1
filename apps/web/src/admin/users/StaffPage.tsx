@@ -124,10 +124,11 @@ export function StaffPage() {
       key: 'actions',
       label: t('admin.col.actions'),
       render: (u) => (
-        <div className="ui-row">
+        <div className="dir-actions">
           {u.id !== me?.user.id && (
             <Button
               variant={u.active ? 'danger' : 'secondary'}
+              size="sm"
               disabled={action.busy}
               onClick={() =>
                 void patch(

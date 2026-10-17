@@ -5,7 +5,6 @@ import {
   type CertificateDesign,
 } from '@udakids/engine';
 import { useCallback, useState } from 'react';
-import { Link } from 'react-router-dom';
 import {
   certificates,
   deleteCertificate,
@@ -24,13 +23,14 @@ import {
 } from '../../components/certificate/sheet';
 import { useAsync } from '../../hooks/useAsync';
 import { t, type MessageKey } from '../../i18n';
-import { formatDate, formatDateTime } from '../../lib/format';
+import { formatDateTime, formatShortDate } from '../../lib/format';
 import { ShellIconSvg } from '../../ui/AppShell';
 import { CountUp, Kpi } from '../../ui/charts';
 import { Dialog } from '../../ui/Dialog';
 import { ListPager, usePaged } from '../../ui/Pager';
 import { ErrorState, LoadingState } from '../../ui/states';
 import { Badge, Button, Card, Empty, Notice, PageHeader, TextField } from '../../ui/ui';
+import { CertificateSheetDialog } from './CertificateSheetDialog';
 
 const SAMPLE_NUMBER = 'CERT-7KQ2MX';
 
@@ -44,8 +44,8 @@ const usesFullName = (c: AdminCertificate & { nickname?: string }) =>
   !!c.nickname && c.childName !== c.nickname;
 
 /**
- * Sertifikat Juara: lembar yang berlaku (dari Pengaturan Sistem), desain, anak yang menunggu, dan semua sertifikat yang
- * terbit (lihat, unduh, cek keaslian, perbarui, hapus).
+ * Sertifikat Juara: lembar yang berlaku (isinya diatur lewat dialog "Atur isi lembar"), desain, anak yang menunggu,
+ * dan semua sertifikat yang terbit (lihat, unduh, cek keaslian, perbarui, hapus).
  */
 export function CertificatesPage() {
   const load = useCallback(() => certificates(), []);
@@ -57,6 +57,7 @@ export function CertificatesPage() {
   const [removing, setRemoving] = useState<AdminCertificate>();
   const [confirm, setConfirm] = useState('');
   const [downloadError, setDownloadError] = useState(false);
+  const [editing, setEditing] = useState(false);
 
   const q = query.trim().toLowerCase();
   const list = (data?.certificates ?? []).filter(
@@ -106,16 +107,26 @@ export function CertificatesPage() {
     });
   };
 
+  const editSheet = (size: 'md' | 'sm') => (
+    <Button
+      variant="secondary"
+      size={size}
+      aria-haspopup="dialog"
+      disabled={!data}
+      onClick={() => setEditing(true)}
+    >
+      <ShellIconSvg name="gear" size={size === 'sm' ? 16 : 18} />
+      {t('admin.certs.editSheet')}
+    </Button>
+  );
+
   const header = (
     <PageHeader
       title={t('admin.certs.title')}
       subtitle={t('admin.certs.subtitle')}
       actions={
         <>
-          <Link className="ui-btn ui-btn-secondary" to="/admin/pengaturan">
-            <ShellIconSvg name="gear" size={18} />
-            {t('admin.certs.editSheet')}
-          </Link>
+          {editSheet('md')}
           <a
             className="ui-btn ui-btn-ghost"
             href="/sertifikat/cek"
@@ -189,14 +200,7 @@ export function CertificatesPage() {
         />
       </div>
 
-      <Card
-        title={t('admin.certs.sheetTitle')}
-        actions={
-          <Link className="ui-btn ui-btn-ghost" to="/admin/pengaturan">
-            {t('admin.certs.editSheet')}
-          </Link>
-        }
-      >
+      <Card title={t('admin.certs.sheetTitle')} actions={editSheet('sm')}>
         <div className="certs-sheet">
           <div>
             <p className="ui-muted">{t('admin.certs.sheetHint')}</p>
@@ -260,7 +264,7 @@ export function CertificatesPage() {
                 {data.design === d ? (
                   <Badge tone="success">{t('admin.certs.designActive')}</Badge>
                 ) : (
-                  <Button variant="secondary" onClick={() => void chooseDesign(d)}>
+                  <Button variant="secondary" size="sm" onClick={() => void chooseDesign(d)}>
                     {t('admin.certs.designUse')}
                   </Button>
                 )}
@@ -303,7 +307,9 @@ export function CertificatesPage() {
                       </Badge>
                     </td>
                     <td>
-                      <Button onClick={() => void issue(c)}>{t('admin.certs.issue')}</Button>
+                      <Button size="sm" onClick={() => void issue(c)}>
+                        {t('admin.certs.issue')}
+                      </Button>
                     </td>
                   </tr>
                 ))}
@@ -366,12 +372,13 @@ export function CertificatesPage() {
                       <small className="ui-muted dir-sub">{c.parentEmail}</small>
                     </td>
                     <td>{c.bookTitle}</td>
-                    <td>{formatDate(c.issuedAt)}</td>
+                    <td className="adm-nowrap">{formatShortDate(c.issuedAt)}</td>
                     <td>{t(`admin.certs.design.${c.design}` as MessageKey)}</td>
                     <td>
-                      <div className="dir-actions">
+                      <div className="adm-row-actions">
                         <Button
-                          variant="secondary"
+                          variant="ghost"
+                          size="sm"
                           onClick={() => {
                             setDownloadError(false);
                             setViewing(c);
@@ -379,10 +386,10 @@ export function CertificatesPage() {
                         >
                           {t('admin.certs.view')}
                         </Button>
-                        <Button variant="ghost" onClick={() => void refresh(c)}>
+                        <Button variant="ghost" size="sm" onClick={() => void refresh(c)}>
                           {t('admin.certs.refresh')}
                         </Button>
-                        <Button variant="danger" onClick={() => setRemoving(c)}>
+                        <Button variant="danger" size="sm" onClick={() => setRemoving(c)}>
                           {t('admin.certs.delete')}
                         </Button>
                       </div>
@@ -431,6 +438,17 @@ export function CertificatesPage() {
             </div>
           </div>
         </Dialog>
+      )}
+
+      {editing && (
+        <CertificateSheetDialog
+          design={data.design}
+          onClose={() => setEditing(false)}
+          onSaved={() => {
+            setEditing(false);
+            setMessage({ tone: 'success', text: t('admin.certSettings.saved') });
+          }}
+        />
       )}
 
       {removing && (

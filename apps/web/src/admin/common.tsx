@@ -63,6 +63,54 @@ export function Loadable({
   return <>{children()}</>;
 }
 
+export type ChipTone = 'neutral' | 'warning' | 'success' | 'danger' | 'info' | 'muted';
+
+/**
+ * Chip saring status dengan jumlah berbentuk kapsul. `tone` memberi warna status yang lembut (sama dengan badge di
+ * daftarnya); tanpa `tone`, chip aktif memakai warna utama.
+ */
+export function FilterChips<K extends string>({
+  label,
+  items,
+  value,
+  onChange,
+  className,
+}: {
+  label: string;
+  items: readonly { key: K; label: string; count?: number; tone?: ChipTone }[];
+  value: K;
+  onChange: (key: K) => void;
+  className?: string;
+}) {
+  return (
+    <div
+      className={`dir-tabs${className ? ` ${className}` : ''}`}
+      role="tablist"
+      aria-label={label}
+    >
+      {items.map((it) => (
+        <button
+          key={it.key}
+          type="button"
+          role="tab"
+          aria-selected={value === it.key}
+          className={`ins-chip${it.tone ? ` ins-chip--${it.tone}` : ''}${value === it.key ? ' is-on' : ''}`}
+          onClick={() => onChange(it.key)}
+        >
+          {it.label}
+          {/* Spasi supaya pembaca layar menyebut "Disetujui 18", bukan "Disetujui18". */}
+          {it.count !== undefined && (
+            <>
+              {' '}
+              <span className="dir-count">{it.count.toLocaleString('id-ID')}</span>
+            </>
+          )}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function ActiveBadge({ active }: { active: boolean }) {
   return active ? (
     <Badge tone="success">{t('admin.user.active')}</Badge>

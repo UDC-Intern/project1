@@ -27,7 +27,9 @@ import { plan } from '../src/api/parent';
 import { startRound } from '../src/api/practice';
 import { useSession } from '../src/auth/store';
 import { AdminLayout } from '../src/admin/AdminLayout';
+import { OrdersPage } from '../src/admin/billing/OrdersPage';
 import { SettingsPage } from '../src/admin/billing/SettingsPage';
+import { CertificatesPage } from '../src/admin/content/CertificatesPage';
 import { SimulatorPage } from '../src/admin/content/SimulatorPage';
 import { GalleryPage } from '../src/admin/media/GalleryPage';
 import { IllustrationsPage } from '../src/admin/media/IllustrationsPage';
@@ -644,19 +646,73 @@ describe('halaman', () => {
     expect(readDb().settings.billing.freeLevels).toBe(4);
   });
 
-  it('Pengaturan sertifikat: pratinjau mengikuti isian sebelum disimpan', async () => {
+  it('Pengaturan Sistem: hanya akses berbayar, kontak WhatsApp, dan data contoh', async () => {
     render(
       <MemoryRouter>
         <SettingsPage />
       </MemoryRouter>,
     );
-    const issuer = await screen.findByLabelText(/Nama penerbit/);
-    fireEvent.change(issuer, { target: { value: 'Sekolah Ceria' } });
-    expect(screen.getByText(/SEKOLAH CERIA · BELAJAR BERSAMA MOMO/)).toBeInTheDocument();
+    expect(await screen.findByText('Akses berbayar')).toBeInTheDocument();
+    expect(screen.getByText('Kontak WhatsApp')).toBeInTheDocument();
+    expect(screen.getByText('Data contoh')).toBeInTheDocument();
+    expect(screen.queryByLabelText(/Nama penerbit/)).toBeNull();
+  });
+
+  it('Sertifikat: Atur isi lembar membuka dialog, pratinjau mengikuti isian, Batal tidak menyimpan', async () => {
+    render(
+      <MemoryRouter>
+        <CertificatesPage />
+      </MemoryRouter>,
+    );
+    const open = async () => {
+      const [button] = await screen.findAllByRole('button', { name: /Atur isi lembar/ });
+      await waitFor(() => expect(button).toBeEnabled());
+      fireEvent.click(button!);
+      return screen.findByRole('dialog', { name: 'Atur isi lembar sertifikat' });
+    };
+
+    let dialog = await open();
+    fireEvent.change(within(dialog).getByLabelText(/Nama penerbit/), {
+      target: { value: 'Sekolah Ceria' },
+    });
+    expect(within(dialog).getByText(/SEKOLAH CERIA · BELAJAR BERSAMA MOMO/)).toBeInTheDocument();
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Batal' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
     expect(readDb().settings.certificate.issuer).toBe('UdaKids');
-    fireEvent.click(within(issuer.closest('form')!).getByRole('button', { name: 'Simpan' }));
+
+    dialog = await open();
+    const issuer = within(dialog).getByLabelText(/Nama penerbit/);
+    expect(issuer).toHaveValue('UdaKids');
+    fireEvent.change(issuer, { target: { value: 'Sekolah Ceria' } });
+    fireEvent.click(within(dialog).getByLabelText(/Tampilkan kode QR/));
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Simpan pengaturan' }));
     expect(await screen.findByText('Pengaturan sertifikat disimpan.')).toBeInTheDocument();
-    expect(readDb().settings.certificate.issuer).toBe('Sekolah Ceria');
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(readDb().settings.certificate).toMatchObject({ issuer: 'Sekolah Ceria', showQr: false });
+    // Ringkasan "Lembar yang berlaku" langsung memakai isi baru.
+    const facts = screen.getByText('Nama penerbit').closest('dl')!;
+    expect(within(facts).getByText('Sekolah Ceria')).toBeInTheDocument();
+  });
+
+  it('Transaksi: chip saring status menampilkan jumlah per status dan menyaring daftar', async () => {
+    render(
+      <MemoryRouter>
+        <OrdersPage />
+      </MemoryRouter>,
+    );
+    const chips = await screen.findByRole('tablist', { name: 'Saring status pesanan' });
+    const all = await within(chips).findByRole('tab', { name: 'Semua 3' });
+    expect(within(chips).getByRole('tab', { name: 'Menunggu verifikasi 0' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    expect(within(chips).getByRole('tab', { name: 'Ditolak 1' })).toBeInTheDocument();
+    expect(screen.getByText('Tidak ada pesanan dengan status ini.')).toBeInTheDocument();
+    fireEvent.click(all);
+    expect(all).toHaveAttribute('aria-selected', 'true');
+    expect(await screen.findAllByRole('button', { name: /Detail pesanan/ })).toHaveLength(3);
+    fireEvent.click(within(chips).getByRole('tab', { name: 'Kedaluwarsa 1' }));
+    expect(screen.getAllByRole('button', { name: /Detail pesanan/ })).toHaveLength(1);
   });
 
   it('menu admin dikelompokkan: Konten & Kurikulum, Media & Audio, Pengguna & Akademik, Langganan', async () => {

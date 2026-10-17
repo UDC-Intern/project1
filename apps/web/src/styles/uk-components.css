@@ -292,7 +292,10 @@ a.uk-card:hover {
 .uk-dialog-backdrop {
   position: fixed;
   inset: 0;
-  background: rgb(35 48 43 / 0.5);
+  background: var(--overlay);
+  /* Latar di belakang dialog diburamkan supaya fokus ke isi dialog. */
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
   display: grid;
   place-items: center;
   padding: var(--space-4);

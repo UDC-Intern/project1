@@ -16,6 +16,16 @@ export function formatDate(iso: string): string {
   });
 }
 
+/** Tanggal singkat untuk kolom tabel, mis. "17 Okt 2026", supaya tidak pecah menjadi beberapa baris. */
+export function formatShortDate(iso: string): string {
+  if (new Date(iso).getUTCFullYear() >= 9999) return 'selamanya';
+  return new Date(iso).toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
 /** Tanggal dan jam singkat, mis. "15 Okt 2026 14.05". */
 export function formatDateTime(iso: string): string {
   return new Date(iso).toLocaleString('id-ID', {

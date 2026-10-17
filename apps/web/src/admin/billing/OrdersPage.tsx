@@ -19,6 +19,7 @@ import {
 import {
   ActionNotice,
   confirmAction,
+  FilterChips,
   Icon,
   Loadable,
   notifyOrdersChanged,
@@ -231,14 +232,15 @@ function OrderDetail({
   );
 }
 
-/** Transaksi: saring per status, buka detail, lihat bukti, setujui atau tolak dengan alasan. */
+/** Transaksi: saring per status (dengan jumlahnya), buka detail, lihat bukti, setujui atau tolak dengan alasan. */
 export function OrdersPage() {
   const [filter, setFilter] = useState<Filter>('awaiting_review');
   const [selected, setSelected] = useState<OrderRow | null>(null);
-  const list = useFetch<OrderRow[]>(
-    'staff',
-    filter === 'all' ? '/admin/orders' : `/admin/orders?status=${filter}`,
-  );
+  const list = useFetch<OrderRow[]>('staff', '/admin/orders');
+  const all = list.data ?? [];
+  const rows = filter === 'all' ? all : all.filter((o) => o.status === filter);
+  const countOf = (f: Filter) =>
+    f === 'all' ? all.length : all.filter((o) => o.status === f).length;
   // Detail yang terbuka mengikuti data terbaru setelah daftar dimuat ulang.
   useEffect(() => {
     if (!selected || !list.data) return;
@@ -292,6 +294,7 @@ export function OrdersPage() {
       render: (o) => (
         <Button
           variant="secondary"
+          size="sm"
           aria-label={t('admin.order.openLabel', { number: o.number })}
           onClick={() => setSelected(o)}
         >
@@ -304,21 +307,28 @@ export function OrdersPage() {
   return (
     <>
       <PageHeader title={t('admin.order.title')} subtitle={t('admin.order.subtitle')} />
-      <div className="adm-tabs" role="group" aria-label={t('admin.order.filterLabel')}>
-        {FILTERS.map((f) => (
-          <Button
-            key={f}
-            variant={f === filter ? 'primary' : 'secondary'}
-            aria-pressed={f === filter}
-            onClick={() => {
-              setFilter(f);
-              setSelected(null);
-            }}
-          >
-            {f === 'all' ? t('admin.filter.all') : t(STATUS[f].label)}
-          </Button>
-        ))}
-        <Button variant="ghost" onClick={list.reload} aria-label={t('admin.order.refresh')}>
+      <div className="adm-filter-bar">
+        <FilterChips
+          label={t('admin.order.filterLabel')}
+          value={filter}
+          onChange={(f) => {
+            setFilter(f);
+            setSelected(null);
+          }}
+          items={FILTERS.map((f) => ({
+            key: f,
+            label: f === 'all' ? t('admin.filter.all') : t(STATUS[f].label),
+            count: list.data ? countOf(f) : undefined,
+            tone: f === 'all' ? 'neutral' : STATUS[f].tone,
+          }))}
+        />
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={list.reload}
+          aria-label={t('admin.order.refresh')}
+          title={t('admin.order.refresh')}
+        >
           <Icon name="refresh" />
         </Button>
       </div>
@@ -338,7 +348,7 @@ export function OrdersPage() {
           {() => (
             <Table
               key={filter}
-              rows={list.data!}
+              rows={rows}
               columns={columns}
               rowKey={(o) => o.id}
               empty={t('admin.order.empty')}

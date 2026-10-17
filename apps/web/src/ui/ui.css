@@ -5,6 +5,8 @@
   --ui-ink: var(--malam);
   --ui-muted: var(--malam-muted);
   --ui-line: var(--garis);
+  /* Garis tombol netral dan chip: lebih tegas dari garis kartu supaya tombol tidak tampak seperti teks polos. */
+  --ui-line-strong: color-mix(in srgb, var(--garis-tegas) 45%, var(--garis));
   --ui-primary: var(--gonjong);
   --ui-primary-ink: var(--on-gonjong);
   --ui-success: var(--sawah);
@@ -58,15 +60,42 @@
   color: var(--ui-primary);
   border-color: var(--ui-primary);
 }
+/* Netral: tetap berbingkai dan berlatar, sejajar dengan tombol lain di baris yang sama. */
 .ui-btn-ghost {
-  background: transparent;
-  color: var(--ui-ink);
-  border-color: var(--ui-line);
-}
-.ui-btn-danger {
   background: var(--ui-surface);
+  color: var(--ui-ink);
+  border-color: var(--ui-line-strong, var(--ui-line));
+}
+/* Hapus atau nonaktifkan: latar merah lembut supaya beda dari tombol sekunder. */
+.ui-btn-danger {
+  background: var(--gonjong-soft);
   color: var(--ui-danger);
+  border-color: color-mix(in srgb, var(--gonjong) 45%, var(--kertas));
+}
+.ui-btn-primary:not(:disabled):hover {
+  filter: brightness(0.93);
+}
+.ui-btn-secondary:not(:disabled):hover {
+  background: var(--gonjong-soft);
+}
+.ui-btn-ghost:not(:disabled):hover {
+  background: var(--awan-2);
+}
+.ui-btn-danger:not(:disabled):hover {
   border-color: var(--ui-danger);
+}
+/* Ringkas: aksi di baris tabel dan kartu, ukurannya seragam. */
+.ui-btn-sm {
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 8px;
+  gap: 6px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.ui-btn-sm svg {
+  width: 16px;
+  height: 16px;
 }
 
 .ui-field {
@@ -187,30 +216,45 @@
   color: var(--ui-danger);
 }
 
+/* Semua badge status sama ukurannya: satu baris, kapsul, huruf 12 px. */
 .ui-badge {
-  display: inline-block;
-  padding: 2px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border: 1px solid var(--ui-line);
   border-radius: 999px;
   font-size: 12px;
   font-weight: 700;
+  line-height: 1.35;
+  white-space: nowrap;
+  vertical-align: middle;
   background: var(--awan-2);
   color: var(--ui-ink);
 }
 .ui-badge-success {
   background: var(--sawah-soft);
   color: var(--ui-success);
+  border-color: color-mix(in srgb, var(--sawah) 30%, var(--kertas));
 }
 .ui-badge-warning {
   background: var(--kunyit-soft);
   color: var(--ui-warning);
+  border-color: color-mix(in srgb, var(--kunyit) 45%, var(--kertas));
 }
 .ui-badge-info {
   background: var(--langit-soft);
   color: var(--ui-info);
+  border-color: color-mix(in srgb, var(--langit) 30%, var(--kertas));
 }
 .ui-badge-muted {
   background: var(--awan-2);
   color: var(--ui-muted);
+}
+.ui-badge-danger {
+  background: var(--gonjong-soft);
+  color: var(--ui-danger);
+  border-color: color-mix(in srgb, var(--gonjong) 35%, var(--kertas));
 }
 
 .ui-table-wrap {

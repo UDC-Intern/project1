@@ -1,21 +1,9 @@
-import { useCallback, useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
-import {
-  certificateSettingsSchema,
-  type AppSettings,
-  type BillingSettings,
-  type CertificateDesign,
-  type CertificateSettings,
-  type ContactSettings,
-} from '@udakids/engine';
-import { certificates } from '../../api/admin';
+import { useState, type FormEvent } from 'react';
+import type { AppSettings, BillingSettings, ContactSettings } from '@udakids/engine';
 import type { DemoDataSummary } from '../../api/adminTypes';
 import { isMocked } from '../../api/mode';
 import { settingsChanged } from '../../api/settings';
 import { useApiCall, useFetch } from '../../auth/useApi';
-import { CertificateSheet } from '../../components/certificate/CertificateSheet';
-import { verifyUrlOf } from '../../components/certificate/sheet';
-import { useAsync } from '../../hooks/useAsync';
 import { t, type MessageKey } from '../../i18n';
 import { Button, Card, Checkbox, formatDate, PageHeader, TextField } from '../../ui/ui';
 import { ActionNotice, confirmAction, Loadable, notifyOrdersChanged, useAction } from '../common';
@@ -135,122 +123,6 @@ function ContactForm({ initial }: { initial: ContactSettings }) {
   );
 }
 
-const SAMPLE_NUMBER = 'CERT-7KQ2MX';
-
-/** Isi tetap lembar sertifikat: penerbit, judul, penanda tangan, dan baris tambahan, dengan pratinjau langsung. */
-function CertificateForm({
-  initial,
-  design,
-}: {
-  initial: CertificateSettings;
-  design: CertificateDesign;
-}) {
-  const { action, save } = useSave('certificate', t('admin.certSettings.saved'));
-  const [form, setForm] = useState(initial);
-  const set = <K extends keyof CertificateSettings>(k: K, v: CertificateSettings[K]) =>
-    setForm((f) => ({ ...f, [k]: v }));
-  const parsed = certificateSettingsSchema.safeParse(form);
-  const field = (k: keyof CertificateSettings, label: string, max: number, hint?: string) => (
-    <TextField
-      label={label}
-      hint={hint}
-      maxLength={max}
-      value={String(form[k])}
-      onChange={(e) => set(k, e.target.value as never)}
-    />
-  );
-
-  async function submit(e: FormEvent) {
-    e.preventDefault();
-    const out = await save(form);
-    if (out) setForm(out);
-  }
-
-  return (
-    <Card
-      title={t('admin.certSettings.cardTitle')}
-      actions={
-        <Link className="ui-btn ui-btn-ghost" to="/admin/sertifikat">
-          {t('admin.certSettings.designs')}
-        </Link>
-      }
-    >
-      <ActionNotice error={action.error} done={action.done} />
-      <div className="adm-cert-settings">
-        <form onSubmit={submit}>
-          <div className="adm-fields">
-            {field(
-              'issuer',
-              t('admin.certSettings.issuer'),
-              40,
-              t('admin.certSettings.issuerHint'),
-            )}
-            {field('tagline', t('admin.certSettings.tagline'), 50)}
-            {field('title', t('admin.certSettings.title'), 24)}
-            {field('subtitle', t('admin.certSettings.subtitle'), 32)}
-            {field('signer1Name', t('admin.certSettings.signer1Name'), 40)}
-            {field('signer1Role', t('admin.certSettings.signer1Role'), 40)}
-            {field(
-              'signer2Name',
-              t('admin.certSettings.signer2Name'),
-              60,
-              t('admin.certSettings.signer2Hint'),
-            )}
-            {field('signer2Role', t('admin.certSettings.signer2Role'), 40)}
-            {field(
-              'curriculum',
-              t('admin.certSettings.curriculum'),
-              60,
-              t('admin.certSettings.curriculumHint'),
-            )}
-          </div>
-          <Checkbox
-            label={t('admin.certSettings.showScore')}
-            checked={form.showScore}
-            onChange={(e) => set('showScore', e.target.checked)}
-          />
-          <Checkbox
-            label={t('admin.certSettings.showQr')}
-            checked={form.showQr}
-            onChange={(e) => set('showQr', e.target.checked)}
-          />
-          <p className="ui-hint">{t('admin.certSettings.showQrHint')}</p>
-          <Checkbox
-            label={t('admin.certSettings.useFullName')}
-            checked={form.useFullName}
-            onChange={(e) => set('useFullName', e.target.checked)}
-          />
-          <p className="ui-hint">{t('admin.certSettings.useFullNameHint')}</p>
-          <Button type="submit" disabled={action.busy || !parsed.success}>
-            {t('admin.save')}
-          </Button>
-        </form>
-        <figure className="adm-cert-preview">
-          <figcaption className="ui-muted">{t('admin.certSettings.preview')}</figcaption>
-          {parsed.success ? (
-            <CertificateSheet
-              data={{
-                childName: t('admin.certSettings.sampleName'),
-                bookTitle: t('admin.certSettings.sampleBook'),
-                levels: 40,
-                topics: 10,
-                design,
-                number: SAMPLE_NUMBER,
-                issuedAt: new Date().toISOString(),
-                averageScore: 92,
-                settings: parsed.data,
-                verifyUrl: parsed.data.showQr ? verifyUrlOf(SAMPLE_NUMBER) : null,
-              }}
-            />
-          ) : (
-            <p className="ui-muted">{t('admin.certSettings.previewInvalid')}</p>
-          )}
-        </figure>
-      </div>
-    </Card>
-  );
-}
-
 /** Data contoh mode tiruan: muat ulang dengan tanggal hari ini, atau hapus untuk melihat halaman yang masih kosong. */
 function DemoDataCard() {
   const call = useApiCall('staff');
@@ -319,12 +191,12 @@ function DemoDataCard() {
   );
 }
 
-/** Pengaturan: akses berbayar, kontak WhatsApp, isi lembar sertifikat, dan data contoh (mode tiruan). */
+/**
+ * Pengaturan Sistem: akses berbayar, kontak WhatsApp, dan data contoh (mode tiruan). Isi lembar sertifikat diatur di
+ * halaman Sertifikat Juara, suara narasi di Audio Narasi.
+ */
 export function SettingsPage() {
   const s = useFetch<AppSettings>('staff', '/admin/settings');
-  // Pratinjau lembar memakai desain yang sedang aktif (dipilih di halaman Sertifikat).
-  const loadDesign = useCallback(() => certificates().then((c) => c.design), []);
-  const design = useAsync(loadDesign).data ?? 'klasik';
   return (
     <>
       <PageHeader title={t('admin.settings.title')} subtitle={t('admin.settings.subtitle')} />
@@ -333,7 +205,6 @@ export function SettingsPage() {
           <>
             <BillingForm initial={s.data!.billing} />
             <ContactForm initial={s.data!.contact} />
-            <CertificateForm initial={s.data!.certificate} design={design} />
           </>
         )}
       </Loadable>

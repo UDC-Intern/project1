@@ -14,13 +14,20 @@ import './ui.css';
 
 export function Button({
   variant = 'primary',
+  size = 'md',
   className,
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
+  /** `sm`: tombol ringkas untuk aksi di baris tabel dan kartu. */
+  size?: 'md' | 'sm';
 }) {
   return (
-    <button type="button" {...props} className={`ui-btn ui-btn-${variant} ${className ?? ''}`} />
+    <button
+      type="button"
+      {...props}
+      className={`ui-btn ui-btn-${variant}${size === 'sm' ? ' ui-btn-sm' : ''} ${className ?? ''}`}
+    />
   );
 }
 
@@ -329,13 +336,9 @@ export function Dialog({
   );
 }
 
-export function Badge({
-  tone = 'neutral',
-  children,
-}: {
-  tone?: 'neutral' | 'success' | 'warning' | 'info' | 'muted';
-  children: ReactNode;
-}) {
+export type BadgeTone = 'neutral' | 'success' | 'warning' | 'info' | 'muted' | 'danger';
+
+export function Badge({ tone = 'neutral', children }: { tone?: BadgeTone; children: ReactNode }) {
   return <span className={`ui-badge ui-badge-${tone}`}>{children}</span>;
 }
 

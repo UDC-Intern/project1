@@ -11,7 +11,7 @@ import type {
 } from '../../api/adminTypes';
 import { useApiCall, useFetch } from '../../auth/useApi';
 import { t, type MessageKey } from '../../i18n';
-import { formatDate as formatDay } from '../../lib/format';
+import { formatShortDate } from '../../lib/format';
 import { ShellIconSvg } from '../../ui/AppShell';
 import { Kpi } from '../../ui/charts';
 import { Pager } from '../../ui/Pager';
@@ -22,6 +22,7 @@ import {
   ActiveBadge,
   childReportPath,
   ColorDot,
+  FilterChips,
   lastSeen,
   Loadable,
   useAction,
@@ -299,17 +300,19 @@ export function FamiliesPage() {
     <div className="dir-actions">
       <Button
         variant="secondary"
+        size="sm"
         onClick={() =>
           setPremiumFor({ id: c.id, name: c.nickname, plan: c.plan, grants: c.grants })
         }
       >
         {t('admin.dir.setPremium')}
       </Button>
-      <Link className="ui-btn ui-btn-ghost" to={childReportPath(c.id)}>
+      <Link className="ui-btn ui-btn-ghost ui-btn-sm" to={childReportPath(c.id)}>
         {t('admin.family.report')}
       </Link>
       <Button
         variant="ghost"
+        size="sm"
         aria-expanded={pinFor === c.id}
         title={t('admin.pin.reset')}
         onClick={() => setPinFor(pinFor === c.id ? undefined : c.id)}
@@ -318,6 +321,7 @@ export function FamiliesPage() {
       </Button>
       <Button
         variant={c.active ? 'danger' : 'secondary'}
+        size="sm"
         disabled={action.busy}
         onClick={() => void toggleChild(c)}
       >
@@ -382,24 +386,19 @@ export function FamiliesPage() {
       )}
 
       <section className="ins-panel dir-panel">
-        <div className="dir-tabs" role="tablist" aria-label={t('admin.dir.tabs')}>
-          {(['families', 'children'] as const).map((k) => (
-            <button
-              key={k}
-              type="button"
-              role="tab"
-              aria-selected={tab === k}
-              className={`ins-chip${tab === k ? ' is-on' : ''}`}
-              onClick={() => {
-                setPinFor(undefined);
-                set({ tab: k === 'children' ? 'anak' : null, sort: null });
-              }}
-            >
-              {t(k === 'families' ? 'admin.dir.tabFamilies' : 'admin.dir.tabChildren')}
-              {s && <span className="dir-count">{k === 'families' ? s.families : s.children}</span>}
-            </button>
-          ))}
-        </div>
+        <FilterChips
+          label={t('admin.dir.tabs')}
+          value={tab}
+          onChange={(k) => {
+            setPinFor(undefined);
+            set({ tab: k === 'children' ? 'anak' : null, sort: null });
+          }}
+          items={(['families', 'children'] as const).map((k) => ({
+            key: k,
+            label: t(k === 'families' ? 'admin.dir.tabFamilies' : 'admin.dir.tabChildren'),
+            count: s ? (k === 'families' ? s.families : s.children) : undefined,
+          }))}
+        />
 
         <div className="dir-filters">
           <label className="dir-search">
@@ -507,6 +506,7 @@ export function FamiliesPage() {
                     <div className="dir-actions dir-family-actions">
                       <Button
                         variant={p.active ? 'danger' : 'secondary'}
+                        size="sm"
                         disabled={action.busy}
                         onClick={() => void toggleParent(p)}
                       >
@@ -556,7 +556,7 @@ export function FamiliesPage() {
                         </small>
                       </span>
                       <span role="cell" data-label={t('admin.dir.cLast')}>
-                        {c.lastActiveAt ? formatDay(c.lastActiveAt) : '—'}
+                        {c.lastActiveAt ? formatShortDate(c.lastActiveAt) : '—'}
                       </span>
                       <span role="cell" data-label={t('admin.dir.cActions')}>
                         {childActions(c)}

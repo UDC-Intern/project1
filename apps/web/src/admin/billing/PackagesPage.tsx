@@ -296,12 +296,13 @@ export function PackagesPage() {
       key: 'actions',
       label: t('admin.col.actions'),
       render: (p) => (
-        <div className="ui-row">
-          <Button variant="secondary" onClick={() => setEditing(p)}>
+        <div className="adm-row-actions">
+          <Button variant="ghost" size="sm" onClick={() => setEditing(p)}>
             {t('admin.edit')}
           </Button>
           <Button
             variant="danger"
+            size="sm"
             disabled={action.busy}
             aria-label={t('admin.pkg.deleteLabel', { name: p.name })}
             onClick={() => void remove(p)}

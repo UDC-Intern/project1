@@ -245,13 +245,6 @@
   border-radius: 4px;
 }
 
-.adm-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-
 .adm-proof {
   max-width: 100%;
   max-height: 480px;
@@ -277,26 +270,76 @@
 
 /* Ringkasan angka dan panel. */
 
+/* Chip pilihan dan saring status. Aktif: latar lembut + bingkai tebal warna nadanya; angka berupa kapsul. */
 .ins-chip {
-  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
   padding: 0 14px;
   border-radius: 999px;
-  border: 1px solid var(--ui-line);
+  border: 1px solid var(--ui-line-strong, var(--ui-line));
   background: var(--ui-surface);
+  color: var(--ui-ink);
   font: inherit;
+  font-size: 14px;
   font-weight: 700;
   cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.ins-chip:hover {
+  background: var(--awan-2);
 }
 
 .ins-chip.is-on {
-  border-color: var(--ui-primary);
+  border-color: var(--gonjong);
   background: var(--gonjong-soft);
-  color: var(--ui-primary);
+  color: var(--gonjong-teks);
+  box-shadow: inset 0 0 0 1px var(--gonjong);
 }
 
 .ins-chip:focus-visible {
   outline: 3px solid var(--kunyit);
   outline-offset: 2px;
+}
+
+.ins-chip--warning.is-on {
+  border-color: var(--kunyit);
+  background: var(--kunyit-soft);
+  color: var(--kunyit-teks);
+  box-shadow: inset 0 0 0 1px var(--kunyit);
+}
+
+.ins-chip--success.is-on {
+  border-color: var(--sawah);
+  background: var(--sawah-soft);
+  color: var(--sawah-teks);
+  box-shadow: inset 0 0 0 1px var(--sawah);
+}
+
+.ins-chip--info.is-on {
+  border-color: var(--langit);
+  background: var(--langit-soft);
+  color: var(--langit-teks);
+  box-shadow: inset 0 0 0 1px var(--langit);
+}
+
+.ins-chip--muted.is-on,
+.ins-chip--neutral.is-on {
+  border-color: var(--malam);
+  background: var(--awan-2);
+  color: var(--malam);
+  box-shadow: inset 0 0 0 1px var(--malam);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ins-chip {
+    transition: none;
+  }
 }
 
 .ins-kpis {
@@ -346,12 +389,101 @@
   gap: 8px;
 }
 
+/* Angka jumlah di chip: kapsul berwarna lembut sesuai nada; padat saat chip aktif. */
 .dir-count {
-  margin-left: 8px;
+  display: inline-grid;
+  place-items: center;
+  min-width: 24px;
+  height: 22px;
   padding: 0 8px;
+  box-sizing: border-box;
   border-radius: 999px;
+  background: var(--awan-2);
+  color: var(--malam);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.ins-chip.is-on .dir-count {
+  background: var(--gonjong);
+  color: var(--on-gonjong);
+}
+
+.ins-chip--warning .dir-count {
+  background: var(--kunyit-soft);
+  color: var(--kunyit-teks);
+}
+
+.ins-chip--warning.is-on .dir-count {
+  background: var(--kunyit);
+  color: var(--on-kunyit);
+}
+
+.ins-chip--success .dir-count {
+  background: var(--sawah-soft);
+  color: var(--sawah-teks);
+}
+
+.ins-chip--success.is-on .dir-count {
+  background: var(--sawah);
+  color: var(--on-sawah);
+}
+
+.ins-chip--danger .dir-count {
   background: var(--gonjong-soft);
-  font-size: 13px;
+  color: var(--gonjong-teks);
+}
+
+.ins-chip--info .dir-count {
+  background: var(--langit-soft);
+  color: var(--langit-teks);
+}
+
+.ins-chip--info.is-on .dir-count {
+  background: var(--langit);
+  color: var(--on-langit);
+}
+
+.ins-chip--muted .dir-count {
+  color: var(--malam-muted);
+}
+
+.ins-chip--muted.is-on .dir-count,
+.ins-chip--neutral.is-on .dir-count {
+  background: var(--malam);
+  color: var(--kertas);
+}
+
+/* Deretan chip saring di atas daftar, dengan tombol muat ulang tetap di ujung baris pertama. */
+.adm-filter-bar {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.adm-filter-bar > .dir-tabs {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.adm-filter-bar > .ui-btn {
+  flex: none;
+  margin-top: 3px;
+}
+
+.adm-nowrap {
+  white-space: nowrap;
+}
+
+/* Aksi di satu baris tabel: tombol ringkas sejajar, tidak bertumpuk. */
+.adm-row-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 6px;
 }
 
 .dir-filters {
@@ -515,18 +647,6 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--ui-muted);
-}
-
-.dir-tr .dir-actions,
-.dir-kid-row .dir-actions {
-  gap: 4px;
-}
-
-.dir-tr .dir-actions .ui-btn,
-.dir-kid-row .dir-actions .ui-btn {
-  min-height: 36px;
-  padding: 0 10px;
-  font-size: 14px;
 }
 
 .dir-form textarea {
@@ -801,14 +921,7 @@
   margin: 0;
 }
 
-/* Pengaturan sertifikat: isian di kiri, pratinjau lembar di kanan. */
-
-.adm-cert-settings {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
-  gap: 24px;
-  align-items: start;
-}
+/* Pratinjau lembar di dialog "Atur isi lembar": ikut terlihat saat isian digulir. */
 
 .adm-cert-preview {
   position: sticky;
@@ -822,12 +935,64 @@
   border: 1px solid var(--ui-line);
 }
 
-@media (max-width: 1100px) {
-  .adm-cert-settings {
-    grid-template-columns: 1fr;
-  }
+@media (max-width: 860px) {
   .adm-cert-preview {
     position: static;
+  }
+}
+
+/* Dialog "Atur isi lembar" di Sertifikat Juara: isian berkelompok di kiri, pratinjau di kanan, tombol di bawah. */
+
+.certs-editor {
+  display: grid;
+  gap: 12px;
+}
+
+.certs-editor-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.certs-editor-group {
+  min-width: 0;
+  margin: 0 0 12px;
+  padding: 10px 14px 0;
+  border: 1px solid var(--ui-line);
+  border-radius: 12px;
+}
+
+.certs-editor-group legend {
+  padding: 0 6px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.certs-editor-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 12px;
+}
+
+/* Tetap terlihat di dasar dialog saat isian digulir; geser sejauh padding dialog supaya rata dengan tepinya. */
+.certs-editor-actions {
+  position: sticky;
+  bottom: calc(-1 * var(--space-4));
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 calc(-1 * var(--space-4)) calc(-1 * var(--space-4));
+  padding: 12px var(--space-4);
+  border-top: 1px solid var(--ui-line);
+  background: var(--kertas);
+}
+
+@media (max-width: 860px) {
+  .certs-editor-body,
+  .certs-editor-pair {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -1517,32 +1682,64 @@
   border: 1px solid var(--ui-line);
 }
 
+/* Chip saring tidak menempel ke kisi kartu di bawahnya. */
+.ill-tabs {
+  margin-bottom: 20px;
+}
+
+/* Latar lembut di sekeliling gambar supaya tidak mepet ke pinggir kartu. */
+.ill-frame {
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--awan);
+}
+
+.ill-frame .ill-svg {
+  width: 100%;
+}
+
 .ill-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 14px;
+  gap: 24px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+/* Gambar, keterangan, lalu tombol yang selalu rata di bawah kartu. */
 .ill-card {
   display: grid;
-  gap: 10px;
-  padding: 12px;
+  grid-template-rows: auto 1fr auto;
+  gap: 14px;
+  padding: 16px;
   border: 1px solid var(--ui-line);
   border-radius: 16px;
   background: var(--ui-surface);
 }
 
-.ill-card .ill-svg {
-  width: 100%;
-}
-
 .ill-card-body {
   display: grid;
-  gap: 4px;
+  align-content: start;
+  gap: 6px;
   justify-items: start;
+}
+
+.ill-card-title {
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+.ill-card-body .ui-badge {
+  margin-top: 4px;
+}
+
+.ill-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--ui-line);
 }
 
 @media (max-width: 900px) {

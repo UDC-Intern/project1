@@ -116,8 +116,9 @@ tambahannya selesai). API NestJS dan database dibangun di M6 sampai M11 dengan k
 
 ### 4.3 Pengaturan admin
 
-Menu **Pengaturan Sistem** (`/admin/pengaturan`) dan **Audio Narasi** (`/admin/narasi`, bagian `voice`) menyimpan nilai
-yang dulu tertulis di kode. Semua halaman membaca nilai yang
+Menu **Pengaturan Sistem** (`/admin/pengaturan`, bagian `billing` dan `contact`), dialog **Atur isi lembar** di
+Sertifikat Juara (`/admin/sertifikat`, bagian `certificate`), dan **Audio Narasi** (`/admin/narasi`, bagian `voice`)
+menyimpan nilai yang dulu tertulis di kode. Semua halaman membaca nilai yang
 sama lewat `useSettings()`, sehingga perubahan langsung berlaku tanpa memuat ulang. Tiap bagian disimpan sendiri (`PUT
 /admin/settings/:part`) dan diperiksa skema di `engine`; isian yang keliru ditolak per isian.
 
@@ -128,9 +129,10 @@ sama lewat `useSettings()`, sehingga perubahan langsung berlaku tanpa memuat ula
 | `certificate`| Penerbit, kalimat kecil kepala, judul, sub-judul, dua penanda tangan beserta jabatannya, keterangan kurikulum, tampilkan rata-rata skor, tampilkan kode QR, pakai nama lengkap dari orang tua | Lembar sertifikat (anak, orang tua, admin, landing), halaman cek keaslian |
 | `voice`      | Suara aktif, bacakan otomatis saat halaman/soal tampil, kecepatan (0,6 sampai 1,4, awalnya 0,92), nada (0,5 sampai 1,5, awalnya 1,1), suara peramban yang diutamakan. Diatur di menu Audio Narasi | Semua suara di area anak; pratinjau admin memakai isian yang belum disimpan |
 
-Halaman Pengaturan menampilkan pratinjau lembar langsung dari isian (data contoh) sebelum disimpan. Pilihan desain tetap di
-menu Sertifikat. Pengecualian per level ada di menu Konten dan ditandai "Pengecualian"; pengecualian yang kembali sama
-dengan aturan Pengaturan otomatis dihapus.
+Dialog Atur isi lembar (latar diburamkan) menampilkan pratinjau lembar langsung dari isian (data contoh) sebelum
+disimpan; Simpan menutup dialog dan ringkasan "Lembar yang berlaku" langsung memakai isi baru, Batal tidak menyimpan
+apa pun. Pilihan desain ada di halaman yang sama. Pengecualian per level ada di menu Konten dan ditandai
+"Pengecualian"; pengecualian yang kembali sama dengan aturan Pengaturan otomatis dihapus.
 
 ### 4.4 Interaksi antar peran
 
@@ -144,8 +146,8 @@ dengan aturan Pengaturan otomatis dihapus.
 6. Anak menuntaskan sebuah buku. Sertifikat terbit, tampil di halaman hasil dan Profil anak, di menu Sertifikat orang tua,
    dan di panel admin. Orang tua bisa mengisi nama lengkap anak agar lembarnya resmi; siapa pun bisa mencocokkan nomornya
    di halaman cek keaslian.
-7. Admin mengubah Pengaturan (level gratis, WhatsApp, isi lembar). Anak, orang tua, dan pengunjung langsung melihat
-   perubahannya. Admin menonaktifkan akun anak atau keluarga; akun itu tidak bisa masuk dan tersembunyi dari pilihan
+7. Admin mengubah Pengaturan (level gratis, WhatsApp) atau isi lembar sertifikat. Anak, orang tua, dan pengunjung
+   langsung melihat perubahannya. Admin menonaktifkan akun anak atau keluarga; akun itu tidak bisa masuk dan tersembunyi dari pilihan
    profil sampai diaktifkan lagi.
 
 ## 5. Peta Jalan (setelah rilis 1.0)
@@ -221,13 +223,15 @@ Hal berikut **tidak** dibangun di rilis 1.0. Struktur data dan modul disiapkan a
 6. Transaksi: saring menurut status, periksa bukti transfer, setujui atau tolak dengan catatan; lencana di menu menghitung
    pesanan yang menunggu verifikasi. Paket dan Rekening: tambah, ubah (nama, keterangan, harga normal, harga jual, masa
    aktif, status, urutan), nonaktifkan, atau hapus; paket yang sudah pernah dipesan hanya dinonaktifkan.
-7. Sertifikat Juara: lihat lembar yang berlaku (teks dari Pengaturan Sistem, kode QR, aturan nama lengkap) dengan contoh,
-   pilih desain, terbitkan dari daftar Menunggu, cari sertifikat terbit (nama di lembar: lengkap atau panggilan),
+7. Sertifikat Juara: lihat lembar yang berlaku (teks lembar, kode QR, aturan nama lengkap) dengan contoh, ubah isinya
+   lewat dialog Atur isi lembar dengan pratinjau langsung, pilih desain, terbitkan dari daftar Menunggu, cari sertifikat terbit (nama di lembar: lengkap atau panggilan),
    lihat/unduh/cetak, buka cek keaslian, perbarui, atau hapus (konfirmasi mengetik "hapus").
 8. Laporan: statistik per level (tingkat lulus, jawaban keliru terbanyak) dan laporan per anak (Skor Jago, topik yang
    perlu ditemani, kemajuan tiap buku).
-9. Pengaturan: ubah level gratis, kunci berbayar, batas bayar pesanan, kontak WhatsApp, dan isi lembar sertifikat dengan
-   pratinjau langsung (bagian 4.3). Lonceng di pojok kanan atas memuat 30 kabar terakhir.
+9. Pengaturan Sistem: ubah level gratis, kunci berbayar, batas bayar pesanan, dan kontak WhatsApp (bagian 4.3); di mode
+   tiruan juga muat ulang atau hapus data contoh. Lonceng di pojok kanan atas memuat 30 kabar terakhir.
+10. Semua daftar memakai pola yang sama: chip saring berwarna status (kuning menunggu, hijau lunas/disetujui, merah
+    ditolak) dengan jumlah per status, badge status satu ukuran, dan tombol aksi ringkas yang seragam di tiap baris.
 
 ## 7. Daftar Halaman
 
@@ -271,11 +275,11 @@ Router: React Router 6. Bagian dinamis ditulis `:param`. URL halaman berbahasa I
 | Tim Staf & Akses    | `/admin/staf`                 | Daftar admin, tambah, atur kata sandi, nonaktifkan                                    | Admin        |
 | Laporan & Rapor     | `/admin/laporan`              | Statistik level dan daftar anak                                                       | Admin        |
 | Laporan anak (admin)| `/admin/laporan/anak/:id`     | Skor Jago, topik yang perlu ditemani, kemajuan tiap buku dan level                    | Admin        |
-| Sertifikat Juara    | `/admin/sertifikat`           | Lembar yang berlaku (dari Pengaturan, dengan QR), desain, daftar Menunggu, sertifikat terbit (nama di lembar, cek keaslian) | Admin        |
+| Sertifikat Juara    | `/admin/sertifikat`           | Lembar yang berlaku (dengan QR) dan dialog Atur isi lembar, desain, daftar Menunggu, sertifikat terbit (nama di lembar, cek keaslian) | Admin        |
 | Transaksi & Bukti   | `/admin/transaksi`            | Pesanan menurut status, bukti transfer, setujui atau tolak                            | Admin        |
 | Paket Langganan     | `/admin/paket`                | Tambah, ubah, hapus paket: nama, keterangan, harga normal, harga jual, masa aktif     | Admin        |
 | Rekening & Pembayaran | `/admin/rekening`           | Bank dan e-wallet tujuan transfer, petunjuk bayar                                     | Admin        |
-| Pengaturan Sistem   | `/admin/pengaturan`           | Level gratis dan kunci berbayar, kontak WhatsApp, isi lembar sertifikat dengan pratinjau | Admin        |
+| Pengaturan Sistem   | `/admin/pengaturan`           | Level gratis dan kunci berbayar, kontak WhatsApp, data contoh (mode tiruan)            | Admin        |
 | 404                 | `*`                           | Halaman tidak ditemukan dengan tombol kembali (nada ramah anak)                       | Tidak        |
 
 Pengalihan: `/play/*` tanpa sesi anak ke `/play/masuk`. `/orang-tua/*` tanpa sesi orang tua ke `/orang-tua/masuk`.
@@ -561,6 +565,7 @@ sampai M9), bukan hanya disembunyikan di tampilan.
 | 1      | M0             | Dokumen produk dan keputusan arsitektur (tanpa kode)                                                  | Selesai |
 | 1      | M1 sampai M5   | Semua tampilan tiga peran dengan data tiruan di browser (mode mock), mengikuti kontrak                | Selesai |
 | 1      | Tambahan M5    | Paket dan pembayaran manual, Kelas 1 sampai 4 dan Peta Belajar, area anak bersuara, 2 level gratis + 2 Premium, Sertifikat Juara Digital | Selesai |
+| 1      | Tambahan M5e   | Isi lembar sertifikat dipindah ke dialog di Sertifikat Juara (Pengaturan Sistem tinggal akses berbayar, WhatsApp, data contoh); chip saring berwarna status dengan jumlah, badge seragam, tombol aksi tabel ringkas | Selesai |
 | 1      | Tambahan M5d   | Data contoh mode tiruan (puluhan keluarga, anak, staf, transaksi, ribuan ronde, sertifikat, ilustrasi) yang bisa dimuat ulang atau dihapus di Pengaturan Sistem; paging di semua daftar admin dan riwayat transaksi orang tua; tombol kembali Detail Topik ke Peta Belajar | Selesai |
 | 1      | Tambahan M5c   | Navigasi admin baru (Konten & Kurikulum, Media & Audio, Pengguna & Akademik, Langganan & Pembayaran), Ringkasan baru, Bank Soal & Latihan (simulator kuis), Sertifikat Juara terhubung Pengaturan, Galeri Aset, Audio Narasi, Ilustrasi AI | Selesai |
 | 1      | Tambahan M5b   | Menu Pengaturan admin (level gratis, WhatsApp, lembar sertifikat), nama sertifikat dengan persetujuan orang tua, kode QR dan cek keaslian, panel admin lengkap (Keluarga, Staf, Laporan, Paket dan Rekening yang bisa ditambah, notifikasi) | Selesai |

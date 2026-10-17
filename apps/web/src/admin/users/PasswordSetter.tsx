@@ -4,7 +4,7 @@ import { Button, TextField } from '../../ui/ui';
 
 export const MIN_PASSWORD = 8;
 
-/** Tombol "Atur password" yang membuka form kecil (minimal 8 karakter). */
+/** Tombol ringkas "Atur password" yang membuka form kecil (minimal 8 karakter). Dipakai di baris tabel dan kartu. */
 export function PasswordSetter({
   onSubmit,
   busy,
@@ -18,7 +18,7 @@ export function PasswordSetter({
   const [password, setPassword] = useState('');
   if (!open) {
     return (
-      <Button variant="ghost" onClick={() => setOpen(true)}>
+      <Button variant="ghost" size="sm" onClick={() => setOpen(true)}>
         {t('admin.user.setPassword')}
       </Button>
     );
@@ -42,10 +42,10 @@ export function PasswordSetter({
         onChange={(e) => setPassword(e.target.value)}
       />
       {note && <p className="ui-hint">{note}</p>}
-      <Button type="submit" disabled={busy || password.length < MIN_PASSWORD}>
+      <Button type="submit" size="sm" disabled={busy || password.length < MIN_PASSWORD}>
         {t('admin.save')}
       </Button>
-      <Button variant="ghost" onClick={() => setOpen(false)}>
+      <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>
         {t('admin.cancel')}
       </Button>
     </form>

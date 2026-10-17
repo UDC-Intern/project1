@@ -28,7 +28,7 @@ import {
   SelectField,
   TextField,
 } from '../../ui/ui';
-import { ActionNotice, Loadable, confirmAction, useAction } from '../common';
+import { ActionNotice, FilterChips, Loadable, confirmAction, useAction } from '../common';
 
 const START: IllustrationRequest = {
   kind: 'scene',
@@ -43,10 +43,11 @@ const START: IllustrationRequest = {
 /** Kartu per halaman: kelipatan 4 dan 3 supaya kisi penuh di layar lebar maupun sedang. */
 const PAGE_SIZES = [12, 24, 48];
 
-const STATUS_TONE: Record<IllustrationStatus, 'warning' | 'success' | 'muted'> = {
+/** Warna status yang sama di chip saring dan badge kartu: kuning menunggu, hijau disetujui, merah ditolak. */
+const STATUS_TONE: Record<IllustrationStatus, 'warning' | 'success' | 'danger'> = {
   review: 'warning',
   approved: 'success',
-  rejected: 'muted',
+  rejected: 'danger',
 };
 
 /**
@@ -241,7 +242,9 @@ export function IllustrationsPage() {
           <figure className="ill-preview">
             <figcaption className="ui-muted">{t('admin.ill.preview')}</figcaption>
             {parsed.success ? (
-              <Illustration request={parsed.data} size={360} />
+              <div className="ill-frame">
+                <Illustration request={parsed.data} size={360} />
+              </div>
             ) : (
               <p className="ui-muted">{t('admin.ill.previewInvalid')}</p>
             )}
@@ -250,21 +253,18 @@ export function IllustrationsPage() {
       </Card>
 
       <Card title={t('admin.ill.listTitle')}>
-        <div className="dir-tabs" role="tablist" aria-label={t('admin.ill.filter')}>
-          {(['review', 'approved', 'rejected', 'all'] as const).map((s) => (
-            <button
-              key={s}
-              type="button"
-              role="tab"
-              aria-selected={filter === s}
-              className={`ins-chip${filter === s ? ' is-on' : ''}`}
-              onClick={() => show(s)}
-            >
-              {t(`admin.ill.status.${s}` as MessageKey)}
-              <span className="dir-count">{s === 'all' ? rows.length : countOf(s)}</span>
-            </button>
-          ))}
-        </div>
+        <FilterChips
+          className="ill-tabs"
+          label={t('admin.ill.filter')}
+          value={filter}
+          onChange={show}
+          items={(['review', 'approved', 'rejected', 'all'] as const).map((s) => ({
+            key: s,
+            label: t(`admin.ill.status.${s}` as MessageKey),
+            count: s === 'all' ? rows.length : countOf(s),
+            tone: s === 'all' ? 'neutral' : STATUS_TONE[s],
+          }))}
+        />
         <ActionNotice error={review.error} done={review.done} />
         <Loadable loading={all.loading} error={all.error} hasData={!!all.data}>
           {() =>
@@ -274,9 +274,11 @@ export function IllustrationsPage() {
               <ul className="ill-grid">
                 {paged.items.map((row) => (
                   <li key={row.id} className="ill-card">
-                    <Illustration request={row} size={260} />
+                    <div className="ill-frame">
+                      <Illustration request={row} size={260} />
+                    </div>
                     <div className="ill-card-body">
-                      <strong>{row.subject}</strong>
+                      <strong className="ill-card-title">{row.subject}</strong>
                       <small className="ui-muted">
                         {t('admin.ill.meta', {
                           kind: t(`admin.ill.kind.${row.kind}` as MessageKey),
@@ -291,11 +293,12 @@ export function IllustrationsPage() {
                         {t(`admin.ill.status.${row.status}` as MessageKey)}
                       </Badge>
                     </div>
-                    <div className="dir-actions">
+                    <div className="ill-card-actions">
                       {ILLUSTRATION_STATUSES.filter((s) => s !== 'review' && s !== row.status).map(
                         (s) => (
                           <Button
                             key={s}
+                            size="sm"
                             variant={s === 'approved' ? 'primary' : 'secondary'}
                             disabled={review.busy}
                             onClick={() => void setStatus(row, s)}
@@ -305,7 +308,8 @@ export function IllustrationsPage() {
                         ),
                       )}
                       <Button
-                        variant="ghost"
+                        size="sm"
+                        variant="danger"
                         disabled={review.busy}
                         onClick={() => void remove(row)}
                       >

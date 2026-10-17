@@ -217,12 +217,13 @@ export function PaymentMethodsPage() {
       key: 'actions',
       label: t('admin.col.actions'),
       render: (m) => (
-        <div className="ui-row">
-          <Button variant="secondary" onClick={() => setEditing(m)}>
+        <div className="adm-row-actions">
+          <Button variant="ghost" size="sm" onClick={() => setEditing(m)}>
             {t('admin.edit')}
           </Button>
           <Button
             variant="danger"
+            size="sm"
             disabled={action.busy}
             aria-label={t('admin.pay.deleteLabel', { name: m.name })}
             onClick={() => void remove(m)}

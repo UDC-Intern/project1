@@ -18,6 +18,7 @@ import { t, type MessageKey } from '../../i18n';
 import { ShellIconSvg } from '../../ui/AppShell';
 import { Dialog } from '../../ui/Dialog';
 import { Button, Empty, PageHeader } from '../../ui/ui';
+import { FilterChips } from '../common';
 
 type Category = 'objects' | 'pins' | 'momo' | 'plants' | 'certificates' | 'ai';
 const CATEGORIES: Category[] = ['objects', 'pins', 'momo', 'plants', 'certificates', 'ai'];
@@ -180,21 +181,16 @@ export function GalleryPage() {
     <>
       <PageHeader title={t('admin.gallery.title')} subtitle={t('admin.gallery.subtitle')} />
       <section className="ins-panel">
-        <div className="dir-tabs" role="tablist" aria-label={t('admin.gallery.categories')}>
-          {(['all', ...CATEGORIES] as const).map((c) => (
-            <button
-              key={c}
-              type="button"
-              role="tab"
-              aria-selected={category === c}
-              className={`ins-chip${category === c ? ' is-on' : ''}`}
-              onClick={() => setCategory(c)}
-            >
-              {t(`admin.gallery.cat.${c}` as MessageKey)}
-              <span className="dir-count">{c === 'all' ? assets.length : count(c)}</span>
-            </button>
-          ))}
-        </div>
+        <FilterChips
+          label={t('admin.gallery.categories')}
+          value={category}
+          onChange={setCategory}
+          items={(['all', ...CATEGORIES] as const).map((c) => ({
+            key: c,
+            label: t(`admin.gallery.cat.${c}` as MessageKey),
+            count: c === 'all' ? assets.length : count(c),
+          }))}
+        />
         <label className="dir-search">
           <span className="adm-sr">{t('admin.gallery.search')}</span>
           <ShellIconSvg name="search" size={18} />
