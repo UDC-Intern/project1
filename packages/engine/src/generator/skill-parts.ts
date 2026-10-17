@@ -1,4 +1,5 @@
 import type { Rng } from '../rng.js';
+import type { Visual } from '../schemas/domain.js';
 import type { GeneratedQuestion } from './types.js';
 
 /** Sampel ditolak: pembuat soal mencoba lagi dengan nilai acak berikutnya. */
@@ -27,6 +28,8 @@ export type PartLike = { family: string; params: Record<string, unknown> };
 
 export type ManualItem = {
   prompt: string;
+  /** Gambar benda hitung yang menyertai soal (dari soal generator yang disalin ke bank soal). */
+  visual?: Visual;
   stimulus?: unknown[];
   choices?: { visual?: { kind?: string; text?: string }; say?: string }[];
   answer?: number | number[];
@@ -81,7 +84,7 @@ export function manualQuestion(p: { items: ManualItem[] }, rng: Rng): GeneratedQ
   return {
     type: 'choice',
     prompt: soften(it.prompt),
-    visual: null,
+    visual: it.visual ?? null,
     options: rng.shuffle(texts).map(soften),
     answer: soften(answer),
     explanation: soften(it.reteach ?? 'Yuk kita lihat lagi bersama.'),

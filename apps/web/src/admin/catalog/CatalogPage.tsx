@@ -160,15 +160,9 @@ export function CatalogPage() {
         <QuestionBankDialog
           level={writing}
           onClose={() => setWriting(undefined)}
-          onChanged={(next, count) => {
-            const level = writing;
+          onChanged={(next, message) => {
             setWriting(undefined);
-            changed(
-              next,
-              count > 0
-                ? t('admin.bank.saved', { n: level.number, count })
-                : t('admin.bank.cleared', { n: level.number }),
-            );
+            changed(next, message);
           }}
         />
       )}

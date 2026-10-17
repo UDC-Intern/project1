@@ -25,6 +25,11 @@ const sentences = (text: string) =>
 const hasForbidden = (text: string) =>
   FORBIDDEN_WORDS.some((w) => new RegExp(`(^|[^\\p{L}])${w}([^\\p{L}]|$)`, 'iu').test(text));
 
+/** Kata yang dihindari untuk anak ("salah", "gagal") di sebuah teks; kosong bila bersih. */
+export function checkForbiddenWords(text: string): string[] {
+  return hasForbidden(text) ? ['Memakai kata "salah" atau "gagal". Pakai "belum tepat".'] : [];
+}
+
 /** Aturan teks anak untuk satu teks bebas (materi, kalimat soal): panjang kalimat dan kata terlarang. */
 export function checkChildText(text: string): string[] {
   const issues: string[] = [];

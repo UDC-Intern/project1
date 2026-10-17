@@ -217,7 +217,13 @@ export function CertificatesPage() {
               <dt>{t('admin.certs.signature')}</dt>
               <dd>{t(`admin.certs.signature.${settings.signatureType}` as MessageKey)}</dd>
               <dt>{t('admin.certs.stamp')}</dt>
-              <dd>{yes(settings.showStamp)}</dd>
+              <dd>
+                {!settings.showStamp
+                  ? yes(false)
+                  : settings.stampImage
+                    ? t('admin.certs.stampOwn')
+                    : t('admin.certs.stampDefault')}
+              </dd>
               <dt>{t('admin.certSettings.curriculum')}</dt>
               <dd>{settings.curriculum || '—'}</dd>
               <dt>{t('admin.certs.showScore')}</dt>

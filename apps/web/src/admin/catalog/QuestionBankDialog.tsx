@@ -1,5 +1,6 @@
 import { memo, useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import {
+  BANK_DRAFT_SIZE,
   BANK_GOOD_QUESTIONS,
   BANK_MAX_CHOICES,
   BANK_MAX_QUESTIONS,
@@ -11,12 +12,24 @@ import {
 } from '@udakids/engine';
 import type { CatalogBook, CatalogLevel } from '../../api/adminTypes';
 import { useApiCall, useFetch } from '../../auth/useApi';
+import { CountObjects } from '../../components/CountObjects';
 import { t } from '../../i18n';
 import { Dialog } from '../../ui/Dialog';
 import { Badge, Button, Notice, TextField } from '../../ui/ui';
 import { ActionNotice, ConfirmDialog, Icon, Loadable, confirmAction, useAction } from '../common';
 
-type LevelQuestions = { items: BankQuestion[]; min: number; good: number; max: number };
+type LevelQuestions = {
+  items: BankQuestion[];
+  min: number;
+  good: number;
+  max: number;
+  /** Soal contoh dari generator level, belum disimpan. */
+  draft: boolean;
+  /** Level bawaan yang soalnya sudah disesuaikan sebelumnya. */
+  edited: boolean;
+  /** Soal contoh baru bisa diambil dari generator bawaan level. */
+  regenerable: boolean;
+};
 
 const blank = (): BankQuestion => ({ prompt: '', choices: ['', '', ''], answer: 0, hint: '' });
 const START_COUNT = BANK_MIN_QUESTIONS;
@@ -107,6 +120,15 @@ const QuestionCard = memo(function QuestionCard({
           </Button>
         </span>
       </div>
+      {question.visual && (
+        <div className="bank-visual">
+          <CountObjects visual={question.visual} />
+          <small className="ui-hint">{t('admin.bank.visualNote')}</small>
+          <Button variant="ghost" size="sm" onClick={() => set({ visual: undefined })}>
+            {t('admin.bank.visualRemove')}
+          </Button>
+        </div>
+      )}
       <div className="ui-field">
         <label htmlFor={`bank-prompt-${n}`}>{t('admin.bank.prompt')}</label>
         <input
@@ -184,9 +206,10 @@ const QuestionCard = memo(function QuestionCard({
 }, sameCard);
 
 /**
- * Bank soal sebuah level buatan admin (`GET`, `PUT`, `DELETE /admin/levels/:id/questions`): soal pilihan ganda
- * yang ditulis sendiri. Satu ronde mengambil 10 soal dari bank dengan urutan pilihan diacak. Level baru bisa
- * dimainkan anak begitu bank punya cukup soal yang lengkap.
+ * Bank soal sebuah level (`GET`, `PUT`, `DELETE /admin/levels/:id/questions`): soal pilihan ganda yang bisa
+ * disunting admin. Level otomatis dibuka dengan 20 soal contoh dari generatornya; setelah disimpan, level memakai
+ * daftar ini. Satu ronde tetap mengambil 10 soal dari bank dengan urutan pilihan diacak. Level baru bisa dimainkan
+ * anak begitu bank punya cukup soal yang lengkap.
  */
 export function QuestionBankDialog({
   level,
@@ -195,8 +218,8 @@ export function QuestionBankDialog({
 }: {
   level: CatalogLevel;
   onClose: () => void;
-  /** Dipanggil setelah soal disimpan atau dikosongkan. `count` = jumlah soal sekarang. */
-  onChanged: (books: CatalogBook[], count: number) => void;
+  /** Dipanggil setelah soal disimpan, dikosongkan, atau dikembalikan; `message` untuk kabar di halaman. */
+  onChanged: (books: CatalogBook[], message: string) => void;
 }) {
   const call = useApiCall('staff');
   const action = useAction();
@@ -208,6 +231,10 @@ export function QuestionBankDialog({
   const [initial, setInitial] = useState('[]');
   const [tried, setTried] = useState(false);
   const [clearing, setClearing] = useState(false);
+  const [reverting, setReverting] = useState(false);
+  const [draft, setDraft] = useState(false);
+  /** Jumlah soal contoh terakhir yang diambil dari generator (untuk catatan "hanya sekian soal berbeda"). */
+  const [drawn, setDrawn] = useState(0);
   const firstInput = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -217,6 +244,8 @@ export function QuestionBankDialog({
     setItems(start);
     // Soal kosong awal bukan "perubahan": yang dihitung hanya yang ditulis admin.
     setInitial(JSON.stringify(loaded.data.items.length > 0 ? start : []));
+    setDraft(loaded.data.draft);
+    setDrawn(loaded.data.draft ? loaded.data.items.length : 0);
   }, [loaded.data]);
 
   useEffect(() => {
@@ -249,27 +278,46 @@ export function QuestionBankDialog({
     onClose();
   }
 
+  const endpoint = `/admin/levels/${encodeURIComponent(level.id)}/questions`;
+  const canRegenerate = loaded.data?.regenerable === true;
+  const canRevert = !level.custom && loaded.data?.edited === true;
+  const canClear = level.custom && hasBank && !level.used;
+
   async function save(e: FormEvent) {
     e.preventDefault();
     setTried(true);
     if (!check.ok) return;
     const out = await action.run(() =>
-      call<CatalogBook[]>(`/admin/levels/${encodeURIComponent(level.id)}/questions`, {
-        method: 'PUT',
-        body: { items },
-      }),
+      call<CatalogBook[]>(endpoint, { method: 'PUT', body: { items } }),
     );
-    if (out) onChanged(out, items.length);
+    if (out) onChanged(out, t('admin.bank.saved', { n: level.number, count: items.length }));
   }
 
   async function clear() {
-    const out = await action.run(() =>
-      call<CatalogBook[]>(`/admin/levels/${encodeURIComponent(level.id)}/questions`, {
-        method: 'DELETE',
-      }),
-    );
+    const out = await action.run(() => call<CatalogBook[]>(endpoint, { method: 'DELETE' }));
     setClearing(false);
-    if (out) onChanged(out, 0);
+    if (out) onChanged(out, t('admin.bank.cleared', { n: level.number }));
+  }
+
+  /** Soal yang disesuaikan dihapus; level memakai soal bawaannya lagi. */
+  async function revert() {
+    const out = await action.run(() => call<CatalogBook[]>(endpoint, { method: 'DELETE' }));
+    setReverting(false);
+    if (out) onChanged(out, t('admin.bank.reverted', { n: level.number }));
+  }
+
+  /** Ambil 20 soal contoh baru dari generator bawaan (urutan acak berbeda); belum disimpan. */
+  async function regenerate() {
+    if (dirty && !confirmAction(t('admin.bank.regenerateConfirm'))) return;
+    const seed = Math.floor(Math.random() * 1_000_000) + 1;
+    const out = await action.run(() =>
+      call<LevelQuestions>(`${endpoint}?from=generator&seed=${seed}`),
+    );
+    if (!out || out.items.length === 0) return;
+    setItems(out.items);
+    setDraft(true);
+    setDrawn(out.items.length);
+    setTried(false);
   }
 
   return (
@@ -301,6 +349,20 @@ export function QuestionBankDialog({
                   <span style={{ width: `${percent}%` }} />
                 </div>
               </div>
+              {draft && (
+                <Notice tone="info">
+                  {t('admin.bank.draftNote', { count: drawn })}
+                  {drawn < BANK_DRAFT_SIZE && (
+                    <>
+                      <br />
+                      {t('admin.bank.draftFew', { count: drawn })}
+                    </>
+                  )}
+                </Notice>
+              )}
+              {!draft && loaded.data?.edited && (
+                <p className="ui-hint">{t('admin.bank.editedNote')}</p>
+              )}
               <ol className="bank-list">
                 {items.map((q, i) => (
                   <QuestionCard
@@ -341,16 +403,35 @@ export function QuestionBankDialog({
               )}
               <ActionNotice error={action.error} />
               <div className="dlg-actions">
-                {hasBank && !level.used && (
-                  <Button
-                    variant="danger"
-                    disabled={action.busy}
-                    onClick={() => setClearing(true)}
-                    style={{ marginRight: 'auto' }}
-                  >
-                    {t('admin.bank.clear')}
-                  </Button>
-                )}
+                <span className="bank-side">
+                  {canRegenerate && (
+                    <Button
+                      variant="secondary"
+                      disabled={action.busy}
+                      onClick={() => void regenerate()}
+                    >
+                      {t('admin.bank.regenerate')}
+                    </Button>
+                  )}
+                  {canRevert && (
+                    <Button
+                      variant="danger"
+                      disabled={action.busy}
+                      onClick={() => setReverting(true)}
+                    >
+                      {t('admin.bank.revert')}
+                    </Button>
+                  )}
+                  {canClear && (
+                    <Button
+                      variant="danger"
+                      disabled={action.busy}
+                      onClick={() => setClearing(true)}
+                    >
+                      {t('admin.bank.clear')}
+                    </Button>
+                  )}
+                </span>
                 <Button variant="ghost" onClick={close}>
                   {t('admin.bank.close')}
                 </Button>
@@ -363,6 +444,15 @@ export function QuestionBankDialog({
           )}
         </Loadable>
       </Dialog>
+      <ConfirmDialog
+        open={reverting}
+        title={t('admin.bank.revertTitle', { n: level.number })}
+        message={t('admin.bank.revertText')}
+        confirmLabel={t('admin.bank.revert')}
+        busy={action.busy}
+        onConfirm={() => void revert()}
+        onCancel={() => setReverting(false)}
+      />
       <ConfirmDialog
         open={clearing}
         title={t('admin.bank.clearTitle', { n: level.number })}

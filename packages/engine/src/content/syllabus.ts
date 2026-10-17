@@ -1,6 +1,10 @@
 import { z } from 'zod';
+import { generateRound, hasGenerator } from '../generator/index.js';
+import { numberDistractors, type GeneratedQuestion } from '../generator/types.js';
+import { createRng } from '../rng.js';
 import type { LevelContent } from '../schemas/content.js';
-import { checkChildText } from './validate-question.js';
+import { visualSchema, type Visual } from '../schemas/domain.js';
+import { checkChildText, checkForbiddenWords } from './validate-question.js';
 
 /**
  * Silabus buatan admin: buku, topik, level, dan bank soal tulisan sendiri. Aturan di sini dipakai sama oleh
@@ -198,6 +202,8 @@ export const bankQuestionSchema = z
     answer: z.number().int().min(0),
     /** Petunjuk saat anak belum tepat; kosong memakai kalimat bawaan. */
     hint: z.string().trim().max(240, 'Petunjuk maksimal 240 huruf.'),
+    /** Gambar benda hitung yang menyertai soal; hanya ada pada soal yang disalin dari generator, tidak diketik admin. */
+    visual: visualSchema.optional(),
   })
   .superRefine((q, ctx) => {
     if (q.answer >= q.choices.length)
@@ -211,9 +217,32 @@ export const bankQuestionSchema = z
       childText(choice, ctx, ['choices', i]);
     });
     childText(q.prompt, ctx, ['prompt']);
-    childText(q.hint, ctx, ['hint']);
+    // Petunjuk berisi langkah hitung ("7 × 3 = 21, lalu tambah satu kelompok 7") yang bisa panjang; yang dijaga
+    // hanya kata yang dihindari untuk anak, sama seperti penjelasan soal dari generator.
+    for (const message of checkForbiddenWords(q.hint))
+      ctx.addIssue({ code: 'custom', path: ['hint'], message });
   });
 export type BankQuestion = z.infer<typeof bankQuestionSchema>;
+
+/**
+ * Kunci pembanding soal. `exact`: kalimat, gambar, pilihan, dan jawaban sama (soal kembar). Tanpa `exact`: hanya
+ * kalimat, gambar, dan jawaban, untuk memilih soal yang beragam dari generator.
+ */
+function bankKey(q: BankQuestion, exact: boolean): string {
+  return [
+    q.prompt.trim().toLowerCase(),
+    JSON.stringify(q.visual ?? null),
+    q.choices[q.answer]?.toLowerCase(),
+    ...(exact
+      ? [
+          [...q.choices]
+            .map((c) => c.toLowerCase())
+            .sort()
+            .join('|'),
+        ]
+      : []),
+  ].join('\u241f');
+}
 
 export const questionBankSchema = z
   .array(bankQuestionSchema)
@@ -222,13 +251,15 @@ export const questionBankSchema = z
   .superRefine((items, ctx) => {
     const first = new Map<string, number>();
     items.forEach((q, i) => {
-      const key = q.prompt.trim().toLowerCase();
+      // Kalimat yang sama dengan pilihan atau gambar lain ("Mana yang bisa terbang?", "Ada berapa apel?") adalah
+      // soal yang berbeda; yang ditolak hanya soal kembar.
+      const key = bankKey(q, true);
       const earlier = first.get(key);
       if (earlier !== undefined)
         ctx.addIssue({
           code: 'custom',
           path: [i, 'prompt'],
-          message: `Pertanyaan ini sama dengan soal ke-${earlier + 1}.`,
+          message: `Soal ini sama persis dengan soal ke-${earlier + 1}.`,
         });
       else first.set(key, i);
     });
@@ -256,17 +287,20 @@ export function bankIssues(items: readonly BankQuestion[]): BankIssues & { ok: b
 type ManualChoice = { visual: { kind: 'text'; text: string }; say: string; tag?: string };
 type ManualItemShape = {
   prompt: string;
+  visual?: NonNullable<Visual>;
   choices: ManualChoice[];
   answer: number;
   reteach: string;
 };
 
 /** Bank soal menjadi level yang bisa dimainkan: family `manual` di dalam generator `skill`. */
-export function bankToLevel(
-  items: readonly BankQuestion[],
-): Pick<LevelContent, 'generator' | 'generatorParams'> {
+export function bankToLevel(items: readonly BankQuestion[]): {
+  generator: 'skill';
+  generatorParams: Record<string, unknown>;
+} {
   const manual: ManualItemShape[] = items.map((q) => ({
     prompt: q.prompt,
+    ...(q.visual && { visual: q.visual }),
     choices: q.choices.map((text, i) => ({
       visual: { kind: 'text' as const, text },
       say: text,
@@ -295,12 +329,103 @@ export function bankFromLevel(
       choices.some((c) => typeof c !== 'string')
     )
       return null;
+    const visual = visualSchema.safeParse(raw.visual ?? null);
     out.push({
       prompt: raw.prompt,
       choices: choices as string[],
       answer: raw.answer,
       hint: raw.reteach === DEFAULT_HINT ? '' : (raw.reteach ?? ''),
+      ...(visual.success && visual.data && { visual: visual.data }),
     });
+  }
+  return out;
+}
+
+/** Jumlah soal yang diambil dari generator saat admin mulai menyesuaikan soal sebuah level otomatis. */
+export const BANK_DRAFT_SIZE = 20;
+/** Paling banyak ronde generator yang dicoba untuk mengumpulkan soal yang berbeda. */
+const DRAFT_ROUNDS = 40;
+
+/** Petunjuk dipotong di batas kalimat bila lebih dari 240 huruf; kalimat pertama yang kepanjangan dipotong dengan "…". */
+function fitHint(text: string): string {
+  const MAX = 240;
+  if (text.length <= MAX) return text;
+  const sentences = text.match(/[^.!?]+[.!?]+(\s+|$)/g) ?? [];
+  let out = '';
+  for (const sentence of sentences) {
+    if ((out + sentence).trim().length > MAX) break;
+    out += sentence;
+  }
+  return out.trim() || `${text.slice(0, MAX - 1).trimEnd()}…`;
+}
+
+/** Satu soal generator menjadi soal bank: soal isian angka menjadi pilihan ganda (jawaban dan pengecoh angka). */
+function toBankQuestion(q: GeneratedQuestion, seed: number): BankQuestion | null {
+  let choices: string[];
+  if (q.options && q.options.length >= BANK_MIN_CHOICES) choices = [...q.options];
+  else if (q.type === 'number') {
+    const n = Number(q.answer);
+    if (!Number.isInteger(n) || n < 0) return null;
+    const rng = createRng(seed >>> 0);
+    choices = rng.shuffle([q.answer, ...numberDistractors(rng, n, Math.max(20, n + 10))]);
+  } else return null;
+  const answer = choices.indexOf(q.answer);
+  if (answer < 0 || choices.length > BANK_MAX_CHOICES) return null;
+  const parsed = bankQuestionSchema.safeParse({
+    // Satu baris di kolom pertanyaan: pemisah baris pada soal bertumpuk menjadi spasi.
+    prompt: q.prompt.replace(/\s*\n\s*/g, ' ').trim(),
+    choices,
+    answer,
+    hint: fitHint((q.explanation ?? '').replace(/\s*\n\s*/g, ' ').trim()),
+    ...(q.visual && { visual: q.visual }),
+  });
+  return parsed.success ? parsed.data : null;
+}
+
+/**
+ * Soal dari generator bawaan sebuah level, disalin menjadi bank soal yang bisa disunting admin. Mengumpulkan
+ * `size` soal yang berbeda (kalimat, gambar, dan jawaban) dari beberapa ronde generator; deterministik untuk
+ * `seed` yang sama. Level yang ruang soalnya kecil bisa menghasilkan lebih sedikit dari `size`. Kosong bila level
+ * tidak punya generator.
+ */
+export function bankFromGenerator(
+  level: Pick<LevelContent, 'generator' | 'generatorParams'>,
+  opts: { size?: number; seed?: number } = {},
+): BankQuestion[] {
+  const size = Math.min(BANK_MAX_QUESTIONS, opts.size ?? BANK_DRAFT_SIZE);
+  if (!level.generator || !hasGenerator(level.generator)) return [];
+  const spec = {
+    generator: level.generator,
+    generatorParams: level.generatorParams as Record<string, unknown> | undefined,
+  };
+  const base = opts.seed ?? 1;
+  // Soal yang beragam (kalimat, gambar, jawaban berbeda) didahulukan; soal yang hanya beda pengecoh jadi cadangan
+  // untuk level yang ruang soalnya kecil, supaya tetap terkumpul `size` soal.
+  const diverse = new Map<string, BankQuestion>();
+  const spare = new Map<string, BankQuestion>();
+  const exactSeen = new Set<string>();
+  for (let round = 0; round < DRAFT_ROUNDS && diverse.size < size; round++) {
+    const seed = base + round * 10_007;
+    let questions: GeneratedQuestion[];
+    try {
+      questions = generateRound(spec, seed);
+    } catch {
+      break;
+    }
+    questions.forEach((q, i) => {
+      const item = toBankQuestion(q, seed + i);
+      if (!item || diverse.size >= size) return;
+      const exact = bankKey(item, true);
+      if (exactSeen.has(exact)) return;
+      exactSeen.add(exact);
+      if (!diverse.has(bankKey(item, false))) diverse.set(bankKey(item, false), item);
+      else spare.set(exact, item);
+    });
+  }
+  const out = [...diverse.values()];
+  for (const item of spare.values()) {
+    if (out.length >= size) break;
+    out.push(item);
   }
   return out;
 }

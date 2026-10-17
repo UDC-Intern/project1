@@ -257,6 +257,8 @@ export const SIGNATURE_W = 200;
 export const SIGNATURE_H = 72;
 /** Jarak mendatar dari tengah tanda tangan ke tengah segel. */
 const SEAL_GAP = 160;
+/** Kotak (px) tempat gambar stempel sendiri dimuat, dengan perbandingan gambar tetap. */
+export const STAMP_BOX = 132;
 
 /** Semua bentuk satu lembar sertifikat, berurutan dari belakang ke depan. */
 export function sheetShapes(data: SheetData): Shape[] {
@@ -483,7 +485,20 @@ export function sheetShapes(data: SheetData): Shape[] {
       : []),
 
     // Stempel digital resmi (opsional) di samping kiri tanda tangan.
-    ...(s.showStamp ? seal(right - SEAL_GAP, 594, s.issuer, t('common.cert.seal')) : []),
+    ...(s.showStamp
+      ? s.stampImage
+        ? [
+            {
+              kind: 'image' as const,
+              href: s.stampImage,
+              x: right - SEAL_GAP - STAMP_BOX / 2,
+              y: 600 - STAMP_BOX / 2,
+              w: STAMP_BOX,
+              h: STAMP_BOX,
+            },
+          ]
+        : seal(right - SEAL_GAP, 594, s.issuer, t('common.cert.seal'))
+      : []),
 
     // Kode QR menuju halaman cek keaslian.
     ...(qr

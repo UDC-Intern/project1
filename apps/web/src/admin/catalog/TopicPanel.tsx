@@ -9,13 +9,21 @@ import { ActionNotice, ConfirmDialog, Icon, useAction } from '../common';
 
 type LevelDraft = { title?: string; free?: boolean };
 
-/** Isi pilihan akses (gratis atau Premium) untuk satu level. */
+/** Asal soal satu level: otomatis (generator), bank soal, atau belum ada. */
 function SourceBadge({ level }: { level: CatalogLevel }) {
   if (level.source === 'auto') return <Badge tone="muted">{t('admin.catalog.level.auto')}</Badge>;
   if (level.source === 'bank')
     return <Badge tone="success">{t('admin.catalog.level.bank', { n: level.questions })}</Badge>;
   return <Badge tone="warning">{t('admin.catalog.level.none')}</Badge>;
 }
+
+/** Tombol soal satu level: menyesuaikan soal otomatis, mengubah bank soal, atau menulis soal pertama. */
+const questionAction = (level: CatalogLevel) =>
+  level.source === 'auto'
+    ? ({ label: 'admin.catalog.level.adjust', aria: 'admin.catalog.level.adjustLabel' } as const)
+    : level.source === 'bank'
+      ? ({ label: 'admin.catalog.level.edit', aria: 'admin.catalog.level.editLabel' } as const)
+      : ({ label: 'admin.catalog.level.write', aria: 'admin.catalog.level.writeLabel' } as const);
 
 /**
  * Panel sunting satu topik: judul, materi, "Tahukah kamu?", dan level (judul, gratis atau Premium, soal). Topik
@@ -163,7 +171,7 @@ export function TopicPanel({
           <ul className="syl-levels">
             {topic.levels.map((l) => {
               const d = levelOf(l);
-              const writable = l.custom && l.source !== 'auto';
+              const action = questionAction(l);
               const removable =
                 l.custom && !l.used && topic.levels.length > 1 && l.number === lastNumber;
               return (
@@ -196,28 +204,18 @@ export function TopicPanel({
                   </div>
                   <div className="syl-level-meta">
                     <SourceBadge level={l} />
+                    {l.edited && <Badge tone="info">{t('admin.catalog.level.adjusted')}</Badge>}
                     {l.override && <Badge tone="info">{t('admin.catalog.level.override')}</Badge>}
                     <span className="syl-spacer" />
-                    {writable && (
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        aria-label={t(
-                          l.source === 'bank'
-                            ? 'admin.catalog.level.editLabel'
-                            : 'admin.catalog.level.writeLabel',
-                          { n: l.number },
-                        )}
-                        onClick={() => onWrite(l)}
-                      >
-                        <Icon name="edit" />
-                        {t(
-                          l.source === 'bank'
-                            ? 'admin.catalog.level.edit'
-                            : 'admin.catalog.level.write',
-                        )}
-                      </Button>
-                    )}
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      aria-label={t(action.aria, { n: l.number })}
+                      onClick={() => onWrite(l)}
+                    >
+                      <Icon name="edit" />
+                      {t(action.label)}
+                    </Button>
                     {removable && (
                       <Button
                         variant="danger"

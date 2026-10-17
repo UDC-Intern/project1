@@ -949,6 +949,58 @@
   margin: 2px 0 12px;
 }
 
+/* Pilihan stempel: sumber (yang sudah ada atau unggah baru), daftar riwayat, dan pratinjau kecil. */
+.stamp-picker {
+  display: grid;
+  gap: 10px;
+  margin: 2px 0 12px;
+  padding: 10px 12px;
+  border: 1px dashed var(--ui-line-strong);
+  border-radius: 12px;
+  background: var(--ui-bg);
+}
+
+.stamp-picker .ui-seg {
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.stamp-picker .ui-seg-btn {
+  flex: 1 1 auto;
+  padding: 6px 8px;
+  line-height: 1.2;
+  text-align: center;
+  white-space: normal;
+}
+
+.stamp-picker .ui-field {
+  margin: 0;
+}
+
+.stamp-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.stamp-thumb {
+  width: 64px;
+  height: 64px;
+  padding: 4px;
+  border: 1px solid var(--ui-line);
+  border-radius: 10px;
+  background: conic-gradient(
+      var(--awan-2) 25%,
+      var(--kertas) 0 50%,
+      var(--awan-2) 0 75%,
+      var(--kertas) 0
+    )
+    0 0 / 16px 16px;
+  object-fit: contain;
+}
+
 /* Tiga pilihan memenuhi lebar kelompok isian; tulisan boleh turun baris di layar sempit. */
 .sign-editor .ui-seg {
   display: flex;
@@ -1063,9 +1115,10 @@
 }
 
 @media (max-width: 860px) {
+  /* minmax(0, …): isian dengan teks panjang (mis. pilihan stempel) tidak boleh melebarkan kolom melewati dialog. */
   .certs-editor-body,
   .certs-editor-pair {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

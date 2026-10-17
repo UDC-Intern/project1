@@ -4,9 +4,11 @@
  * bacaan yang diminta sebelum itu ditahan dan diputar pada ketukan pertama.
  * Bila peramban tidak punya suara, tombol dengar tetap aman: tidak ada yang terjadi dan teks tetap tampil.
  * Kecepatan, nada, suara yang diutamakan, dan sakelar suara diatur admin di menu Audio Narasi (pengaturan `voice`).
+ * Simbol matematika (> < = + - × ÷) diganti kata bahasa Indonesia sebelum dibacakan (`speakableText`), karena mesin
+ * suara peramban biasanya melewatkannya.
  */
 
-import { DEFAULT_SETTINGS, type VoiceSettings } from '@udakids/engine';
+import { DEFAULT_SETTINGS, speakableText, type VoiceSettings } from '@udakids/engine';
 import { currentSettings } from '../api/settings';
 
 type Synth = SpeechSynthesis;
@@ -74,7 +76,7 @@ function say(text: string, voice: VoiceSettings, onEnd?: () => void): void {
   if (!s || typeof SpeechSynthesisUtterance === 'undefined') return;
   try {
     s.cancel();
-    const u = new SpeechSynthesisUtterance(text);
+    const u = new SpeechSynthesisUtterance(speakableText(text));
     u.lang = 'id-ID';
     u.rate = voice.rate;
     u.pitch = voice.pitch;

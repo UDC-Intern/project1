@@ -4,6 +4,7 @@ import {
   BANK_MIN_QUESTIONS,
   MAX_LEVELS_PER_TOPIC,
   MAX_TOPICS_PER_BOOK,
+  bankFromGenerator,
   bankFromLevel,
   bankToLevel,
   bookInputSchema,
@@ -26,6 +27,7 @@ import { ApiError } from '../client';
 import {
   BOOKS,
   applyEdits,
+  baseLevelOf,
   gradeOf,
   levelId,
   readDb,
@@ -139,6 +141,7 @@ export function catalogBooks(): CatalogBook[] {
             questions: source === 'bank' ? questionCount(l) : 0,
             custom: mine.levels.has(id),
             used: used.has(id),
+            edited: db.contentEdits.questions?.[id] !== undefined,
           };
         }),
       };
@@ -332,31 +335,71 @@ export async function deleteLevel(token: string | null, id: string): Promise<Cat
   return save(db);
 }
 
-/** Buang suntingan judul dan akses milik item yang dihapus (kunci yang cocok dengan `match`). */
+/** Buang suntingan judul, akses, dan soal milik item yang dihapus (kunci yang cocok dengan `match`). */
 function dropEdits(db: MockDb, match: (key: string) => boolean) {
   const edits = db.contentEdits;
   for (const key of Object.keys(edits.levels)) if (match(key)) delete edits.levels[key];
   for (const key of Object.keys(edits.topics)) if (match(key)) delete edits.topics[key];
+  for (const key of Object.keys(edits.questions ?? {}))
+    if (match(key)) delete edits.questions![key];
 }
 
-export type LevelQuestions = { items: BankQuestion[]; min: number; good: number; max: number };
+export type LevelQuestions = {
+  items: BankQuestion[];
+  min: number;
+  good: number;
+  max: number;
+  /** Soal belum disimpan: baru diambil dari generator level ini supaya bisa disunting. */
+  draft: boolean;
+  /** Level bawaan yang soalnya sudah disesuaikan admin (bisa dikembalikan ke soal bawaan). */
+  edited: boolean;
+  /** Level punya generator bawaan, jadi soal contoh bisa diambil ulang darinya. */
+  regenerable: boolean;
+};
 
-/** `GET /admin/levels/:id/questions`: bank soal level buatan admin (kosong bila belum ada). */
-export async function getQuestions(token: string | null, id: string): Promise<LevelQuestions> {
+/**
+ * `GET /admin/levels/:id/questions`: soal sebuah level sebagai bank yang bisa disunting. Level yang soalnya sudah
+ * berupa bank (tulisan admin, disesuaikan, atau bank bawaan) memberi isinya; level otomatis memberi 20 soal contoh
+ * dari generatornya (`draft`), yang baru menggantikan generator setelah disimpan. `from: 'generator'` mengambil
+ * contoh baru dari generator bawaan (dengan `seed` lain), meski soalnya sudah disesuaikan.
+ */
+export async function getQuestions(
+  token: string | null,
+  id: string,
+  opts: { from?: string | null; seed?: number } = {},
+): Promise<LevelQuestions> {
   adminFromToken(token);
   const { level } = findLevelInCatalog(id);
-  if (!level.custom)
-    throw conflict('Soal level bawaan dibuat otomatis dan tidak disunting di sini.');
+  const db = readDb();
   const content = findLevel(id)?.level;
-  return {
-    items: (content && bankFromLevel(content)) ?? [],
+  const base = baseLevelOf(id);
+  const regenerable = !!base && levelSource(base) === 'auto';
+  const stored = db.contentEdits.questions?.[id];
+  const rest = {
     min: BANK_MIN_QUESTIONS,
     good: BANK_GOOD_QUESTIONS,
     max: BANK_MAX_QUESTIONS,
+    edited: stored !== undefined,
+    regenerable,
   };
+  if (opts.from === 'generator') {
+    if (!base || !regenerable)
+      throw conflict('Level ini tidak punya soal otomatis yang bisa diambil ulang.');
+    return { items: bankFromGenerator(base, { seed: opts.seed }), draft: true, ...rest };
+  }
+  if (stored) return { items: stored, draft: false, ...rest };
+  const own = content ? bankFromLevel(content) : null;
+  if (own) return { items: own, draft: false, ...rest };
+  if (level.source === 'auto' && content)
+    return { items: bankFromGenerator(content, { seed: opts.seed }), draft: true, ...rest };
+  return { items: [], draft: false, ...rest };
 }
 
-/** `PUT /admin/levels/:id/questions`: bank soal baru; level langsung bisa dimainkan anak. */
+/**
+ * `PUT /admin/levels/:id/questions`: bank soal baru; level langsung memakainya dan bisa dimainkan anak. Level buatan
+ * admin menyimpannya di levelnya sendiri; level bawaan menyimpannya sebagai suntingan yang menggantikan generatornya
+ * (generator aslinya kembali bila suntingan dihapus).
+ */
 export async function saveQuestions(
   token: string | null,
   id: string,
@@ -364,8 +407,6 @@ export async function saveQuestions(
 ): Promise<CatalogBook[]> {
   adminFromToken(token);
   const { level, tid, number } = findLevelInCatalog(id);
-  if (!level.custom)
-    throw conflict('Soal level bawaan dibuat otomatis dan tidak disunting di sini.');
   const parsed = questionBankSchema.safeParse((body as { items?: unknown } | undefined)?.items);
   if (!parsed.success) throw invalid(parsed.error);
   const spec = bankToLevel(parsed.data);
@@ -376,24 +417,36 @@ export async function saveQuestions(
     throw failed('Soal belum bisa dibuat menjadi satu ronde. Periksa lagi pilihan jawabannya.');
   }
   const db = readDb();
-  const stored = storedLevel(additions(db), tid, number);
-  if (!stored) throw notFound('Level tidak ketemu.');
-  stored.generator = spec.generator;
-  stored.generatorParams = spec.generatorParams;
+  if (level.custom) {
+    const stored = storedLevel(additions(db), tid, number);
+    if (!stored) throw notFound('Level tidak ketemu.');
+    stored.generator = spec.generator;
+    stored.generatorParams = spec.generatorParams;
+  } else {
+    (db.contentEdits.questions ??= {})[id] = parsed.data;
+  }
   return save(db);
 }
 
-/** `DELETE /admin/levels/:id/questions`: kembali ke "Segera hadir"; hanya bila belum dikerjakan anak. */
+/**
+ * `DELETE /admin/levels/:id/questions`. Level buatan admin kembali ke "Segera hadir" (hanya bila belum dikerjakan
+ * anak); level bawaan kembali ke soal bawaannya (generator aslinya), kapan pun.
+ */
 export async function clearQuestions(token: string | null, id: string): Promise<CatalogBook[]> {
   adminFromToken(token);
   const { level, tid, number } = findLevelInCatalog(id);
-  if (!level.custom) throw conflict('Soal level bawaan tidak bisa dikosongkan.');
-  if (level.used)
-    throw conflict('Level ini sudah dikerjakan anak, jadi soalnya tidak bisa dikosongkan.');
   const db = readDb();
-  const stored = storedLevel(additions(db), tid, number);
-  if (!stored) throw notFound('Level tidak ketemu.');
-  stored.generator = null;
-  delete stored.generatorParams;
+  if (level.custom) {
+    if (level.used)
+      throw conflict('Level ini sudah dikerjakan anak, jadi soalnya tidak bisa dikosongkan.');
+    const stored = storedLevel(additions(db), tid, number);
+    if (!stored) throw notFound('Level tidak ketemu.');
+    stored.generator = null;
+    delete stored.generatorParams;
+  } else {
+    if (db.contentEdits.questions?.[id] === undefined)
+      throw conflict('Soal level ini belum disesuaikan, jadi masih memakai soal bawaan.');
+    delete db.contentEdits.questions[id];
+  }
   return save(db);
 }

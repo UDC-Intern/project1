@@ -250,18 +250,15 @@ describe('Silabus Belajar: bank soal tulisan admin', () => {
     expect((await errorOf(adm(`/admin/levels/${level1}/questions`, 'PUT', {}))).status).toBe(400);
   });
 
-  it('soal level bawaan tidak bisa disunting atau dikosongkan di sini', async () => {
+  it('level yang tidak ada dijawab 404 untuk semua aksi soal', async () => {
     for (const method of ['GET', 'PUT', 'DELETE'])
       expect(
         (
           await errorOf(
-            adm('/admin/levels/matematika-kelas-1:A:1/questions', method, { items: bank(5) }),
+            adm('/admin/levels/matematika-kelas-1:ZZ:1/questions', method, { items: bank(5) }),
           )
         ).status,
-      ).toBe(409);
-    expect((await errorOf(adm('/admin/levels/matematika-kelas-1:ZZ:1/questions'))).status).toBe(
-      404,
-    );
+      ).toBe(404);
   });
 
   it('bank dikosongkan kembali menjadi "Segera hadir", kecuali sudah dikerjakan anak', async () => {
@@ -440,7 +437,7 @@ describe('Silabus Belajar: halaman', () => {
     expect(readDb().contentEdits.levels['matematika-kelas-1:A:3']?.isFree).toBe(true);
   });
 
-  it('topik bawaan tidak punya tombol hapus dan levelnya tidak bisa ditulis soalnya', async () => {
+  it('topik bawaan tidak punya tombol hapus, tetapi tiap levelnya bisa disesuaikan soalnya', async () => {
     renderPage();
     const book = await firstBook();
     fireEvent.click(within(book).getByRole('button', { name: 'Ubah topik Bilangan sampai 100' }));
@@ -448,6 +445,8 @@ describe('Silabus Belajar: halaman', () => {
     expect(screen.queryByRole('button', { name: /Hapus topik/ })).toBeNull();
     expect(screen.queryByRole('button', { name: /Tulis soal level/ })).toBeNull();
     expect(screen.getAllByText('Soal otomatis')).toHaveLength(4);
+    for (const n of [1, 2, 3, 4])
+      expect(screen.getByRole('button', { name: `Sesuaikan soal level ${n}` })).toBeInTheDocument();
   });
 
   it('tambah topik lewat dialog: isian keliru ditandai, isian benar langsung terbuka di daftar', async () => {

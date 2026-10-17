@@ -596,6 +596,35 @@
   background: var(--sawah-soft);
 }
 
+.bank-visual {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  padding: 8px 12px;
+  border: 1px dashed var(--ui-line-strong);
+  border-radius: 12px;
+  background: var(--ui-bg);
+}
+
+.bank-visual .uk-count {
+  transform-origin: left center;
+  transform: scale(0.7);
+  margin: -8px 0;
+}
+
+.bank-visual small {
+  flex: 1 1 160px;
+}
+
+/* Aksi di sisi kiri bilah tombol dialog soal (ambil contoh baru, kembalikan, kosongkan). */
+.bank-side {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-right: auto;
+}
+
 .bank-issues {
   margin: 0;
   padding-left: 18px;

@@ -7,15 +7,41 @@ import { useFetch } from '../../auth/useApi';
 import { Momo } from '../../components/Momo';
 import { useAsync } from '../../hooks/useAsync';
 import { t, type MessageKey } from '../../i18n';
-import { ColumnChart, Donut, Funnel, Heatmap, LineChart } from '../../ui/adminCharts';
+import {
+  ColumnChart,
+  Donut,
+  Funnel,
+  Heatmap,
+  LineChart,
+  heatLevel,
+  type HeatmapCell,
+} from '../../ui/adminCharts';
 import { ShellIconSvg, type ShellIcon } from '../../ui/AppShell';
 import { CountUp, Kpi, Meter } from '../../ui/charts';
 import { ErrorState, LoadingState } from '../../ui/states';
 import { Badge, Empty, Notice, PageHeader, formatDate } from '../../ui/ui';
 
 const shortDate = (iso: string) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
-const HOURS = Array.from({ length: 16 }, (_, i) => String(i + 6).padStart(2, '0'));
+/** 24 jam penuh, 00 sampai 23 (WIB). */
+const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
 const WEEKDAYS = ['sen', 'sel', 'rab', 'kam', 'jum', 'sab', 'min'] as const;
+const HEAT_TONE = { busy: 'danger', medium: 'warning', quiet: 'muted' } as const;
+
+/** Tiga kalimat sebuah sel heatmap: hari dan jam lengkap, jumlah ronde, dan jumlah anak aktif. */
+function heatText(d: { heatmapChildren: number[][] }, cell: HeatmapCell): [string, string, string] {
+  const hour = HOURS[cell.col] ?? '00';
+  return [
+    t('admin.dash.heat.when', {
+      day: t(`admin.dash.dayFull.${WEEKDAYS[cell.row] ?? 'sen'}` as MessageKey),
+      from: `${hour}:00`,
+      to: `${hour}:59`,
+    }),
+    t('admin.dash.heat.rounds', { n: cell.value.toLocaleString('id-ID') }),
+    t('admin.dash.heat.kids', {
+      n: (d.heatmapChildren[cell.row]?.[cell.col] ?? 0).toLocaleString('id-ID'),
+    }),
+  ];
+}
 
 const ORDER_TONE: Record<string, 'success' | 'warning' | 'info' | 'muted'> = {
   paid: 'success',
@@ -326,7 +352,27 @@ export function DashboardPage() {
             matrix={d.heatmap}
             rowLabels={WEEKDAYS.map((w) => t(`admin.dash.day.${w}`))}
             colLabels={HOURS}
+            ariaLabel={t('admin.dash.heatmapAria')}
+            label={(cell) => heatText(d, cell).join('. ')}
+            tip={(cell) => {
+              const [when, rounds, kids] = heatText(d, cell);
+              return (
+                <>
+                  <strong>{when}</strong>
+                  <span>{rounds}</span>
+                  <span>{kids}</span>
+                  <Badge tone={HEAT_TONE[heatLevel(cell.value, cell.max)]}>
+                    {t(`admin.dash.heat.${heatLevel(cell.value, cell.max)}` as MessageKey)}
+                  </Badge>
+                </>
+              );
+            }}
           />
+          <div className="heatmap-legend" aria-hidden>
+            <span>{t('admin.dash.heat.quiet')}</span>
+            <span className="heatmap-scale" />
+            <span>{t('admin.dash.heat.busy')}</span>
+          </div>
         </Panel>
 
         <Panel

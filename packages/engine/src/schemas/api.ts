@@ -627,8 +627,10 @@ export const adminInsightsSchema = z.object({
   revenueSeries: z.array(z.object({ date: z.string(), amount: z.number().int() })),
   funnel: z.array(z.object({ label: z.string(), value: z.number().int() })),
   subjects: z.array(z.object({ label: z.string(), value: z.number().int() })),
-  /** 7 hari (Senin sampai Minggu) x 16 jam (06 sampai 21) */
+  /** Jumlah ronde selesai: 7 hari (Senin sampai Minggu) x 24 jam (00 sampai 23, WIB), dijumlah dalam rentang yang dipilih. */
   heatmap: z.array(z.array(z.number().int())),
+  /** Bentuknya sama dengan `heatmap`: jumlah anak berbeda yang menyelesaikan ronde pada hari dan jam itu. */
+  heatmapChildren: z.array(z.array(z.number().int())),
   hardestSkills: z.array(
     z.object({ title: z.string(), accuracy: z.number().int(), answers: z.number().int() }),
   ),

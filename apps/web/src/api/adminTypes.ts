@@ -181,6 +181,8 @@ export type CatalogLevel = {
   questions: number;
   /** Dibuat admin: soalnya bisa ditulis dan levelnya bisa dihapus (bila yang terakhir dan belum dikerjakan). */
   custom: boolean;
+  /** Level bawaan yang soalnya sudah disesuaikan admin (menggantikan soal bawaannya). */
+  edited: boolean;
   /** Sudah dikerjakan anak. */
   used: boolean;
 };

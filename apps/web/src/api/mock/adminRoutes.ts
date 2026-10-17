@@ -52,6 +52,7 @@ import {
 } from './db';
 import { findLevel } from './levels';
 import { orderView } from './parentRoutes';
+import * as stamps from './stamps';
 import * as syllabus from './syllabus';
 import { catalogBooks } from './syllabus';
 import { SETTINGS_PARTS, adminSettings, updateSettings, type SettingsPart } from './settings';
@@ -942,11 +943,21 @@ export async function handle<T>(
   if (method === 'DELETE' && at('levels', '*'))
     return send(await syllabus.deleteLevel(token, seg[1]!));
   if (method === 'GET' && at('levels', '*', 'questions'))
-    return send(await syllabus.getQuestions(token, seg[1]!));
+    return send(
+      await syllabus.getQuestions(token, seg[1]!, {
+        from: params.get('from'),
+        seed: Number(params.get('seed')) || undefined,
+      }),
+    );
   if (method === 'PUT' && at('levels', '*', 'questions'))
     return send(await syllabus.saveQuestions(token, seg[1]!, body));
   if (method === 'DELETE' && at('levels', '*', 'questions'))
     return send(await syllabus.clearQuestions(token, seg[1]!));
+
+  // Riwayat stempel sertifikat
+  if (method === 'GET' && at('stamps')) return send(await stamps.list(token));
+  if (method === 'POST' && at('stamps')) return send(await stamps.add(token, body));
+  if (method === 'DELETE' && at('stamps', '*')) return send(await stamps.remove(token, seg[1]!));
 
   // Pengaturan
   if (method === 'GET' && at('settings')) return send(await adminSettings(token));

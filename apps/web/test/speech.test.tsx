@@ -35,6 +35,26 @@ function setVoice(patch: Partial<ReturnType<typeof readDb>['settings']['voice']>
   writeDb(db);
 }
 
+describe('simbol matematika dibacakan sebagai kata', () => {
+  it('> < = dibaca lebih dari, kurang dari, sama dengan', () => {
+    speak('Mana yang benar: 8 > 5 atau 8 < 5?');
+    speak('3 + 4 = 7');
+    expect(said.map((s) => s.text)).toEqual([
+      'Mana yang benar: 8 lebih dari 5 atau 8 kurang dari 5?',
+      '3 tambah 4 sama dengan 7',
+    ]);
+  });
+
+  it('juga untuk bacaan yang tertahan sebelum halaman diketuk dan untuk pratinjau admin', () => {
+    speak('9 - 4 = 5', { voice: { ...readDb().settings.voice, enabled: false } });
+    speak('2 × 3 ≠ 7 ÷ 1');
+    expect(said.map((s) => s.text)).toEqual([
+      '9 kurang 4 sama dengan 5',
+      '2 kali 3 tidak sama dengan 7 bagi 1',
+    ]);
+  });
+});
+
 describe('suara narasi mengikuti Audio Narasi', () => {
   it('kecepatan dan nada dari pengaturan', () => {
     setVoice({ rate: 1.2, pitch: 0.9 });

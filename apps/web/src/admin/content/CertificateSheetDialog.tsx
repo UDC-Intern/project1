@@ -4,6 +4,7 @@ import {
   type AppSettings,
   type CertificateDesign,
   type CertificateSettings,
+  type Stamp,
 } from '@udakids/engine';
 import { settingsChanged, useSettings } from '../../api/settings';
 import { useApiCall } from '../../auth/useApi';
@@ -14,6 +15,7 @@ import { Dialog } from '../../ui/Dialog';
 import { Button, Checkbox, TextField } from '../../ui/ui';
 import { ActionNotice, useAction } from '../common';
 import { SignatureEditor } from './SignatureEditor';
+import { StampPicker, type PendingStamp } from './StampPicker';
 
 const SAMPLE_NUMBER = 'CERT-7KQ2MX';
 const FORM_ID = 'cert-sheet-form';
@@ -35,6 +37,8 @@ export function CertificateSheetDialog({
 }) {
   const current = useSettings().certificate;
   const [form, setForm] = useState<CertificateSettings>(current);
+  /** Stempel yang baru diunggah dan baru masuk riwayat saat pengaturan disimpan. */
+  const [pendingStamp, setPendingStamp] = useState<PendingStamp | null>(null);
   const call = useApiCall('staff');
   const action = useAction();
   const box = useRef<HTMLDivElement>(null);
@@ -48,9 +52,12 @@ export function CertificateSheetDialog({
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    const out = await action.run(() =>
-      call<AppSettings>('/admin/settings/certificate', { method: 'PUT', body: form }),
-    );
+    const out = await action.run(async () => {
+      // Stempel yang diunggah masuk riwayat dulu; kalau gagal (mis. riwayat penuh), pengaturan tidak disimpan.
+      if (pendingStamp && form.showStamp && form.stampImage === pendingStamp.image)
+        await call<Stamp[]>('/admin/stamps', { method: 'POST', body: pendingStamp });
+      return call<AppSettings>('/admin/settings/certificate', { method: 'PUT', body: form });
+    });
     if (out) {
       settingsChanged(out);
       onSaved();
@@ -125,6 +132,17 @@ export function CertificateSheetDialog({
                 onChange={(e) => set('showStamp', e.target.checked)}
               />
               <p className="ui-hint">{t('admin.certSettings.showStampHint')}</p>
+              {form.showStamp && (
+                <StampPicker
+                  image={form.stampImage}
+                  pending={pendingStamp}
+                  onPick={(image) => set('stampImage', image)}
+                  onUpload={(stamp) => {
+                    setPendingStamp(stamp);
+                    set('stampImage', stamp.image);
+                  }}
+                />
+              )}
             </fieldset>
             <fieldset className="certs-editor-group">
               <legend>{t('admin.certSettings.groupShow')}</legend>

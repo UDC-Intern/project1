@@ -13,9 +13,15 @@ export type SignatureProblem = 'type' | 'size' | 'read' | 'empty' | 'dense' | 'c
 export type SignatureResult =
   { ok: true; dataUrl: string } | { ok: false; problem: SignatureProblem };
 
-type Decoded = { source: CanvasImageSource; width: number; height: number; close: () => void };
+export type Decoded = {
+  source: CanvasImageSource;
+  width: number;
+  height: number;
+  close: () => void;
+};
 
-async function decode(file: File): Promise<Decoded | null> {
+/** Membaca berkas gambar menjadi sumber yang bisa digambar di kanvas; null bila tidak terbaca. */
+export async function decodeImage(file: File): Promise<Decoded | null> {
   try {
     if (typeof createImageBitmap === 'function') {
       const bitmap = await createImageBitmap(file);
@@ -57,7 +63,7 @@ export async function processSignatureFile(file: File): Promise<SignatureResult>
   if (!SIGNATURE_MIME.includes(file.type)) return { ok: false, problem: 'type' };
   if (file.size > SIGNATURE_MAX_BYTES) return { ok: false, problem: 'size' };
 
-  const image = await decode(file);
+  const image = await decodeImage(file);
   if (!image) return { ok: false, problem: 'read' };
   try {
     const k = Math.min(1, ANALYSE_MAX / Math.max(image.width, image.height));

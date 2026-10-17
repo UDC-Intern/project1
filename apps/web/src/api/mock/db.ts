@@ -1,7 +1,9 @@
 import {
   FOREVER_ISO,
+  bankToLevel,
   mergeSettings,
   type AppSettings,
+  type BankQuestion,
   type BillingPackage,
   type BookContent,
   type Certificate,
@@ -13,6 +15,7 @@ import {
   type PaymentMethod,
   type Pin,
   type Stage,
+  type Stamp,
   type TopicContent,
 } from '@udakids/engine';
 import {
@@ -31,6 +34,14 @@ const BASE: BookContent[] = BASE_BOOKS;
 /** Buku yang sedang berlaku: BASE ditambah suntingan admin. Array yang sama dipakai semua modul mock. */
 export const BOOKS: BookContent[] = structuredClone(BASE);
 
+/** Level seperti di berkas konten, tanpa suntingan soal admin; undefined bila level itu buatan admin atau tidak ada. */
+export function baseLevelOf(id: string): LevelContent | undefined {
+  const [slug, code, n] = id.split(':');
+  return BASE.find((b) => b.slug === slug)
+    ?.topics.find((t) => t.code === code)
+    ?.levels.find((l) => String(l.number) === n);
+}
+
 /** Silabus buatan admin (Silabus Belajar): ditambahkan di atas buku dari berkas konten. */
 export type SyllabusAdditions = {
   /** Buku baru lengkap dengan topik dan level awalnya. */
@@ -44,6 +55,11 @@ export type SyllabusAdditions = {
 export type ContentEdits = {
   topics: Record<string, { title?: string; lesson?: string; tips?: string[] }>;
   levels: Record<string, { title?: string; isFree?: boolean }>;
+  /**
+   * Bank soal tulisan admin per level (id level → soal). Menggantikan generator level itu, baik level bawaan maupun
+   * buatan admin; menghapusnya mengembalikan generator aslinya.
+   */
+  questions?: Record<string, BankQuestion[]>;
   /** Data versi lama belum punya bagian ini. */
   added?: SyllabusAdditions;
 };
@@ -68,8 +84,11 @@ export function applyEdits(edits: ContentEdits): void {
       const te = edits.topics[`${book.slug}:${topic.code}`];
       if (te) Object.assign(topic, te);
       for (const level of topic.levels) {
-        const le = edits.levels[`${book.slug}:${topic.code}:${level.number}`];
+        const id = `${book.slug}:${topic.code}:${level.number}`;
+        const le = edits.levels[id];
         if (le) Object.assign(level, le);
+        const bank = edits.questions?.[id];
+        if (bank) Object.assign(level, bankToLevel(bank));
       }
     }
   }
@@ -187,6 +206,8 @@ export type MockDb = {
   certificates: Record<string, Certificate>;
   /** desain yang dipakai saat sertifikat berikutnya terbit (dipilih admin) */
   certificateDesign: CertificateDesign;
+  /** Riwayat stempel yang pernah diunggah admin (paling baru di depan). Data versi lama belum punya bagian ini. */
+  stamps?: Stamp[];
   /** Data contoh (`demoData.ts`): versi yang dimuat dan kapan; `at` kosong berarti sudah dihapus admin. */
   demo?: { version: number; at: string | null };
 };

@@ -85,17 +85,36 @@ const line = (min: number, max: number) => z.string().trim().min(min).max(max);
 export const SIGNATURE_TYPES = ['default', 'draw', 'upload'] as const;
 export type SignatureType = (typeof SIGNATURE_TYPES)[number];
 
-/** Panjang paling besar Data URL tanda tangan (karakter), kira-kira 220 KB: cukup untuk PNG 700 × 240. */
+/** Panjang paling besar Data URL tanda tangan atau stempel (karakter), kira-kira 220 KB: cukup untuk PNG 700 × 240. */
 export const SIGNATURE_IMAGE_MAX = 300_000;
 
 /** Data URL gambar raster (bukan SVG, supaya tidak bisa membawa skrip atau alamat luar); kosong berarti tanpa gambar. */
-const signatureImage = z
+export const imageDataUrlSchema = z
   .string()
-  .max(SIGNATURE_IMAGE_MAX, 'Gambar tanda tangan terlalu besar.')
+  .max(SIGNATURE_IMAGE_MAX, 'Gambar terlalu besar.')
   .refine(
     (v) => v === '' || /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(v),
-    'Tanda tangan harus berupa gambar PNG, JPG, atau WebP.',
+    'Gambar harus berupa PNG, JPG, atau WebP.',
   );
+
+/** Paling banyak stempel yang disimpan di riwayat stempel (yang pernah diunggah admin). */
+export const STAMP_LIBRARY_MAX = 12;
+
+/** Stempel yang pernah diunggah admin, tersimpan di riwayat supaya bisa dipakai lagi. */
+export const stampSchema = z.object({
+  id: z.string(),
+  name: z.string().trim().min(1).max(40),
+  image: imageDataUrlSchema.refine((v) => v !== '', 'Gambar stempel wajib ada.'),
+  createdAt: z.string(),
+});
+export type Stamp = z.infer<typeof stampSchema>;
+
+/** `POST /admin/stamps`: simpan stempel baru ke riwayat. */
+export const stampInputSchema = z.strictObject({
+  name: z.string().trim().min(1, 'Beri nama stempel.').max(40, 'Nama stempel maksimal 40 huruf.'),
+  image: imageDataUrlSchema.refine((v) => v !== '', 'Gambar stempel wajib ada.'),
+});
+export type StampInput = z.infer<typeof stampInputSchema>;
 
 export const certificateSettingsSchema = z.strictObject({
   /** Nama penerbit di kepala lembar dan di tanda tangan tim, mis. "UdaKids". */
@@ -118,9 +137,11 @@ export const certificateSettingsSchema = z.strictObject({
   /** Jenis tanda tangan yang tampil. 'default': goresan bawaan; 'draw' dan 'upload': memakai `signatureImage`. */
   signatureType: z.enum(SIGNATURE_TYPES).optional().default('default'),
   /** Gambar tanda tangan (Data URL PNG, JPG, atau WebP) dari kanvas atau unggahan. Kosong: goresan bawaan. */
-  signatureImage: signatureImage.optional().default(''),
+  signatureImage: imageDataUrlSchema.optional().default(''),
   /** Pasang stempel digital resmi (segel emas) di samping tanda tangan. */
   showStamp: z.boolean().optional().default(true),
+  /** Gambar stempel sendiri (Data URL PNG, JPG, atau WebP) yang menggantikan segel emas bawaan. Kosong: segel bawaan. */
+  stampImage: imageDataUrlSchema.optional().default(''),
 });
 export type CertificateSettings = z.infer<typeof certificateSettingsSchema>;
 
@@ -167,6 +188,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
     signatureType: 'default',
     signatureImage: '',
     showStamp: true,
+    stampImage: '',
   },
   voice: { enabled: true, autoRead: true, rate: 0.92, pitch: 1.1, voiceName: '' },
 };

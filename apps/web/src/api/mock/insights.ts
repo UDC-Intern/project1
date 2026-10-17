@@ -11,8 +11,8 @@ import { BOOKS, readDb, type MockDb, type MockRound } from './db';
 import { findLevel } from './levels';
 
 const DAY = 24 * 60 * 60 * 1000;
-const HOURS = 16; // 06.00 sampai 21.59
-const FIRST_HOUR = 6;
+const HOURS = 24; // 00.00 sampai 23.59 WIB
+const FIRST_HOUR = 0;
 /** Di bawah jumlah ronde ini, grafik memakai data contoh supaya dasbor tetap terbaca. */
 const MIN_REAL_ROUNDS = 8;
 
@@ -52,6 +52,9 @@ function real(db: MockDb, days: string[]) {
 
   const activity = days.map((date) => ({ date, rounds: 0, answers: 0 }));
   const heatmap = Array.from({ length: 7 }, () => Array.from({ length: HOURS }, () => 0));
+  const heatmapKids = Array.from({ length: 7 }, () =>
+    Array.from({ length: HOURS }, () => new Set<string>()),
+  );
   const skills = new Map<string, { title: string; right: number; total: number }>();
   const distractors = new Map<string, { prompt: string; chosen: string; count: number }>();
   const subjects = new Map<string, number>();
@@ -66,11 +69,14 @@ function real(db: MockDb, days: string[]) {
       activity[idx]!.rounds += 1;
       activity[idx]!.answers += answers.length;
     }
-    const when = new Date(finished);
-    const weekday = (when.getUTCDay() + 6) % 7;
-    const hour = when.getUTCHours() + 7; // WIB
-    const slot = (hour % 24) - FIRST_HOUR;
-    if (slot >= 0 && slot < HOURS) heatmap[weekday]![slot]! += 1;
+    // Hari dan jam dibaca dalam WIB: ronde pukul 00.30 WIB hari Selasa jatuh di baris Selasa, kolom 00.
+    const wib = new Date(finished + 7 * 60 * 60 * 1000);
+    const weekday = (wib.getUTCDay() + 6) % 7;
+    const slot = wib.getUTCHours() - FIRST_HOUR;
+    if (slot >= 0 && slot < HOURS) {
+      heatmap[weekday]![slot]! += 1;
+      heatmapKids[weekday]![slot]!.add(r.childId);
+    }
 
     const found = findLevel(r.levelId);
     if (found) {
@@ -96,7 +102,18 @@ function real(db: MockDb, days: string[]) {
     }
   }
 
-  return { rounds, activity, heatmap, skills, distractors, subjects, right, total };
+  const heatmapChildren = heatmapKids.map((row) => row.map((kids) => kids.size));
+  return {
+    rounds,
+    activity,
+    heatmap,
+    heatmapChildren,
+    skills,
+    distractors,
+    subjects,
+    right,
+    total,
+  };
 }
 
 function sampleInsights(
@@ -106,6 +123,7 @@ function sampleInsights(
   | 'activity'
   | 'revenueSeries'
   | 'heatmap'
+  | 'heatmapChildren'
   | 'hardestSkills'
   | 'popularDistractors'
   | 'subjects'
@@ -120,12 +138,19 @@ function sampleInsights(
     date,
     amount: rand() > 0.55 ? [17500, 37500, 63000][Math.floor(rand() * 3)]! : 0,
   }));
+  // Anak berlatih sepulang sekolah (15.00 sampai 20.59) dan sedikit di pagi hari; dini hari nyaris sepi.
   const heatmap = Array.from({ length: 7 }, (_, d) =>
     Array.from({ length: HOURS }, (_, h) => {
-      const evening = h >= 11 && h <= 14 ? 6 : h >= 2 && h <= 5 ? 3 : 0;
-      const weekend = d >= 5 ? 2 : 0;
-      return Math.floor(rand() * 4) + evening + weekend;
+      const peak = h >= 15 && h <= 20 ? 6 : h >= 7 && h <= 11 ? 3 : 0;
+      const awake = h >= 5 && h <= 21;
+      const weekend = awake && d >= 5 ? 2 : 0;
+      const noise = Math.floor(rand() * (awake ? 4 : 2));
+      return noise + peak + weekend;
     }),
+  );
+  // Perkiraan: satu anak rata-rata menyelesaikan sekitar dua ronde dalam satu jam.
+  const heatmapChildren = heatmap.map((row) =>
+    row.map((n) => (n === 0 ? 0 : Math.max(1, Math.round(n / 2.4)))),
   );
   const levels = BOOKS.flatMap((b) =>
     b.topics.flatMap((t) =>
@@ -153,6 +178,7 @@ function sampleInsights(
     activity,
     revenueSeries,
     heatmap,
+    heatmapChildren,
     hardestSkills,
     popularDistractors,
     subjects: [
@@ -245,6 +271,7 @@ export async function insights(
       ? demo!.subjects
       : [...r.subjects.entries()].map(([label, value]) => ({ label, value })),
     heatmap: sample ? demo!.heatmap : r.heatmap,
+    heatmapChildren: sample ? demo!.heatmapChildren : r.heatmapChildren,
     hardestSkills: sample
       ? demo!.hardestSkills
       : [...r.skills.values()]

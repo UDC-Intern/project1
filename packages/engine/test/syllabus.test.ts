@@ -269,7 +269,10 @@ describe('bank soal tulisan sendiri', () => {
     const dup = [...bank(5), question(1)];
     const issues = bankIssues(dup);
     expect(issues.ok).toBe(false);
-    expect(issues.byQuestion.get(5)).toEqual(['Pertanyaan ini sama dengan soal ke-1.']);
+    expect(issues.byQuestion.get(5)).toEqual(['Soal ini sama persis dengan soal ke-1.']);
+    // Kalimat yang sama dengan pilihan atau jawaban lain adalah soal yang berbeda.
+    const variant = [...bank(5), question(1, { choices: ['2', '9', '1'] })];
+    expect(bankIssues(variant).ok).toBe(true);
   });
 
   it('bankIssues mengelompokkan isu umum dan per soal', () => {

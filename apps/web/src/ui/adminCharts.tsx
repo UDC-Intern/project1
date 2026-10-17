@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 
 /** Grafik SVG dan CSS buatan sendiri. Semua angka juga tersedia sebagai teks untuk pembaca layar. */
 
@@ -337,42 +337,149 @@ export function Funnel({ steps }: { steps: { label: string; value: number }[] })
   );
 }
 
+/** Satu sel heatmap: baris, kolom, nilainya, dan nilai terbesar di seluruh heatmap. */
+export type HeatmapCell = { row: number; col: number; value: number; max: number };
+
+export type HeatLevel = 'busy' | 'medium' | 'quiet';
+
+/** Tingkat keramaian sebuah sel dibanding sel paling ramai: dari dua pertiga ke atas ramai sekali, dari seperempat sedang. */
+export function heatLevel(value: number, max: number): HeatLevel {
+  if (value <= 0 || max <= 0) return 'quiet';
+  const share = value / max;
+  return share >= 0.66 ? 'busy' : share >= 0.25 ? 'medium' : 'quiet';
+}
+
+/** Lebar dan tinggi popover (px), dipakai untuk menjaganya tetap di layar. */
+const TIP_W = 276;
+const TIP_H = 128;
+const TIP_EDGE = 8;
+
+type Tip = { row: number; col: number; x: number; y: number; below: boolean };
+
+/**
+ * Peta panas: baris (mis. hari) dan kolom (mis. jam), makin pekat makin besar nilainya. Mengarahkan kursor, mengetuk,
+ * atau memfokuskan sebuah sel membuka popover berisi rincian dari `tip`; papan ketik bergerak antar sel dengan panah
+ * (satu sel saja yang bisa dicapai dengan Tab). `label` adalah kalimat lengkap sel untuk pembaca layar.
+ */
 export function Heatmap({
   matrix,
   rowLabels,
   colLabels,
+  ariaLabel,
+  label,
+  tip,
 }: {
   matrix: number[][];
   rowLabels: string[];
   colLabels: string[];
+  ariaLabel: string;
+  label: (cell: HeatmapCell) => string;
+  tip: (cell: HeatmapCell) => ReactNode;
 }) {
   const max = Math.max(1, ...matrix.flat());
+  const grid = useRef<HTMLDivElement>(null);
+  const [shown, setShown] = useState<Tip | null>(null);
+  const [stop, setStop] = useState({ row: 0, col: 0 });
+  const rows = matrix.length;
+  const cols = matrix[0]?.length ?? 0;
+
+  const show = (row: number, col: number, el: HTMLElement) => {
+    const r = el.getBoundingClientRect();
+    const half = TIP_W / 2 + TIP_EDGE;
+    const x = Math.min(Math.max(r.left + r.width / 2, half), window.innerWidth - half);
+    const below = r.top < TIP_H + TIP_EDGE * 2;
+    setShown({ row, col, x, y: below ? r.bottom + 6 : r.top - 6, below });
+  };
+
+  // Popover ikut hilang saat halaman digulir atau diubah ukurannya, supaya tidak tertinggal di tempat yang salah.
+  useEffect(() => {
+    if (!shown) return;
+    const hide = () => setShown(null);
+    window.addEventListener('scroll', hide, true);
+    window.addEventListener('resize', hide);
+    return () => {
+      window.removeEventListener('scroll', hide, true);
+      window.removeEventListener('resize', hide);
+    };
+  }, [shown]);
+
+  const focusCell = (row: number, col: number) => {
+    const r = Math.min(rows - 1, Math.max(0, row));
+    const c = Math.min(cols - 1, Math.max(0, col));
+    setStop({ row: r, col: c });
+    grid.current?.querySelector<HTMLElement>(`[data-cell="${r}-${c}"]`)?.focus();
+  };
+
+  function onKeyDown(e: KeyboardEvent<HTMLElement>, row: number, col: number) {
+    const move: Record<string, [number, number]> = {
+      ArrowRight: [row, col + 1],
+      ArrowLeft: [row, col - 1],
+      ArrowDown: [row + 1, col],
+      ArrowUp: [row - 1, col],
+      Home: [row, 0],
+      End: [row, cols - 1],
+    };
+    if (e.key === 'Escape') setShown(null);
+    else if (move[e.key]) {
+      e.preventDefault();
+      focusCell(...move[e.key]!);
+    }
+  }
+
+  const cell = (row: number, col: number): HeatmapCell => ({
+    row,
+    col,
+    value: matrix[row]?.[col] ?? 0,
+    max,
+  });
+
   return (
-    <div className="heatmap" role="table" aria-label="Jam paling aktif">
-      <div className="heatmap-row heatmap-head" role="row">
-        <span />
-        {colLabels.map((c, i) => (
-          <span key={i} role="columnheader">
-            {i % 3 === 0 ? c : ''}
-          </span>
-        ))}
-      </div>
-      {matrix.map((row, r) => (
-        <div key={r} className="heatmap-row" role="row">
-          <span className="heatmap-label" role="rowheader">
-            {rowLabels[r]}
-          </span>
-          {row.map((v, c) => (
-            <span
-              key={c}
-              role="cell"
-              className="heatmap-cell"
-              style={{ opacity: v === 0 ? 0.12 : 0.25 + (v / max) * 0.75 }}
-              title={`${rowLabels[r]} ${colLabels[c]}: ${v} ronde`}
-            />
+    <div className="heatmap-wrap">
+      <div ref={grid} className="heatmap" role="grid" aria-label={ariaLabel}>
+        <div className="heatmap-row heatmap-head" role="row">
+          <span role="presentation" />
+          {colLabels.map((c, i) => (
+            <span key={i} role="columnheader" aria-label={c}>
+              {i % 3 === 0 ? c : ''}
+            </span>
           ))}
         </div>
-      ))}
+        {matrix.map((line, r) => (
+          <div key={r} className="heatmap-row" role="row">
+            <span className="heatmap-label" role="rowheader">
+              {rowLabels[r]}
+            </span>
+            {line.map((v, c) => (
+              <span
+                key={c}
+                role="gridcell"
+                data-cell={`${r}-${c}`}
+                className={`heatmap-cell${shown?.row === r && shown.col === c ? ' is-shown' : ''}`}
+                style={{ opacity: v === 0 ? 0.12 : 0.25 + (v / max) * 0.75 }}
+                tabIndex={stop.row === r && stop.col === c ? 0 : -1}
+                aria-label={label(cell(r, c))}
+                onMouseEnter={(e) => show(r, c, e.currentTarget)}
+                onMouseLeave={() => setShown(null)}
+                onFocus={(e) => {
+                  setStop({ row: r, col: c });
+                  show(r, c, e.currentTarget);
+                }}
+                onBlur={() => setShown(null)}
+                onKeyDown={(e) => onKeyDown(e, r, c)}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+      {shown && (
+        <div
+          className={`heatmap-tip${shown.below ? ' is-below' : ''}`}
+          role="tooltip"
+          style={{ left: shown.x, top: shown.y, width: TIP_W }}
+        >
+          {tip(cell(shown.row, shown.col))}
+        </div>
+      )}
     </div>
   );
 }
