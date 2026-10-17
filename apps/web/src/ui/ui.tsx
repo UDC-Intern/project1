@@ -2,12 +2,12 @@ import type {
   ButtonHTMLAttributes,
   InputHTMLAttributes,
   ReactNode,
-  SelectHTMLAttributes,
   TextareaHTMLAttributes,
 } from 'react';
 import { useEffect, useId, useRef, useState } from 'react';
 import { t } from '../i18n';
 import { ListPager, usePaged } from './Pager';
+import { Select, type SelectOption } from './Select';
 import './ui.css';
 
 /** Komponen dasar untuk area orang dewasa (admin, fasilitator, orang tua). */
@@ -177,27 +177,47 @@ export function TextArea({
   );
 }
 
+/** Pilihan satu dari beberapa, dengan daftar bergaya (bukan `<select>` bawaan peramban). */
 export function SelectField({
   label,
   hint,
   error,
   options,
-  ...props
-}: FieldProps &
-  SelectHTMLAttributes<HTMLSelectElement> & { options: { value: string; label: string }[] }) {
+  value,
+  onChange,
+  disabled,
+  placeholder,
+}: FieldProps & {
+  value: string;
+  onChange: (value: string) => void;
+  options: readonly SelectOption[];
+  disabled?: boolean;
+  placeholder?: string;
+}) {
   const id = useId();
   return (
     <div className="ui-field">
       <label htmlFor={id}>{label}</label>
-      <select id={id} {...props}>
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
-      {hint && !error && <small className="ui-hint">{hint}</small>}
-      {error && <small className="ui-error">{error}</small>}
+      <Select
+        id={id}
+        value={value}
+        options={options}
+        onChange={onChange}
+        disabled={disabled}
+        placeholder={placeholder}
+        invalid={!!error}
+        aria-describedby={describedBy(id, hint, error)}
+      />
+      {hint && !error && (
+        <small id={`${id}-hint`} className="ui-hint">
+          {hint}
+        </small>
+      )}
+      {error && (
+        <small id={`${id}-error`} className="ui-error">
+          {error}
+        </small>
+      )}
     </div>
   );
 }

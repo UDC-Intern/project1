@@ -164,27 +164,48 @@ export type AdminNotification = {
 export type PackageRow = BillingPackage & { sold: number; pricing: Pricing };
 export type PaymentMethodRow = PaymentMethod;
 
-/** Konten untuk halaman Konten: buku, topik (materi dan hal penting), dan level beserta status gratis. */
+/** Asal soal sebuah level: belum ada, bank soal tulisan admin, atau dibuat generator bawaan. */
+export type LevelSource = 'none' | 'bank' | 'auto';
+
+/** Satu level di Silabus Belajar. */
+export type CatalogLevel = {
+  id: string;
+  number: number;
+  title: string;
+  free: boolean;
+  /** Status gratis/Premium berbeda dari aturan level gratis (dikecualikan oleh admin). */
+  override: boolean;
+  generator: string | null;
+  source: LevelSource;
+  /** Jumlah soal di bank soal (0 bila bukan bank soal). */
+  questions: number;
+  /** Dibuat admin: soalnya bisa ditulis dan levelnya bisa dihapus (bila yang terakhir dan belum dikerjakan). */
+  custom: boolean;
+  /** Sudah dikerjakan anak. */
+  used: boolean;
+};
+
+export type CatalogTopic = {
+  id: string;
+  code: string;
+  title: string;
+  lesson: string;
+  tips: string[];
+  custom: boolean;
+  used: boolean;
+  levels: CatalogLevel[];
+};
+
+/** Konten untuk Silabus Belajar: buku, topik (materi dan hal penting), dan level beserta status gratis. */
 export type CatalogBook = {
   slug: string;
   title: string;
   subject: 'math' | 'science';
-  topics: {
-    id: string;
-    code: string;
-    title: string;
-    lesson: string;
-    tips: string[];
-    levels: {
-      id: string;
-      number: number;
-      title: string;
-      free: boolean;
-      /** Status gratis/Premium mengikuti pengecualian admin, bukan aturan level gratis di Pengaturan. */
-      override: boolean;
-      generator: string | null;
-    }[];
-  }[];
+  grade: number;
+  /** Buku buatan admin (bisa dihapus bila belum dikerjakan anak). */
+  custom: boolean;
+  used: boolean;
+  topics: CatalogTopic[];
 };
 
 /** `GET|POST|DELETE /admin/demo-data` (mode tiruan): jumlah baris data contoh yang sedang dimuat. */

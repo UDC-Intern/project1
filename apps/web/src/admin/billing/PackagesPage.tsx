@@ -14,7 +14,15 @@ import {
   TextField,
   type Column,
 } from '../../ui/ui';
-import { ActionNotice, ActiveBadge, confirmAction, Icon, Loadable, useAction } from '../common';
+import {
+  ActionNotice,
+  ActiveBadge,
+  confirmAction,
+  Icon,
+  Loadable,
+  RowActions,
+  useAction,
+} from '../common';
 
 type Form = {
   name: string;
@@ -296,7 +304,7 @@ export function PackagesPage() {
       key: 'actions',
       label: t('admin.col.actions'),
       render: (p) => (
-        <div className="adm-row-actions">
+        <RowActions slots={[76, 40]}>
           <Button variant="ghost" size="sm" onClick={() => setEditing(p)}>
             {t('admin.edit')}
           </Button>
@@ -305,11 +313,12 @@ export function PackagesPage() {
             size="sm"
             disabled={action.busy}
             aria-label={t('admin.pkg.deleteLabel', { name: p.name })}
+            title={t('admin.pkg.deleteLabel', { name: p.name })}
             onClick={() => void remove(p)}
           >
             <Icon name="trash" />
           </Button>
-        </div>
+        </RowActions>
       ),
     },
   ];

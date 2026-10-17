@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { t } from '../i18n';
+import { Select } from './Select';
 import './pager.css';
 
 const SIZES = [10, 20, 50];
@@ -78,6 +79,7 @@ export function Pager({
   onPageSize?: (n: number) => void;
   sizes?: number[];
 }) {
+  const sizeLabel = useId();
   // Ukuran yang sedang dipakai selalu ada di pilihan (mis. 12 kartu per halaman).
   const options = sizes.includes(pageSize) ? sizes : [...sizes, pageSize].sort((a, b) => a - b);
   const pages = Math.max(1, Math.ceil(total / pageSize));
@@ -125,16 +127,16 @@ export function Pager({
         </button>
       </div>
       {onPageSize && (
-        <label className="pager-size">
-          {t('common.pager.perPage')}
-          <select value={pageSize} onChange={(e) => onPageSize(Number(e.target.value))}>
-            {options.map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </select>
-        </label>
+        <div className="pager-size">
+          <span id={sizeLabel}>{t('common.pager.perPage')}</span>
+          <Select
+            size="sm"
+            aria-labelledby={sizeLabel}
+            value={String(pageSize)}
+            options={options.map((n) => ({ value: String(n), label: String(n) }))}
+            onChange={(v) => onPageSize(Number(v))}
+          />
+        </div>
       )}
     </nav>
   );

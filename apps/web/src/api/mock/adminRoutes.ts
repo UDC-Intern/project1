@@ -17,7 +17,6 @@ import type {
   AdminChildReport,
   AdminDashboard,
   AdminNotification,
-  CatalogBook,
   ChildRow,
   ChildSummaryRow,
   DirectorySummary,
@@ -53,13 +52,9 @@ import {
 } from './db';
 import { findLevel } from './levels';
 import { orderView } from './parentRoutes';
-import {
-  SETTINGS_PARTS,
-  adminSettings,
-  isLevelFree,
-  updateSettings,
-  type SettingsPart,
-} from './settings';
+import * as syllabus from './syllabus';
+import { catalogBooks } from './syllabus';
+import { SETTINGS_PARTS, adminSettings, updateSettings, type SettingsPart } from './settings';
 import { adminFromToken } from './staff';
 
 /**
@@ -607,33 +602,6 @@ const packageRow = (p: billing.AdminPackage): PackageRow => ({
 
 // ---- Konten ----
 
-function catalogBooks(): CatalogBook[] {
-  const db = readDb();
-  return BOOKS.map((b) => ({
-    slug: b.slug,
-    title: b.title,
-    subject: b.subject,
-    topics: b.topics.map((t) => ({
-      id: topicId(b.slug, t.code),
-      code: t.code,
-      title: t.title,
-      lesson: t.lesson,
-      tips: t.tips ?? [],
-      levels: t.levels.map((l) => {
-        const id = levelId(b.slug, t.code, l.number);
-        return {
-          id,
-          number: l.number,
-          title: l.title,
-          free: isLevelFree(db, id, l.number),
-          override: db.contentEdits.levels[id]?.isFree !== undefined,
-          generator: l.generator,
-        };
-      }),
-    })),
-  }));
-}
-
 /** Pengecualian gratis/Premium per level; sama dengan aturan Pengaturan berarti pengecualiannya dihapus. */
 async function saveLevel(token: string | null, id: string, body: Body | undefined) {
   if (!findLevel(id)) throw notFound('Level tidak ketemu.');
@@ -952,7 +920,7 @@ export async function handle<T>(
   if (method === 'DELETE' && at('payment-methods', '*'))
     return send(await billing.deleteMethod(token, seg[1]!));
 
-  // Konten
+  // Silabus Belajar: baca, sunting, tambah, dan hapus buku, topik, level, serta soal
   if (method === 'GET' && at('catalogs')) return send(catalogBooks());
   if (method === 'PATCH' && at('topics', '*')) {
     await admin.updateTopic(token, seg[1]!, body as never);
@@ -962,6 +930,23 @@ export async function handle<T>(
     await saveLevel(token, seg[1]!, body);
     return send(catalogBooks());
   }
+  if (method === 'POST' && at('books')) return send(await syllabus.addBook(token, body));
+  if (method === 'DELETE' && at('books', '*'))
+    return send(await syllabus.deleteBook(token, seg[1]!));
+  if (method === 'POST' && at('books', '*', 'topics'))
+    return send(await syllabus.addTopic(token, seg[1]!, body));
+  if (method === 'DELETE' && at('topics', '*'))
+    return send(await syllabus.deleteTopic(token, seg[1]!));
+  if (method === 'POST' && at('topics', '*', 'levels'))
+    return send(await syllabus.addLevel(token, seg[1]!, body));
+  if (method === 'DELETE' && at('levels', '*'))
+    return send(await syllabus.deleteLevel(token, seg[1]!));
+  if (method === 'GET' && at('levels', '*', 'questions'))
+    return send(await syllabus.getQuestions(token, seg[1]!));
+  if (method === 'PUT' && at('levels', '*', 'questions'))
+    return send(await syllabus.saveQuestions(token, seg[1]!, body));
+  if (method === 'DELETE' && at('levels', '*', 'questions'))
+    return send(await syllabus.clearQuestions(token, seg[1]!));
 
   // Pengaturan
   if (method === 'GET' && at('settings')) return send(await adminSettings(token));

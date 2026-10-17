@@ -1,177 +1,177 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import type { CatalogBook } from '../../api/adminTypes';
+import type { CatalogBook, CatalogLevel } from '../../api/adminTypes';
 import { useSettings } from '../../api/settings';
-import { useApiCall, useFetch } from '../../auth/useApi';
+import { useFetch } from '../../auth/useApi';
 import { t } from '../../i18n';
-import { Badge, Button, Empty, PageHeader, TextArea, TextField } from '../../ui/ui';
-import { ActionNotice, Icon, Loadable, useAction } from '../common';
+import { ShellIconSvg } from '../../ui/AppShell';
+import { CountUp, Kpi } from '../../ui/charts';
+import { Button, Empty, Notice, PageHeader } from '../../ui/ui';
+import { Icon, Loadable } from '../common';
+import { AccessCard } from './AccessCard';
+import { AddBookDialog, AddTopicDialog } from './AddDialogs';
+import { BookCard } from './BookCard';
+import './catalog.css';
+import { Legend } from './LevelPills';
+import { QuestionBankDialog } from './QuestionBankDialog';
 
-type Topic = CatalogBook['topics'][number];
-
-/** Satu topik: judul, materi singkat, hal penting ("Tahukah kamu?"), dan judul level beserta status gratis. */
-function TopicEditor({
-  topic,
-  onSaved,
-}: {
-  topic: Topic;
-  onSaved: (books: CatalogBook[]) => void;
-}) {
-  const call = useApiCall('staff');
-  const action = useAction();
-  const [title, setTitle] = useState(topic.title);
-  const [lesson, setLesson] = useState(topic.lesson);
-  const [tips, setTips] = useState(topic.tips.join('\n'));
-  const [levels, setLevels] = useState(topic.levels);
-  const cleanTips = tips
-    .split('\n')
-    .map((x) => x.trim())
-    .filter(Boolean)
-    .slice(0, 6);
-
-  async function save() {
-    const out = await action.run(
-      async () => {
-        let books = await call<CatalogBook[]>(`/admin/topics/${encodeURIComponent(topic.id)}`, {
-          method: 'PATCH',
-          body: { title, lesson, tips: cleanTips },
-        });
-        for (const level of levels) {
-          const before = topic.levels.find((l) => l.id === level.id)!;
-          if (before.title !== level.title || before.free !== level.free)
-            books = await call<CatalogBook[]>(`/admin/levels/${encodeURIComponent(level.id)}`, {
-              method: 'PATCH',
-              body: { title: level.title, free: level.free },
-            });
-        }
-        return books;
-      },
-      t('admin.catalog.saved', { topic: title }),
-    );
-    if (!out) return;
-    // Tanda "Pengecualian" mengikuti hasil simpan (level yang kembali sama dengan aturan tidak lagi dikecualikan).
-    const fresh = out.flatMap((b) => b.topics).find((x) => x.id === topic.id);
-    if (fresh) setLevels(fresh.levels);
-    onSaved(out);
-  }
-
-  return (
-    <div className="adm-cat-row">
-      <div className="adm-inline-form" style={{ marginBottom: 8 }}>
-        <div style={{ width: 70 }}>
-          <TextField label={t('admin.catalog.code')} value={topic.code} readOnly />
-        </div>
-        <div style={{ flex: 1, minWidth: 220 }}>
-          <TextField
-            label={t('admin.catalog.catTitle')}
-            maxLength={60}
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-        </div>
-      </div>
-      <details className="adm-cat-intro">
-        <summary>{t('admin.catalog.introEdit')}</summary>
-        <TextArea
-          label={t('admin.catalog.intro')}
-          hint={t('admin.catalog.introHint')}
-          rows={3}
-          maxLength={600}
-          value={lesson}
-          onChange={(e) => setLesson(e.target.value)}
-        />
-        <TextArea
-          label={t('admin.catalog.tips')}
-          hint={t('admin.catalog.tipsHint')}
-          rows={3}
-          value={tips}
-          onChange={(e) => setTips(e.target.value)}
-        />
-        <ul className="adm-level-list">
-          {levels.map((l, i) => (
-            <li key={l.id}>
-              <span className="adm-level-num">{l.number}</span>
-              <TextField
-                label={t('admin.catalog.levelTitle', { n: l.number })}
-                maxLength={60}
-                value={l.title}
-                onChange={(e) =>
-                  setLevels((xs) =>
-                    xs.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)),
-                  )
-                }
-              />
-              <label className="ui-check">
-                <input
-                  type="checkbox"
-                  checked={l.free}
-                  disabled={l.number === 1}
-                  aria-label={t('admin.catalog.freeLabel', { n: l.number })}
-                  onChange={(e) =>
-                    setLevels((xs) =>
-                      xs.map((x, j) => (j === i ? { ...x, free: e.target.checked } : x)),
-                    )
-                  }
-                />
-                <span>{l.free ? t('admin.catalog.free') : t('admin.catalog.premium')}</span>
-              </label>
-              {l.override && <Badge tone="info">{t('admin.catalog.override')}</Badge>}
-              {!l.generator && <Badge tone="muted">{t('admin.catalog.noGenerator')}</Badge>}
-            </li>
-          ))}
-        </ul>
-      </details>
-      <ActionNotice error={action.error} done={action.done} />
-      <Button variant="secondary" onClick={() => void save()} disabled={action.busy}>
-        <Icon name="check" />
-        {t('admin.catalog.save')}
-      </Button>
-    </div>
-  );
-}
-
-/** Konten: buku, topik, materi singkat, hal penting, dan level. Struktur buku tetap dari berkas konten. */
+/**
+ * Silabus Belajar: aturan akses berbayar, lalu buku, topik, dan level. Admin bisa menambah buku, topik, dan level
+ * baru, menulis bank soal level buatannya, mengatur judul, materi, "Tahukah kamu?", serta level mana yang gratis
+ * atau Premium. Buku bawaan dari berkas konten tidak bisa dihapus; yang dibuat admin bisa selama belum dikerjakan.
+ */
 export function CatalogPage() {
   const catalogs = useFetch<CatalogBook[]>('staff', '/admin/catalogs');
-  const billing = useSettings().billing;
+  const paywall = useSettings().billing.paywall;
+  const [opened, setOpened] = useState<Set<string> | null>(null);
+  const [addingBook, setAddingBook] = useState(false);
+  const [addingTopicTo, setAddingTopicTo] = useState<CatalogBook>();
+  const [writing, setWriting] = useState<CatalogLevel>();
+  const [notice, setNotice] = useState<string>();
+
+  const books = catalogs.data;
+  // Awalnya buku pertama terbuka; sesudah itu mengikuti ketukan admin.
+  const open = opened ?? new Set(books?.[0] ? [books[0].slug] : []);
+  const toggle = (slug: string) => {
+    const next = new Set(open);
+    if (next.has(slug)) next.delete(slug);
+    else next.add(slug);
+    setOpened(next);
+  };
+
+  const topics = books?.reduce((n, b) => n + b.topics.length, 0) ?? 0;
+  const levels = books?.flatMap((b) => b.topics.flatMap((x) => x.levels)) ?? [];
+  const freeLevels = levels.filter((l) => l.free).length;
+  const noQuestions = levels.filter((l) => l.source === 'none').length;
+
+  function changed(next: CatalogBook[], message?: string) {
+    catalogs.setData(next);
+    setNotice(message);
+  }
+
   return (
     <>
       <PageHeader
         title={t('admin.catalog.title')}
         subtitle={t('admin.catalog.subtitle')}
         actions={
-          <Link className="ui-btn ui-btn-ghost" to="/admin/pengaturan">
-            {billing.paywall
-              ? t('admin.catalog.freeRule', { n: billing.freeLevels })
-              : t('admin.catalog.allFree')}
-          </Link>
+          <Button onClick={() => setAddingBook(true)} disabled={!books}>
+            <Icon name="plus" />
+            {t('admin.catalog.addBook')}
+          </Button>
         }
       />
-      <Loadable loading={catalogs.loading} error={catalogs.error} hasData={!!catalogs.data}>
+      {notice && <Notice tone="success">{notice}</Notice>}
+
+      {books && (
+        <div className="ins-kpis">
+          <Kpi
+            i={0}
+            tone="grape"
+            icon={<ShellIconSvg name="book" />}
+            label={t('admin.catalog.kBooks')}
+            value={<CountUp value={books.length} />}
+            hint={t('admin.catalog.kBooksHint', { n: books.filter((b) => b.custom).length })}
+          />
+          <Kpi
+            i={1}
+            tone="sky"
+            icon={<ShellIconSvg name="grid" />}
+            label={t('admin.catalog.kTopics')}
+            value={<CountUp value={topics} />}
+            hint={t('admin.catalog.kTopicsHint')}
+          />
+          <Kpi
+            i={2}
+            tone="sun"
+            icon={<ShellIconSvg name="tag" />}
+            label={t('admin.catalog.kLevels')}
+            value={<CountUp value={levels.length} />}
+            hint={t('admin.catalog.kLevelsHint', {
+              free: freeLevels,
+              premium: levels.length - freeLevels,
+            })}
+          />
+          <Kpi
+            i={3}
+            tone="leaf"
+            icon={<ShellIconSvg name="play" />}
+            label={t('admin.catalog.kReady')}
+            value={<CountUp value={levels.length - noQuestions} />}
+            hint={t('admin.catalog.kReadyHint', { n: noQuestions })}
+          />
+        </div>
+      )}
+
+      <AccessCard onSaved={catalogs.reload} />
+
+      <Loadable loading={catalogs.loading} error={catalogs.error} hasData={!!books}>
         {() =>
-          catalogs.data!.length === 0 ? (
+          books!.length === 0 ? (
             <Empty>{t('admin.catalog.empty')}</Empty>
           ) : (
-            catalogs.data!.map((b, i) => (
-              <details key={b.slug} className="ui-card adm-book" open={i === 0}>
-                <summary>
-                  <h2>{b.title}</h2>
-                  <span className="ui-muted">
-                    {t('admin.catalog.topics', { n: b.topics.length })}
-                  </span>
-                </summary>
-                {b.topics.map((topic) => (
-                  <TopicEditor
-                    key={topic.id}
-                    topic={topic}
-                    onSaved={(books) => catalogs.setData(books)}
+            <>
+              <Legend />
+              <ul className="syl-books">
+                {books!.map((b) => (
+                  <BookCard
+                    key={b.slug}
+                    book={b}
+                    open={open.has(b.slug)}
+                    paywall={paywall}
+                    onToggle={() => toggle(b.slug)}
+                    onAddTopic={() => setAddingTopicTo(b)}
+                    onBooks={(next) => changed(next)}
+                    onNotice={setNotice}
+                    onWrite={setWriting}
                   />
                 ))}
-              </details>
-            ))
+              </ul>
+            </>
           )
         }
       </Loadable>
+
+      {addingBook && books && (
+        <AddBookDialog
+          books={books}
+          onClose={() => setAddingBook(false)}
+          onDone={(next, title) => {
+            setAddingBook(false);
+            // Buku baru langsung terbuka supaya topik pertamanya terlihat.
+            const fresh = next.find((b) => !books.some((x) => x.slug === b.slug));
+            if (fresh) setOpened(new Set([...open, fresh.slug]));
+            changed(next, t('admin.catalog.addBook.done', { title }));
+          }}
+        />
+      )}
+      {addingTopicTo && (
+        <AddTopicDialog
+          book={addingTopicTo}
+          onClose={() => setAddingTopicTo(undefined)}
+          onDone={(next, title) => {
+            const book = addingTopicTo;
+            setAddingTopicTo(undefined);
+            setOpened(new Set([...open, book.slug]));
+            changed(next, t('admin.catalog.addTopic.done', { title, book: book.title }));
+          }}
+        />
+      )}
+      {writing && (
+        <QuestionBankDialog
+          level={writing}
+          onClose={() => setWriting(undefined)}
+          onChanged={(next, count) => {
+            const level = writing;
+            setWriting(undefined);
+            changed(
+              next,
+              count > 0
+                ? t('admin.bank.saved', { n: level.number, count })
+                : t('admin.bank.cleared', { n: level.number }),
+            );
+          }}
+        />
+      )}
     </>
   );
 }

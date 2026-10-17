@@ -176,9 +176,8 @@ describe('paging tabel', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Halaman 3' }));
     expect(screen.getByText('Baris 23')).toBeInTheDocument();
     expect(screen.queryByText('Baris 1')).toBeNull();
-    fireEvent.change(screen.getByRole('combobox', { name: /Per halaman/ }), {
-      target: { value: '50' },
-    });
+    fireEvent.click(screen.getByRole('combobox', { name: /Per halaman/ }));
+    fireEvent.click(screen.getByRole('option', { name: '50' }));
     expect(screen.getAllByRole('row')).toHaveLength(24);
   });
 

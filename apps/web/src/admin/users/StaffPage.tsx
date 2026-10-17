@@ -14,7 +14,15 @@ import {
   TextField,
   type Column,
 } from '../../ui/ui';
-import { ActionNotice, ActiveBadge, Icon, Loadable, useAction } from '../common';
+import {
+  ActionNotice,
+  ActiveBadge,
+  Icon,
+  Loadable,
+  RowActions,
+  RowGap,
+  useAction,
+} from '../common';
 import { MIN_PASSWORD, PasswordSetter } from './PasswordSetter';
 
 function CreateStaff({ onCreated }: { onCreated: (u: StaffUser) => void }) {
@@ -124,8 +132,8 @@ export function StaffPage() {
       key: 'actions',
       label: t('admin.col.actions'),
       render: (u) => (
-        <div className="dir-actions">
-          {u.id !== me?.user.id && (
+        <RowActions slots={[116, 128]} label={t('admin.staff.actionsFor', { name: u.name })}>
+          {u.id !== me?.user.id ? (
             <Button
               variant={u.active ? 'danger' : 'secondary'}
               size="sm"
@@ -142,6 +150,8 @@ export function StaffPage() {
             >
               {u.active ? t('admin.user.deactivate') : t('admin.user.activate')}
             </Button>
+          ) : (
+            <RowGap />
           )}
           <PasswordSetter
             busy={action.busy}
@@ -149,7 +159,7 @@ export function StaffPage() {
               patch(u, { password }, t('admin.user.passwordSet', { name: u.name }))
             }
           />
-        </div>
+        </RowActions>
       ),
     },
   ];

@@ -11,13 +11,13 @@ konten, keluarga, transaksi, Premium, sertifikat, dan pengaturan aplikasi.
   Jago, papan peringkat, profil, dan sertifikat.
 - **Orang tua:** daftar, kelola sampai 3 profil anak, dasbor dan laporan per anak, paket dengan pembayaran transfer manual,
   riwayat transaksi, akun, dan menu Sertifikat.
-- **Admin:** menu dikelompokkan menjadi Konten & Kurikulum (Silabus Belajar, Bank Soal & Latihan sebagai simulator kuis,
-  Sertifikat Juara), Media & Audio (Galeri Aset, Audio Narasi, Ilustrasi AI), Pengguna & Akademik (Keluarga & Anak, Tim
+- **Admin:** menu dikelompokkan menjadi Konten & Kurikulum (Silabus Belajar untuk menambah buku, topik, dan level lengkap dengan soal tulisan sendiri serta
+  mengatur level gratis, Bank Soal & Latihan sebagai simulator kuis, Sertifikat Juara), Media & Audio (Galeri Aset, Audio Narasi, Ilustrasi AI), Pengguna & Akademik (Keluarga & Anak, Tim
   Staf & Akses, Laporan & Rapor Belajar), dan Langganan & Pembayaran (Transaksi & Bukti Bayar, Paket Langganan, Rekening &
   Pembayaran, Pengaturan Sistem), ditambah Ringkasan bergrafik dan notifikasi.
 - **Paket:** 5 paket awal (Tunas, Kumbang, Tumbuh Bersama, Bintang Kecil, Teman Setia); admin bisa mengubah dan menambah.
   Awalnya level 1 dan 2 tiap topik gratis, level berikutnya Premium untuk semua anak di keluarga itu; batasnya diatur di
-  Pengaturan.
+  Silabus Belajar.
 - **Sertifikat Juara Digital:** terbit otomatis dengan nomor `CERT-XXXXXX` saat anak Premium lulus semua level satu buku.
   Bisa dicetak, disimpan sebagai PDF, atau diunduh sebagai gambar PNG. Orang tua boleh mengisi nama lengkap anak khusus
   untuk sertifikat (dengan persetujuan), kode QR di lembar membuka halaman cek keaslian yang menyamarkan nama, dan isi

@@ -161,7 +161,7 @@ export function IllustrationsPage() {
               <SelectField
                 label={t('admin.ill.kind')}
                 value={form.kind}
-                onChange={(e) => set('kind', e.target.value as IllustrationRequest['kind'])}
+                onChange={(v) => set('kind', v as IllustrationRequest['kind'])}
                 options={ILLUSTRATION_KINDS.map((k) => ({
                   value: k,
                   label: t(`admin.ill.kind.${k}` as MessageKey),
@@ -170,7 +170,7 @@ export function IllustrationsPage() {
               <SelectField
                 label={t('admin.ill.theme')}
                 value={form.theme}
-                onChange={(e) => set('theme', e.target.value as IllustrationRequest['theme'])}
+                onChange={(v) => set('theme', v as IllustrationRequest['theme'])}
                 options={ILLUSTRATION_THEMES.map((k) => ({
                   value: k,
                   label: t(`admin.ill.theme.${k}` as MessageKey),
@@ -218,9 +218,7 @@ export function IllustrationsPage() {
                 label={t('admin.ill.momoColor')}
                 value={form.momoColor}
                 disabled={!form.withMomo && form.kind !== 'character'}
-                onChange={(e) =>
-                  set('momoColor', e.target.value as IllustrationRequest['momoColor'])
-                }
+                onChange={(v) => set('momoColor', v as IllustrationRequest['momoColor'])}
                 options={MOMO_COLORS.map((c) => ({
                   value: c,
                   label: t(`admin.ill.color.${c}` as MessageKey),

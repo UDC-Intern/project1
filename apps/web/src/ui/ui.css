@@ -108,14 +108,38 @@
   font-weight: 600;
 }
 .ui-field input,
-.ui-field select,
 .ui-field textarea {
   font: inherit;
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid var(--ui-line);
+  border: 1px solid var(--ui-line-strong, var(--ui-line));
   background: var(--ui-surface);
   color: var(--ui-ink);
+}
+.ui-field input::placeholder,
+.ui-field textarea::placeholder {
+  color: var(--ui-muted);
+  opacity: 0.8;
+}
+.ui-field input:hover:not(:disabled):not(:focus),
+.ui-field textarea:hover:not(:disabled):not(:focus) {
+  border-color: var(--garis-tegas);
+}
+.ui-field input:disabled,
+.ui-field input:read-only,
+.ui-field textarea:disabled {
+  background: var(--awan-2);
+  color: var(--ui-muted);
+}
+/* Kolom angka memakai tombol kurang-tambah sendiri bila perlu; panah bawaan peramban disembunyikan. */
+.ui-field input[type='number'] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+.ui-field input[type='number']::-webkit-outer-spin-button,
+.ui-field input[type='number']::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
 }
 .ui-field textarea {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -137,10 +161,73 @@
   align-items: flex-start;
   margin-bottom: 14px;
 }
+/* Kotak centang dan bulatan pilihan bergaya UdaKids (bukan biru bawaan peramban). */
+.ui-check {
+  cursor: pointer;
+}
 .ui-check input {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-grid;
+  place-content: center;
+  flex: none;
   width: 20px;
   height: 20px;
-  margin-top: 2px;
+  margin: 2px 0 0;
+  border: 2px solid var(--garis-tegas);
+  border-radius: 6px;
+  background: var(--ui-surface);
+  cursor: pointer;
+  transition:
+    background-color 0.12s ease,
+    border-color 0.12s ease;
+}
+.ui-check input[type='radio'] {
+  border-radius: 50%;
+}
+.ui-check input::after {
+  content: '';
+  width: 10px;
+  height: 6px;
+  border-left: 2.5px solid var(--on-gonjong);
+  border-bottom: 2.5px solid var(--on-gonjong);
+  transform: translateY(-1px) rotate(-45deg) scale(0);
+  transition: transform 0.12s ease;
+}
+.ui-check input[type='radio']::after {
+  width: 8px;
+  height: 8px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--on-gonjong);
+  transform: scale(0);
+}
+.ui-check input:checked {
+  border-color: var(--ui-primary);
+  background: var(--ui-primary);
+}
+.ui-check input:checked::after {
+  transform: translateY(-1px) rotate(-45deg) scale(1);
+}
+.ui-check input[type='radio']:checked::after {
+  transform: scale(1);
+}
+.ui-check input:hover:not(:disabled):not(:checked) {
+  border-color: var(--ui-primary);
+}
+.ui-check input:focus-visible {
+  outline: 3px solid var(--kunyit);
+  outline-offset: 2px;
+}
+.ui-check input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ui-check input,
+  .ui-check input::after {
+    transition: none;
+  }
 }
 
 .ui-card {

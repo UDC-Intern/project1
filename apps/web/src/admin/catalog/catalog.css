@@ -1,0 +1,643 @@
+/* Silabus Belajar: akses berbayar, buku, topik, level, dan bank soal. Hanya token (tanpa warna baru). */
+
+/* ---- Pil level: warna menunjukkan gratis, Premium, atau belum ada soal ---- */
+.syl-pills {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.syl-pill {
+  display: inline-grid;
+  place-items: center;
+  min-width: 28px;
+  height: 28px;
+  box-sizing: border-box;
+  padding: 0 6px;
+  border: 1.5px solid transparent;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.syl-pill.is-free {
+  border-color: color-mix(in srgb, var(--sawah) 45%, var(--kertas));
+  background: var(--sawah-soft);
+  color: var(--sawah-teks);
+}
+
+.syl-pill.is-premium {
+  border-color: color-mix(in srgb, var(--kunyit) 60%, var(--kertas));
+  background: var(--kunyit-soft);
+  color: var(--kunyit-teks);
+}
+
+/* Belum ada soal: garis putus-putus, warnanya tetap menunjukkan gratis atau Premium. */
+.syl-pill.is-empty {
+  border-style: dashed;
+  background: transparent;
+}
+
+.syl-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 18px;
+  margin: 0 0 12px;
+  color: var(--ui-muted);
+  font-size: 13px;
+}
+
+.syl-legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.syl-dot {
+  width: 14px;
+  height: 14px;
+  box-sizing: border-box;
+  border: 1.5px solid;
+  border-radius: 5px;
+}
+
+.syl-dot.is-free {
+  border-color: color-mix(in srgb, var(--sawah) 55%, var(--kertas));
+  background: var(--sawah-soft);
+}
+
+.syl-dot.is-premium {
+  border-color: color-mix(in srgb, var(--kunyit) 70%, var(--kertas));
+  background: var(--kunyit-soft);
+}
+
+.syl-dot.is-empty {
+  border-style: dashed;
+  border-color: var(--garis-tegas);
+}
+
+/* ---- Kartu akses berbayar ---- */
+.syl-access {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+
+.syl-access-controls {
+  display: grid;
+  gap: 20px;
+}
+
+.syl-rule {
+  display: grid;
+  gap: 8px;
+}
+
+.syl-rule-label {
+  font-weight: 700;
+}
+
+.syl-rule-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+}
+
+.syl-example {
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px dashed var(--ui-line-strong, var(--ui-line));
+  border-radius: 14px;
+  background: var(--ui-bg);
+}
+
+.syl-example h3 {
+  margin: 0;
+  color: var(--ui-muted);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.syl-example .syl-pill {
+  min-width: 36px;
+  height: 36px;
+  font-size: 15px;
+}
+
+.syl-example-note {
+  margin: 0;
+  font-weight: 700;
+}
+
+.syl-access-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  margin-top: 20px;
+}
+
+/* ---- Buku ---- */
+.syl-books {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.syl-book {
+  border: 1px solid var(--ui-line);
+  border-radius: 16px;
+  background: var(--ui-surface);
+}
+
+.syl-book-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px 6px 6px;
+}
+
+.syl-book-toggle {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 10px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.syl-book-toggle:hover {
+  background: var(--ui-bg);
+}
+
+.syl-book-toggle:focus-visible,
+.syl-topic-toggle:focus-visible {
+  outline: 3px solid var(--kunyit);
+  outline-offset: -3px;
+}
+
+.syl-chevron {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  color: var(--ui-primary);
+  transition: transform 0.15s ease;
+}
+
+[aria-expanded='true'] > .syl-chevron {
+  transform: rotate(90deg);
+}
+
+.syl-book-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--gonjong-soft);
+  color: var(--gonjong-teks);
+}
+
+.syl-book-icon.is-science {
+  background: var(--sawah-soft);
+  color: var(--sawah-teks);
+}
+
+.syl-book-title {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.syl-book-title strong {
+  font-size: 17px;
+  line-height: 1.25;
+}
+
+.syl-book-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.syl-book-actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+}
+
+.syl-book-body {
+  border-top: 1px solid var(--ui-line);
+}
+
+.syl-empty {
+  margin: 0;
+  padding: 18px;
+  color: var(--ui-muted);
+}
+
+/* ---- Topik ---- */
+.syl-topics {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.syl-topic + .syl-topic {
+  border-top: 1px solid var(--ui-line);
+}
+
+.syl-topic-toggle {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto 20px;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 18px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.syl-topic-toggle:hover,
+.syl-topic.is-open > .syl-topic-toggle {
+  background: var(--ui-bg);
+}
+
+.syl-code {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--gonjong-soft);
+  color: var(--gonjong-teks);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.syl-topic-title {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.syl-topic-title strong {
+  line-height: 1.3;
+}
+
+.syl-topic-title small {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  color: var(--ui-muted);
+}
+
+.syl-panel {
+  display: grid;
+  gap: 18px;
+  padding: 18px;
+  border-top: 1px dashed var(--ui-line-strong, var(--ui-line));
+  background: var(--kertas-2);
+}
+
+.syl-panel-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.syl-panel .ui-field textarea {
+  min-height: 96px;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.syl-section-title {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.syl-panel-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--ui-line);
+}
+
+.syl-panel-foot .syl-spacer {
+  flex: 1;
+}
+
+/* ---- Level di dalam topik ---- */
+.syl-levels {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.syl-level {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  grid-template-areas:
+    'num title access'
+    '. meta meta';
+  align-items: center;
+  gap: 8px 12px;
+  padding: 12px;
+  border: 1px solid var(--ui-line);
+  border-radius: 12px;
+  background: var(--ui-surface);
+}
+
+.syl-level .ui-field {
+  margin: 0;
+}
+
+.syl-level .adm-level-num {
+  grid-area: num;
+}
+
+.syl-level-title {
+  grid-area: title;
+}
+
+.syl-level-access {
+  grid-area: access;
+}
+
+.syl-level-meta {
+  grid-area: meta;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.syl-level-meta .syl-spacer {
+  flex: 1;
+}
+
+.syl-add-level {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.syl-add-level .ui-field {
+  flex: 1;
+  margin: 0;
+}
+
+.syl-add-level .ui-btn {
+  min-height: 42px;
+}
+
+/* ---- Formulir topik di dalam dialog ---- */
+.syl-form-head {
+  display: grid;
+  grid-template-columns: minmax(120px, 170px) minmax(0, 1fr);
+  gap: 0 14px;
+  align-items: start;
+}
+
+.uk-dialog .ui-field textarea {
+  min-height: 88px;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.syl-form-levels {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.syl-form-level {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 8px;
+}
+
+.syl-form-level .ui-field {
+  margin: 0;
+}
+
+.syl-form-level .ui-btn {
+  min-height: 42px;
+}
+
+.syl-form-group {
+  min-width: 0;
+  margin: 0 0 14px;
+  padding: 12px 14px 4px;
+  border: 1px solid var(--ui-line);
+  border-radius: 12px;
+}
+
+.syl-form-group legend {
+  padding: 0 6px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.syl-form-hint {
+  margin: 0 0 10px;
+  color: var(--ui-muted);
+  font-size: 13px;
+}
+
+.syl-errors {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}
+
+/* ---- Bank soal ---- */
+.bank-head {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.bank-meter {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--awan-2);
+}
+
+.bank-meter > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--sawah);
+  transition: width 0.2s ease;
+}
+
+.bank-list {
+  display: grid;
+  gap: 14px;
+  margin: 0 0 14px;
+  padding: 0;
+  list-style: none;
+}
+
+.bank-q {
+  display: grid;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--ui-line);
+  border-radius: 14px;
+  background: var(--ui-surface);
+}
+
+.bank-q.is-bad {
+  border-color: color-mix(in srgb, var(--gonjong) 55%, var(--kertas));
+}
+
+.bank-q-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.bank-q-no {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+}
+
+.bank-q .ui-field {
+  margin: 0;
+}
+
+.bank-choices {
+  display: grid;
+  gap: 8px;
+}
+
+.bank-choices-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.bank-choice {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.bank-choice .ui-check {
+  margin: 0;
+}
+
+.bank-choice input[type='text'] {
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--ui-line-strong, var(--ui-line));
+  border-radius: 10px;
+  background: var(--ui-surface);
+  color: var(--ui-ink);
+  font: inherit;
+}
+
+.bank-choice.is-answer input[type='text'] {
+  border-color: var(--sawah);
+  background: var(--sawah-soft);
+}
+
+.bank-issues {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--ui-danger);
+  font-size: 13px;
+}
+
+/* ---- Layar sempit ---- */
+@media (max-width: 900px) {
+  .syl-access,
+  .syl-panel-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .syl-book-head {
+    flex-wrap: wrap;
+    padding: 6px;
+  }
+
+  .syl-book-actions {
+    width: 100%;
+    padding: 0 6px 6px;
+  }
+
+  .syl-topic-toggle {
+    grid-template-columns: 42px minmax(0, 1fr) 20px;
+    padding: 12px 14px;
+  }
+
+  .syl-topic-toggle .syl-pills {
+    grid-column: 2 / 3;
+    grid-row: 2;
+  }
+
+  .syl-level {
+    grid-template-columns: 36px minmax(0, 1fr);
+    grid-template-areas:
+      'num title'
+      '. access'
+      '. meta';
+  }
+
+  .syl-add-level {
+    flex-wrap: wrap;
+  }
+
+  .syl-form-head {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .syl-chevron,
+  .bank-meter > span {
+    transition: none;
+  }
+}

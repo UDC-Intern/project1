@@ -100,7 +100,7 @@ function LevelStats() {
         <SelectField
           label={t('admin.report.sort')}
           value={sort}
-          onChange={(e) => setSort(e.target.value as LevelSort)}
+          onChange={(v) => setSort(v as LevelSort)}
           options={[
             { value: 'accuracy-asc', label: t('admin.report.sortAccAsc') },
             { value: 'accuracy-desc', label: t('admin.report.sortAccDesc') },
@@ -111,7 +111,7 @@ function LevelStats() {
         <SelectField
           label={t('admin.report.book')}
           value={book}
-          onChange={(e) => setBook(e.target.value)}
+          onChange={setBook}
           options={[{ value: '', label: t('admin.filter.all') }, ...books]}
         />
       </div>

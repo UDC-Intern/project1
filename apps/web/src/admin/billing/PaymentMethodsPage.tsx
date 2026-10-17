@@ -15,7 +15,15 @@ import {
   TextField,
   type Column,
 } from '../../ui/ui';
-import { ActionNotice, ActiveBadge, confirmAction, Icon, Loadable, useAction } from '../common';
+import {
+  ActionNotice,
+  ActiveBadge,
+  confirmAction,
+  Icon,
+  Loadable,
+  RowActions,
+  useAction,
+} from '../common';
 
 type Kind = PaymentMethodRow['kind'];
 const EMPTY: PaymentMethodInput = {
@@ -87,7 +95,7 @@ function MethodEditor({
           <SelectField
             label={t('admin.pay.kind')}
             value={form.kind}
-            onChange={(e) => set('kind', e.target.value as Kind)}
+            onChange={(v) => set('kind', v as Kind)}
             options={[
               { value: 'bank', label: t('admin.pay.kindBank') },
               { value: 'ewallet', label: t('admin.pay.kindEwallet') },
@@ -217,7 +225,7 @@ export function PaymentMethodsPage() {
       key: 'actions',
       label: t('admin.col.actions'),
       render: (m) => (
-        <div className="adm-row-actions">
+        <RowActions slots={[76, 40]}>
           <Button variant="ghost" size="sm" onClick={() => setEditing(m)}>
             {t('admin.edit')}
           </Button>
@@ -226,11 +234,12 @@ export function PaymentMethodsPage() {
             size="sm"
             disabled={action.busy}
             aria-label={t('admin.pay.deleteLabel', { name: m.name })}
+            title={t('admin.pay.deleteLabel', { name: m.name })}
             onClick={() => void remove(m)}
           >
             <Icon name="trash" />
           </Button>
-        </div>
+        </RowActions>
       ),
     },
   ];

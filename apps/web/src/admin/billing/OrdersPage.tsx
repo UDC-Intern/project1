@@ -23,6 +23,7 @@ import {
   Icon,
   Loadable,
   notifyOrdersChanged,
+  RowActions,
   useAction,
 } from '../common';
 
@@ -292,14 +293,16 @@ export function OrdersPage() {
       key: 'actions',
       label: t('admin.col.actions'),
       render: (o) => (
-        <Button
-          variant="secondary"
-          size="sm"
-          aria-label={t('admin.order.openLabel', { number: o.number })}
-          onClick={() => setSelected(o)}
-        >
-          {t('admin.order.open')}
-        </Button>
+        <RowActions slots={[84]}>
+          <Button
+            variant="secondary"
+            size="sm"
+            aria-label={t('admin.order.openLabel', { number: o.number })}
+            onClick={() => setSelected(o)}
+          >
+            {t('admin.order.open')}
+          </Button>
+        </RowActions>
       ),
     },
   ];

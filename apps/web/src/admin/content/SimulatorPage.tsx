@@ -179,13 +179,13 @@ export function SimulatorPage() {
             <SelectField
               label={t('admin.sim.book')}
               value={book?.slug ?? ''}
-              onChange={(e) => pick({ book: e.target.value })}
+              onChange={(v) => pick({ book: v })}
               options={books.map((b) => ({ value: b.slug, label: b.title }))}
             />
             <SelectField
               label={t('admin.sim.topic')}
               value={topic?.id ?? ''}
-              onChange={(e) => pick({ topic: e.target.value })}
+              onChange={(v) => pick({ topic: v })}
               options={(book?.topics ?? []).map((x) => ({
                 value: x.id,
                 label: `${x.code}. ${x.title}`,

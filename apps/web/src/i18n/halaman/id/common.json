@@ -41,5 +41,7 @@
   "pager.prev": "Halaman sebelumnya",
   "pager.next": "Halaman berikutnya",
   "pager.page": "Halaman {n}",
-  "pager.perPage": "Per halaman"
+  "pager.perPage": "Per halaman",
+  "stepper.less": "Kurangi",
+  "stepper.more": "Tambah"
 }

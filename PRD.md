@@ -9,12 +9,12 @@ Nama produk dan maskot ditulis sekali di `apps/web/src/config/app.ts` (`APP_NAME
 UdaKids adalah aplikasi web belajar untuk anak SD Kelas 1 sampai 4. Anak berlatih soal Matematika dan Sains per topik dan
 per level, ditemani robot kecil bernama Momo yang membacakan soal. Orang tua membuat profil anak, memantau laporan, membeli
 paket, dan mengunduh sertifikat anak. Admin mengelola buku, topik, level, keluarga, transaksi, Premium, sertifikat, dan
-pengaturan aplikasi (level gratis, kontak WhatsApp, isi lembar sertifikat, suara Momo), dibantu Ilustrasi AI untuk gambar
-materi dan soal. Papan
+pengaturan aplikasi (batas bayar pesanan, kontak WhatsApp, suara Momo), dibantu Ilustrasi AI untuk gambar materi dan
+soal. Aturan level gratis diatur di Silabus Belajar, tempat admin juga menambah buku, topik, dan level baru. Papan
 peringkat hanya menampilkan nama panggilan.
 
-Rilis 1.0 memuat **5 buku**: Matematika Kelas 1, 2, 3, 4 dan Sains Kelas 1. Totalnya 50 topik dan 199 level, semua soal
-dibuat generator. Tiga peran (anak, orang tua, admin) saling terhubung penuh. Arsitekturnya monorepo pnpm, React + Vite,
+Rilis 1.0 memuat **5 buku**: Matematika Kelas 1, 2, 3, 4 dan Sains Kelas 1. Totalnya 50 topik dan 199 level bawaan, soalnya
+dibuat generator; level yang ditambah admin memakai bank soal tulisan admin sendiri. Tiga peran (anak, orang tua, admin) saling terhubung penuh. Arsitekturnya monorepo pnpm, React + Vite,
 NestJS, Drizzle, PostgreSQL, dan paket `engine` bersama yang dipakai web dan server.
 
 **Posisi saat ini:** seluruh tampilan tiga peran sudah berjalan dengan data tiruan di browser (mode mock, M1 sampai M5 dan
@@ -43,19 +43,21 @@ tambahannya selesai). API NestJS dan database dibangun di M6 sampai M11 dengan k
   walau nama panggilan anak pendek.
 - Aturan bisnis (batas level gratis, nomor WhatsApp, isi lembar sertifikat) berubah-ubah, jadi admin harus bisa mengubahnya
   tanpa menunggu rilis baru.
+- Silabus harus bisa tumbuh: admin perlu menambah buku, topik, dan level baru, lengkap dengan soalnya, tanpa menunggu
+  rilis baru.
 
 ## 4. Fitur Rilis 1.0 (10 fitur inti)
 
 | No | Fitur                    | Penjelasan singkat |
 | -- | ------------------------ | ------------------ |
 | 1  | Akun dan tiga peran      | Orang tua daftar (email + kata sandi, wajib centang persetujuan) dan mendapat kode keluarga 6 huruf. Orang tua membuat maksimal 3 profil anak (nama panggilan, warna Momo, sandi 3 gambar). Anak masuk dengan kode keluarga + sandi gambar. Admin masuk lewat halaman staf. Orang tua punya halaman akun (nama, kata sandi, email dengan kode konfirmasi). |
-| 2  | Belajar terstruktur      | 5 buku, 10 topik per buku, 4 level per topik (topik pertama Sains Kelas 1 berisi 3 level). Semua topik terbuka sejak awal; di dalam topik level berurutan. Awalnya level 1 dan 2 gratis, level 3 dan 4 Premium; batasnya diatur admin di Pengaturan. Beranda anak berupa **Peta Belajar**: pilihan Kelas 1 sampai 4, jalur topik per buku, dan panel topik (pengantar yang bisa didengar, "Tahukah kamu?", kemajuan, Mulai belajar). Kartu Premium muncul setelah level gratis topik itu lulus. |
+| 2  | Belajar terstruktur      | 5 buku, 10 topik per buku, 4 level per topik (topik pertama Sains Kelas 1 berisi 3 level). Semua topik terbuka sejak awal; di dalam topik level berurutan. Awalnya level 1 dan 2 gratis, level 3 dan 4 Premium; batasnya diatur admin di Silabus Belajar. Admin bisa menambah buku, topik, dan level baru; levelnya bisa dimainkan setelah soalnya ditulis. Beranda anak berupa **Peta Belajar**: pilihan Kelas 1 sampai 4, jalur topik per buku, dan panel topik (pengantar yang bisa didengar, "Tahukah kamu?", kemajuan, Mulai belajar). Kartu Premium muncul setelah level gratis topik itu lulus. |
 | 3  | Ronde latihan            | 10 soal dibuat generator di `engine` dari seed ronde (deterministik, tanpa bank soal statis). Jenis soal: pilihan ganda, isian angka, benar/belum tepat. Pilihan langsung dinilai saat diketuk; isian angka memakai `Keypad` dan tombol periksa. Umpan balik hijau/kuning dengan petunjuk langsung dibacakan, stopwatch tanpa batas, 10 titik indikator, lalu halaman hasil. **Dinilai di server.** |
 | 4  | Skor Jago dan tanaman    | Skor penguasaan per topik (0 sampai 100), diperbarui tiap jawaban. Anak hanya melihat tanaman 4 tahap (benih, tunas, pohon, berbuah). Orang tua dan admin melihat angka dan status (Belajar, Bisa, Jago). |
 | 5  | Papan peringkat          | Tiga mode: Rata-rata (tertimbang), Total Skor, dan Mock Test (disiapkan, belum berisi). Total dan per buku. Hanya nama panggilan dan warna Momo yang terlihat. Posisi anak sendiri disorot. 10 besar tampil di landing. |
 | 6  | Laporan orang tua        | Dasbor keluarga (ringkasan minggu, progres tiap anak dan tiap buku, level berikutnya, topik terkuat dan yang perlu ditemani), laporan per anak, dan kartu sertifikat. |
 | 7  | Paket dan pembayaran     | 5 paket: Tunas (30 hari), Kumbang (90), Tumbuh Bersama (180), Bintang Kecil (365), Teman Setia (selamanya). Orang tua memilih paket dan cara bayar (BCA, BNI, CIMB Niaga, Gopay, ShopeePay), mentransfer total dengan kode unik Rp1 sampai Rp499, lalu mengunggah bukti. Admin menyetujui atau menolak dengan catatan. Premium berlaku untuk semua anak di keluarga itu. Tanpa perpanjangan otomatis. Tombol WhatsApp admin di semua halaman. Paket dan rekening bisa ditambah, diubah, dinonaktifkan, atau dihapus admin; harga di landing dan area orang tua mengikuti menu Paket, dan nomor WhatsApp mengikuti Pengaturan. |
-| 8  | Panel admin              | **Ringkasan** (angka utama, tingkat lulus ronde, catatan tindak lanjut, grafik belajar dan penjualan, kelulusan per buku, pesanan terbaru). **Konten & Kurikulum:** Silabus Belajar (buku, topik, materi, "Tahukah kamu?", judul level, pengecualian gratis/Premium), Bank Soal & Latihan (simulator kuis seperti anak dan kunci jawaban per seed), Sertifikat Juara. **Media & Audio:** Galeri Aset, Audio Narasi (suara Momo), Ilustrasi AI (gambar dengan antrean tinjau). **Pengguna & Akademik:** Keluarga & Anak, Tim Staf & Akses, Laporan & Rapor Belajar. **Langganan & Pembayaran:** Transaksi & Bukti Bayar, Paket Langganan, Rekening & Pembayaran, Pengaturan Sistem. Lonceng notifikasi di kanan atas. Aturan Pengaturan di bagian 4.3. |
+| 8  | Panel admin              | **Ringkasan** (angka utama, tingkat lulus ronde, catatan tindak lanjut, grafik belajar dan penjualan, kelulusan per buku, pesanan terbaru). **Konten & Kurikulum:** Silabus Belajar (tambah buku, topik, dan level; materi, "Tahukah kamu?", judul level; aturan akses berbayar dan level gratis; pengecualian gratis/Premium per level; bank soal tulisan admin untuk level buatan sendiri), Bank Soal & Latihan (simulator kuis seperti anak dan kunci jawaban per seed), Sertifikat Juara. **Media & Audio:** Galeri Aset, Audio Narasi (suara Momo), Ilustrasi AI (gambar dengan antrean tinjau). **Pengguna & Akademik:** Keluarga & Anak, Tim Staf & Akses, Laporan & Rapor Belajar. **Langganan & Pembayaran:** Transaksi & Bukti Bayar, Paket Langganan, Rekening & Pembayaran, Pengaturan Sistem. Lonceng notifikasi di kanan atas. Aturan Pengaturan di bagian 4.3. |
 | 9  | Sertifikat Juara Digital | Bagian dari Premium. Anak yang lulus semua level dalam satu buku mendapat sertifikat bernomor (`CERT-XXXXXX`) yang terbit otomatis. Anak melihat dan mencetaknya; orang tua mengunduh gambar PNG atau mencetak/menyimpan PDF dan bisa mengisi nama lengkap anak khusus untuk sertifikat; admin mengelola desain, isi lembar, daftar menunggu, dan semua sertifikat. Setiap lembar punya kode QR ke halaman publik cek keaslian. Aturan lengkap di bagian 4.2. |
 | 10 | Suara                    | Setiap halaman anak membacakan isinya begitu tampil, tombol dan tautan menyebut namanya saat diketuk, soal dan umpan balik dibacakan tanpa jeda. Admin mengatur suara di Audio Narasi: hidup/mati, bacaan otomatis, kecepatan, nada, dan suara yang diutamakan. Mode tiruan memakai suara peramban berbahasa Indonesia. M10 menambah klip Google Cloud Text-to-Speech (`id-ID-Chirp3-HD-Leda`) untuk soal dan materi, dibuat sekali dan disimpan di PostgreSQL. Tanpa suara, teks tetap tampil. |
 
@@ -66,8 +68,8 @@ tambahannya selesai). API NestJS dan database dibangun di M6 sampai M11 dengan k
 - **Level:** semua topik boleh dipilih bebas. Di dalam topik, level 1 selalu terbuka dan level berikutnya terbuka bila
   level sebelumnya pernah lulus.
 - **Premium:** level berbayar hanya bisa dimainkan bila anak punya Premium aktif, dari paket keluarga atau dari admin.
-  Level gratis: nomor level ≤ `freeLevels` di Pengaturan (awalnya 2, nilai awal `FREE_LEVELS` di `engine`), kecuali
-  admin mengecualikan satu level di menu Konten (level 1 selalu gratis). Kunci berbayar bisa dimatikan: semua level
+  Level gratis: nomor level ≤ `freeLevels` di Silabus Belajar (awalnya 2, nilai awal `FREE_LEVELS` di `engine`), kecuali
+  admin mengecualikan satu level di topiknya (level 1 selalu gratis). Kunci berbayar bisa dimatikan: semua level
   gratis. Yang berlaku adalah tanggal berakhir Premium yang paling akhir. Dicek di server.
 - **Skor Jago:** tahap tanaman yang sudah terlihat tidak pernah turun. Kekeliruan di mode tantangan tidak menghukum.
 - **Peringkat:** total skor = jumlah skor terbaik tiap level, seri dipecah dengan total waktu lebih cepat. Mode Rata-rata
@@ -116,23 +118,24 @@ tambahannya selesai). API NestJS dan database dibangun di M6 sampai M11 dengan k
 
 ### 4.3 Pengaturan admin
 
-Menu **Pengaturan Sistem** (`/admin/pengaturan`, bagian `billing` dan `contact`), dialog **Atur isi lembar** di
-Sertifikat Juara (`/admin/sertifikat`, bagian `certificate`), dan **Audio Narasi** (`/admin/narasi`, bagian `voice`)
-menyimpan nilai yang dulu tertulis di kode. Semua halaman membaca nilai yang
+Kartu **Akses berbayar** di Silabus Belajar (`/admin/konten`, kunci berbayar dan level gratis di bagian `billing`), menu
+**Pengaturan Sistem** (`/admin/pengaturan`, batas bayar pesanan di bagian `billing`, dan bagian `contact`), dialog **Atur
+isi lembar** di Sertifikat Juara (`/admin/sertifikat`, bagian `certificate`), dan **Audio Narasi** (`/admin/narasi`, bagian
+`voice`) menyimpan nilai yang dulu tertulis di kode. Semua halaman membaca nilai yang
 sama lewat `useSettings()`, sehingga perubahan langsung berlaku tanpa memuat ulang. Tiap bagian disimpan sendiri (`PUT
 /admin/settings/:part`) dan diperiksa skema di `engine`; isian yang keliru ditolak per isian.
 
 | Bagian       | Isian | Dipakai di |
 | ------------ | ----- | ---------- |
-| `billing`    | Kunci berbayar (hidup/mati), level gratis per topik (1 sampai 12, awalnya 2), batas bayar pesanan (1 sampai 168 jam, awalnya 24) | Status level anak, landing, halaman Paket dan Konten admin, masa berlaku pesanan baru |
+| `billing`    | Kunci berbayar (hidup/mati) dan level gratis per topik (1 sampai 12, awalnya 2), diatur di Silabus Belajar; batas bayar pesanan (1 sampai 168 jam, awalnya 24), diatur di Pengaturan Sistem. Menyimpan satu isian tidak mengubah yang lain | Status level anak, landing, halaman Paket dan Silabus Belajar admin, masa berlaku pesanan baru |
 | `contact`    | Nomor atau link WhatsApp admin (nomor HP 08… diubah menjadi `https://wa.me/62…`, hanya domain WhatsApp), pesan pembuka (maks 200 huruf), link grup WhatsApp orang tua (hanya `chat.whatsapp.com`, opsional) | Tombol "Hubungi admin" (kosong berarti tombol disembunyikan), halaman Paket orang tua |
 | `certificate`| Penerbit, kalimat kecil kepala, judul, sub-judul, dua penanda tangan beserta jabatannya, keterangan kurikulum, tampilkan rata-rata skor, tampilkan kode QR, pakai nama lengkap dari orang tua | Lembar sertifikat (anak, orang tua, admin, landing), halaman cek keaslian |
 | `voice`      | Suara aktif, bacakan otomatis saat halaman/soal tampil, kecepatan (0,6 sampai 1,4, awalnya 0,92), nada (0,5 sampai 1,5, awalnya 1,1), suara peramban yang diutamakan. Diatur di menu Audio Narasi | Semua suara di area anak; pratinjau admin memakai isian yang belum disimpan |
 
 Dialog Atur isi lembar (latar diburamkan) menampilkan pratinjau lembar langsung dari isian (data contoh) sebelum
 disimpan; Simpan menutup dialog dan ringkasan "Lembar yang berlaku" langsung memakai isi baru, Batal tidak menyimpan
-apa pun. Pilihan desain ada di halaman yang sama. Pengecualian per level ada di menu Konten dan ditandai
-"Pengecualian"; pengecualian yang kembali sama dengan aturan Pengaturan otomatis dihapus.
+apa pun. Pilihan desain ada di halaman yang sama. Pengecualian per level ada di topiknya di Silabus Belajar dan ditandai
+"Pengecualian"; pengecualian yang kembali sama dengan aturan akses otomatis dihapus.
 
 ### 4.4 Interaksi antar peran
 
@@ -141,12 +144,13 @@ apa pun. Pilihan desain ada di halaman yang sama. Pengecualian per level ada di 
 3. Setiap ronde tersimpan, sehingga laporan orang tua, Skor Jago, papan peringkat, dan statistik admin ikut berubah.
 4. Orang tua membeli paket dan mengunggah bukti transfer. Admin menyetujui, lalu level berbayar di semua topik terbuka
    untuk semua anak di keluarga itu. Admin juga bisa memberi atau mencabut Premium per anak tanpa transaksi.
-5. Admin mengubah judul, materi, atau status level. Perubahan langsung terlihat di area anak. Soal ronde selalu dibuat
-   generator, jadi tidak perlu ditinjau satu per satu.
+5. Admin mengubah judul, materi, atau status level. Perubahan langsung terlihat di area anak. Soal level bawaan dibuat
+   generator, jadi tidak perlu ditinjau satu per satu. Admin juga menambah buku, topik, dan level; level baru langsung bisa
+   dimainkan anak begitu bank soalnya (minimal 4 soal) disimpan.
 6. Anak menuntaskan sebuah buku. Sertifikat terbit, tampil di halaman hasil dan Profil anak, di menu Sertifikat orang tua,
    dan di panel admin. Orang tua bisa mengisi nama lengkap anak agar lembarnya resmi; siapa pun bisa mencocokkan nomornya
    di halaman cek keaslian.
-7. Admin mengubah Pengaturan (level gratis, WhatsApp) atau isi lembar sertifikat. Anak, orang tua, dan pengunjung
+7. Admin mengubah aturan level gratis (Silabus Belajar), WhatsApp (Pengaturan), atau isi lembar sertifikat. Anak, orang tua, dan pengunjung
    langsung melihat perubahannya. Admin menonaktifkan akun anak atau keluarga; akun itu tidak bisa masuk dan tersembunyi dari pilihan
    profil sampai diaktifkan lagi.
 
@@ -206,8 +210,15 @@ Hal berikut **tidak** dibangun di rilis 1.0. Struktur data dan modul disiapkan a
    anak Premium, sertifikat, sedang bermain), catatan tindak lanjut bertautan (bukti menunggu, sertifikat menunggu,
    ilustrasi menunggu tinjau, level tersulit), grafik aktivitas, pendapatan, corong keluarga, jam ramai, kelulusan per buku,
    level tersulit, jawaban keliru terbanyak, dan pesanan terbaru. Rentang 7 hari, 30 hari, atau bulan ini.
-2. Silabus Belajar: atur buku, topik (judul, materi, "Tahukah kamu?"), dan level (judul, gratis/Premium). Aturan gratis datang dari
-   Pengaturan; mengubah satu level menjadi pengecualian ditandai "Pengecualian". Tiap buku bisa dilipat.
+2. Silabus Belajar: kartu **Akses berbayar** (kunci berbayar hidup/mati dan jumlah level gratis per topik, dengan contoh
+   satu topik); di bawahnya tiap buku bisa dilipat. **Tambah buku** membuat buku untuk satu pasangan mapel dan kelas yang
+   belum ada, langsung dengan topik pertamanya; **Tambah topik** menambah topik (kode, judul, materi, "Tahukah kamu?", level).
+   Topik dibuka untuk mengubah judul, materi, judul level, dan akses tiap level (Gratis/Premium; yang menyimpang dari
+   aturan ditandai "Pengecualian"), menambah level di akhir (paling banyak 12), dan menghapus topik atau level buatan admin
+   yang belum dikerjakan anak. Level buatan admin memakai **bank soal tulisan admin**: pertanyaan dan pilihan jawaban,
+   satu jawaban benar, petunjuk (minimal 4 soal, 10 atau lebih supaya jarang berulang); satu ronde mengambil 10 soal
+   dengan urutan pilihan diacak. Level tanpa soal tampil "Segera hadir" di area anak. Buku, topik, dan level bawaan tidak bisa
+   dihapus dan soalnya tetap dibuat generator.
 3. Bank Soal & Latihan: pilih buku, topik, level, dan seed. Mode simulasi memutar ronde 10 soal seperti anak (dibacakan,
    dijawab, umpan balik dan petunjuk, hasil lulus/belum); mode kunci menampilkan 10 soal beserta jawaban dan petunjuk.
    Tidak menyimpan apa pun.
@@ -228,10 +239,13 @@ Hal berikut **tidak** dibangun di rilis 1.0. Struktur data dan modul disiapkan a
    lihat/unduh/cetak, buka cek keaslian, perbarui, atau hapus (konfirmasi mengetik "hapus").
 8. Laporan: statistik per level (tingkat lulus, jawaban keliru terbanyak) dan laporan per anak (Skor Jago, topik yang
    perlu ditemani, kemajuan tiap buku).
-9. Pengaturan Sistem: ubah level gratis, kunci berbayar, batas bayar pesanan, dan kontak WhatsApp (bagian 4.3); di mode
+9. Pengaturan Sistem: ubah batas bayar pesanan dan kontak WhatsApp (bagian 4.3); di mode
    tiruan juga muat ulang atau hapus data contoh. Lonceng di pojok kanan atas memuat 30 kabar terakhir.
 10. Semua daftar memakai pola yang sama: chip saring berwarna status (kuning menunggu, hijau lunas/disetujui, merah
-    ditolak) dengan jumlah per status, badge status satu ukuran, dan tombol aksi ringkas yang seragam di tiap baris.
+    ditolak) dengan jumlah per status, badge status satu ukuran, dan tombol aksi ringkas yang menempati kolom tetap sehingga
+    sejajar antarbaris.
+11. Semua pilihan satu dari beberapa memakai dropdown bergaya (bukan daftar bawaan peramban) yang bisa dipakai dengan
+    papan ketik; sakelar, pilihan segmen, stepper, kotak centang, dan bulatan pilihan juga bergaya seragam.
 
 ## 7. Daftar Halaman
 
@@ -266,7 +280,7 @@ Router: React Router 6. Bagian dinamis ditulis `:param`. URL halaman berbahasa I
 | Akun saya           | `/orang-tua/akun`             | Nama, kata sandi, email dengan kode konfirmasi                                        | Orang tua    |
 | Masuk staf          | `/masuk/staf`                 | Email + kata sandi admin                                                              | Tidak        |
 | Ringkasan           | `/admin`                      | Angka utama, catatan tindak lanjut, grafik belajar dan penjualan, kelulusan per buku, pesanan terbaru | Admin        |
-| Silabus Belajar     | `/admin/konten`               | Buku (bisa dilipat), topik, "Tahukah kamu?", level, gratis/Premium dan pengecualian    | Admin        |
+| Silabus Belajar     | `/admin/konten`               | Buku (bisa dilipat), tambah buku/topik/level, bank soal, aturan akses berbayar, pengecualian| Admin        |
 | Bank Soal & Latihan | `/admin/soal`                 | Simulator kuis seperti anak dan kunci jawaban 10 soal per level dan seed               | Admin        |
 | Galeri Aset         | `/admin/galeri`               | Semua gambar aplikasi per jenis, cari, detail, unduh SVG                               | Admin        |
 | Audio Narasi        | `/admin/narasi`               | Pengaturan suara Momo, uji suara, semua teks yang dibacakan                            | Admin        |
@@ -279,7 +293,7 @@ Router: React Router 6. Bagian dinamis ditulis `:param`. URL halaman berbahasa I
 | Transaksi & Bukti   | `/admin/transaksi`            | Pesanan menurut status, bukti transfer, setujui atau tolak                            | Admin        |
 | Paket Langganan     | `/admin/paket`                | Tambah, ubah, hapus paket: nama, keterangan, harga normal, harga jual, masa aktif     | Admin        |
 | Rekening & Pembayaran | `/admin/rekening`           | Bank dan e-wallet tujuan transfer, petunjuk bayar                                     | Admin        |
-| Pengaturan Sistem   | `/admin/pengaturan`           | Level gratis dan kunci berbayar, kontak WhatsApp, data contoh (mode tiruan)            | Admin        |
+| Pengaturan Sistem   | `/admin/pengaturan`           | Batas bayar pesanan, kontak WhatsApp, data contoh (mode tiruan)                        | Admin        |
 | 404                 | `*`                           | Halaman tidak ditemukan dengan tombol kembali (nada ramah anak)                       | Tidak        |
 
 Pengalihan: `/play/*` tanpa sesi anak ke `/play/masuk`. `/orang-tua/*` tanpa sesi orang tua ke `/orang-tua/masuk`.
@@ -320,8 +334,8 @@ Pengalihan: `/play/*` tanpa sesi anak ke `/play/masuk`. `/orang-tua/*` tanpa ses
   buatan pustaka `uqr`; daftar yang sama digambar ke kanvas untuk unduhan PNG) dan `CertificatePrint` (salinan khusus
   cetak). Isi teks lembar selalu datang dari Pengaturan lewat `SheetData.settings`.
 - **Komponen dewasa:** `AppShell` (sidebar yang bisa disembunyikan, laci di layar sempit, bilah atas untuk lonceng
-  notifikasi admin), `Card`, `Table`, `FormField`, `TextArea`, `SelectField`, `Checkbox`, `Pager` (paging tabel),
-  `Dialog`, `Badge`, `Notice`, `PlanBadge`, grafik dasbor.
+  notifikasi admin), `Card`, `Table`, `FormField`, `TextArea`, `SelectField`, `Select` (dropdown bergaya), `Switch`, `Segmented`, `Stepper`, `Checkbox`, `Pager`
+  (paging tabel), `Dialog`, `Badge`, `Notice`, `PlanBadge`, grafik dasbor.
 - **Tata letak:**
   - **Anak:** bilah atas tipis di beranda: chip profil (Momo kecil, nama panggilan, poin bintang) dan dua tombol ikon
     (Peringkat, Selesai), masing-masing ≥ 64 px. Tidak ada navigasi bawah; halaman lain memakai kepala halaman dengan
@@ -468,6 +482,11 @@ dan web (mode mock) menghasilkan soal yang identik. Satu soal berbentuk:
 
 Keluaran generator wajib lolos `validateQuestion` (aturan teks anak). Test engine menguji ribuan seed per family.
 
+Level buatan admin memakai family `skill` dengan spesifikasi `manual`: bank soal (4 sampai 60 soal, tiap soal 2 sampai 4
+pilihan, satu jawaban benar, petunjuk opsional) disimpan di `generator_params`. Ronde mengambil 10 soal dari bank dengan
+urutan pilihan diacak oleh seed ronde, sehingga tetap bisa dibuat ulang tanpa menyimpan kunci. Skema bank dan
+pemeriksaan teks anak ada di `engine` dan dipakai bersama oleh web dan server.
+
 ### Tabel aktivitas: `rounds`, `round_answers`, `skill_mastery`
 
 | Tabel         | Kolom |
@@ -565,6 +584,7 @@ sampai M9), bukan hanya disembunyikan di tampilan.
 | 1      | M0             | Dokumen produk dan keputusan arsitektur (tanpa kode)                                                  | Selesai |
 | 1      | M1 sampai M5   | Semua tampilan tiga peran dengan data tiruan di browser (mode mock), mengikuti kontrak                | Selesai |
 | 1      | Tambahan M5    | Paket dan pembayaran manual, Kelas 1 sampai 4 dan Peta Belajar, area anak bersuara, 2 level gratis + 2 Premium, Sertifikat Juara Digital | Selesai |
+| 1      | Tambahan M5f   | Silabus Belajar bisa menambah buku, topik, dan level (bank soal tulisan admin), aturan level gratis pindah ke sana dari Pengaturan Sistem; dropdown bergaya menggantikan daftar bawaan peramban; tombol aksi tabel menempati kolom tetap | Selesai |
 | 1      | Tambahan M5e   | Isi lembar sertifikat dipindah ke dialog di Sertifikat Juara (Pengaturan Sistem tinggal akses berbayar, WhatsApp, data contoh); chip saring berwarna status dengan jumlah, badge seragam, tombol aksi tabel ringkas | Selesai |
 | 1      | Tambahan M5d   | Data contoh mode tiruan (puluhan keluarga, anak, staf, transaksi, ribuan ronde, sertifikat, ilustrasi) yang bisa dimuat ulang atau dihapus di Pengaturan Sistem; paging di semua daftar admin dan riwayat transaksi orang tua; tombol kembali Detail Topik ke Peta Belajar | Selesai |
 | 1      | Tambahan M5c   | Navigasi admin baru (Konten & Kurikulum, Media & Audio, Pengguna & Akademik, Langganan & Pembayaran), Ringkasan baru, Bank Soal & Latihan (simulator kuis), Sertifikat Juara terhubung Pengaturan, Galeri Aset, Audio Narasi, Ilustrasi AI | Selesai |

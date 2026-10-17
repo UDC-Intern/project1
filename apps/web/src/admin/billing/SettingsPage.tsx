@@ -1,11 +1,12 @@
 import { useState, type FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 import type { AppSettings, BillingSettings, ContactSettings } from '@udakids/engine';
 import type { DemoDataSummary } from '../../api/adminTypes';
 import { isMocked } from '../../api/mode';
-import { settingsChanged } from '../../api/settings';
+import { currentSettings, settingsChanged } from '../../api/settings';
 import { useApiCall, useFetch } from '../../auth/useApi';
 import { t, type MessageKey } from '../../i18n';
-import { Button, Card, Checkbox, formatDate, PageHeader, TextField } from '../../ui/ui';
+import { Button, Card, formatDate, PageHeader, TextField } from '../../ui/ui';
 import { ActionNotice, confirmAction, Loadable, notifyOrdersChanged, useAction } from '../common';
 
 /** Simpan satu bagian pengaturan; halaman lain yang memakainya ikut diperbarui. */
@@ -23,50 +24,39 @@ function useSave<K extends keyof AppSettings>(part: K, success: string) {
   return { action, save };
 }
 
-function BillingForm({ initial }: { initial: BillingSettings }) {
-  const { action, save } = useSave('billing', t('admin.billing.saved'));
-  const [form, setForm] = useState(initial);
-  const set = <K extends keyof BillingSettings>(k: K, v: BillingSettings[K]) =>
-    setForm((f) => ({ ...f, [k]: v }));
+/**
+ * Pembayaran: berapa lama pesanan menunggu dibayar. Kunci berbayar dan level gratis ada di Silabus Belajar;
+ * bagian `billing` yang sama disimpan utuh, jadi aturan akses di sana tidak berubah.
+ */
+function PaymentForm({ initial }: { initial: BillingSettings }) {
+  const { action, save } = useSave('billing', t('admin.catalog.pay.saved'));
+  const [hours, setHours] = useState(initial.orderExpiryHours);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    const out = await save(form);
-    if (out) setForm(out);
+    // Aturan akses diambil dari pengaturan terbaru, bukan dari isian awal halaman ini.
+    const out = await save({ ...currentSettings().billing, orderExpiryHours: hours });
+    if (out) setHours(out.orderExpiryHours);
   }
 
   return (
-    <Card title={t('admin.billing.cardTitle')}>
+    <Card title={t('admin.catalog.pay.cardTitle')}>
       <ActionNotice error={action.error} done={action.done} />
       <form onSubmit={submit}>
-        <Checkbox
-          label={t('admin.billing.paywall')}
-          checked={form.paywall}
-          onChange={(e) => set('paywall', e.target.checked)}
+        <TextField
+          label={t('admin.catalog.pay.expiry')}
+          hint={t('admin.catalog.pay.expiryHint')}
+          type="number"
+          required
+          min={1}
+          max={168}
+          value={String(hours)}
+          onChange={(e) => setHours(Number(e.target.value))}
         />
-        <p className="ui-hint">{t('admin.billing.paywallHint')}</p>
-        <div className="adm-fields">
-          <TextField
-            label={t('admin.billing.freeLevels')}
-            hint={t('admin.billing.freeLevelsHint')}
-            type="number"
-            required
-            min={1}
-            max={12}
-            value={String(form.freeLevels)}
-            onChange={(e) => set('freeLevels', Number(e.target.value))}
-          />
-          <TextField
-            label={t('admin.billing.expiry')}
-            hint={t('admin.billing.expiryHint')}
-            type="number"
-            required
-            min={1}
-            max={168}
-            value={String(form.orderExpiryHours)}
-            onChange={(e) => set('orderExpiryHours', Number(e.target.value))}
-          />
-        </div>
+        <p className="ui-muted" style={{ marginBottom: 14 }}>
+          {t('admin.catalog.pay.freeLevels')}{' '}
+          <Link to="/admin/konten">{t('admin.catalog.pay.openCatalog')}</Link>
+        </p>
         <Button type="submit" disabled={action.busy}>
           {t('admin.save')}
         </Button>
@@ -203,7 +193,7 @@ export function SettingsPage() {
       <Loadable loading={s.loading} error={s.error} hasData={!!s.data}>
         {() => (
           <>
-            <BillingForm initial={s.data!.billing} />
+            <PaymentForm initial={s.data!.billing} />
             <ContactForm initial={s.data!.contact} />
           </>
         )}

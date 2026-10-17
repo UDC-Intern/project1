@@ -14,7 +14,10 @@ export function Dialog({
   wide?: boolean;
 }) {
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    const onKey = (e: KeyboardEvent) => {
+      // Esc di pop-up konfirmasi (elemen <dialog>) hanya menutup konfirmasinya, bukan dialog di belakangnya.
+      if (e.key === 'Escape' && !document.querySelector('dialog[open]')) onClose();
+    };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);

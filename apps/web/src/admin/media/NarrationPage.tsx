@@ -187,7 +187,7 @@ function Narration({ initial, books }: { initial: VoiceSettings; books: CatalogB
                 label={t('admin.voice.voice')}
                 hint={t('admin.voice.voiceHint')}
                 value={form.voiceName}
-                onChange={(e) => set('voiceName', e.target.value)}
+                onChange={(v) => set('voiceName', v)}
                 options={[
                   { value: '', label: t('admin.voice.voiceAuto') },
                   ...voices.map((v) => ({ value: v.name, label: `${v.name} (${v.lang})` })),
@@ -246,7 +246,7 @@ function Narration({ initial, books }: { initial: VoiceSettings; books: CatalogB
             <SelectField
               label={t('admin.voice.book')}
               value={book?.slug ?? ''}
-              onChange={(e) => setBookSlug(e.target.value)}
+              onChange={setBookSlug}
               options={books.map((b) => ({ value: b.slug, label: b.title }))}
             />
           )

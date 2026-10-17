@@ -7,11 +7,13 @@ import {
   type Certificate,
   type CertificateDesign,
   type Illustration,
+  type LevelContent,
   type MasteryState,
   type MomoColor,
   type PaymentMethod,
   type Pin,
   type Stage,
+  type TopicContent,
 } from '@udakids/engine';
 import {
   ORDER_TTL_MS,
@@ -29,13 +31,38 @@ const BASE: BookContent[] = BASE_BOOKS;
 /** Buku yang sedang berlaku: BASE ditambah suntingan admin. Array yang sama dipakai semua modul mock. */
 export const BOOKS: BookContent[] = structuredClone(BASE);
 
+/** Silabus buatan admin (Silabus Belajar): ditambahkan di atas buku dari berkas konten. */
+export type SyllabusAdditions = {
+  /** Buku baru lengkap dengan topik dan level awalnya. */
+  books: BookContent[];
+  /** Topik baru untuk buku yang sudah ada (bawaan atau buatan admin). */
+  topics: { book: string; topic: TopicContent }[];
+  /** Level baru untuk topik yang sudah ada. */
+  levels: { topic: string; level: LevelContent }[];
+};
+
 export type ContentEdits = {
   topics: Record<string, { title?: string; lesson?: string; tips?: string[] }>;
   levels: Record<string, { title?: string; isFree?: boolean }>;
+  /** Data versi lama belum punya bagian ini. */
+  added?: SyllabusAdditions;
 };
 
 export function applyEdits(edits: ContentEdits): void {
   BOOKS.splice(0, BOOKS.length, ...structuredClone(BASE));
+  const added = edits.added;
+  if (added) {
+    BOOKS.push(...structuredClone(added.books));
+    BOOKS.sort((a, b) => a.sort - b.sort);
+    for (const { book, topic } of added.topics)
+      BOOKS.find((b) => b.slug === book)?.topics.push(structuredClone(topic));
+    for (const { topic, level } of added.levels) {
+      const [slug, code] = topic.split(':');
+      BOOKS.find((b) => b.slug === slug)
+        ?.topics.find((t) => t.code === code)
+        ?.levels.push(structuredClone(level));
+    }
+  }
   for (const book of BOOKS) {
     for (const topic of book.topics) {
       const te = edits.topics[`${book.slug}:${topic.code}`];

@@ -149,59 +149,6 @@
   }
 }
 
-/* Satu buku di editor konten: bisa dilipat. */
-.adm-book > summary {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 12px;
-  cursor: pointer;
-  list-style: none;
-}
-
-.adm-book > summary::-webkit-details-marker {
-  display: none;
-}
-
-.adm-book > summary::before {
-  content: '▸';
-  color: var(--ui-primary);
-}
-
-.adm-book[open] > summary::before {
-  content: '▾';
-}
-
-.adm-book > summary h2 {
-  margin: 0;
-  font-size: 1.15rem;
-}
-
-.adm-book[open] > summary {
-  margin-bottom: 12px;
-}
-
-.adm-cat-row {
-  border-bottom: 1px solid var(--ui-line);
-  margin-bottom: 10px;
-}
-
-.adm-cat-intro {
-  margin: 0 0 12px;
-}
-
-.adm-cat-intro summary {
-  cursor: pointer;
-  font-weight: 600;
-  color: var(--ui-primary);
-  margin-bottom: 8px;
-}
-
-.adm-cat-intro .ui-field textarea {
-  font-family: inherit;
-  font-size: inherit;
-}
-
 .adm-price {
   display: flex;
   flex-direction: column;
@@ -351,6 +298,7 @@
 
 .ins-panel {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   align-content: start;
   gap: 8px;
   padding: 16px;
@@ -478,12 +426,37 @@
   white-space: nowrap;
 }
 
-/* Aksi di satu baris tabel: tombol ringkas sejajar, tidak bertumpuk. */
+/* Aksi di satu baris: tombol menempati slot lebar tetap (lihat RowActions) sehingga sejajar antarbaris. */
 .adm-row-actions {
-  display: flex;
-  flex-wrap: nowrap;
+  display: grid;
+  grid-template-columns: var(--slots);
   align-items: center;
+  justify-content: start;
   gap: 6px;
+}
+
+/* Di layar sempit slot tetap tidak muat di kartu keluarga: tombol dibagi rata, tetap seragam antarkartu. */
+@media (max-width: 600px) {
+  .dir-kid-row .adm-row-actions {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+  .dir-family-actions .adm-row-actions {
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  }
+}
+
+.adm-row-actions > .ui-btn {
+  width: 100%;
+  justify-content: center;
+  padding-inline: 8px;
+}
+
+.adm-row-actions > .adm-inline-form {
+  grid-column: 1 / -1;
+}
+
+.adm-row-gap {
+  display: block;
 }
 
 .dir-filters {
@@ -583,13 +556,6 @@
   align-items: center;
 }
 
-.dir-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  align-items: center;
-}
-
 .dir-kid-list {
   display: grid;
   gap: 8px;
@@ -606,7 +572,7 @@
   align-items: center;
 }
 
-.dir-kid-row .dir-actions {
+.dir-kid-row .adm-row-actions {
   grid-column: 1 / -1;
 }
 
@@ -975,8 +941,8 @@
   gap: 0 12px;
 }
 
-/* Tetap terlihat di dasar dialog saat isian digulir; geser sejauh padding dialog supaya rata dengan tepinya. */
-.certs-editor-actions {
+/* Bilah tombol dialog: tetap terlihat di dasar saat isian digulir; geser sejauh padding dialog agar rata tepinya. */
+.dlg-actions {
   position: sticky;
   bottom: calc(-1 * var(--space-4));
   display: flex;
@@ -1026,27 +992,6 @@
   color: var(--ui-muted);
 }
 
-/* Daftar level di editor konten. */
-
-.adm-level-list {
-  display: grid;
-  gap: 8px;
-  margin: 8px 0 12px;
-  padding: 0;
-  list-style: none;
-}
-
-.adm-level-list li {
-  display: grid;
-  grid-template-columns: 36px minmax(0, 1fr) auto auto auto;
-  gap: 8px 12px;
-  align-items: center;
-}
-
-.adm-level-list .ui-field {
-  margin: 0;
-}
-
 .adm-level-num {
   display: grid;
   place-items: center;
@@ -1056,15 +1001,6 @@
   background: var(--gonjong-soft);
   color: var(--ui-primary);
   font-weight: 800;
-}
-
-@media (max-width: 640px) {
-  .adm-level-list li {
-    grid-template-columns: 36px minmax(0, 1fr);
-  }
-  .adm-level-list li > :nth-child(n + 3) {
-    grid-column: 2;
-  }
 }
 
 /* Ringkasan. */

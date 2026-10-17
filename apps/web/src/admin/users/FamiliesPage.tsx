@@ -25,6 +25,7 @@ import {
   FilterChips,
   lastSeen,
   Loadable,
+  RowActions,
   useAction,
   useDebounced,
 } from '../common';
@@ -148,7 +149,7 @@ function PremiumDialog({
             <SelectField
               label={liveAdmin.length ? t('admin.dir.extend') : t('admin.dir.duration')}
               value={duration}
-              onChange={(e) => setDuration(e.target.value)}
+              onChange={setDuration}
               options={DURATIONS.map((d) => ({ value: d.value, label: t(d.label) }))}
             />
             <TextArea
@@ -296,8 +297,12 @@ export function FamiliesPage() {
     if (ok) setPinFor(undefined);
   }
 
-  const childActions = (c: FamilyChild): ReactNode => (
-    <div className="dir-actions">
+  /** Empat aksi per anak: dua baris dua kolom di tabel (`grid`), atau satu baris di kartu keluarga (`row`). */
+  const childActions = (c: FamilyChild, layout: 'grid' | 'row'): ReactNode => (
+    <RowActions
+      slots={layout === 'grid' ? [124, 124] : [124, 84, 108, 108]}
+      label={t('admin.staff.actionsFor', { name: c.nickname })}
+    >
       <Button
         variant="secondary"
         size="sm"
@@ -327,7 +332,7 @@ export function FamiliesPage() {
       >
         {c.active ? t('admin.user.deactivate') : t('admin.user.activate')}
       </Button>
-    </div>
+    </RowActions>
   );
   const pinRow = (c: FamilyChild) =>
     pinFor === c.id && (
@@ -417,7 +422,7 @@ export function FamiliesPage() {
           <SelectField
             label={t('admin.dir.fStatus')}
             value={status}
-            onChange={(e) => set({ status: e.target.value })}
+            onChange={(v) => set({ status: v })}
             options={[
               { value: 'all', label: t('admin.dir.all') },
               { value: 'premium', label: t('common.plan.premium') },
@@ -427,7 +432,7 @@ export function FamiliesPage() {
           <SelectField
             label={t('admin.dir.fActive')}
             value={active}
-            onChange={(e) => set({ active: e.target.value })}
+            onChange={(v) => set({ active: v })}
             options={[
               { value: 'all', label: t('admin.dir.all') },
               { value: 'active', label: t('admin.dir.active') },
@@ -437,7 +442,7 @@ export function FamiliesPage() {
           <SelectField
             label={t('admin.dir.fSort')}
             value={sort}
-            onChange={(e) => set({ sort: e.target.value })}
+            onChange={(v) => set({ sort: v })}
             options={[
               { value: 'newest', label: t('admin.dir.sNewest') },
               { value: 'oldest', label: t('admin.dir.sOldest') },
@@ -495,7 +500,7 @@ export function FamiliesPage() {
                                 {!c.active && <ActiveBadge active={false} />}
                               </span>
                               <small className="ui-muted">{lastSeen(c.lastActiveAt)}</small>
-                              {childActions(c)}
+                              {childActions(c, 'row')}
                             </div>
                             {pinRow(c)}
                           </li>
@@ -503,22 +508,27 @@ export function FamiliesPage() {
                       </ul>
                     )}
 
-                    <div className="dir-actions dir-family-actions">
-                      <Button
-                        variant={p.active ? 'danger' : 'secondary'}
-                        size="sm"
-                        disabled={action.busy}
-                        onClick={() => void toggleParent(p)}
+                    <div className="dir-family-actions">
+                      <RowActions
+                        slots={[200, 128]}
+                        label={t('admin.staff.actionsFor', { name: p.name })}
                       >
-                        {p.active
-                          ? t('admin.user.deactivateFamily')
-                          : t('admin.user.activateFamily')}
-                      </Button>
-                      <PasswordSetter
-                        busy={action.busy}
-                        note={t('admin.user.passwordForceNote')}
-                        onSubmit={(pw) => setPassword(p, pw)}
-                      />
+                        <Button
+                          variant={p.active ? 'danger' : 'secondary'}
+                          size="sm"
+                          disabled={action.busy}
+                          onClick={() => void toggleParent(p)}
+                        >
+                          {p.active
+                            ? t('admin.user.deactivateFamily')
+                            : t('admin.user.activateFamily')}
+                        </Button>
+                        <PasswordSetter
+                          busy={action.busy}
+                          note={t('admin.user.passwordForceNote')}
+                          onSubmit={(pw) => setPassword(p, pw)}
+                        />
+                      </RowActions>
                     </div>
                   </li>
                 ))}
@@ -559,7 +569,7 @@ export function FamiliesPage() {
                         {c.lastActiveAt ? formatShortDate(c.lastActiveAt) : '—'}
                       </span>
                       <span role="cell" data-label={t('admin.dir.cActions')}>
-                        {childActions(c)}
+                        {childActions(c, 'grid')}
                       </span>
                     </div>
                     {pinRow(c)}

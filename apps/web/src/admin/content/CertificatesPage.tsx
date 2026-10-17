@@ -30,6 +30,7 @@ import { Dialog } from '../../ui/Dialog';
 import { ListPager, usePaged } from '../../ui/Pager';
 import { ErrorState, LoadingState } from '../../ui/states';
 import { Badge, Button, Card, Empty, Notice, PageHeader, TextField } from '../../ui/ui';
+import { RowActions } from '../common';
 import { CertificateSheetDialog } from './CertificateSheetDialog';
 
 const SAMPLE_NUMBER = 'CERT-7KQ2MX';
@@ -307,9 +308,11 @@ export function CertificatesPage() {
                       </Badge>
                     </td>
                     <td>
-                      <Button size="sm" onClick={() => void issue(c)}>
-                        {t('admin.certs.issue')}
-                      </Button>
+                      <RowActions slots={[96]}>
+                        <Button size="sm" onClick={() => void issue(c)}>
+                          {t('admin.certs.issue')}
+                        </Button>
+                      </RowActions>
                     </td>
                   </tr>
                 ))}
@@ -375,7 +378,7 @@ export function CertificatesPage() {
                     <td className="adm-nowrap">{formatShortDate(c.issuedAt)}</td>
                     <td>{t(`admin.certs.design.${c.design}` as MessageKey)}</td>
                     <td>
-                      <div className="adm-row-actions">
+                      <RowActions slots={[72, 88, 72]} label={`${c.id}`}>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -392,7 +395,7 @@ export function CertificatesPage() {
                         <Button variant="danger" size="sm" onClick={() => setRemoving(c)}>
                           {t('admin.certs.delete')}
                         </Button>
-                      </div>
+                      </RowActions>
                     </td>
                   </tr>
                 ))}

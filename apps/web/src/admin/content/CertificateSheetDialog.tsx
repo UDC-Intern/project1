@@ -172,7 +172,7 @@ export function CertificateSheetDialog({
             )}
           </figure>
         </div>
-        <div className="certs-editor-actions">
+        <div className="dlg-actions">
           <Button variant="ghost" onClick={onClose}>
             {t('admin.certSettings.close')}
           </Button>

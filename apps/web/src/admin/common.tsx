@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { errorMessage } from '../api/client';
 import { t } from '../i18n';
-import { Badge, formatDate, Notice, Spinner } from '../ui/ui';
+import { Badge, Button, Dialog as UiDialog, formatDate, Notice, Spinner } from '../ui/ui';
 
 /** Nilai yang baru berubah setelah `ms` tanpa perubahan (untuk pencarian sambil mengetik). */
 export function useDebounced<T>(value: T, ms = 300): T {
@@ -111,6 +111,36 @@ export function FilterChips<K extends string>({
   );
 }
 
+/**
+ * Tombol aksi di satu baris tabel atau kartu. Tiap tombol menempati "slot" selebar angka di `slots` (piksel),
+ * jadi tombol yang sama selalu jatuh di kolom yang sama di setiap baris, apa pun panjang tulisannya. Slot yang
+ * tidak dipakai di satu baris diisi `<RowGap />` supaya tombol sesudahnya tidak bergeser.
+ */
+export function RowActions({
+  slots,
+  children,
+  label,
+}: {
+  slots: readonly number[];
+  children: ReactNode;
+  /** Nama kelompok untuk pembaca layar, mis. "Aksi untuk Ayu". */
+  label?: string;
+}) {
+  return (
+    <div
+      className="adm-row-actions"
+      role={label ? 'group' : undefined}
+      aria-label={label}
+      style={{ '--slots': slots.map((w) => `${w}px`).join(' ') } as CSSProperties}
+    >
+      {children}
+    </div>
+  );
+}
+
+/** Slot kosong di `RowActions`. */
+export const RowGap = () => <span className="adm-row-gap" aria-hidden />;
+
 export function ActiveBadge({ active }: { active: boolean }) {
   return active ? (
     <Badge tone="success">{t('admin.user.active')}</Badge>
@@ -136,6 +166,10 @@ const ICONS = {
   trash: 'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13',
   back: 'M15 18l-6-6 6-6',
   check: 'M5 12l5 5 9-10',
+  chevron: 'M9 6l6 6-6 6',
+  edit: 'M4 20h4L19 9l-4-4L4 16zM14 6l4 4',
+  copy: 'M9 9h11v11H9zM5 15V4h11',
+  lock: 'M7 11V8a5 5 0 0110 0v3M6 11h12v9H6z',
 } as const;
 
 /** Ikon garis sederhana (tanpa emoji). */
@@ -158,6 +192,49 @@ export function Icon({ name }: { name: keyof typeof ICONS }) {
 }
 
 export const childReportPath = (id: string) => `/admin/laporan/anak/${encodeURIComponent(id)}`;
+
+/**
+ * Konfirmasi bergaya (pop-up, bukan kotak bawaan peramban) sebelum menghapus atau mengosongkan sesuatu.
+ * Tombol utama berwarna merah lembut; Esc atau Batal menutup tanpa melakukan apa-apa.
+ */
+export function ConfirmDialog({
+  open,
+  title,
+  message,
+  confirmLabel,
+  busy,
+  onConfirm,
+  onCancel,
+}: {
+  open: boolean;
+  title: string;
+  message: ReactNode;
+  confirmLabel: string;
+  busy?: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <UiDialog
+      open={open}
+      title={title}
+      tone="warning"
+      onClose={onCancel}
+      actions={
+        <>
+          <Button variant="ghost" onClick={onCancel}>
+            {t('admin.cancel')}
+          </Button>
+          <Button variant="danger" disabled={busy} onClick={onConfirm}>
+            {confirmLabel}
+          </Button>
+        </>
+      }
+    >
+      <p>{message}</p>
+    </UiDialog>
+  );
+}
 
 /** Konfirmasi sebelum aksi berbahaya (window.confirm; aman bila tidak tersedia). */
 export function confirmAction(message: string): boolean {

@@ -37,8 +37,7 @@
   opacity: 0.4;
   cursor: default;
 }
-.pager-pages button:focus-visible,
-.pager-size select:focus-visible {
+.pager-pages button:focus-visible {
   outline: 3px solid var(--kunyit);
   outline-offset: 2px;
 }
@@ -53,13 +52,4 @@
   align-items: center;
   gap: 8px;
   font-size: 14px;
-}
-.pager-size select {
-  height: 40px;
-  border-radius: 10px;
-  border: 1px solid var(--ui-line, var(--garis));
-  padding: 0 8px;
-  background: var(--ui-surface, var(--kertas));
-  color: var(--ui-ink, var(--malam));
-  font: inherit;
 }

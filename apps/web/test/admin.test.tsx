@@ -35,7 +35,6 @@ import { GalleryPage } from '../src/admin/media/GalleryPage';
 import { IllustrationsPage } from '../src/admin/media/IllustrationsPage';
 import { NarrationPage } from '../src/admin/media/NarrationPage';
 import { DashboardPage } from '../src/admin/overview/DashboardPage';
-import { CatalogPage } from '../src/admin/catalog/CatalogPage';
 import { FamiliesPage } from '../src/admin/users/FamiliesPage';
 import { Landing } from '../src/site/Landing';
 import { StaffLogin } from '../src/staff/StaffLogin';
@@ -633,28 +632,41 @@ describe('halaman', () => {
     expect(readDb().premiumUntil[AYU]).toBeTruthy();
   });
 
-  it('Pengaturan: ubah level gratis lalu simpan', async () => {
+  it('Pengaturan Sistem: batas bayar pesanan disimpan tanpa mengubah aturan level gratis', async () => {
+    const db = readDb();
+    db.settings.billing = { ...db.settings.billing, paywall: true, freeLevels: 3 };
+    writeDb(db);
     render(
       <MemoryRouter>
         <SettingsPage />
       </MemoryRouter>,
     );
-    const input = await screen.findByLabelText(/Level gratis per topik/);
-    fireEvent.change(input, { target: { value: '4' } });
+    const input = await screen.findByLabelText(/Batas bayar pesanan/);
+    fireEvent.change(input, { target: { value: '48' } });
     fireEvent.click(within(input.closest('form')!).getByRole('button', { name: 'Simpan' }));
-    expect(await screen.findByText('Pengaturan akses disimpan.')).toBeInTheDocument();
-    expect(readDb().settings.billing.freeLevels).toBe(4);
+    expect(await screen.findByText('Batas bayar pesanan disimpan.')).toBeInTheDocument();
+    expect(readDb().settings.billing).toMatchObject({
+      orderExpiryHours: 48,
+      freeLevels: 3,
+      paywall: true,
+    });
+    expect(screen.getByRole('link', { name: 'Buka Silabus Belajar' })).toHaveAttribute(
+      'href',
+      '/admin/konten',
+    );
   });
 
-  it('Pengaturan Sistem: hanya akses berbayar, kontak WhatsApp, dan data contoh', async () => {
+  it('Pengaturan Sistem: hanya pembayaran, kontak WhatsApp, dan data contoh', async () => {
     render(
       <MemoryRouter>
         <SettingsPage />
       </MemoryRouter>,
     );
-    expect(await screen.findByText('Akses berbayar')).toBeInTheDocument();
+    expect(await screen.findByText('Pembayaran')).toBeInTheDocument();
     expect(screen.getByText('Kontak WhatsApp')).toBeInTheDocument();
     expect(screen.getByText('Data contoh')).toBeInTheDocument();
+    // Level gratis pindah ke Silabus Belajar, isi lembar ke Sertifikat Juara.
+    expect(screen.queryByLabelText(/Level gratis per topik/)).toBeNull();
     expect(screen.queryByLabelText(/Nama penerbit/)).toBeNull();
   });
 
@@ -813,23 +825,5 @@ describe('halaman', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Simpan' }));
     expect(await screen.findByText('Pengaturan suara disimpan.')).toBeInTheDocument();
     expect(readDb().settings.voice.autoRead).toBe(false);
-  });
-
-  it('Konten: level 3 dijadikan gratis ditandai sebagai pengecualian', async () => {
-    render(
-      <MemoryRouter>
-        <CatalogPage />
-      </MemoryRouter>,
-    );
-    expect(await screen.findByRole('link', { name: /Level 1–2 gratis/ })).toHaveAttribute(
-      'href',
-      '/admin/pengaturan',
-    );
-    const box = screen.getAllByRole('checkbox', { name: 'Level 3 gratis' })[0]!;
-    fireEvent.click(box);
-    const row = box.closest('.adm-cat-row') as HTMLElement;
-    fireEvent.click(within(row).getByRole('button', { name: 'Simpan topik' }));
-    expect(await within(row).findByText('Pengecualian')).toBeInTheDocument();
-    expect(readDb().contentEdits.levels['matematika-kelas-1:A:3']?.isFree).toBe(true);
   });
 });

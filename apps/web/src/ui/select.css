@@ -1,0 +1,167 @@
+/* Dropdown bergaya (Select). Token --ui-* ada di .ui-shell; pengganti ke token akar dipakai bila di luar area itu. */
+.ui-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 42px;
+  box-sizing: border-box;
+  padding: 0 10px 0 12px;
+  border: 1px solid var(--ui-line-strong, var(--garis));
+  border-radius: 10px;
+  background: var(--ui-surface, var(--kertas));
+  color: var(--ui-ink, var(--malam));
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.ui-select-trigger:hover:not(:disabled) {
+  border-color: var(--garis-tegas);
+}
+
+.ui-select-trigger[aria-expanded='true'] {
+  border-color: var(--ui-primary, var(--gonjong));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gonjong) 18%, transparent);
+}
+
+.ui-select-trigger:focus-visible {
+  outline: 3px solid var(--kunyit);
+  outline-offset: 2px;
+}
+
+.ui-select-trigger:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.ui-select-trigger[aria-invalid='true'] {
+  border-color: var(--ui-danger, var(--gonjong-teks));
+}
+
+.ui-select-value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ui-select-value.is-placeholder {
+  color: var(--ui-muted, var(--malam-muted));
+}
+
+.ui-select-chevron {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--ui-muted, var(--malam-muted));
+  transition: transform 0.15s ease;
+}
+
+.ui-select-trigger[aria-expanded='true'] .ui-select-chevron {
+  transform: rotate(180deg);
+}
+
+.ui-select-trigger.ui-select-sm {
+  width: auto;
+  min-width: 72px;
+  min-height: 36px;
+  padding: 0 8px 0 10px;
+  border-radius: 9px;
+  font-size: 14px;
+}
+
+/* Daftar pilihan: melayang di atas halaman (dipasang di dialog atau area admin terdekat). */
+.ui-select-pop {
+  position: fixed;
+  z-index: 90;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--ui-line-strong, var(--garis));
+  border-radius: 12px;
+  background: var(--ui-surface, var(--kertas));
+  color: var(--ui-ink, var(--malam));
+  box-shadow:
+    0 14px 34px rgba(28, 36, 48, 0.18),
+    0 2px 6px rgba(28, 36, 48, 0.08);
+  font-family: var(--font-body);
+  font-size: 15px;
+  animation: ui-select-in 0.12s ease-out;
+}
+
+.ui-select-pop.ui-select-sm {
+  font-size: 14px;
+}
+
+.ui-select-opt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 38px;
+  box-sizing: border-box;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.ui-select-sm .ui-select-opt,
+.ui-select-pop.ui-select-sm .ui-select-opt {
+  min-height: 34px;
+}
+
+.ui-select-opt[data-active] {
+  background: var(--gonjong-soft);
+}
+
+.ui-select-opt[aria-selected='true'] {
+  color: var(--gonjong-teks);
+  font-weight: 700;
+}
+
+.ui-select-opt[aria-disabled='true'] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ui-select-opt-label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.ui-select-check {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: var(--ui-primary, var(--gonjong));
+}
+
+@keyframes ui-select-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-select-pop {
+    animation: none;
+  }
+  .ui-select-trigger,
+  .ui-select-chevron {
+    transition: none;
+  }
+}
