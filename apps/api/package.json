@@ -1,0 +1,48 @@
+{
+  "name": "@udakids/api",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "nest start --watch --preserveWatchOutput",
+    "build": "nest build",
+    "start": "node dist/main.js",
+    "start:prod": "node dist/cli/migrate.js && node dist/main.js",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p test",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx --conditions=source src/cli/migrate.ts",
+    "db:seed": "tsx --conditions=source scripts/seed.ts",
+    "db:backup": "tsx --conditions=source scripts/db-backup.ts",
+    "db:restore": "tsx --conditions=source scripts/db-restore.ts",
+    "migrate:prod": "node dist/cli/migrate.js",
+    "seed:prod": "node dist/cli/seed.js"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.1.0",
+    "@nestjs/core": "^11.1.0",
+    "@nestjs/jwt": "^11.0.2",
+    "@nestjs/platform-express": "^11.1.0",
+    "@udakids/engine": "workspace:*",
+    "drizzle-orm": "^0.44.0",
+    "nodemailer": "^7.0.13",
+    "pg": "^8.16.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "zod": "^4.1.0",
+    "@electric-sql/pglite": "^0.5.0"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11.0.0",
+    "@nestjs/testing": "^11.1.0",
+    "@swc/core": "^1.13.0",
+    "@types/express": "^5.0.0",
+    "@types/nodemailer": "^7.0.0",
+    "@types/pg": "^8.15.0",
+    "@types/supertest": "^6.0.3",
+    "drizzle-kit": "^0.31.0",
+    "supertest": "^7.1.0",
+    "tsx": "^4.20.0",
+    "unplugin-swc": "^1.5.0",
+    "vitest": "^3.2.4"
+  }
+}

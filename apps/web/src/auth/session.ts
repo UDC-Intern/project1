@@ -36,7 +36,7 @@ export function rememberFamilyCode(code: string | null) {
 
 function build(
   kind: SessionKind,
-  stored: { token: string; role: Role; name: string } | null,
+  stored: { token: string; role: Role; name: string; id?: string } | null,
 ): Session | null {
   if (!stored || stored.role !== ROLE[kind]) return null;
   const idx = stored.token.indexOf(':');
@@ -44,7 +44,7 @@ function build(
   return {
     token: stored.token,
     user: {
-      id: idx >= 0 ? stored.token.slice(idx + 1) : stored.token,
+      id: stored.id ?? (idx >= 0 ? stored.token.slice(idx + 1) : ''),
       role: stored.role,
       name: stored.name,
     },
@@ -59,7 +59,12 @@ export function getSession(kind: SessionKind): Session | null {
 export function setSession(kind: SessionKind, session: Session | null) {
   const store = useStore.getState();
   if (session) {
-    store.signIn({ token: session.token, role: ROLE[kind], name: session.user.name });
+    store.signIn({
+      token: session.token,
+      role: ROLE[kind],
+      name: session.user.name,
+      id: session.user.id,
+    });
     if (session.familyCode) rememberFamilyCode(session.familyCode);
   } else if (store.session?.role === ROLE[kind]) {
     store.signOut();

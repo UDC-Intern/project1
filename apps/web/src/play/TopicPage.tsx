@@ -189,7 +189,7 @@ export function TopicPage() {
         <div className="lesson-head">
           <Momo mood="happy" size={72} />
           <h2 id="lesson-title">{t('topic.lesson')}</h2>
-          <ListenButton text={[intro, ...tips].join('. ')} />
+          <ListenButton text={[intro, ...tips].join('. ')} audioUrl={data.topic.lessonAudioUrl} />
         </div>
         <p className="lesson-intro">{intro}</p>
         {tips.length > 0 && (

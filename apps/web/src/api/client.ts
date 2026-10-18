@@ -49,13 +49,13 @@ export function errorMessage(err: unknown): string {
   return t('common.error.generic');
 }
 
-type Options = { method?: string; body?: unknown; token?: string | null };
+type Options = { method?: string; body?: unknown; token?: string | null; signal?: AbortSignal };
 
 /** Satu-satunya tempat fetch dipanggil. Halaman memakai fungsi di src/api/<modul>.ts. */
 export async function request<T>(path: string, options: Options = {}): Promise<T> {
   const headers: Record<string, string> = {};
   if (options.body !== undefined) headers['Content-Type'] = 'application/json';
-  const token = options.token ?? useSession.getState().session?.token;
+  const token = options.token !== undefined ? options.token : useSession.getState().session?.token;
   if (token) headers.Authorization = `Bearer ${token}`;
 
   let res: Response;
@@ -63,9 +63,11 @@ export async function request<T>(path: string, options: Options = {}): Promise<T
     res = await fetch(`${API_URL}${path}`, {
       method: options.method ?? (options.body !== undefined ? 'POST' : 'GET'),
       headers,
+      signal: options.signal,
       body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
     });
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') throw error;
     throw new ApiError(0, {
       code: 'RATE_LIMITED',
       message: 'Belum bisa terhubung. Coba lagi, ya.',
@@ -81,6 +83,7 @@ export async function request<T>(path: string, options: Options = {}): Promise<T
       parsed.success
         ? parsed.data.error
         : { code: 'VALIDATION', message: 'Ada yang belum berjalan. Coba lagi, ya.' },
+      parsed.success ? (parsed.data.issues ?? []) : [],
     );
   }
   return json as T;

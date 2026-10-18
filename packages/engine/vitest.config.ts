@@ -6,7 +6,8 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       include: ['src/**/*.ts'],
-      exclude: ['src/index.ts'],
+      // Modul ini hanya mendeklarasikan tipe TypeScript, tidak memiliki perilaku runtime untuk diuji.
+      exclude: ['src/index.ts', 'src/view/admin.ts'],
       thresholds: { statements: 90, branches: 90, functions: 90, lines: 90 },
     },
   },

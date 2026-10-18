@@ -1,5 +1,7 @@
 import { mulberry32, seedFrom, type IllustrationRequest } from '@udakids/engine';
 import { OBJECT_LABELS, ObjectShape, type ObjectItem } from './CountObjects';
+import { useEffect, useState } from 'react';
+import { assetUrl, illustrationBlob } from '../api/media';
 
 /**
  * Ilustrasi dari permintaan admin (menu Ilustrasi AI). Di mode tiruan gambar disusun dari pustaka bentuk sendiri:
@@ -128,14 +130,49 @@ export function Illustration({
   size = 320,
   title,
 }: {
-  request: IllustrationRequest;
+  request: IllustrationRequest & { imageUrl?: string | null };
   size?: number;
   /** Teks alternatif; bawaan: subjek dan jumlah benda. */
   title?: string;
 }) {
+  const [privateUrl, setPrivateUrl] = useState<string | null>(null);
+  const imageUrl = request.imageUrl;
+  useEffect(() => {
+    if (!imageUrl?.startsWith('/api/admin/')) return;
+    const controller = new AbortController();
+    let url: string | null = null;
+    void illustrationBlob(imageUrl, controller.signal)
+      .then((blob) => {
+        if (controller.signal.aborted) return;
+        url = URL.createObjectURL(blob);
+        setPrivateUrl(url);
+      })
+      .catch(() => undefined);
+    return () => {
+      controller.abort();
+      if (url) URL.revokeObjectURL(url);
+      setPrivateUrl(null);
+    };
+  }, [imageUrl]);
   const item = illustrationItem(request.subject);
   const label = title ?? `${request.subject}, ${request.count} ${OBJECT_LABELS[item]}`;
   const momoSize = request.kind === 'character' ? 150 : 100;
+  const src = imageUrl?.startsWith('/api/admin/')
+    ? privateUrl
+    : imageUrl
+      ? assetUrl(imageUrl)
+      : null;
+  if (src)
+    return (
+      <img
+        className="ill-svg"
+        src={src}
+        alt={label}
+        width={size}
+        height={(size * H) / W}
+        style={{ objectFit: 'contain' }}
+      />
+    );
   return (
     <svg
       className="ill-svg"

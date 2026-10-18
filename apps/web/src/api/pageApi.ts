@@ -22,5 +22,5 @@ export async function api<T>(path: string, opts: Options = {}): Promise<T> {
     const routes = path.startsWith('/admin/') ? adminRoutes : parentRoutes;
     return routes.handle<T>(path, method, body, token);
   }
-  return request<T>(path, { method, body: opts.body, token });
+  return request<T>(path, { method, body: opts.body, token, signal: opts.signal });
 }

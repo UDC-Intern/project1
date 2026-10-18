@@ -4,7 +4,6 @@ import {
   type AppSettings,
   type CertificateDesign,
   type CertificateSettings,
-  type Stamp,
 } from '@udakids/engine';
 import { settingsChanged, useSettings } from '../../api/settings';
 import { useApiCall } from '../../auth/useApi';
@@ -37,7 +36,6 @@ export function CertificateSheetDialog({
 }) {
   const current = useSettings().certificate;
   const [form, setForm] = useState<CertificateSettings>(current);
-  /** Stempel yang baru diunggah dan baru masuk riwayat saat pengaturan disimpan. */
   const [pendingStamp, setPendingStamp] = useState<PendingStamp | null>(null);
   const call = useApiCall('staff');
   const action = useAction();
@@ -53,13 +51,12 @@ export function CertificateSheetDialog({
   async function submit(e: FormEvent) {
     e.preventDefault();
     const out = await action.run(async () => {
-      // Stempel yang diunggah masuk riwayat dulu; kalau gagal (mis. riwayat penuh), pengaturan tidak disimpan.
-      if (pendingStamp && form.showStamp && form.stampImage === pendingStamp.image)
-        await call<Stamp[]>('/admin/stamps', { method: 'POST', body: pendingStamp });
+      if (pendingStamp) await call('/admin/stamps', { method: 'POST', body: pendingStamp });
       return call<AppSettings>('/admin/settings/certificate', { method: 'PUT', body: form });
     });
     if (out) {
       settingsChanged(out);
+      setPendingStamp(null);
       onSaved();
     }
   }
@@ -104,11 +101,11 @@ export function CertificateSheetDialog({
               </div>
             </fieldset>
             <fieldset className="certs-editor-group">
-              <legend>{t('admin.certSettings.groupSigners')}</legend>
+              <legend>Penanda tangan di kanan bawah</legend>
               <div className="certs-editor-pair">
                 {field(
                   'signer2Name',
-                  t('admin.certSettings.signer2Name'),
+                  'Nama penanda tangan',
                   60,
                   t('admin.certSettings.signer2Hint'),
                 )}
@@ -121,28 +118,11 @@ export function CertificateSheetDialog({
                 )}
               </div>
               <SignatureEditor
-                value={{ type: form.signatureType, image: form.signatureImage }}
-                onChange={(v) =>
-                  setForm((f) => ({ ...f, signatureType: v.type, signatureImage: v.image }))
+                value={{ image: form.signatureImage, type: form.signatureType }}
+                onChange={(next) =>
+                  setForm((f) => ({ ...f, signatureImage: next.image, signatureType: next.type }))
                 }
               />
-              <Checkbox
-                label={t('admin.certSettings.showStamp')}
-                checked={form.showStamp}
-                onChange={(e) => set('showStamp', e.target.checked)}
-              />
-              <p className="ui-hint">{t('admin.certSettings.showStampHint')}</p>
-              {form.showStamp && (
-                <StampPicker
-                  image={form.stampImage}
-                  pending={pendingStamp}
-                  onPick={(image) => set('stampImage', image)}
-                  onUpload={(stamp) => {
-                    setPendingStamp(stamp);
-                    set('stampImage', stamp.image);
-                  }}
-                />
-              )}
             </fieldset>
             <fieldset className="certs-editor-group">
               <legend>{t('admin.certSettings.groupShow')}</legend>
@@ -151,6 +131,22 @@ export function CertificateSheetDialog({
                 t('admin.certSettings.curriculum'),
                 60,
                 t('admin.certSettings.curriculumHint'),
+              )}
+              <Checkbox
+                label="Pasang stempel digital resmi"
+                checked={form.showStamp !== false}
+                onChange={(e) => set('showStamp', e.target.checked)}
+              />
+              {form.showStamp !== false && (
+                <StampPicker
+                  image={form.stampImage ?? ''}
+                  pending={pendingStamp}
+                  onPick={(stampImage) => set('stampImage', stampImage)}
+                  onUpload={(stamp) => {
+                    setPendingStamp(stamp);
+                    set('stampImage', stamp.image);
+                  }}
+                />
               )}
               <Checkbox
                 label={t('admin.certSettings.showScore')}

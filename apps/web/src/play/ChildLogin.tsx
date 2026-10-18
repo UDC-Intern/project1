@@ -61,7 +61,7 @@ export function ChildLogin() {
     setMessage(null);
     try {
       const res = await childLogin({ childId: chosen.id, pin: [next[0]!, next[1]!, next[2]!] });
-      signIn({ token: res.token, role: 'child', name: res.child.nickname });
+      signIn({ token: res.token, role: 'child', name: res.child.nickname, id: res.child.id });
       navigate('/play', { replace: true });
     } catch (err) {
       setMessage(explain(err));

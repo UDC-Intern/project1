@@ -33,6 +33,7 @@ export const API_ERROR_CODES = [
 ] as const;
 
 export const apiErrorSchema = z.object({
+  issues: z.array(z.object({ path: z.string(), message: z.string() })).optional(),
   error: z.object({
     code: z.enum(API_ERROR_CODES),
     message: z.string(),

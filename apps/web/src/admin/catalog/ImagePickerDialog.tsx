@@ -11,6 +11,8 @@ import {
   type GalleryCategory,
 } from '../media/galleryAssets';
 import { svgToQuestionImage } from '../media/svgImage';
+import { illustrationBlob } from '../../api/media';
+import { processQuestionImage } from './questionImageFile';
 
 /** Lembar sertifikat bukan gambar untuk soal, jadi tidak ikut ditawarkan. */
 const CATEGORIES = GALLERY_CATEGORIES.filter((c) => c !== 'certificates');
@@ -46,7 +48,23 @@ export function ImagePickerDialog({
   );
   const count = (c: GalleryCategory) => pickable.filter((a) => a.category === c).length;
 
-  function choose(e: MouseEvent<HTMLButtonElement>, asset: GalleryAsset) {
+  async function choose(e: MouseEvent<HTMLButtonElement>, asset: GalleryAsset) {
+    if (asset.imageUrl) {
+      try {
+        const blob = await illustrationBlob(asset.imageUrl);
+        const result = await processQuestionImage(
+          new File([blob], 'ilustrasi', { type: blob.type }),
+        );
+        if (!result.ok) {
+          setTooBig(true);
+          return;
+        }
+        onPick({ url: result.dataUrl, label: asset.name });
+      } catch {
+        setTooBig(true);
+      }
+      return;
+    }
     const svg = e.currentTarget.querySelector('svg');
     const url = svg ? svgToQuestionImage(svg) : null;
     if (!url) {
@@ -92,7 +110,7 @@ export function ImagePickerDialog({
                 type="button"
                 className="gal-tile"
                 aria-label={t('admin.bank.pickTile', { name: a.name })}
-                onClick={(e) => choose(e, a)}
+                onClick={(e) => void choose(e, a)}
               >
                 <span className="gal-preview">{a.render(72)}</span>
                 <strong>{a.name}</strong>

@@ -3,3 +3,7 @@ dist
 coverage
 pnpm-lock.yaml
 *.md
+
+.data
+playwright-report
+test-results

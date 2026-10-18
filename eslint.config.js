@@ -5,7 +5,14 @@ import globals from 'globals';
 
 export default tseslint.config(
   {
-    ignores: ['**/dist/**', '**/coverage/**', 'apps/api/drizzle/**'],
+    ignores: [
+      '**/dist/**',
+      '**/coverage/**',
+      'apps/api/drizzle/**',
+      '.data/**',
+      'playwright-report/**',
+      'test-results/**',
+    ],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,

@@ -249,6 +249,12 @@ export const questionBankSchema = z
   .min(BANK_MIN_QUESTIONS, `Tulis minimal ${BANK_MIN_QUESTIONS} soal.`)
   .max(BANK_MAX_QUESTIONS, `Satu level paling banyak ${BANK_MAX_QUESTIONS} soal.`)
   .superRefine((items, ctx) => {
+    const imageChars = items.reduce(
+      (n, q) => n + (q.visual?.kind === 'image' ? q.visual.url.length : 0),
+      0,
+    );
+    if (imageChars > 3_000_000)
+      ctx.addIssue({ code: 'custom', message: 'Terlalu banyak gambar di satu level.' });
     const first = new Map<string, number>();
     items.forEach((q, i) => {
       // Kalimat yang sama dengan pilihan atau gambar lain ("Mana yang bisa terbang?", "Ada berapa apel?") adalah

@@ -25,7 +25,7 @@ export function StaffLogin() {
     setError(null);
     try {
       const res = await staffLogin({ email, password });
-      signIn({ token: res.token, role: 'admin', name: res.user.name });
+      signIn({ token: res.token, role: 'admin', name: res.user.name, id: res.user.id });
       navigate('/admin', { replace: true });
     } catch (err) {
       setError(err instanceof ApiError ? err.message : t('error.generic'));

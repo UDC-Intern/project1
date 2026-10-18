@@ -10,6 +10,7 @@
 
 import { DEFAULT_SETTINGS, speakableText, type VoiceSettings } from '@udakids/engine';
 import { currentSettings } from '../api/settings';
+import { assetUrl } from '../api/media';
 
 type Synth = SpeechSynthesis;
 
@@ -26,7 +27,13 @@ const synth = (): Synth | null =>
   typeof window !== 'undefined' && 'speechSynthesis' in window ? window.speechSynthesis : null;
 
 let touched = false;
-let pending: { text: string; onEnd: (() => void) | undefined; voice: VoiceSettings } | null = null;
+let pending: {
+  text: string;
+  onEnd: (() => void) | undefined;
+  voice: VoiceSettings;
+  audioUrl?: string | null;
+} | null = null;
+let playing: HTMLAudioElement | null = null;
 
 /** Halaman sudah pernah diketuk atau ditekan tombolnya? */
 function ready(): boolean {
@@ -40,6 +47,8 @@ function ready(): boolean {
 
 export function stopSpeaking(): void {
   pending = null;
+  playing?.pause();
+  playing = null;
   try {
     synth()?.cancel();
   } catch {
@@ -100,7 +109,27 @@ function pickVoice(s: Synth, name: string): SpeechSynthesisVoice | undefined {
   );
 }
 
-function say(text: string, voice: VoiceSettings, onEnd?: () => void): void {
+function say(
+  text: string,
+  voice: VoiceSettings,
+  onEnd?: () => void,
+  audioUrl?: string | null,
+): void {
+  playing?.pause();
+  playing = null;
+  if (audioUrl && typeof Audio !== 'undefined') {
+    synth()?.cancel();
+    const audio = new Audio(assetUrl(audioUrl));
+    playing = audio;
+    audio.onended = () => {
+      if (playing === audio) playing = null;
+      onEnd?.();
+    };
+    void audio.play().catch(() => {
+      if (playing === audio) playing = null;
+    });
+    return;
+  }
   const s = synth();
   if (!s || typeof SpeechSynthesisUtterance === 'undefined') return;
   try {
@@ -119,6 +148,7 @@ function say(text: string, voice: VoiceSettings, onEnd?: () => void): void {
 }
 
 export type SpeakOptions = {
+  audioUrl?: string | null;
   onEnd?: () => void;
   /** Pratinjau admin: pakai nilai ini dan abaikan sakelar "suara aktif". */
   voice?: VoiceSettings;
@@ -131,15 +161,15 @@ export function speak(text: string, opts: SpeakOptions = {}): void {
   const voice = opts.voice ?? voiceSettings();
   if (!opts.voice && !voice.enabled) return;
   if (!ready()) {
-    pending = { text: clean, onEnd: opts.onEnd, voice };
+    pending = { text: clean, onEnd: opts.onEnd, voice, audioUrl: opts.audioUrl };
     return;
   }
-  say(clean, voice, opts.onEnd);
+  say(clean, voice, opts.onEnd, opts.audioUrl);
 }
 
 /** Bacaan otomatis saat halaman atau soal tampil; mati bila admin mematikan "bacakan otomatis". */
-export function speakAuto(text: string): void {
-  if (voiceSettings().autoRead) speak(text);
+export function speakAuto(text: string, audioUrl?: string | null): void {
+  if (voiceSettings().autoRead) speak(text, { audioUrl });
 }
 
 /** Pasang sekali: ketukan atau tombol pertama membuka suara dan memutar bacaan yang tertahan. */
@@ -152,7 +182,7 @@ export function installAudioUnlock(): void {
     if (pending) {
       const p = pending;
       pending = null;
-      say(p.text, p.voice, p.onEnd);
+      say(p.text, p.voice, p.onEnd, p.audioUrl);
     }
   };
   for (const ev of events) window.addEventListener(ev, unlock, { capture: true, passive: true });

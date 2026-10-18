@@ -1,0 +1,1 @@
+ALTER TABLE "children" ADD COLUMN "pin_changed_at" timestamp with time zone;

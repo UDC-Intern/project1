@@ -1,0 +1,72 @@
+# /etc/nginx/sites-available/udakids  (ganti app.contoh.id dengan domain Anda)
+# Web statis (apps/web/dist) + API di /api/ pada domain yang SAMA → tanpa CORS, cocok untuk iPad/HP.
+server {
+    listen 80;
+    server_name app.contoh.id;
+
+    root /srv/udakids/apps/web/dist;
+    index index.html;
+    server_tokens off;
+
+    # Header keamanan. add_header di blok location menimpa yang di server, jadi diulang lewat variabel di bawah.
+    # img-src data: blob: dipakai gambar soal, tanda tangan, dan stempel; media-src memutar klip suara Momo.
+    set $csp "default-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; font-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'";
+
+    # Statistik langsung (Server-Sent Events), bila dipakai: jangan di-buffer, koneksi boleh lama.
+    location = /api/public/stats/stream {
+        proxy_pass http://127.0.0.1:7177/public/stats/stream;
+        proxy_http_version 1.1;
+        proxy_set_header Connection '';
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_read_timeout 1h;
+        add_header X-Accel-Buffering no;
+    }
+
+    # API NestJS (systemd: udakids-api). Awalan /api dibuang sebelum diteruskan ke Nest.
+    location /api/ {
+        proxy_pass http://127.0.0.1:7177/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        # Bukti transfer sampai 3 MB dan simpan katalog sampai 5 MB.
+        client_max_body_size 5m;
+    }
+
+    # Batasi koneksi SSE per IP: letakkan `limit_conn_zone $binary_remote_addr zone=sse:10m;` di blok http nginx.conf
+    # limit_conn sse 5;
+
+    # Aset hasil build ber-hash → cache lama
+    location /assets/ {
+        try_files $uri =404;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+        add_header Content-Security-Policy $csp always;
+        add_header X-Content-Type-Options nosniff always;
+        add_header X-Frame-Options DENY always;
+        add_header Referrer-Policy strict-origin-when-cross-origin always;
+        add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+        # Aktifkan setelah HTTPS jalan (certbot):
+        # add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    }
+
+    location = /robots.txt {
+        try_files $uri =404;
+        access_log off;
+        log_not_found off;
+    }
+
+    # SPA: semua rute (/play, /orang-tua, /admin, ...) ke index.html
+    location / {
+        try_files $uri /index.html;
+        add_header Cache-Control "no-cache";
+        add_header Content-Security-Policy $csp always;
+        add_header X-Content-Type-Options nosniff always;
+        add_header X-Frame-Options DENY always;
+        add_header Referrer-Policy strict-origin-when-cross-origin always;
+        add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+        # add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    }
+}
+# HTTPS: jalankan `sudo certbot --nginx -d app.contoh.id` (menambah blok 443 dan redirect otomatis).

@@ -27,6 +27,7 @@ export const GALLERY_CATEGORIES: GalleryCategory[] = [
 ];
 
 export type GalleryAsset = {
+  imageUrl?: string | null;
   key: string;
   category: GalleryCategory;
   name: string;
@@ -145,6 +146,7 @@ export function useGalleryAssets(): { assets: GalleryAsset[]; loading: boolean }
         name: img.subject,
         code: img.id,
         meta: t('admin.gallery.aiMeta', { by: img.createdBy }),
+        imageUrl: img.imageUrl,
         render: (size) => <Illustration request={img} size={size * 1.4} />,
       });
     return list;

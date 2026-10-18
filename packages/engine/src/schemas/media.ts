@@ -39,5 +39,7 @@ export const illustrationSchema = illustrationRequestSchema.extend({
   createdBy: z.string(),
   createdAt: z.string(),
   reviewedAt: z.string().nullable(),
+  /** Alamat gambar server; kosong bila permintaan memakai pustaka bentuk. */
+  imageUrl: z.string().nullable().optional(),
 });
 export type Illustration = z.infer<typeof illustrationSchema>;

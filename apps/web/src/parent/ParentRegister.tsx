@@ -41,7 +41,7 @@ export function ParentRegister() {
         consent: true,
         ...(ref ? { referralCode: ref } : {}),
       });
-      signIn({ token: res.token, role: 'parent', name: res.user.name });
+      signIn({ token: res.token, role: 'parent', name: res.user.name, id: res.user.id });
       navigate('/orang-tua', { replace: true });
     } catch (err) {
       setError(err instanceof ApiError ? err.message : t('error.generic'));

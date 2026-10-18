@@ -1,96 +1,53 @@
 # UdaKids
 
-Aplikasi web belajar untuk anak SD Kelas 1 sampai 4. Anak berlatih Matematika dan Sains per topik dan level, ditemani robot
-Momo yang membacakan soal. Orang tua memantau perkembangan anak, membeli paket, dan mengunduh sertifikat. Admin mengelola
-konten, keluarga, transaksi, Premium, sertifikat, dan pengaturan aplikasi.
+UdaKids adalah aplikasi belajar untuk anak SD kelas 1–4 dengan area anak, orang tua, dan admin. Monorepo ini berisi frontend React, backend NestJS, PostgreSQL/Drizzle, kurikulum di `content/`, dan aturan bersama di `packages/engine`.
 
-## Fitur rilis 1.0
+## Menjalankan secara lokal
 
-- **Anak:** masuk dengan kode keluarga dan sandi 3 gambar, Peta Belajar Kelas 1 sampai 4 (Matematika Kelas 1 sampai 4,
-  Sains Kelas 1), ronde 10 soal yang dibacakan dan langsung dinilai saat diketuk, umpan balik ramah anak, tanaman Skor
-  Jago, papan peringkat, profil, dan sertifikat.
-- **Orang tua:** daftar, kelola sampai 3 profil anak, dasbor dan laporan per anak, paket dengan pembayaran transfer manual,
-  riwayat transaksi, akun, dan menu Sertifikat.
-- **Admin:** menu dikelompokkan menjadi Konten & Kurikulum (Silabus Belajar untuk menambah buku, topik, dan level lengkap dengan soal tulisan sendiri (gambar tiap soal bisa
-  diganti: benda hitung dan jumlahnya, gambar dari galeri, atau unggahan) serta mengatur level gratis, Bank Soal & Latihan sebagai simulator kuis, Sertifikat Juara), Media & Audio (Galeri Aset, Audio Narasi, Ilustrasi AI), Pengguna & Akademik (Keluarga & Anak, Tim
-  Staf & Akses, Laporan & Rapor Belajar), dan Langganan & Pembayaran (Transaksi & Bukti Bayar, Paket Langganan, Rekening &
-  Pembayaran, Pengaturan Sistem), ditambah Ringkasan bergrafik dan notifikasi.
-- **Paket:** 5 paket awal (Tunas, Kumbang, Tumbuh Bersama, Bintang Kecil, Teman Setia); admin bisa mengubah dan menambah.
-  Awalnya level 1 dan 2 tiap topik gratis, level berikutnya Premium untuk semua anak di keluarga itu; batasnya diatur di
-  Silabus Belajar.
-- **Sertifikat Juara Digital:** terbit otomatis dengan nomor `CERT-XXXXXX` saat anak Premium lulus semua level satu buku.
-  Bisa dicetak, disimpan sebagai PDF, atau diunduh sebagai gambar PNG. Orang tua boleh mengisi nama lengkap anak khusus
-  untuk sertifikat (dengan persetujuan), kode QR di lembar membuka halaman cek keaslian yang menyamarkan nama, dan isi
-  lembar (penerbit, judul, penanda tangan, kurikulum, skor) diatur admin, termasuk tanda tangan (goresan bawaan, ditulis di
-  kanvas, atau foto/scan dengan latar yang dibersihkan otomatis) dan stempel digital (segel emas bawaan, stempel yang pernah
-  diunggah, atau gambar stempel baru). Admin memilih desain (Kuning, Merah, atau Hijau) dan menerbitkan sertifikat yang
-  tertunda.
-- **Suara:** setiap halaman anak membacakan isinya, tombol menyebut namanya saat diketuk; simbol matematika (`>`, `<`, `=`,
-  `+`, `-`, `×`, `÷`) dibacakan sebagai kata bahasa Indonesia.
+Gunakan Node.js 22.12 atau lebih baru dan pnpm 10. Dari PowerShell di folder repo:
 
-## Status
-
-Semua tampilan tiga peran berjalan penuh dengan data tiruan di browser (mode mock, disimpan di `localStorage`). API NestJS
-dan PostgreSQL dibangun mulai M6 dengan kontrak yang sudah ditulis di `packages/engine/src/schemas`. Rencana lengkap ada di
-[PRD.md](PRD.md) bagian 12.
-
-## Teknologi
-
-Monorepo pnpm berbasis TypeScript: React 18 + Vite di `apps/web`, `packages/engine` berisi skema, generator soal,
-penilaian, dan aturan paket serta sertifikat yang dipakai bersama web dan server, dan `apps/api` (NestJS 11 + Drizzle +
-PostgreSQL, mulai M6).
-
-| Folder            | Isi                                                                 |
-| ----------------- | ------------------------------------------------------------------- |
-| `apps/web`        | Aplikasi web: area anak, orang tua, admin, landing, data tiruan     |
-| `packages/engine` | Skema Zod, generator soal ber-seed, penilaian, peringkat, sertifikat |
-| `content/`        | Buku, topik, level, materi, serta paket dan rekening (`billing.json`) |
-| `scripts/`        | Validasi konten dan impor spesifikasi soal                          |
-
-## Menjalankan
-
-```bash
+```powershell
 corepack enable
 pnpm install
-cp .env.example .env      # PowerShell: Copy-Item .env.example .env
-pnpm dev                  # web http://localhost:6006
+pnpm dev:local
 ```
 
-`VITE_MOCK_MODULES=*` (bawaan) membuat semua modul memakai data tiruan. Saat pertama dibuka, aplikasi memuat **data
-contoh** (49 keluarga, sekitar 97 anak, 31 staf, sekitar 100 transaksi, ribuan ronde, sertifikat, dan ilustrasi) supaya
-semua halaman bisa dicoba dengan isi yang ramai. Data contoh bisa dimuat ulang dengan tanggal hari ini atau dihapus di
-admin, **Pengaturan Sistem → Data contoh**; data buatan sendiri tidak ikut terhapus. Untuk mengulang semua data, buka
-`http://localhost:6006/gaya` lalu klik "Setel ulang data tiruan".
+`dev:local` membuat `.env` hanya jika file itu belum ada, memilih PGlite lokal, mengisi migrasi dan data kurikulum, lalu menjalankan web di `http://localhost:6006` dan API di `http://localhost:7177`. Data lokal tersimpan di `.data/development`. Ganti `ADMIN_PASSWORD` dan rahasia lain di `.env` sebelum memakai akun lokal untuk demo. Akun admin memakai `ADMIN_EMAIL` dan `ADMIN_PASSWORD` dari `.env`.
 
-## Akun demo (mode mock)
+Untuk mengisi papan peringkat dan laporan dengan lima anak contoh melalui API lokal, biarkan `pnpm dev:local` berjalan lalu jalankan `pnpm db:demo` di terminal lain. Skrip hanya menerima `DATABASE_DRIVER=pglite`, membuat keluarga dan ronde latihan lewat backend, lalu memeriksa papan peringkat. Akses keluarga dan sandi gambar tersimpan di `.data/demo-access.json` (diabaikan Git). Jalankan ulang perintah ini dengan aman: ronde yang sudah dibuat tidak digandakan. Muat ulang halaman web untuk melihat hasilnya. Jangan gunakan akun demo untuk data sungguhan.
 
-| Peran     | Cara masuk                                                                            |
-| --------- | ------------------------------------------------------------------------------------- |
-| Anak      | `/play/masuk`, kode `RWJUVF`, Ayu (apel, bintang, ikan) atau Bima (bola, awan, daun)   |
-| Orang tua | `/orang-tua/masuk`, `ridhodwi330@gmail.com` / `rahasia123`                            |
-| Admin     | `/masuk/staf`, `admin@udakids.local` / `admin12345`                                   |
-| Anak (data contoh) | kode `CERDAS`: Nara (apel, bintang, ikan) sudah punya sertifikat Matematika Kelas 1, Sakti (bola, awan, daun), Lili (kucing, rumah, bunga) |
-| Orang tua (data contoh) | `rina.kusumawati@example.com` / `rahasia123` (12 transaksi); orang tua contoh lain juga memakai `rahasia123` |
-| Staf (data contoh) | mis. `nadia.paramitha@udakids.local` / `staf12345`                               |
+Untuk PostgreSQL, siapkan role dan database lebih dulu. Isi `DATABASE_URL`, `DATABASE_DRIVER=postgres`, `JWT_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, serta `WEB_ORIGIN` dalam `.env`, lalu jalankan:
 
-Untuk mencoba sertifikat tanpa memainkan semua level, buka `/gaya` (hanya saat `pnpm dev`) lalu klik "Demo sertifikat"
-(Ayu menuntaskan Matematika Kelas 1 dengan Premium) atau "Demo menunggu" (Bima menuntaskan Sains Kelas 1 tanpa Premium,
-muncul di daftar Menunggu admin).
+```powershell
+pnpm db:setup
+pnpm dev
+```
 
-## Perintah
+`pnpm dev` menjalankan API dan web dalam mode HTTP. `VITE_MOCK_MODULES` kosong pada konfigurasi lokal sehingga permintaan halaman diteruskan ke API. Mode demo lama dapat diaktifkan dengan `VITE_MOCK_MODULES=*`; mode itu memakai data browser terpisah.
 
-| Perintah                | Fungsi                                              |
-| ----------------------- | --------------------------------------------------- |
-| `pnpm dev`              | Membangun engine lalu menjalankan web               |
-| `pnpm lint`             | ESLint dan pemeriksaan format Prettier              |
-| `pnpm format`           | Merapikan format                                    |
-| `pnpm typecheck`        | Pemeriksaan tipe semua paket                        |
-| `pnpm test`             | Test engine (coverage ≥ 90%) dan web                |
-| `pnpm validate:content` | Memeriksa semua buku di `content/`                  |
-| `pnpm build`            | Build engine dan web                                |
+## Pengaturan layanan
 
-## Dokumen
+API memerlukan `JWT_SECRET` minimal 32 karakter. SMTP, OpenAI Images API, dan Google Cloud Text-to-Speech bersifat opsional dan hanya dipanggil oleh backend. Tanpa SMTP, email tersimpan di outbox menunggu konfigurasi SMTP. Tanpa kunci gambar/TTS, aplikasi tetap berjalan dan suara peramban tetap dapat dipakai.
 
-| Dokumen          | Isi                                                                                   |
-| ---------------- | ------------------------------------------------------------------------------------- |
-| [PRD.md](PRD.md) | Produk: fitur, aturan nilai dan sertifikat, alur, halaman, tampilan, database, keamanan, rencana |
+Panduan konfigurasi lokal dan produksi ada di [docs/backend.md](docs/backend.md), kontrak rute ada di [docs/api/api.md](docs/api/api.md), dan skema tabel serta batas keamanan ada di [docs/architecture.md](docs/architecture.md). [docs/plan.md](docs/plan.md) mencatat implementasi dan pekerjaan yang belum dijalankan.
+
+## Pemeriksaan dan perintah
+
+| Perintah | Fungsi |
+| --- | --- |
+| `pnpm lint` | ESLint dan format Prettier |
+| `pnpm typecheck` | Pemeriksaan tipe semua paket |
+| `pnpm test` | Tes engine, web, dan API |
+| `pnpm test:browser` | Alur browser terhadap API dan database memori terisolasi |
+| `pnpm validate:content` | Validasi berkas konten kurikulum |
+| `pnpm build` | Build engine, API, dan web |
+| `pnpm db:generate` | Membuat migrasi dari perubahan skema |
+| `pnpm db:setup` | Migrasi dan seed PostgreSQL |
+| `pnpm db:demo` | Isi dan verifikasi data demo lewat API PGlite lokal |
+| `pnpm db:backup` / `pnpm db:restore` | Backup/restore PostgreSQL melalui `pg_dump`/`pg_restore` |
+
+`pnpm db:restore` meminta konfirmasi sebelum menimpa data tujuan. Untuk prosedur dan pembatasan produksi, baca [docs/backend.md](docs/backend.md).
+
+## Batasan sebelum produksi
+
+Belum ada VPS atau alamat publik yang dikonfigurasi. SMTP, gambar AI, dan suara Google belum diuji memakai kredensial sungguhan. Pengaktifan verifikasi email juga menunggu alur verifikasi pada UI. Detail keadaan dan gerbang pemeriksaan terakhir dicatat di [docs/plan.md](docs/plan.md).

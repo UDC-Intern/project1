@@ -4,6 +4,9 @@ coverage/
 .env
 *.log
 backups/
+.data/
+playwright-report/
+test-results/
 *.tsbuildinfo
 
 # Berkas kerja lokal
