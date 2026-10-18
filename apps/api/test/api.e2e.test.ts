@@ -80,6 +80,31 @@ describe('fondasi API dan akun', () => {
       .expect(403);
     await request(ctx.app.getHttpServer()).get('/catalog/home').expect(401);
   });
+  it('pengisi data demo hanya tersedia untuk admin pada PGlite lokal', async () => {
+    const parent = await request(ctx.app.getHttpServer())
+      .post('/auth/parent/login')
+      .send({ email: 'keluarga@example.test', password: 'kata-sandi-123' });
+    await request(ctx.app.getHttpServer())
+      .post('/admin/demo-data')
+      .set('Authorization', `Bearer ${parent.body.token}`)
+      .send({})
+      .expect(403);
+    const admin = await request(ctx.app.getHttpServer())
+      .post('/auth/staff/login')
+      .send({ email: 'admin@udakids.local', password: 'tes-admin-aman-123' });
+    const driver = process.env.DATABASE_DRIVER;
+    process.env.DATABASE_DRIVER = 'postgres';
+    try {
+      await request(ctx.app.getHttpServer())
+        .post('/admin/demo-data')
+        .set('Authorization', `Bearer ${admin.body.token}`)
+        .send({})
+        .expect(403);
+    } finally {
+      if (driver === undefined) delete process.env.DATABASE_DRIVER;
+      else process.env.DATABASE_DRIVER = driver;
+    }
+  });
   it('alur keluarga, ronde dan pembayaran berjalan dengan penilaian di server', async () => {
     const http = () => request(ctx.app.getHttpServer());
     const login = await http()

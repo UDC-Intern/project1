@@ -14,7 +14,7 @@ pnpm dev:local
 
 `dev:local` membuat `.env` hanya jika file itu belum ada, memilih PGlite lokal, mengisi migrasi dan data kurikulum, lalu menjalankan web di `http://localhost:6006` dan API di `http://localhost:7177`. Data lokal tersimpan di `.data/development`. Ganti `ADMIN_PASSWORD` dan rahasia lain di `.env` sebelum memakai akun lokal untuk demo. Akun admin memakai `ADMIN_EMAIL` dan `ADMIN_PASSWORD` dari `.env`.
 
-Untuk mengisi papan peringkat dan laporan dengan lima anak contoh melalui API lokal, biarkan `pnpm dev:local` berjalan lalu jalankan `pnpm db:demo` di terminal lain. Skrip hanya menerima `DATABASE_DRIVER=pglite`, membuat keluarga dan ronde latihan lewat backend, lalu memeriksa papan peringkat. Akses keluarga dan sandi gambar tersimpan di `.data/demo-access.json` (diabaikan Git). Jalankan ulang perintah ini dengan aman: ronde yang sudah dibuat tidak digandakan. Muat ulang halaman web untuk melihat hasilnya. Jangan gunakan akun demo untuk data sungguhan.
+Untuk menyiapkan presentasi, biarkan `pnpm dev:local` berjalan lalu jalankan `pnpm db:demo` di terminal lain. Skrip hanya menerima `DATABASE_DRIVER=pglite` dan mengisi 24 keluarga, 72 anak (batas aplikasi tiga anak per keluarga), lima admin demo di samping admin awal, latihan dan peringkat, transaksi, Premium, sertifikat, serta ilustrasi contoh. Akses akun orang tua, anak, dan admin demo tersimpan di `.data/demo-access.json` (diabaikan Git). Jalankan ulang perintah ini dengan aman: data yang sudah ada tidak digandakan. Muat ulang halaman web untuk melihat hasilnya. Jangan gunakan akun demo untuk data sungguhan.
 
 Untuk PostgreSQL, siapkan role dan database lebih dulu. Isi `DATABASE_URL`, `DATABASE_DRIVER=postgres`, `JWT_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, serta `WEB_ORIGIN` dalam `.env`, lalu jalankan:
 
@@ -43,7 +43,7 @@ Panduan konfigurasi lokal dan produksi ada di [docs/backend.md](docs/backend.md)
 | `pnpm build` | Build engine, API, dan web |
 | `pnpm db:generate` | Membuat migrasi dari perubahan skema |
 | `pnpm db:setup` | Migrasi dan seed PostgreSQL |
-| `pnpm db:demo` | Isi dan verifikasi data demo lewat API PGlite lokal |
+| `pnpm db:demo` | Isi dan verifikasi data presentasi di PGlite lokal |
 | `pnpm db:backup` / `pnpm db:restore` | Backup/restore PostgreSQL melalui `pg_dump`/`pg_restore` |
 
 `pnpm db:restore` meminta konfirmasi sebelum menimpa data tujuan. Untuk prosedur dan pembatasan produksi, baca [docs/backend.md](docs/backend.md).

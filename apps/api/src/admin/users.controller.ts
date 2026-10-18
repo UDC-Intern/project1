@@ -5,6 +5,7 @@ import { emailSchema, passwordSchema, setPinBodySchema, pinSecret } from '@udaki
 import { DB, type Db } from '../db/db.module.js';
 import * as s from '../db/schema.js';
 import { DirectoryService } from './directory.service.js';
+import { DemoSeedService } from './demo-seed.service.js';
 import { CurrentUser, Roles, type User } from '../auth/decorators.js';
 import { AuthGuard } from '../auth/auth.guard.js';
 import { hashSecret } from '../common/crypto.js';
@@ -23,10 +24,16 @@ export class UsersController {
   constructor(
     @Inject(DB) private db: Db,
     private directory: DirectoryService,
+    private demo: DemoSeedService,
     private guard: AuthGuard,
   ) {}
   @Get('directory/summary') summary() {
     return this.directory.summary();
+  }
+  @Post('demo-data') seedDemo(@CurrentUser() u: User, @Body() body: unknown) {
+    if (process.env.DATABASE_DRIVER !== 'pglite' || process.env.NODE_ENV === 'production')
+      fail(403, 'FORBIDDEN', 'Data demo hanya tersedia pada PGlite lokal.');
+    return this.demo.seed(body, u);
   }
   @Get('directory/families') families(@Query() q: unknown) {
     return this.directory.families(q);

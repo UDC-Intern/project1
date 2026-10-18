@@ -18,6 +18,7 @@ import { CertificatesController } from './certificates/certificates.controller.j
 import { ContentService } from './content/content.service.js';
 import { ContentController } from './content/content.controller.js';
 import { DirectoryService } from './admin/directory.service.js';
+import { DemoSeedService } from './admin/demo-seed.service.js';
 import { UsersController } from './admin/users.controller.js';
 import { ReportsService } from './reports/reports.service.js';
 import { ReportsController } from './reports/reports.controller.js';
@@ -57,6 +58,7 @@ import { MailController } from './mail/mail.controller.js';
     BillingService,
     ContentService,
     DirectoryService,
+    DemoSeedService,
     ReportsService,
     VoiceService,
     { provide: TTS_PROVIDER, useFactory: ttsFromEnv },
