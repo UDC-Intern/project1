@@ -6,7 +6,6 @@ import {
   childUpdateSchema,
   type Color,
   type PinPicture,
-  MAX_CHILDREN_PER_PARENT,
 } from '@udakids/engine';
 import { errorMessage } from '../api/client';
 import type { ChildProfile } from '../api/types';
@@ -38,7 +37,7 @@ function Form({
 }: {
   mode: ChildFormMode;
   child?: ChildProfile;
-  /** Banyak anak di akun (mode new): info "2 dari 3 anak". */
+  /** Banyak anak di akun (mode new): info jumlah terhadap batas admin. */
   count?: number;
 }) {
   const navigate = useNavigate();
@@ -57,7 +56,9 @@ function Form({
   const withPin = mode !== 'edit';
   const withProfile = mode !== 'pin';
   // Nama lengkap khusus sertifikat: hanya saat mengubah profil, dan bila Pengaturan memakai nama lengkap.
-  const { useFullName } = useSettings().certificate;
+  const settings = useSettings();
+  const { useFullName } = settings.certificate;
+  const maxChildren = settings.family.maxChildren;
   const withCertName = mode === 'edit' && useFullName;
   const savedCertName = child?.certificateName ?? null;
   const [certName, setCertName] = useState<CertificateNameState>({
@@ -107,7 +108,7 @@ function Form({
       setBusy(false);
       // Batas anak per akun tercapai (mis. anak ditambahkan dari perangkat lain) → pop-up akun terpisah.
       if (isChildLimitError(err)) {
-        setError(t('parent.dash.childLimit', { n: MAX_CHILDREN_PER_PARENT }));
+        setError(t('parent.dash.childLimit', { n: maxChildren }));
         setLimitOpen(true);
         return;
       }
@@ -251,10 +252,11 @@ function Form({
 /** Akun sudah mencapai batas anak: tanpa formulir, pop-up "buat akun terpisah" langsung terbuka. */
 function LimitReached() {
   const [open, setOpen] = useState(true);
+  const maxChildren = useSettings().family.maxChildren;
   return (
     <div className="pa-form">
       <ChildLimitDialog open={open} onClose={() => setOpen(false)} />
-      <Notice tone="warning">{t('parent.dash.childLimit', { n: MAX_CHILDREN_PER_PARENT })}</Notice>
+      <Notice tone="warning">{t('parent.dash.childLimit', { n: maxChildren })}</Notice>
       <div className="ui-row">
         <Button variant="secondary" onClick={() => setOpen(true)}>
           {t('parent.limit.newAccount')}
@@ -267,13 +269,14 @@ function LimitReached() {
 
 /** Tambah anak (mode new), ubah nama/warna (edit), atau ganti sandi gambar (pin). */
 export function ChildForm({ mode }: { mode: ChildFormMode }) {
+  const maxChildren = useSettings().family.maxChildren;
   const { id } = useParams();
   const list = useFetch<ChildProfile[]>('parent', '/parent/children');
   if (mode === 'new') {
     // Batas anak per akun: tunggu daftar anak, lalu beri tahu sebelum orang tua mengisi formulir.
     if (list.loading && !list.data) return <Spinner label={t('parent.loading')} />;
     const count = list.data?.length ?? 0;
-    if (count >= MAX_CHILDREN_PER_PARENT) return <LimitReached />;
+    if (count >= maxChildren) return <LimitReached />;
     return <Form mode="new" count={list.data ? count : undefined} />;
   }
   if (list.loading) return <Spinner label={t('parent.loading')} />;

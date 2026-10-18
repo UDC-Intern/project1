@@ -146,7 +146,7 @@ describe('data contoh mode tiruan', () => {
     expect(orders.length).toBeGreaterThan(10);
 
     const { profiles } = await familyProfiles('cerdas');
-    expect(profiles.map((p) => p.nickname)).toEqual(['Nara', 'Sakti', 'Lili']);
+    expect(profiles.map((p) => p.nickname)).toEqual(['Nara', 'Sakti', 'Lili', 'Nina', 'Rafi']);
     const nara = profiles.find((p) => p.nickname === 'Nara')!;
     const login = await childLogin({ childId: nara.id, pin: ['apple', 'star', 'fish'] });
     expect(login.token).toContain(nara.id);

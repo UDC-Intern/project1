@@ -656,13 +656,28 @@ describe('halaman', () => {
     );
   });
 
-  it('Pengaturan Sistem: hanya pembayaran, kontak WhatsApp, dan data contoh', async () => {
+  it('Pengaturan Sistem: batas anak disimpan lewat formulir admin', async () => {
+    render(
+      <MemoryRouter>
+        <SettingsPage />
+      </MemoryRouter>,
+    );
+    const input = await screen.findByLabelText(/Maksimal anak per keluarga/);
+    expect(input).toHaveValue(5);
+    fireEvent.change(input, { target: { value: '7' } });
+    fireEvent.click(within(input.closest('form')!).getByRole('button', { name: 'Simpan' }));
+    expect(await screen.findByText('Batas anak per keluarga disimpan.')).toBeInTheDocument();
+    expect(readDb().settings.family.maxChildren).toBe(7);
+  });
+
+  it('Pengaturan Sistem: batas anak, pembayaran, kontak WhatsApp, dan data contoh', async () => {
     render(
       <MemoryRouter>
         <SettingsPage />
       </MemoryRouter>,
     );
     expect(await screen.findByText('Pembayaran')).toBeInTheDocument();
+    expect(screen.getByText('Batas anak per keluarga')).toBeInTheDocument();
     expect(screen.getByText('Kontak WhatsApp')).toBeInTheDocument();
     expect(screen.getByText('Data contoh')).toBeInTheDocument();
     // Level gratis pindah ke Silabus Belajar, isi lembar ke Sertifikat Juara.

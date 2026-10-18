@@ -5,7 +5,6 @@ import {
   childUpdateSchema,
   pinSchema,
   pinSecret,
-  MAX_CHILDREN_PER_PARENT,
   masteryStatus,
   subjectDomainOf,
   FOREVER_ISO,
@@ -40,8 +39,7 @@ export class ParentService {
       .select()
       .from(s.children)
       .where(eq(s.children.parentId, parentId))
-      .orderBy(s.children.createdAt)
-      .limit(MAX_CHILDREN_PER_PARENT);
+      .orderBy(s.children.createdAt);
   }
   async create(parentId: string, input: unknown) {
     const data = createChildBodySchema.extend({ pin: pinSchema.optional() }).parse(input);
@@ -56,8 +54,11 @@ export class ParentService {
         .select({ n: sql<number>`count(*)::int` })
         .from(s.children)
         .where(eq(s.children.parentId, parentId));
-      if (count!.n >= MAX_CHILDREN_PER_PARENT)
-        fail(409, 'CONFLICT', 'Satu keluarga paling banyak tiga anak.');
+      const maxChildren = (await this.learning.settings.get(tx)).family.maxChildren;
+      if (count!.n >= maxChildren)
+        fail(409, 'CONFLICT', `Satu keluarga paling banyak ${maxChildren} anak.`, {
+          reason: 'child_limit',
+        });
       const [child] = await tx
         .insert(s.children)
         .values({ parentId, nickname: data.nickname, momoColor: data.momoColor, picturePinHash })

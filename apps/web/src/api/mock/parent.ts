@@ -29,8 +29,6 @@ import {
 } from './db';
 import { findLevel } from './levels';
 
-const MAX_CHILDREN = 3;
-
 const notFound = () => new ApiError(404, { code: 'NOT_FOUND', message: 'Anak tidak ketemu.' });
 
 /** Anak milik orang lain dijawab 404, seolah tidak ada. */
@@ -92,8 +90,13 @@ export async function createChild(token: string | null, body: CreateChildBody) {
     throw new ApiError(400, { code: 'VALIDATION', message: 'Nama panggilan 2 sampai 20 huruf.' });
   const db = readDb();
   const mine = db.children.filter((c) => c.parentId === parent.id);
-  if (mine.length >= MAX_CHILDREN)
-    throw new ApiError(409, { code: 'CONFLICT', message: 'Satu keluarga maksimal 3 anak.' });
+  const maxChildren = db.settings.family.maxChildren;
+  if (mine.length >= maxChildren)
+    throw new ApiError(409, {
+      code: 'CONFLICT',
+      message: `Satu keluarga maksimal ${maxChildren} anak.`,
+      reason: 'child_limit',
+    });
   if (mine.some((c) => c.nickname.toLowerCase() === parsed.data.nickname.toLowerCase()))
     throw new ApiError(409, { code: 'CONFLICT', message: 'Nama panggilan ini sudah dipakai.' });
 

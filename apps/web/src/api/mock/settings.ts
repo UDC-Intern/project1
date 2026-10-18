@@ -2,6 +2,7 @@ import {
   billingSettingsSchema,
   certificateSettingsSchema,
   contactSettingsSchema,
+  familySettingsSchema,
   voiceSettingsSchema,
   type AppSettings,
 } from '@udakids/engine';
@@ -24,6 +25,7 @@ export async function adminSettings(token: string | null): Promise<AppSettings> 
 }
 
 const SCHEMAS = {
+  family: familySettingsSchema,
   billing: billingSettingsSchema,
   contact: contactSettingsSchema,
   certificate: certificateSettingsSchema,

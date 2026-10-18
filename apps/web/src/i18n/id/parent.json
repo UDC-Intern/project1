@@ -30,7 +30,7 @@
   "home.week.active": "Anak aktif",
   "home.children": "Anak",
   "home.addChild": "Tambah anak",
-  "home.maxChildren": "Satu keluarga maksimal 3 anak.",
+  "home.maxChildren": "Jumlah anak per keluarga mengikuti pengaturan admin.",
   "home.noChildren": "Belum ada anak. Tambahkan anak pertama untuk mulai.",
   "child.report": "Laporan",
   "child.edit": "Ubah",

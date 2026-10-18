@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { MAX_CHILDREN_PER_PARENT, type Color } from '@udakids/engine';
+import { type Color } from '@udakids/engine';
 import { errorMessage } from '../api/client';
+import { useSettings } from '../api/settings';
 import { useApiCall, useFetch } from '../auth/useApi';
 import { rememberFamilyCode, rememberedFamilyCode, useSession } from '../auth/session';
 import { Momo } from '../components/Momo';
@@ -165,6 +166,7 @@ function FamilyHero({
   kids: OverviewChild[];
   onLimit: () => void;
 }) {
+  const maxChildren = useSettings().family.maxChildren;
   const sum = (f: (c: OverviewChild) => number) => kids.reduce((a, c) => a + f(c), 0);
   const active = kids.filter((c) => c.insights.weekRounds > 0).length;
   return (
@@ -177,7 +179,7 @@ function FamilyHero({
           <Link className="ui-btn ui-btn-primary" to="/play">
             {t('parent.dash.play')}
           </Link>
-          {!atChildLimit(kids.length) ? (
+          {!atChildLimit(kids.length, maxChildren) ? (
             <Link className="ui-btn ui-btn-secondary" to="/orang-tua/anak/baru">
               {t('parent.dash.addChild')}
             </Link>
@@ -188,9 +190,9 @@ function FamilyHero({
             </Button>
           )}
         </div>
-        {atChildLimit(kids.length) && (
+        {atChildLimit(kids.length, maxChildren) && (
           <p className="pd-limit" role="status">
-            {t('parent.dash.childLimit', { n: MAX_CHILDREN_PER_PARENT })}
+            {t('parent.dash.childLimit', { n: maxChildren })}
           </p>
         )}
       </div>

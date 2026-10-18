@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import { MAX_CHILDREN_PER_PARENT } from '@udakids/engine';
 import { ApiError } from '../api/client';
+import { useSettings } from '../api/settings';
 import { setSession } from '../auth/session';
 import { t } from '../i18n';
 import { Button, Dialog } from '../ui/ui';
@@ -9,14 +9,14 @@ import { Button, Dialog } from '../ui/ui';
 export const isChildLimitError = (err: unknown) =>
   err instanceof ApiError && err.body.reason === 'child_limit';
 
-export const atChildLimit = (count: number) => count >= MAX_CHILDREN_PER_PARENT;
+export const atChildLimit = (count: number, max: number) => count >= max;
 
-/** "2 dari 3 anak terdaftar" — info batas yang selalu terlihat di dasbor. */
+/** Jumlah anak dan batas dari pengaturan admin yang terlihat di dasbor. */
 export function ChildCount({ count, className }: { count: number; className?: string }) {
-  const n = MAX_CHILDREN_PER_PARENT;
+  const n = useSettings().family.maxChildren;
   return (
     <p className={className ?? 'ui-muted'} data-testid="child-count">
-      {t(atChildLimit(count) ? 'parent.limit.countFull' : 'parent.limit.count', { count, n })}
+      {t(atChildLimit(count, n) ? 'parent.limit.countFull' : 'parent.limit.count', { count, n })}
     </p>
   );
 }
@@ -27,7 +27,7 @@ export function ChildCount({ count, className }: { count: number; className?: st
  */
 export function ChildLimitDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const navigate = useNavigate();
-  const n = MAX_CHILDREN_PER_PARENT;
+  const n = useSettings().family.maxChildren;
   return (
     <Dialog
       open={open}

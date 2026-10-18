@@ -56,7 +56,7 @@ import { isLevelFree } from './settings';
  */
 
 /** Naikkan bila isi data contoh berubah: data contoh lama diganti saat aplikasi dibuka. */
-export const DEMO_VERSION = 1;
+export const DEMO_VERSION = 2;
 
 const DAY = 86_400_000;
 const HOUR = 3_600_000;
@@ -359,6 +359,8 @@ const SHOWCASE = {
     { nickname: 'Nara', momoColor: 'pink', pin: ['apple', 'star', 'fish'], grade: 1 },
     { nickname: 'Sakti', momoColor: 'teal', pin: ['ball', 'cloud', 'leaf'], grade: 3 },
     { nickname: 'Lili', momoColor: 'yellow', pin: ['cat', 'house', 'flower'], grade: 1 },
+    { nickname: 'Nina', momoColor: 'blue', pin: ['apple', 'cloud', 'leaf'], grade: 2 },
+    { nickname: 'Rafi', momoColor: 'green', pin: ['ball', 'star', 'fish'], grade: 2 },
   ],
 } as const;
 
@@ -514,7 +516,7 @@ function addFamilies(ctx: Ctx): Family[] {
       k.grade,
       i < 2 ? showcaseJoined + (i + 1) * HOUR : now - 12 * DAY,
     );
-    kid.skill = [0.9, 0.82, 0.74][i]!;
+    kid.skill = [0.9, 0.82, 0.74, 0.76, 0.79][i]!;
   });
 
   // Tanggal daftar: sebagian baru minggu ini (muncul di notifikasi), sisanya menyebar sampai 200 hari lalu.

@@ -15,6 +15,7 @@ import {
   orders,
   quizResults,
   emailOutbox,
+  appSettings,
 } from '../src/db/schema.js';
 import {
   generateRound,
@@ -104,6 +105,63 @@ describe('fondasi API dan akun', () => {
       if (driver === undefined) delete process.env.DATABASE_DRIVER;
       else process.env.DATABASE_DRIVER = driver;
     }
+  });
+  it('batas anak tersimpan di database dan tetap menampilkan profil saat diturunkan', async () => {
+    const http = () => request(ctx.app.getHttpServer());
+    const adminLogin = await http()
+      .post('/auth/staff/login')
+      .send({ email: 'admin@udakids.local', password: 'tes-admin-aman-123' })
+      .expect(201);
+    const admin = `Bearer ${adminLogin.body.token}`;
+    const registered = await http()
+      .post('/auth/parent/register')
+      .send({
+        name: 'Keluarga Lima',
+        email: 'lima@example.test',
+        password: 'kata-sandi-123',
+        consent: true,
+      })
+      .expect(201);
+    const parent = `Bearer ${registered.body.token}`;
+    expect((await http().get('/settings').expect(200)).body.family.maxChildren).toBe(5);
+    expect(
+      (await ctx.db.select().from(appSettings).where(eq(appSettings.key, 'family')))[0]?.value,
+    ).toEqual({ maxChildren: 5 });
+
+    for (const nickname of ['Ayu', 'Bima', 'Caca', 'Danu', 'Eka'])
+      await http()
+        .post('/parent/children')
+        .set('Authorization', parent)
+        .send({ nickname, momoColor: 'blue' })
+        .expect(201);
+    const sixth = await http()
+      .post('/parent/children')
+      .set('Authorization', parent)
+      .send({ nickname: 'Fani', momoColor: 'pink' })
+      .expect(409);
+    expect(sixth.body.error.reason).toBe('child_limit');
+
+    await http()
+      .put('/admin/settings/family')
+      .set('Authorization', admin)
+      .send({ maxChildren: 2 })
+      .expect(200);
+    expect(
+      (await ctx.db.select().from(appSettings).where(eq(appSettings.key, 'family')))[0]?.value,
+    ).toEqual({ maxChildren: 2 });
+    expect(
+      (await http().get('/parent/children').set('Authorization', parent).expect(200)).body,
+    ).toHaveLength(5);
+    await http()
+      .post('/parent/children')
+      .set('Authorization', parent)
+      .send({ nickname: 'Fani', momoColor: 'pink' })
+      .expect(409);
+    await http()
+      .put('/admin/settings/family')
+      .set('Authorization', admin)
+      .send({ maxChildren: 5 })
+      .expect(200);
   });
   it('alur keluarga, ronde dan pembayaran berjalan dengan penilaian di server', async () => {
     const http = () => request(ctx.app.getHttpServer());

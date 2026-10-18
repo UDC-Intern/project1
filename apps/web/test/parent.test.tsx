@@ -109,13 +109,22 @@ describe('mock anak dan laporan', () => {
     expect(rep.suggestions[0]?.topicId).toBe('matematika-kelas-1:A');
   });
 
-  it('maksimal 3 anak dan nama kembar ditolak', async () => {
+  it('batas anak mengikuti pengaturan admin dan nama kembar ditolak', async () => {
     await registerAs('sari@contoh.id');
     await createChild({ nickname: 'Ayu', momoColor: 'blue' });
     expect((await errorOf(createChild({ nickname: 'ayu', momoColor: 'pink' }))).status).toBe(409);
     await createChild({ nickname: 'Bima', momoColor: 'green' });
     await createChild({ nickname: 'Citra', momoColor: 'teal' });
-    expect((await errorOf(createChild({ nickname: 'Dewi', momoColor: 'pink' }))).status).toBe(409);
+    await createChild({ nickname: 'Dewi', momoColor: 'pink' });
+    await createChild({ nickname: 'Eka', momoColor: 'blue' });
+    expect((await errorOf(createChild({ nickname: 'Fani', momoColor: 'pink' }))).body.reason).toBe(
+      'child_limit',
+    );
+    const db = readDb();
+    db.settings.family.maxChildren = 2;
+    writeDb(db);
+    expect((await overview()).children).toHaveLength(5);
+    expect((await errorOf(createChild({ nickname: 'Fani', momoColor: 'pink' }))).status).toBe(409);
   });
 
   it('anak orang tua lain dijawab 404', async () => {
@@ -180,7 +189,7 @@ describe('halaman orang tua', () => {
     );
     expect(await screen.findByText(parent.user.familyCode!)).toBeInTheDocument();
     expect(await screen.findByRole('heading', { name: 'Citra' })).toBeInTheDocument();
-    expect(screen.getByText('1 dari 3 anak terdaftar')).toBeInTheDocument();
+    expect(screen.getByText('1 dari 5 anak terdaftar')).toBeInTheDocument();
   });
 
   it('atur sandi: urutan ulangan harus sama lalu disimpan', async () => {

@@ -4,7 +4,6 @@ import { z } from 'zod';
 import {
   emailSchema,
   generateRound,
-  MAX_CHILDREN_PER_PARENT,
   momoColorSchema,
   nicknameSchema,
   passwordSchema,
@@ -36,7 +35,7 @@ const inputSchema = z.object({
             }),
           )
           .min(1)
-          .max(MAX_CHILDREN_PER_PARENT),
+          .max(10),
       }),
     )
     .min(24)
@@ -125,6 +124,9 @@ export class DemoSeedService {
 
   async seed(input: unknown, admin: { id: string; name: string }) {
     const data = inputSchema.parse(input);
+    const maxChildren = (await this.learning.settings.get()).family.maxChildren;
+    if (data.parents.some((family) => family.children.length > maxChildren))
+      throw new Error(`Data demo melebihi batas ${maxChildren} anak per keluarga.`);
     let newRounds = 0;
     const familyAccess: {
       email: string;

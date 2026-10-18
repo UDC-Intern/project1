@@ -37,6 +37,7 @@ export const apiErrorSchema = z.object({
   error: z.object({
     code: z.enum(API_ERROR_CODES),
     message: z.string(),
+    reason: z.string().optional(),
     attemptsLeft: z.number().int().optional(),
     lockedUntil: z.string().optional(),
   }),

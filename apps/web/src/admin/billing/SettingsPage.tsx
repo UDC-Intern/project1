@@ -1,6 +1,11 @@
 import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import type { AppSettings, BillingSettings, ContactSettings } from '@udakids/engine';
+import type {
+  AppSettings,
+  BillingSettings,
+  ContactSettings,
+  FamilySettings,
+} from '@udakids/engine';
 import type { DemoDataSummary } from '../../api/adminTypes';
 import { isMocked } from '../../api/mode';
 import { currentSettings, settingsChanged } from '../../api/settings';
@@ -57,6 +62,38 @@ function PaymentForm({ initial }: { initial: BillingSettings }) {
           {t('admin.catalog.pay.freeLevels')}{' '}
           <Link to="/admin/konten">{t('admin.catalog.pay.openCatalog')}</Link>
         </p>
+        <Button type="submit" disabled={action.busy}>
+          {t('admin.save')}
+        </Button>
+      </form>
+    </Card>
+  );
+}
+
+function FamilyForm({ initial }: { initial: FamilySettings }) {
+  const { action, save } = useSave('family', t('admin.familySettings.saved'));
+  const [maxChildren, setMaxChildren] = useState(initial.maxChildren);
+
+  async function submit(e: FormEvent) {
+    e.preventDefault();
+    const out = await save({ maxChildren });
+    if (out) setMaxChildren(out.maxChildren);
+  }
+
+  return (
+    <Card title={t('admin.familySettings.title')}>
+      <ActionNotice error={action.error} done={action.done} />
+      <form onSubmit={submit}>
+        <TextField
+          label={t('admin.familySettings.maxChildren')}
+          hint={t('admin.familySettings.hint')}
+          type="number"
+          required
+          min={1}
+          max={10}
+          value={String(maxChildren)}
+          onChange={(e) => setMaxChildren(Number(e.target.value))}
+        />
         <Button type="submit" disabled={action.busy}>
           {t('admin.save')}
         </Button>
@@ -186,7 +223,7 @@ function DemoDataCard() {
 }
 
 /**
- * Pengaturan Sistem: akses berbayar, kontak WhatsApp, dan data contoh (mode tiruan). Isi lembar sertifikat diatur di
+ * Pengaturan Sistem: batas anak, akses berbayar, kontak WhatsApp, dan data contoh (mode tiruan). Isi lembar sertifikat diatur di
  * halaman Sertifikat Juara, suara narasi di Audio Narasi.
  */
 export function SettingsPage() {
@@ -197,6 +234,7 @@ export function SettingsPage() {
       <Loadable loading={s.loading} error={s.error} hasData={!!s.data}>
         {() => (
           <>
+            <FamilyForm initial={s.data!.family} />
             <PaymentForm initial={s.data!.billing} />
             <ContactForm initial={s.data!.contact} />
           </>

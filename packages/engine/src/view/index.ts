@@ -18,8 +18,6 @@ export const SAY_COLOR: Record<Color, string> = {
   teal: 'Hijau tosca',
 };
 
-export const MAX_CHILDREN_PER_PARENT = 3;
-
 /** Nama gambar sandi, sebagaimana diucapkan. */
 export const OBJECTS: Record<PinPicture, { say: string }> = {
   apple: { say: 'apel' },

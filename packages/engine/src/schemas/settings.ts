@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { FREE_LEVELS } from '../rules/level.js';
 
 /**
- * Pengaturan aplikasi yang diubah admin: akses berbayar, kontak WhatsApp, isi lembar sertifikat (menu Pengaturan),
+ * Pengaturan aplikasi yang diubah admin: batas anak, akses berbayar, kontak WhatsApp, isi lembar sertifikat,
  * dan suara narasi (menu Audio Narasi). Nilai awal ada di `DEFAULT_SETTINGS`; semua bagian aplikasi membaca dari sini,
  * bukan dari konstanta.
  */
@@ -163,7 +163,14 @@ export type VoiceSettings = z.infer<typeof voiceSettingsSchema>;
 
 // ---- Semua pengaturan ----
 
+export const familySettingsSchema = z.strictObject({
+  /** Batas profil anak baru per akun orang tua. Profil lama tetap tampil bila batas diturunkan. */
+  maxChildren: z.number().int().min(1).max(10),
+});
+export type FamilySettings = z.infer<typeof familySettingsSchema>;
+
 export const appSettingsSchema = z.strictObject({
+  family: familySettingsSchema,
   billing: billingSettingsSchema,
   contact: contactSettingsSchema,
   certificate: certificateSettingsSchema,
@@ -172,6 +179,7 @@ export const appSettingsSchema = z.strictObject({
 export type AppSettings = z.infer<typeof appSettingsSchema>;
 
 export const DEFAULT_SETTINGS: AppSettings = {
+  family: { maxChildren: 5 },
   billing: { paywall: true, freeLevels: FREE_LEVELS, orderExpiryHours: 24 },
   contact: { adminWhatsapp: '', adminMessage: '', groupWhatsapp: '' },
   certificate: {
@@ -206,6 +214,7 @@ export function mergeSettings(stored: unknown): AppSettings {
     return parsed.success ? parsed.data : DEFAULT_SETTINGS[key];
   };
   return {
+    family: part('family', familySettingsSchema),
     billing: part('billing', billingSettingsSchema),
     contact: part('contact', contactSettingsSchema),
     certificate: part('certificate', certificateSettingsSchema),

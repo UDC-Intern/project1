@@ -143,10 +143,10 @@ async function loadAccess() {
       password: password(),
       children: [],
     };
-    for (let slot = 0; slot < 3; slot++) {
+    for (let slot = 0; slot < (family === 0 ? 5 : 3); slot++) {
       const index = family * 3 + slot;
       access.parents[family].children[slot] ??= {
-        nickname: names[index],
+        nickname: family === 0 && slot >= 3 ? ['Nina', 'Rafi'][slot - 3] : names[index],
         momoColor: colors[index % colors.length],
         correct: 10 - (index % 5),
         pin: pin(),
