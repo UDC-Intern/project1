@@ -137,7 +137,9 @@ function sampleInsights(
   const revenueSeries = days.map((date) => ({
     date,
     amount: rand() > 0.55 ? [17500, 37500, 63000][Math.floor(rand() * 3)]! : 0,
+    orders: 0,
   }));
+  for (const day of revenueSeries) if (day.amount > 0) day.orders = 1;
   // Anak berlatih sepulang sekolah (15.00 sampai 20.59) dan sedikit di pagi hari; dini hari nyaris sepi.
   const heatmap = Array.from({ length: 7 }, (_, d) =>
     Array.from({ length: HOURS }, (_, h) => {
@@ -210,6 +212,9 @@ export async function insights(
     amount: Object.values(db.orders)
       .filter((o) => o.status === 'paid' && o.paidAt && dayKey(Date.parse(o.paidAt)) === date)
       .reduce((a, o) => a + o.price, 0),
+    orders: Object.values(db.orders).filter(
+      (o) => o.status === 'paid' && o.paidAt && dayKey(Date.parse(o.paidAt)) === date,
+    ).length,
   }));
   const revenueSeries =
     demo && revenueReal.every((x) => x.amount === 0) ? demo.revenueSeries : revenueReal;
@@ -222,16 +227,14 @@ export async function insights(
   );
   const parentsWithKids = new Set(db.children.map((c) => c.parentId));
   const activeParents = new Set(
-    db.children
-      .filter((c) => Object.values(db.rounds).some((x) => x.childId === c.id && x.result))
-      .map((c) => c.parentId),
+    db.children.filter((c) => activeIds.has(c.id)).map((c) => c.parentId),
   );
 
   const funnel = [
-    { label: 'Mendaftar', value: db.parents.length },
-    { label: 'Punya profil anak', value: parentsWithKids.size },
+    { label: 'Terdaftar', value: db.parents.length },
+    { label: 'Punya anak', value: parentsWithKids.size },
     { label: 'Anak berlatih', value: activeParents.size },
-    { label: 'Langganan berbayar', value: payers.size },
+    { label: 'Bayar & aktif', value: [...activeParents].filter((id) => payers.has(id)).length },
   ];
   if (sample) {
     const base = Math.max(24, db.parents.length);

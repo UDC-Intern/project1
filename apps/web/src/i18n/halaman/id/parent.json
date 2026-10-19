@@ -25,6 +25,7 @@
   "dash.loadError": "Daftar anak belum bisa dimuat.",
   "dash.retry": "Coba lagi",
   "family.title": "Kode keluarga",
+  "family.codeUnavailable": "Kode belum tersedia",
   "family.explain": "Anak memakai kode ini saat masuk dari perangkat lain (misalnya tablet di kelas). Perangkat ini sudah mengingatnya, jadi di sini anak tidak perlu mengetik.",
   "family.copy": "Salin kode",
   "family.copied": "Tersalin",

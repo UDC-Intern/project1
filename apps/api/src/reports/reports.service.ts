@@ -17,6 +17,9 @@ import { orderDto, orderColumns } from '../billing/billing.service.js';
 @Injectable()
 export class ReportsService {
   private cache = new Map<string, { at: number; value: AdminInsights }>();
+  clearInsightsCache() {
+    this.cache.clear();
+  }
   constructor(
     @Inject(DB) private db: Db,
     private learning: LearningService,
@@ -208,7 +211,7 @@ export class ReportsService {
       jakartaDate(new Date(Date.now() - (count - 1 - i) * DAY)),
     );
     const from = new Date(`${days[0]}T00:00:00+07:00`);
-    const [activity, revenue, totals, heat, hard, live, summary] = await Promise.all([
+    const [activity, revenue, totals, heat, hard, live, summary, journey] = await Promise.all([
       this.db
         .select({
           date: sql<string>`to_char(${s.quizResults.finishedAt} at time zone 'Asia/Jakarta','YYYY-MM-DD')`,
@@ -222,6 +225,7 @@ export class ReportsService {
         .select({
           date: sql<string>`to_char(${s.orders.paidAt} at time zone 'Asia/Jakarta','YYYY-MM-DD')`,
           amount: sql<number>`sum(${s.orders.total})::int`,
+          orders: sql<number>`count(*)::int`,
         })
         .from(s.orders)
         .where(and(eq(s.orders.status, 'paid'), gte(s.orders.paidAt, from)))
@@ -260,6 +264,14 @@ export class ReportsService {
         .orderBy(desc(s.rounds.startedAt))
         .limit(8),
       this.directory.summary(),
+      this.db
+        .select({
+          withChildren: sql<number>`count(distinct ${s.children.parentId})::int`,
+          learning: sql<number>`count(distinct ${s.children.parentId}) filter (where ${s.quizResults.finishedAt} >= ${from})::int`,
+          payingLearners: sql<number>`count(distinct ${s.children.parentId}) filter (where ${s.quizResults.finishedAt} >= ${from} and exists (select 1 from ${s.orders} where ${s.orders.parentId} = ${s.children.parentId} and ${s.orders.status} = 'paid'))::int`,
+        })
+        .from(s.children)
+        .leftJoin(s.quizResults, eq(s.quizResults.childId, s.children.id)),
     ]);
     const value: AdminInsights = {
       range,
@@ -274,12 +286,13 @@ export class ReportsService {
       revenueSeries: days.map((date) => ({
         date,
         amount: revenue.find((r) => r.date === date)?.amount ?? 0,
+        orders: revenue.find((r) => r.date === date)?.orders ?? 0,
       })),
       funnel: [
-        { label: 'Keluarga', value: summary.families ?? 0 },
-        { label: 'Anak', value: summary.children ?? 0 },
-        { label: 'Aktif belajar', value: totals[0]!.activeChildren },
-        { label: 'Premium', value: summary.premiumChildren ?? 0 },
+        { label: 'Terdaftar', value: summary.families ?? 0 },
+        { label: 'Punya anak', value: journey[0]!.withChildren },
+        { label: 'Anak berlatih', value: journey[0]!.learning },
+        { label: 'Bayar & aktif', value: journey[0]!.payingLearners },
       ],
       subjects: [],
       heatmap: Array.from({ length: 7 }, (_, d) =>

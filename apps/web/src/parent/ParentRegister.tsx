@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { parentRegister } from '../api/auth';
 import { ApiError } from '../api/client';
+import { setSession } from '../auth/session';
 import { useSession } from '../auth/store';
 import { useT } from '../i18n';
 import { AuthLayout } from '../site/AuthLayout';
@@ -14,7 +15,6 @@ export function ParentRegister() {
   const refParam = params.get('ref') ?? '';
   const ref = /^[A-Za-z]{6}$/.test(refParam) ? refParam.toUpperCase() : null;
   const session = useSession((s) => s.session);
-  const signIn = useSession((s) => s.signIn);
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -41,7 +41,11 @@ export function ParentRegister() {
         consent: true,
         ...(ref ? { referralCode: ref } : {}),
       });
-      signIn({ token: res.token, role: 'parent', name: res.user.name, id: res.user.id });
+      setSession('parent', {
+        token: res.token,
+        user: res.user,
+        familyCode: res.user.familyCode ?? undefined,
+      });
       navigate('/orang-tua', { replace: true });
     } catch (err) {
       setError(err instanceof ApiError ? err.message : t('error.generic'));

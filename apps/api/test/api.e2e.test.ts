@@ -618,6 +618,27 @@ describe('fondasi API dan akun', () => {
       expect(first.body.newRounds).toBe(28);
       expect(first.body.familyAccess).toHaveLength(24);
       expect(first.body.familyAccess[0].children).toHaveLength(5);
+      const overview = await http()
+        .get('/admin/insights?range=7d')
+        .set('Authorization', admin)
+        .expect(200);
+      const insight = overview.body;
+      const occupied = insight.heatmap.flat().filter((value: number) => value > 0);
+      expect(occupied.length).toBeGreaterThan(10);
+      expect(
+        insight.heatmap.filter((row: number[]) => row.some((value) => value > 0)).length,
+      ).toBeGreaterThan(4);
+      expect(
+        insight.revenueSeries.filter((day: { orders: number }) => day.orders > 0).length,
+      ).toBeGreaterThan(3);
+      expect(
+        insight.revenueSeries.reduce((sum: number, day: { orders: number }) => sum + day.orders, 0),
+      ).toBeGreaterThanOrEqual(8);
+      const stages = insight.funnel.map((stage: { value: number }) => stage.value);
+      expect(
+        stages.every((value: number, index: number) => index === 0 || value <= stages[index - 1]),
+      ).toBe(true);
+      expect(stages[3]).toBeGreaterThanOrEqual(8);
 
       const demoAdmin = await http()
         .post('/auth/staff/login')
@@ -670,6 +691,18 @@ describe('fondasi API dan akun', () => {
       });
       expect(second.body.familyAccess[0].children).toHaveLength(5);
       expect(second.body.familyAccess[0].children[0].id).toBe(childId);
+      const afterRerun = await http()
+        .get('/admin/insights?range=7d')
+        .set('Authorization', admin)
+        .expect(200);
+      expect(
+        afterRerun.body.revenueSeries.reduce(
+          (sum: number, day: { orders: number }) => sum + day.orders,
+          0,
+        ),
+      ).toBe(
+        insight.revenueSeries.reduce((sum: number, day: { orders: number }) => sum + day.orders, 0),
+      );
       await http().get('/admin/settings').set('Authorization', oldAdmin).expect(401);
       await http().get('/parent/children').set('Authorization', oldParent).expect(401);
       await http().get('/child/profile').set('Authorization', oldChild).expect(401);

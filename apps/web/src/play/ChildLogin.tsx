@@ -1,8 +1,10 @@
 import type { PinPicture } from '@udakids/engine';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { childLogin, familyProfiles } from '../api/auth';
 import { ApiError } from '../api/client';
+import { api } from '../api/pageApi';
+import { getSession, rememberFamilyCode, rememberedFamilyCode, setSession } from '../auth/session';
 import { useSession } from '../auth/store';
 import { BigButton } from '../components/BigButton';
 import { ListenButton } from '../components/ListenButton';
@@ -28,31 +30,77 @@ export function ChildLogin() {
   const [message, setMessage] = useState<string | null>(null);
   const [shake, setShake] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [initializing, setInitializing] = useState(
+    () => !!getSession('parent') || !!rememberedFamilyCode(),
+  );
 
-  if (session?.role === 'child') return <Navigate to="/play" replace />;
+  const explain = useCallback(
+    (err: unknown): string => {
+      if (!(err instanceof ApiError)) return t('error.generic');
+      if (err.body.code === 'TEMPORARILY_LOCKED') {
+        const ms = err.body.lockedUntil ? Date.parse(err.body.lockedUntil) - Date.now() : 60_000;
+        return t('error.TEMPORARILY_LOCKED', { minutes: Math.max(1, Math.ceil(ms / 60_000)) });
+      }
+      if (err.body.code === 'WRONG_PIN' || err.body.code === 'NOT_FOUND')
+        return t(`error.${err.body.code}`);
+      return t('error.generic');
+    },
+    [t],
+  );
 
-  const explain = (err: unknown): string => {
-    if (!(err instanceof ApiError)) return t('error.generic');
-    if (err.body.code === 'TEMPORARILY_LOCKED') {
-      const ms = err.body.lockedUntil ? Date.parse(err.body.lockedUntil) - Date.now() : 60_000;
-      return t('error.TEMPORARILY_LOCKED', { minutes: Math.max(1, Math.ceil(ms / 60_000)) });
+  const loadProfiles = useCallback(
+    async (familyCode: string) => {
+      setBusy(true);
+      setMessage(null);
+      setCode(familyCode);
+      try {
+        const res = await familyProfiles(familyCode);
+        rememberFamilyCode(familyCode);
+        setProfiles(res.profiles);
+      } catch (err) {
+        if (err instanceof ApiError && err.status === 404) rememberFamilyCode(null);
+        setMessage(explain(err));
+      } finally {
+        setBusy(false);
+      }
+    },
+    [explain],
+  );
+
+  useEffect(() => {
+    if (session?.role === 'child') return;
+    const parent = getSession('parent');
+    const remembered = rememberedFamilyCode();
+    if (!parent && !remembered) {
+      setInitializing(false);
+      return;
     }
-    if (err.body.code === 'WRONG_PIN' || err.body.code === 'NOT_FOUND')
-      return t(`error.${err.body.code}`);
-    return t('error.generic');
-  };
+    let cancelled = false;
+    void (async () => {
+      try {
+        let familyCode = parent?.familyCode;
+        if (parent && !familyCode) {
+          const account = await api<{ familyCode: string }>('/parent/account', {
+            token: parent.token,
+          });
+          familyCode = account.familyCode;
+          if (!cancelled) setSession('parent', { ...parent, familyCode });
+        }
+        if (!cancelled && (familyCode || remembered))
+          await loadProfiles((familyCode || remembered)!);
+      } catch (err) {
+        if (!cancelled) setMessage(explain(err));
+      } finally {
+        if (!cancelled) setInitializing(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [explain, loadProfiles, session?.role]);
 
   async function findFamily() {
-    setBusy(true);
-    setMessage(null);
-    try {
-      const res = await familyProfiles(code);
-      setProfiles(res.profiles);
-    } catch (err) {
-      setMessage(explain(err));
-    } finally {
-      setBusy(false);
-    }
+    await loadProfiles(code);
   }
 
   async function submitPin(next: PinPicture[]) {
@@ -78,7 +126,15 @@ export function ChildLogin() {
     if (next.length === 3) void submitPin(next);
   };
 
-  const say = chosen ? t('pin.title') : profiles ? t('login.who') : t('login.say');
+  if (session?.role === 'child') return <Navigate to="/play" replace />;
+
+  const say = initializing
+    ? t('login.checking')
+    : chosen
+      ? t('pin.title')
+      : profiles
+        ? t('login.who')
+        : t('login.say');
 
   return (
     <>
@@ -109,7 +165,8 @@ export function ChildLogin() {
           </p>
         )}
 
-        {!profiles && (
+        {!profiles && initializing && <p className="kid-note">{t('login.checking')}</p>}
+        {!profiles && !initializing && (
           <form
             className="code-form"
             onSubmit={(e) => {

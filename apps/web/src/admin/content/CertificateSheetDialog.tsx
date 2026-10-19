@@ -172,7 +172,9 @@ export function CertificateSheetDialog({
             {parsed.success ? (
               <CertificateSheet
                 data={{
-                  childName: t('admin.certSettings.sampleName'),
+                  childName: form.useFullName
+                    ? t('admin.certSettings.sampleName')
+                    : t('admin.certSettings.sampleNickname'),
                   bookTitle: t('admin.certSettings.sampleBook'),
                   levels: 40,
                   topics: 10,

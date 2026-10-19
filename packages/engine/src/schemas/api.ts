@@ -626,7 +626,9 @@ export const adminInsightsSchema = z.object({
   activity: z.array(
     z.object({ date: z.string(), rounds: z.number().int(), answers: z.number().int() }),
   ),
-  revenueSeries: z.array(z.object({ date: z.string(), amount: z.number().int() })),
+  revenueSeries: z.array(
+    z.object({ date: z.string(), amount: z.number().int(), orders: z.number().int() }),
+  ),
   funnel: z.array(z.object({ label: z.string(), value: z.number().int() })),
   subjects: z.array(z.object({ label: z.string(), value: z.number().int() })),
   /** Jumlah ronde selesai: 7 hari (Senin sampai Minggu) x 24 jam (00 sampai 23, WIB), dijumlah dalam rentang yang dipilih. */

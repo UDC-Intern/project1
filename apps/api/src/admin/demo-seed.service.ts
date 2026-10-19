@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { and, eq, sql } from 'drizzle-orm';
+import { and, asc, eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import {
   emailSchema,
@@ -18,6 +18,7 @@ import { PracticeService } from '../practice/practice.service.js';
 import { BillingService } from '../billing/billing.service.js';
 import { LearningService } from '../catalog/learning.service.js';
 import { AuthGuard } from '../auth/auth.guard.js';
+import { ReportsService } from '../reports/reports.service.js';
 
 const demoParentEmail = /^demo\.keluarga(?:[1-9]|1\d|2[0-4])@example\.test$/;
 const demoAdminEmail = /^demo\.admin[1-5]@example\.test$/;
@@ -75,6 +76,7 @@ export class DemoSeedService {
     private billing: BillingService,
     private learning: LearningService,
     private guard: AuthGuard,
+    private reports: ReportsService,
   ) {}
 
   private async code() {
@@ -93,7 +95,38 @@ export class DemoSeedService {
     throw new Error('Kode keluarga demo belum bisa dibuat.');
   }
 
-  private async oneRound(childId: string, correct: number, levelId: string, offset: number) {
+  private demoFinishedAt(index: number) {
+    const currentHour = Number(
+      new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Asia/Jakarta',
+        hour: '2-digit',
+        hourCycle: 'h23',
+      }).format(new Date()),
+    );
+    const dayOffset = index % 7 === 0 && currentHour < 8 ? 1 : index % 7;
+    const hour = dayOffset === 0 ? Math.max(0, currentHour - 1) : 8 + ((index * 5) % 13);
+    const day = jakartaDate(new Date(Date.now() - dayOffset * 86_400_000));
+    return new Date(
+      `${day}T${String(hour).padStart(2, '0')}:${String((index * 11) % 60).padStart(2, '0')}:00+07:00`,
+    );
+  }
+
+  private async dateRound(roundId: string, finishedAt: Date) {
+    await this.db
+      .update(s.rounds)
+      .set({ startedAt: new Date(finishedAt.getTime() - 120_000), finishedAt })
+      .where(eq(s.rounds.id, roundId));
+    await this.db
+      .update(s.roundAnswers)
+      .set({ answeredAt: new Date(finishedAt.getTime() - 60_000) })
+      .where(eq(s.roundAnswers.roundId, roundId));
+    await this.db
+      .update(s.quizResults)
+      .set({ finishedAt })
+      .where(eq(s.quizResults.roundId, roundId));
+  }
+
+  private async oneRound(childId: string, correct: number, levelId: string, finishedAt: Date) {
     const opened = await this.practice.start(childId, levelId);
     const [round] = await this.db.select().from(s.rounds).where(eq(s.rounds.id, opened.roundId));
     const questions = generateRound(round!.generatorSnapshot, round!.seed);
@@ -113,18 +146,7 @@ export class DemoSeedService {
     }
     const result = await this.practice.finish(childId, opened.roundId);
     if (result.correct !== correct) throw new Error('Nilai ronde demo tidak sesuai.');
-    const finishedAt = new Date(Date.now() - offset * 86_400_000);
-    await this.db
-      .update(s.rounds)
-      .set({
-        startedAt: new Date(finishedAt.getTime() - 120_000),
-        finishedAt,
-      })
-      .where(eq(s.rounds.id, opened.roundId));
-    await this.db
-      .update(s.quizResults)
-      .set({ finishedAt })
-      .where(eq(s.quizResults.roundId, opened.roundId));
+    await this.dateRound(opened.roundId, finishedAt);
   }
 
   async seed(input: unknown, admin: { id: string; name: string }) {
@@ -245,19 +267,23 @@ export class DemoSeedService {
         childRows.push(child!);
         children.push({ nickname: child!.nickname, id: child!.id });
         const [played] = await this.db
-          .select({ n: sql<number>`count(*)::int` })
+          .select({ roundId: s.quizResults.roundId })
           .from(s.quizResults)
-          .where(eq(s.quizResults.childId, child!.id));
-        if (!played!.n) {
-          const index = childRows.length - 1;
+          .where(eq(s.quizResults.childId, child!.id))
+          .orderBy(asc(s.quizResults.finishedAt))
+          .limit(1);
+        const index = childRows.length - 1;
+        const finishedAt = this.demoFinishedAt(index);
+        if (!played) {
           await this.oneRound(
             child!.id,
             profile.correct,
             levels[index % levels.length]!,
-            index % 14,
+            finishedAt,
           );
           newRounds++;
-        }
+        } else if (demoParentEmail.test(family.email))
+          await this.dateRound(played.roundId, finishedAt);
       }
       familyAccess.push({ email: family.email, familyCode: parent!.familyCode, children });
     }
@@ -288,22 +314,56 @@ export class DemoSeedService {
         await this.db
           .insert(s.referrals)
           .values({ referrerId: parentRows[0]!.id, refereeId: parent.id });
-      if (
-        (
-          await this.db
-            .select({ id: s.orders.id })
-            .from(s.orders)
-            .where(eq(s.orders.parentId, parent.id))
-        ).length
-      )
-        continue;
-      const order = await this.billing.create(parent.id, {
-        packageId: firstPackage.id,
-        methodId: firstMethod.id,
-      });
-      const id = order.id;
       const status = index % 6;
-      if (status === 1 || status === 0 || status === 3) {
+      const shouldPaid = status === 0 || ((status === 1 || status === 2) && index < 12);
+      const [existingOrder] = await this.db
+        .select({ id: s.orders.id, status: s.orders.status })
+        .from(s.orders)
+        .where(eq(s.orders.parentId, parent.id))
+        .orderBy(asc(s.orders.createdAt))
+        .limit(1);
+      const order =
+        existingOrder ??
+        (await this.billing.create(parent.id, {
+          packageId: firstPackage.id,
+          methodId: firstMethod.id,
+        }));
+      const id = order.id;
+      if (
+        shouldPaid &&
+        order.status !== 'paid' &&
+        (order.status === 'awaiting_payment' || order.status === 'awaiting_review')
+      ) {
+        await this.db
+          .update(s.orders)
+          .set({
+            proofName: 'bukti-demo.png',
+            proofMime: 'image/png',
+            proofData: proof,
+            proofAt: new Date(),
+            status: 'awaiting_review',
+          })
+          .where(eq(s.orders.id, id));
+        await this.billing.review(id, admin.id, true);
+      }
+      if (
+        shouldPaid &&
+        (order.status === 'paid' ||
+          order.status === 'awaiting_payment' ||
+          order.status === 'awaiting_review')
+      ) {
+        const paidAt = new Date(
+          Date.now() - (Math.floor(index / 6) * 2 + (index % 3)) * 86_400_000,
+        );
+        await this.db.update(s.orders).set({ paidAt }).where(eq(s.orders.id, id));
+        await this.db
+          .update(s.cashEntries)
+          .set({ day: jakartaDate(paidAt) })
+          .where(eq(s.cashEntries.orderId, id));
+        await this.db.update(s.referrals).set({ paidAt }).where(eq(s.referrals.orderId, id));
+      }
+      if (existingOrder) continue;
+      if (!shouldPaid && (status === 1 || status === 3)) {
         await this.db
           .update(s.orders)
           .set({
@@ -315,7 +375,6 @@ export class DemoSeedService {
           })
           .where(eq(s.orders.id, id));
       }
-      if (status === 0) await this.billing.review(id, admin.id, true);
       if (status === 3)
         await this.billing.review(id, admin.id, false, 'Contoh: nominal transfer belum sesuai.');
       if (status === 4) await this.billing.cancel(parent.id, id);
@@ -431,6 +490,7 @@ export class DemoSeedService {
           (await this.db.select({ n: sql<number>`count(*)::int` }).from(table))[0]!.n,
       ),
     );
+    this.reports.clearInsightsCache();
     return {
       families: counts[0],
       children: counts[1],

@@ -519,6 +519,19 @@ describe('Atur isi lembar: tanda tangan dan stempel', () => {
     expect(within(preview(dialog) as unknown as HTMLElement).queryByText('JUARA')).toBeNull();
   });
 
+  it('pratinjau memakai nama panggilan saat nama lengkap dimatikan', async () => {
+    const dialog = await openDialog();
+    const name = within(dialog).getByLabelText('Pakai nama lengkap dari orang tua');
+    const sheet = within(preview(dialog) as unknown as HTMLElement);
+    expect(sheet.getByText('Ayu Lestari')).toBeInTheDocument();
+    fireEvent.click(name);
+    expect(name).not.toBeChecked();
+    expect(sheet.getByText('Ayu')).toBeInTheDocument();
+    expect(sheet.queryByText('Ayu Lestari')).toBeNull();
+    fireEvent.click(name);
+    expect(sheet.getByText('Ayu Lestari')).toBeInTheDocument();
+  });
+
   it('coretan di kanvas langsung tampil di pratinjau dan tersimpan bersama pengaturan', async () => {
     const dialog = await openDialog();
     fireEvent.click(within(dialog).getByRole('button', { name: 'Tulis / gambar' }));

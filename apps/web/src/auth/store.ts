@@ -1,7 +1,7 @@
 import type { Role } from '@udakids/engine';
 import { create } from 'zustand';
 
-export type Session = { token: string; role: Role; name: string; id?: string };
+export type Session = { token: string; role: Role; name: string; id?: string; familyCode?: string };
 
 const KEY = 'udakids-session-v1';
 

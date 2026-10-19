@@ -200,25 +200,53 @@ export function ColumnChart({
   format = (n) => String(n),
   height = 200,
   color = 'var(--sawah)',
+  describe,
+  detail,
 }: {
   labels: string[];
   values: number[];
   format?: (n: number) => string;
   height?: number;
   color?: string;
+  describe?: (index: number) => string;
+  detail?: (index: number) => ReactNode;
 }) {
+  const [shown, setShown] = useState<{
+    index: number;
+    x: number;
+    y: number;
+    below: boolean;
+  } | null>(null);
   const w = 640;
   const pad = { l: 8, r: 8, t: 12, b: 28 };
   const max = Math.max(1, ...values);
   const slot = (w - pad.l - pad.r) / Math.max(1, values.length);
   const bar = Math.min(32, slot * 0.7);
   const step = Math.max(1, Math.ceil(labels.length / 7));
+  const description = (i: number) => describe?.(i) ?? `${labels[i]}: ${format(values[i] ?? 0)}`;
+  const show = (index: number, el: Element) => {
+    const r = el.getBoundingClientRect();
+    const half = TIP_W / 2 + TIP_EDGE;
+    const x = Math.min(Math.max(r.left + r.width / 2, half), window.innerWidth - half);
+    const below = r.top < TIP_H + TIP_EDGE * 2;
+    setShown({ index, x, y: below ? r.bottom + 6 : r.top - 6, below });
+  };
+  useEffect(() => {
+    if (!shown) return;
+    const hide = () => setShown(null);
+    window.addEventListener('scroll', hide, true);
+    window.addEventListener('resize', hide);
+    return () => {
+      window.removeEventListener('scroll', hide, true);
+      window.removeEventListener('resize', hide);
+    };
+  }, [shown]);
   return (
     <figure className="chart">
       <svg
         viewBox={`0 0 ${w} ${height}`}
-        role="img"
-        aria-label={labels.map((l, i) => `${l}: ${format(values[i] ?? 0)}`).join(', ')}
+        role="group"
+        aria-label={labels.map((_, i) => description(i)).join(', ')}
       >
         <line
           x1={pad.l}
@@ -231,7 +259,29 @@ export function ColumnChart({
           const h = (v / max) * (height - pad.t - pad.b);
           const cx = pad.l + slot * i + slot / 2;
           return (
-            <g key={i}>
+            <g
+              key={i}
+              role="button"
+              tabIndex={0}
+              aria-label={description(i)}
+              onMouseEnter={(e) => show(i, e.currentTarget)}
+              onMouseLeave={() => setShown(null)}
+              onFocus={(e) => show(i, e.currentTarget)}
+              onBlur={() => setShown(null)}
+              onClick={(e) => show(i, e.currentTarget)}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') setShown(null);
+                if (e.key === 'Enter' || e.key === ' ') show(i, e.currentTarget);
+              }}
+            >
+              <rect
+                className="chart-hitbox"
+                x={pad.l + slot * i}
+                y={pad.t}
+                width={slot}
+                height={height - pad.t - pad.b}
+                fill="transparent"
+              />
               <rect
                 x={cx - bar / 2}
                 y={height - pad.b - h}
@@ -239,9 +289,8 @@ export function ColumnChart({
                 height={h}
                 rx="5"
                 fill={color}
-              >
-                <title>{`${labels[i]}: ${format(v)}`}</title>
-              </rect>
+                pointerEvents="none"
+              />
               {i % step === 0 && (
                 <text
                   x={cx}
@@ -257,6 +306,15 @@ export function ColumnChart({
           );
         })}
       </svg>
+      {shown && (
+        <div
+          className={`heatmap-tip${shown.below ? ' is-below' : ''}`}
+          role="tooltip"
+          style={{ left: shown.x, top: shown.y, width: TIP_W }}
+        >
+          {detail?.(shown.index) ?? description(shown.index)}
+        </div>
+      )}
     </figure>
   );
 }

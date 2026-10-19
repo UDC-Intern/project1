@@ -22,6 +22,13 @@ import { ErrorState, LoadingState } from '../../ui/states';
 import { Badge, Empty, Notice, PageHeader, formatDate } from '../../ui/ui';
 
 const shortDate = (iso: string) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
+const longDate = (iso: string) =>
+  new Date(`${iso}T12:00:00+07:00`).toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'Asia/Jakarta',
+  });
 /** 24 jam penuh, 00 sampai 23 (WIB). */
 const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
 const WEEKDAYS = ['sen', 'sel', 'rab', 'kam', 'jum', 'sab', 'min'] as const;
@@ -306,6 +313,20 @@ export function DashboardPage() {
             labels={labels}
             values={d.revenueSeries.map((r) => r.amount)}
             format={formatRupiah}
+            describe={(i) => {
+              const day = d.revenueSeries[i]!;
+              return `${longDate(day.date)}, ${t('admin.dash.revenueOrders', { n: day.orders })}, ${formatRupiah(day.amount)}`;
+            }}
+            detail={(i) => {
+              const day = d.revenueSeries[i]!;
+              return (
+                <>
+                  <strong>{longDate(day.date)}</strong>
+                  <span>{t('admin.dash.revenueOrders', { n: day.orders })}</span>
+                  <span>{t('admin.dash.revenueTotal', { amount: formatRupiah(day.amount) })}</span>
+                </>
+              );
+            }}
           />
         </Panel>
 

@@ -37,6 +37,20 @@ test('orang tua mendaftar dan membaca data keluarga melalui HTTP', async ({ page
   });
   expect(child.ok()).toBe(true);
   const data = (await child.json()) as { id: string };
+  // Sesi lama belum menyimpan kode per akun, sedangkan browser mungkin mengingat kode keluarga lain.
+  await page.evaluate(() => {
+    const stored = JSON.parse(localStorage.getItem('udakids-session-v1')!);
+    delete stored.familyCode;
+    localStorage.setItem('udakids-session-v1', JSON.stringify(stored));
+    localStorage.setItem('udakids.familyCode', 'BELAJF');
+  });
+  await page.reload();
+  await expect(page.getByRole('status', { name: 'Kode keluarga' })).toHaveText(
+    account.user.familyCode,
+  );
+  await page.locator('.pa-side-play').click();
+  await expect(page.getByRole('button', { name: 'Anak Browser' })).toBeVisible();
+  await expect(page.getByLabel('Kode keluarga', { exact: true })).toHaveCount(0);
   for (const path of [
     '/orang-tua',
     '/orang-tua/paket',
@@ -61,6 +75,17 @@ test('orang tua mendaftar dan membaca data keluarga melalui HTTP', async ({ page
     );
     await page.screenshot({ path: `test-results/orang-tua-${width}.png`, fullPage: true });
   }
+  await page.setViewportSize({ width: 1366, height: 900 });
+  await page.getByRole('button', { name: 'Keluar', exact: true }).click();
+  await page.goto('/orang-tua/masuk');
+  await page.getByLabel('Email', { exact: true }).fill(email);
+  await page.getByLabel(/Kata sandi/).fill('browser-password-123');
+  await page.getByRole('button', { name: 'Masuk', exact: true }).click();
+  await expect(page.getByRole('status', { name: 'Kode keluarga' })).toHaveText(
+    account.user.familyCode,
+  );
+  await page.locator('.pa-side-play').click();
+  await expect(page.getByRole('button', { name: 'Anak Browser' })).toBeVisible();
   expect(problems).toEqual([]);
 });
 
@@ -71,6 +96,14 @@ test('admin membuka setiap menu dengan API dan dialog sertifikat', async ({ page
   await page.getByLabel(/Kata sandi/).fill('browser-password-123');
   await page.getByRole('button', { name: 'Masuk', exact: true }).click();
   await expect(page).toHaveURL(/\/admin$/);
+  await expect(page.getByText('Perjalanan keluarga')).toBeVisible();
+  const revenueHeading = page.getByRole('heading', { name: 'Pendapatan' });
+  await revenueHeading.scrollIntoViewIfNeeded();
+  const revenuePanel = page.locator('section').filter({ has: revenueHeading }).first();
+  const firstDay = revenuePanel.locator('g[role="button"]').first();
+  await firstDay.hover();
+  await expect(page.getByRole('tooltip')).toContainText('pesanan');
+  await expect(page.getByRole('tooltip')).toContainText('Rp');
   for (const path of [
     '/admin',
     '/admin/konten',
@@ -97,6 +130,12 @@ test('admin membuka setiap menu dengan API dan dialog sertifikat', async ({ page
   await page.goto('/admin/sertifikat');
   await page.getByRole('button', { name: /Atur isi lembar/ }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
+  const dialog = page.getByRole('dialog');
+  const sheet = dialog.locator('.adm-cert-preview svg');
+  await expect(sheet.getByText('Ayu Lestari')).toBeVisible();
+  await dialog.getByLabel('Pakai nama lengkap dari orang tua').uncheck();
+  await expect(sheet.getByText('Ayu', { exact: true })).toBeVisible();
+  await expect(sheet.getByText('Ayu Lestari')).toHaveCount(0);
   await page.screenshot({ path: 'test-results/editor-sertifikat.png', fullPage: true });
   for (const width of [1366, 768, 390]) {
     await page.setViewportSize({ width, height: 900 });

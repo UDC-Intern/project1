@@ -6,6 +6,7 @@ import { childLogin, familyProfiles } from '../src/api/auth';
 import { ApiError } from '../src/api/client';
 import { book, home, topic } from '../src/api/catalog';
 import { readDb, resetMockDb, writeDb } from '../src/api/mock/db';
+import { rememberFamilyCode, rememberedFamilyCode } from '../src/auth/session';
 import { useSession } from '../src/auth/store';
 import { ChildLogin } from '../src/play/ChildLogin';
 import { installAudioUnlock } from '../src/audio/speech';
@@ -28,6 +29,7 @@ async function errorOf(p: Promise<unknown>): Promise<ApiError> {
 beforeEach(() => {
   resetMockDb();
   useSession.setState({ session: null });
+  rememberFamilyCode(null);
 });
 
 describe('mock auth anak', () => {
@@ -183,6 +185,23 @@ describe('halaman anak', () => {
     const alert = await screen.findByRole('alert');
     expect(alert.textContent).toContain('belum pas');
     expect(alert.textContent?.toLowerCase()).not.toContain('salah');
+  });
+
+  it('sesi orang tua lama mengganti kode tersimpan yang keliru dan langsung memilih anak', async () => {
+    useSession.setState({
+      session: { token: 'mock-parent:p-demo', role: 'parent', name: 'Ridho Dwi Syahputra' },
+    });
+    rememberFamilyCode('BELAJF');
+    render(
+      <MemoryRouter initialEntries={['/play/masuk']}>
+        <Routes>
+          <Route path="/play/masuk" element={<ChildLogin />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    expect(await screen.findByRole('button', { name: /Ayu/ })).toBeInTheDocument();
+    expect(screen.queryByLabelText('Kode keluarga')).not.toBeInTheDocument();
+    expect(rememberedFamilyCode()).toBe('RWJUVF');
   });
 
   it('halaman topik menampilkan materi, tombol dengar, dan status level', async () => {

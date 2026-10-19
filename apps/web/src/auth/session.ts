@@ -1,6 +1,6 @@
 import type { Role } from '@udakids/engine';
 import { useMemo } from 'react';
-import { useSession as useStore } from './store';
+import { useSession as useStore, type Session as StoredSession } from './store';
 
 /**
  * Sesi per jenis akun, dibaca dari penyimpanan sesi aplikasi. Halaman area orang tua memakai
@@ -34,13 +34,10 @@ export function rememberFamilyCode(code: string | null) {
   }
 }
 
-function build(
-  kind: SessionKind,
-  stored: { token: string; role: Role; name: string; id?: string } | null,
-): Session | null {
+function build(kind: SessionKind, stored: StoredSession | null): Session | null {
   if (!stored || stored.role !== ROLE[kind]) return null;
   const idx = stored.token.indexOf(':');
-  const familyCode = rememberedFamilyCode() ?? undefined;
+  const familyCode = kind === 'parent' ? stored.familyCode : undefined;
   return {
     token: stored.token,
     user: {
@@ -64,6 +61,7 @@ export function setSession(kind: SessionKind, session: Session | null) {
       role: ROLE[kind],
       name: session.user.name,
       id: session.user.id,
+      ...(kind === 'parent' && session.familyCode ? { familyCode: session.familyCode } : {}),
     });
     if (session.familyCode) rememberFamilyCode(session.familyCode);
   } else if (store.session?.role === ROLE[kind]) {

@@ -64,6 +64,13 @@
   height: auto;
   display: block;
 }
+.chart g[role='button'] {
+  cursor: pointer;
+}
+.chart g[role='button']:focus-visible .chart-hitbox {
+  stroke: var(--malam);
+  stroke-width: 3;
+}
 .chart-legend {
   display: flex;
   flex-wrap: wrap;

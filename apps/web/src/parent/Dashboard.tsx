@@ -4,7 +4,7 @@ import { type Color } from '@udakids/engine';
 import { errorMessage } from '../api/client';
 import { useSettings } from '../api/settings';
 import { useApiCall, useFetch } from '../auth/useApi';
-import { rememberFamilyCode, rememberedFamilyCode, useSession } from '../auth/session';
+import { rememberedFamilyCode, setSession, useSession } from '../auth/session';
 import { Momo } from '../components/Momo';
 import { t } from '../i18n';
 import { familySteps, Stepper } from '../site/AuthLayout';
@@ -17,12 +17,17 @@ type DashState = { welcome?: boolean; saved?: string } | null;
 
 function FamilyCode() {
   const session = useSession('parent');
-  const me = useFetch<{ familyCode?: string }>('parent', session?.familyCode ? null : '/auth/me');
+  const me = useFetch<{ familyCode: string }>(
+    'parent',
+    session?.familyCode ? null : '/parent/account',
+  );
   const code = session?.familyCode ?? me.data?.familyCode;
   const [copied, setCopied] = useState(false);
   useEffect(() => {
-    if (code && rememberedFamilyCode() !== code) rememberFamilyCode(code);
-  }, [code]);
+    if (!code || !session) return;
+    if (session.familyCode !== code || rememberedFamilyCode() !== code)
+      setSession('parent', { ...session, familyCode: code });
+  }, [code, session]);
 
   return (
     <Card className="pa-family">
@@ -33,8 +38,9 @@ function FamilyCode() {
         </div>
         <div className="pa-family-code-wrap">
           <output className="pa-family-code" aria-label={t('parent.family.title')}>
-            {code ?? '······'}
+            {code ?? (me.loading ? t('parent.loading') : t('parent.family.codeUnavailable'))}
           </output>
+          {me.error != null && <Notice tone="error">{errorMessage(me.error)}</Notice>}
           {code && typeof navigator !== 'undefined' && navigator.clipboard && (
             <Button
               variant="ghost"

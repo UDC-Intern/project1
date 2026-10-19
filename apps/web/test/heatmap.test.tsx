@@ -5,7 +5,7 @@ import { DashboardPage } from '../src/admin/overview/DashboardPage';
 import { insights } from '../src/api/mock/insights';
 import { readDb, resetMockDb, writeDb, type MockRound } from '../src/api/mock/db';
 import { useSession } from '../src/auth/store';
-import { Heatmap, heatLevel } from '../src/ui/adminCharts';
+import { ColumnChart, Heatmap, heatLevel } from '../src/ui/adminCharts';
 
 const ADMIN = 'mock-admin:a-demo';
 
@@ -88,6 +88,33 @@ describe('Heatmap', () => {
     expect(cells.filter((c) => c.tabIndex === 0)).toEqual([cells[3]]);
 
     fireEvent.keyDown(cells[3]!, { key: 'Escape' });
+    expect(screen.queryByRole('tooltip')).toBeNull();
+  });
+});
+
+describe('Grafik pendapatan', () => {
+  it('setiap hari, termasuk nol pesanan, menampilkan rincian saat diarahkan atau difokuskan', () => {
+    render(
+      <ColumnChart
+        labels={['18/10', '19/10']}
+        values={[0, 25000]}
+        describe={(index) => `${index + 18} Oktober: ${index} pesanan`}
+        detail={(index) => (
+          <span>
+            {index} pesanan · Rp{index * 25000}
+          </span>
+        )}
+      />,
+    );
+    const empty = screen.getByRole('button', { name: '18 Oktober: 0 pesanan' });
+    fireEvent.mouseEnter(empty);
+    expect(screen.getByRole('tooltip')).toHaveTextContent('0 pesanan · Rp0');
+    fireEvent.mouseLeave(empty);
+    expect(screen.queryByRole('tooltip')).toBeNull();
+    const paid = screen.getByRole('button', { name: '19 Oktober: 1 pesanan' });
+    fireEvent.focus(paid);
+    expect(screen.getByRole('tooltip')).toHaveTextContent('1 pesanan · Rp25000');
+    fireEvent.blur(paid);
     expect(screen.queryByRole('tooltip')).toBeNull();
   });
 });
