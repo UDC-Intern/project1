@@ -105,7 +105,7 @@ export class MailService implements OnModuleInit, OnModuleDestroy {
       }
       try {
         await this.transport.sendMail({
-          from: process.env.MAIL_FROM ?? process.env.SMTP_USER,
+          from: process.env.MAIL_FROM?.trim() || process.env.SMTP_USER,
           to: row.toEmail,
           subject: row.subject,
           html: row.html ?? '',
