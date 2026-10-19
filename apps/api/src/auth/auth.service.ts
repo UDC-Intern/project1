@@ -12,12 +12,14 @@ import {
 import { DB, type Db } from '../db/db.module.js';
 import { children, parents, staffUsers, referrals } from '../db/schema.js';
 import { hashSecret, verifySecret, randomCode, ipHash } from '../common/crypto.js';
+import { randomBytes } from 'node:crypto';
 import { fail, missing } from '../common/errors.js';
 import { TOKEN_TTL } from '../common/config.js';
 import { RateLimiter } from '../common/rate-limit.js';
 import { MailService } from '../mail/mail.service.js';
 import { template } from '../mail/templates.js';
 import { VerificationService } from './verification.service.js';
+import { GoogleVerifier } from './google.js';
 
 @Injectable()
 export class AuthService {
@@ -30,6 +32,7 @@ export class AuthService {
     private jwt: JwtService,
     private mail: MailService,
     readonly verification: VerificationService,
+    private google: GoogleVerifier,
   ) {}
   async session(
     row: { id: string; name: string; passwordChangedAt?: Date | null; familyCode?: string },
@@ -124,6 +127,47 @@ export class AuthService {
       await this.db.update(parents).set({ lastLoginAt: new Date() }).where(eq(parents.id, row.id));
     }
     return this.session(row, kind === 'staff' ? 'admin' : 'parent');
+  }
+  async parentGoogle(input: { credential: string; consent?: boolean; name?: string }, ip: string) {
+    this.ipLimit.check(ip);
+    const profile = await this.google.verify(input.credential).catch((error: unknown) => {
+      this.ipLimit.fail(ip);
+      throw error;
+    });
+    const [existing] = await this.db.select().from(parents).where(eq(parents.email, profile.email));
+    if (existing) {
+      if (!existing.active) fail(403, 'FORBIDDEN', 'Akun tidak aktif. Hubungi admin.');
+      await this.db
+        .update(parents)
+        .set({ emailVerifiedAt: existing.emailVerifiedAt ?? new Date(), lastLoginAt: new Date() })
+        .where(eq(parents.id, existing.id));
+      return this.session(existing, 'parent');
+    }
+    if (input.consent !== true)
+      return { needsConsent: true as const, email: profile.email, name: profile.name };
+    this.signupLimit.take(ip);
+    const [created] = await this.db
+      .insert(parents)
+      .values({
+        name: input.name?.trim().slice(0, 60) || profile.name,
+        email: profile.email,
+        passwordHash: await hashSecret(randomBytes(32).toString('base64url')),
+        familyCode: randomCode(),
+        consentAt: new Date(),
+        emailVerifiedAt: new Date(),
+        signupIpHash: ipHash(ip),
+        lastLoginAt: new Date(),
+      })
+      .onConflictDoNothing()
+      .returning();
+    if (!created) fail(409, 'CONFLICT', 'Email sudah terdaftar. Silakan masuk.');
+    await this.mail.enqueue(
+      created.email,
+      template('Selamat datang di UdaKids', `Halo ${created.name}. Kode keluarga: ${created.familyCode}.`),
+      'welcome',
+      created.id,
+    );
+    return this.session(created, 'parent');
   }
   async family(code: string, ip: string) {
     this.ipLimit.check(ip);

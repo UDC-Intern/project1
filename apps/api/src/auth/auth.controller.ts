@@ -10,6 +10,7 @@ import {
 import { AuthService } from './auth.service.js';
 import { CurrentUser, Public, type User } from './decorators.js';
 import { parse, fail } from '../common/errors.js';
+import { googleClientId } from './google.js';
 @Controller('auth')
 export class AuthController {
   constructor(private service: AuthService) {}
@@ -18,6 +19,15 @@ export class AuthController {
   }
   @Public() @Post('parent/login') parent(@Body() body: unknown, @Req() req: Request) {
     return this.service.login(parse(loginBodySchema, body), 'parent', req.ip ?? 'unknown');
+  }
+  @Public() @Get('parent/google') googleConfig() {
+    return { clientId: googleClientId() || null };
+  }
+  @Public() @Post('parent/google') google(@Body() body: unknown, @Req() req: Request) {
+    const input = z
+      .object({ credential: z.string().min(20), consent: z.boolean().optional(), name: z.string().max(60).optional() })
+      .parse(body);
+    return this.service.parentGoogle(input, req.ip ?? 'unknown');
   }
   @Public() @Post('staff/login') staff(@Body() body: unknown, @Req() req: Request) {
     return this.service.login(parse(loginBodySchema, body), 'staff', req.ip ?? 'unknown');

@@ -1,12 +1,13 @@
 import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
-import { parentRegister } from '../api/auth';
+import { parentGoogle, parentRegister } from '../api/auth';
 import { ApiError } from '../api/client';
 import { setSession } from '../auth/session';
 import { useSession } from '../auth/store';
 import { useT } from '../i18n';
 import { AuthLayout } from '../site/AuthLayout';
 import { FormField, PasswordField } from '../ui/FormField';
+import { GoogleButton } from './GoogleButton';
 
 export function ParentRegister() {
   const t = useT('parent');
@@ -22,6 +23,25 @@ export function ParentRegister() {
   const [consent, setConsent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  async function onGoogle(credential: string) {
+    if (!consent) {
+      setError(t('register.needConsent'));
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await parentGoogle({ credential, consent: true, name, ...(ref ? { referralCode: ref } : {}) });
+      if ('needsConsent' in res) throw new Error(t('register.needConsent'));
+      setSession('parent', { token: res.token, user: res.user, familyCode: res.user.familyCode ?? undefined });
+      navigate('/orang-tua', { replace: true });
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : t('error.generic'));
+    } finally {
+      setBusy(false);
+    }
+  }
 
   if (session?.role === 'parent') return <Navigate to="/orang-tua" replace />;
 
@@ -59,6 +79,7 @@ export function ParentRegister() {
       <h1>{t('register.title')}</h1>
       {ref && <p>{t('register.referral', { code: ref })}</p>}
       <form className="uk-stack" onSubmit={(e) => void onSubmit(e)} noValidate>
+        <GoogleButton text="signup_with" onCredential={(credential) => void onGoogle(credential)} />
         <FormField
           label={t('register.name')}
           value={name}

@@ -10,7 +10,8 @@ server {
 
     # Header keamanan. add_header di blok location menimpa yang di server, jadi diulang lewat variabel di bawah.
     # img-src data: blob: dipakai gambar soal, tanda tangan, dan stempel; media-src memutar klip suara Momo.
-    set $csp "default-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; font-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'";
+    # Google Identity Services memuat skrip, iframe tombol, dan endpoint status dari accounts.google.com.
+    set $csp "default-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; script-src 'self' https://accounts.google.com/gsi/client; frame-src https://accounts.google.com/gsi/; connect-src 'self' https://accounts.google.com/gsi/; font-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'";
 
     # Statistik langsung (Server-Sent Events), bila dipakai: jangan di-buffer, koneksi boleh lama.
     location = /api/public/stats/stream {

@@ -1,12 +1,13 @@
 import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { parentLogin } from '../api/auth';
+import { parentGoogle, parentLogin } from '../api/auth';
 import { ApiError } from '../api/client';
 import { setSession } from '../auth/session';
 import { useSession } from '../auth/store';
 import { useT } from '../i18n';
 import { AuthLayout } from '../site/AuthLayout';
 import { FormField, PasswordField } from '../ui/FormField';
+import { GoogleButton } from './GoogleButton';
 
 export function ParentLogin() {
   const t = useT('parent');
@@ -17,6 +18,24 @@ export function ParentLogin() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  async function onGoogle(credential: string) {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await parentGoogle({ credential });
+      if ('needsConsent' in res) {
+        setError('Akun Google belum terdaftar. Silakan daftar terlebih dahulu agar persetujuan dapat dicatat.');
+        return;
+      }
+      setSession('parent', { token: res.token, user: res.user, familyCode: res.user.familyCode ?? undefined });
+      navigate('/orang-tua', { replace: true });
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : t('error.generic'));
+    } finally {
+      setBusy(false);
+    }
+  }
 
   if (session?.role === 'parent') return <Navigate to="/orang-tua" replace />;
 
@@ -43,6 +62,7 @@ export function ParentLogin() {
     <AuthLayout variant="parent" title={t('login.title')} text={t('auth.text')}>
       <h1>{t('login.title')}</h1>
       <form className="uk-stack" onSubmit={(e) => void onSubmit(e)} noValidate>
+        <GoogleButton text="signin_with" onCredential={(credential) => void onGoogle(credential)} />
         <FormField
           label={t('register.email')}
           type="email"

@@ -18,5 +18,7 @@ export const parentRegister = (body: RegisterParentBody) =>
 export const parentLogin = (body: LoginBody) =>
   isMocked('auth') ? accounts.parentLogin(body) : http.parentLogin(body);
 
+export const parentGoogle = http.parentGoogle;
+
 export const staffLogin = (body: LoginBody) =>
   isMocked('auth') ? staff.staffLogin(body) : http.staffLogin(body);
