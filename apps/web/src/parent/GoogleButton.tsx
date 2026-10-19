@@ -60,5 +60,5 @@ export function GoogleButton({ onCredential, text }: { onCredential: (value: str
     };
   }, [text]);
   if (status === 'off') return null;
-  return <div aria-busy={status === 'loading'}><div ref={box} /></div>;
+  return <div className="auth-google" aria-busy={status === 'loading'}><div ref={box} /></div>;
 }

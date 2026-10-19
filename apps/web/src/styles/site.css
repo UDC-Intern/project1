@@ -1080,6 +1080,83 @@
   flex-direction: column;
   gap: 16px;
 }
+.auth-card {
+  width: 100%;
+  display: grid;
+  gap: 22px;
+}
+.auth-card h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 3vw, 2.35rem);
+  letter-spacing: 0.01em;
+}
+.auth-card .uk-stack {
+  gap: 18px;
+}
+.auth-card .uk-btn {
+  width: 100%;
+  min-height: 54px;
+  border-radius: 18px;
+  font-size: 1.05rem;
+}
+.auth-google {
+  min-height: 52px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px solid #1769aa;
+  border-radius: 7px;
+  background: #eef5ff;
+  overflow: hidden;
+}
+.auth-google > div {
+  min-width: 320px;
+}
+.auth-card .uk-field {
+  gap: 7px;
+  font-size: 1rem;
+}
+.auth-card .uk-field input {
+  width: 100%;
+  min-height: 52px;
+  border-radius: 18px;
+  border-color: #7f8b9e;
+  padding-inline: 16px;
+  font-size: 1rem;
+}
+.auth-card .ui-input-wrap {
+  position: relative;
+}
+.auth-card .ui-input-wrap input {
+  padding-right: 92px;
+}
+.auth-card .ui-eye {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  color: var(--gonjong);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.auth-card .ui-eye:hover {
+  color: var(--gonjong-tekan);
+}
+.auth-card .ui-eye-text {
+  font-size: 0.9rem;
+}
+.auth-card .uk-check {
+  align-items: flex-start;
+}
+.auth-card p {
+  margin: 0;
+}
 .auth-wrap .ui-card {
   border-radius: var(--radius-lg);
   border: 1px solid var(--garis);
