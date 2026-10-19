@@ -170,3 +170,71 @@ test('anak masuk dengan sandi gambar dan membuka ronde server', async ({ page, r
   await page.screenshot({ path: 'test-results/ronde-http.png', fullPage: true });
   expect(problems).toEqual([]);
 });
+
+test('batas anak dari admin langsung memperbarui tab orang tua yang terbuka', async ({
+  browser,
+  page,
+  request,
+}) => {
+  await page.goto('/orang-tua/daftar');
+  await page.getByLabel('Nama kamu', { exact: true }).fill('Keluarga Batas');
+  await page.getByLabel('Email', { exact: true }).fill(`browser-limit-${Date.now()}@example.test`);
+  await page
+    .getByLabel('Kata sandi (minimal 8 karakter)', { exact: true })
+    .fill('browser-password-123');
+  await page.getByRole('checkbox').check();
+  const registration = page.waitForResponse((r) => r.url().endsWith('/api/auth/parent/register'));
+  await page.getByRole('button', { name: 'Daftar', exact: true }).click();
+  const parent = (await (await registration).json()) as { token: string };
+  await expect(page).toHaveURL(/\/orang-tua$/);
+
+  for (const nickname of ['Ayu', 'Bima', 'Caca', 'Danu', 'Eka']) {
+    const child = await request.post('/api/parent/children', {
+      headers: { Authorization: `Bearer ${parent.token}` },
+      data: { nickname, momoColor: 'blue' },
+    });
+    expect(child.status(), await child.text()).toBe(201);
+  }
+  await page.reload();
+  await expect(page.getByText('5 anak terdaftar (batas 5)')).toBeVisible();
+
+  const adminContext = await browser.newContext();
+  const admin = await adminContext.newPage();
+  await admin.goto('/masuk/staf');
+  await admin.getByLabel('Email', { exact: true }).fill('browser-admin@example.test');
+  await admin.getByLabel(/Kata sandi/).fill('browser-password-123');
+  await admin.getByRole('button', { name: 'Masuk', exact: true }).click();
+  await expect(admin).toHaveURL(/\/admin$/);
+  await admin.goto('/admin/pengaturan');
+  const limit = admin.getByLabel(/Maksimal anak per keluarga/);
+  await expect(limit).toHaveValue('5');
+  const otherAdmin = await adminContext.newPage();
+  await otherAdmin.goto('/admin/pengaturan');
+  const otherLimit = otherAdmin.getByLabel(/Maksimal anak per keluarga/);
+  await expect(otherLimit).toHaveValue('5');
+  await admin.bringToFront();
+  await limit.fill('2');
+  await limit.locator('xpath=ancestor::form').getByRole('button', { name: 'Simpan' }).click();
+  await expect(admin.getByText('Batas anak per keluarga disimpan.')).toBeVisible();
+  await expect(otherLimit).toHaveValue('2');
+  await page.bringToFront();
+  // Chrome headless tidak selalu mengirim event focus saat berpindah browser context.
+  const refreshed = page.waitForResponse((r) => r.url().endsWith('/api/settings'));
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+  await refreshed;
+  await expect(page.getByText('5 anak terdaftar (batas 2)')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Ayu', exact: true })).toBeVisible();
+  await page.getByRole('tab', { name: /Eka/ }).click();
+  await expect(page.getByRole('heading', { name: 'Eka', exact: true })).toBeVisible();
+
+  await admin.bringToFront();
+  await limit.fill('5');
+  await limit.locator('xpath=ancestor::form').getByRole('button', { name: 'Simpan' }).click();
+  await expect(otherLimit).toHaveValue('5');
+  await page.bringToFront();
+  const restored = page.waitForResponse((r) => r.url().endsWith('/api/settings'));
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+  await restored;
+  await expect(page.getByText('5 anak terdaftar (batas 5)')).toBeVisible();
+  await adminContext.close();
+});

@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import type {
   AppSettings,
@@ -8,7 +8,12 @@ import type {
 } from '@udakids/engine';
 import type { DemoDataSummary } from '../../api/adminTypes';
 import { isMocked } from '../../api/mode';
-import { currentSettings, settingsChanged } from '../../api/settings';
+import {
+  currentSettings,
+  loadSettings,
+  SETTINGS_CHANGED,
+  settingsChanged,
+} from '../../api/settings';
 import { useApiCall, useFetch } from '../../auth/useApi';
 import { t, type MessageKey } from '../../i18n';
 import { Button, Card, formatDate, PageHeader, TextField } from '../../ui/ui';
@@ -73,6 +78,7 @@ function PaymentForm({ initial }: { initial: BillingSettings }) {
 function FamilyForm({ initial }: { initial: FamilySettings }) {
   const { action, save } = useSave('family', t('admin.familySettings.saved'));
   const [maxChildren, setMaxChildren] = useState(initial.maxChildren);
+  useEffect(() => setMaxChildren(initial.maxChildren), [initial.maxChildren]);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -228,6 +234,13 @@ function DemoDataCard() {
  */
 export function SettingsPage() {
   const s = useFetch<AppSettings>('staff', '/admin/settings');
+  const setData = s.setData;
+  useEffect(() => {
+    const sync = () => setData(currentSettings());
+    window.addEventListener(SETTINGS_CHANGED, sync);
+    void loadSettings();
+    return () => window.removeEventListener(SETTINGS_CHANGED, sync);
+  }, [setData]);
   return (
     <>
       <PageHeader title={t('admin.settings.title')} subtitle={t('admin.settings.subtitle')} />
