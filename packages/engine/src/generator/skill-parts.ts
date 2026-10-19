@@ -28,6 +28,7 @@ export type PartLike = { family: string; params: Record<string, unknown> };
 
 export type ManualItem = {
   prompt: string;
+  say?: string;
   /** Gambar benda hitung yang menyertai soal (dari soal generator yang disalin ke bank soal). */
   visual?: Visual;
   stimulus?: unknown[];
@@ -84,6 +85,7 @@ export function manualQuestion(p: { items: ManualItem[] }, rng: Rng): GeneratedQ
   return {
     type: 'choice',
     prompt: soften(it.prompt),
+    ...(it.say && { say: soften(it.say) }),
     visual: it.visual ?? null,
     options: rng.shuffle(texts).map(soften),
     answer: soften(answer),

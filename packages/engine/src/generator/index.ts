@@ -10,6 +10,7 @@ export const ROUND_SIZE = 10;
 const FAMILIES: Record<string, Family> = { ...mathFamilies, ...scienceFamilies, skill };
 
 export { stimuliSupported, type SkillSpec };
+export { numberWord } from './skill.js';
 
 export type LevelGenerator = {
   generator: string;

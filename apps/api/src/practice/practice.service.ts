@@ -52,13 +52,14 @@ export class PracticeService {
         .set({ lastLevelId: levelId, lastActiveAt: new Date() })
         .where(eq(s.children.id, childId));
     });
-    const urls = await this.voice.urls(questions.map((q) => q.prompt));
+    const urls = await this.voice.urls(questions.map((q) => q.say ?? q.prompt));
     return {
       roundId: id,
       questions: questions.map((q, index) => ({
         index,
         type: q.type,
         prompt: q.prompt,
+        ...(q.say && { say: q.say }),
         visual: q.visual,
         options: q.options,
         audioUrl: urls[index] ?? null,

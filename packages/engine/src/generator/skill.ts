@@ -307,11 +307,13 @@ function exprQuestion(p: ExprParams, rng: Rng): GeneratedQuestion {
   }
 
   const prompt = soften([fill(p.prompt), ...stimulusLines].join('\n'));
+  const say = p.say ? soften(fill(p.say)) : undefined;
   const explanation = soften(fill(p.explain));
   if (mode === 'input') {
     return {
       type: 'number',
       prompt,
+      ...(say && { say }),
       visual: null,
       options: null,
       answer: String(answerValue),
@@ -323,6 +325,7 @@ function exprQuestion(p: ExprParams, rng: Rng): GeneratedQuestion {
   return {
     type: 'choice',
     prompt,
+    ...(say && { say }),
     visual: null,
     options: shown,
     answer: soften(answerText),

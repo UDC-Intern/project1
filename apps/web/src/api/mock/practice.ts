@@ -76,6 +76,7 @@ export async function startRound(token: string | null, level: string): Promise<S
     index,
     type: q.type,
     prompt: q.prompt,
+    ...(q.say && { say: q.say }),
     visual: q.visual,
     options: q.options,
     audioUrl: null,

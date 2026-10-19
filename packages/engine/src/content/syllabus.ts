@@ -188,6 +188,8 @@ export const bankQuestionSchema = z
       .trim()
       .min(1, 'Tulis pertanyaannya.')
       .max(200, 'Pertanyaan maksimal 200 huruf.'),
+    /** Naskah audio soal; kosong berarti bacakan pertanyaan yang tampil. */
+    say: z.string().trim().min(1).max(240, 'Teks suara maksimal 240 huruf.').optional(),
     choices: z
       .array(
         z
@@ -217,6 +219,13 @@ export const bankQuestionSchema = z
       childText(choice, ctx, ['choices', i]);
     });
     childText(q.prompt, ctx, ['prompt']);
+    if (/\bdengar(?:kan)?\b/i.test(q.prompt) && !q.say)
+      ctx.addIssue({
+        code: 'custom',
+        path: ['say'],
+        message: 'Soal dengar perlu teks yang dibacakan.',
+      });
+    if (q.say) childText(q.say, ctx, ['say']);
     // Petunjuk berisi langkah hitung ("7 × 3 = 21, lalu tambah satu kelompok 7") yang bisa panjang; yang dijaga
     // hanya kata yang dihindari untuk anak, sama seperti penjelasan soal dari generator.
     for (const message of checkForbiddenWords(q.hint))
@@ -293,6 +302,7 @@ export function bankIssues(items: readonly BankQuestion[]): BankIssues & { ok: b
 type ManualChoice = { visual: { kind: 'text'; text: string }; say: string; tag?: string };
 type ManualItemShape = {
   prompt: string;
+  say?: string;
   visual?: NonNullable<Visual>;
   choices: ManualChoice[];
   answer: number;
@@ -306,6 +316,7 @@ export function bankToLevel(items: readonly BankQuestion[]): {
 } {
   const manual: ManualItemShape[] = items.map((q) => ({
     prompt: q.prompt,
+    ...(q.say && { say: q.say }),
     ...(q.visual && { visual: q.visual }),
     choices: q.choices.map((text, i) => ({
       visual: { kind: 'text' as const, text },
@@ -338,6 +349,7 @@ export function bankFromLevel(
     const visual = visualSchema.safeParse(raw.visual ?? null);
     out.push({
       prompt: raw.prompt,
+      ...(raw.say && { say: raw.say }),
       choices: choices as string[],
       answer: raw.answer,
       hint: raw.reteach === DEFAULT_HINT ? '' : (raw.reteach ?? ''),
@@ -379,7 +391,15 @@ function toBankQuestion(q: GeneratedQuestion, seed: number): BankQuestion | null
   if (answer < 0 || choices.length > BANK_MAX_CHOICES) return null;
   const parsed = bankQuestionSchema.safeParse({
     // Satu baris di kolom pertanyaan: pemisah baris pada soal bertumpuk menjadi spasi.
-    prompt: q.prompt.replace(/\s*\n\s*/g, ' ').trim(),
+    prompt: (q.type === 'number' && /\bdengar(?:kan)?\b/i.test(q.prompt)
+      ? q.prompt.replace(/\btulis\b/i, 'pilih')
+      : q.prompt
+    )
+      .replace(/\s*\n\s*/g, ' ')
+      .trim(),
+    ...(q.say && {
+      say: q.type === 'number' ? q.say.replace(/^Tulis angka\b/i, 'Pilih angka') : q.say,
+    }),
     choices,
     answer,
     hint: fitHint((q.explanation ?? '').replace(/\s*\n\s*/g, ' ').trim()),

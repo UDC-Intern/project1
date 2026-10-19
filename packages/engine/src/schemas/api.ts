@@ -99,6 +99,7 @@ export const childQuestionSchema = z.object({
   index: z.number().int().min(0).max(49),
   type: questionTypeSchema,
   prompt: z.string(),
+  say: z.string().optional(),
   visual: visualSchema,
   options: z.array(z.string()).nullable(),
   audioUrl: z.string().nullable(),

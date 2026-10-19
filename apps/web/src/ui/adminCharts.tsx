@@ -109,32 +109,49 @@ const COLORS = [
 ];
 export const chartColor = (i: number) => COLORS[i % COLORS.length]!;
 
-export type Series = { label: string; values: number[]; color?: string };
+export type Series = { label: string; values: number[]; color?: string; dashed?: boolean };
 
 /** Grafik garis dengan beberapa seri. Setiap titik punya tooltip bawaan (title). */
 export function LineChart({
   labels,
   series,
   height = 220,
+  describe,
+  detail,
 }: {
   labels: string[];
   series: Series[];
   height?: number;
+  describe?: (index: number) => string;
+  detail?: (index: number) => ReactNode;
 }) {
+  const [shown, setShown] = useState<{
+    index: number;
+    x: number;
+    y: number;
+    below: boolean;
+  } | null>(null);
   const w = 640;
-  const pad = { l: 36, r: 12, t: 12, b: 28 };
+  const pad = { l: 36, r: 30, t: 12, b: 28 };
   const max = Math.max(1, ...series.flatMap((s) => s.values));
   const nice = Math.ceil(max / 4) * 4 || 4;
   const x = (i: number) =>
     pad.l + (labels.length <= 1 ? 0 : (i / (labels.length - 1)) * (w - pad.l - pad.r));
   const y = (v: number) => pad.t + (1 - v / nice) * (height - pad.t - pad.b);
   const step = Math.max(1, Math.ceil(labels.length / 7));
+  const show = (index: number, el: Element) => {
+    const r = el.getBoundingClientRect();
+    const half = TIP_W / 2 + TIP_EDGE;
+    const x = Math.min(Math.max(r.left + r.width / 2, half), window.innerWidth - half);
+    const below = r.top < TIP_H + TIP_EDGE * 2;
+    setShown({ index, x, y: below ? r.bottom + 6 : r.top - 6, below });
+  };
 
   return (
     <figure className="chart">
       <svg
         viewBox={`0 0 ${w} ${height}`}
-        role="img"
+        role="group"
         aria-label={series.map((s) => s.label).join(', ')}
       >
         {[0, 1, 2, 3, 4].map((g) => {
@@ -159,12 +176,38 @@ export function LineChart({
           const d = s.values.map((v, i) => `${i === 0 ? 'M' : 'L'}${x(i)},${y(v)}`).join(' ');
           return (
             <g key={s.label}>
-              <path d={d} fill="none" stroke={color} strokeWidth="3" strokeLinejoin="round" />
-              {s.values.map((v, i) => (
-                <circle key={i} cx={x(i)} cy={y(v)} r="4" fill={color}>
-                  <title>{`${labels[i]}: ${v} (${s.label})`}</title>
-                </circle>
-              ))}
+              <path
+                d={d}
+                fill="none"
+                stroke={color}
+                strokeWidth="3"
+                strokeLinejoin="round"
+                strokeDasharray={s.dashed ? '7 5' : undefined}
+              />
+              {!s.dashed &&
+                s.values.map((v, i) => (
+                  <g
+                    key={i}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={describe?.(i) ?? `${labels[i]}: ${v} (${s.label})`}
+                    onMouseEnter={(e) => show(i, e.currentTarget)}
+                    onMouseLeave={() => setShown(null)}
+                    onFocus={(e) => show(i, e.currentTarget)}
+                    onBlur={() => setShown(null)}
+                    onClick={(e) => show(i, e.currentTarget)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') setShown(null);
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        show(i, e.currentTarget);
+                      }
+                    }}
+                  >
+                    <circle cx={x(i)} cy={y(v)} r="11" fill="transparent" />
+                    <circle cx={x(i)} cy={y(v)} r="4" fill={color} pointerEvents="none" />
+                  </g>
+                ))}
             </g>
           );
         })}
@@ -190,6 +233,15 @@ export function LineChart({
           </span>
         ))}
       </figcaption>
+      {shown && (
+        <div
+          className={`heatmap-tip${shown.below ? ' is-below' : ''}`}
+          role="tooltip"
+          style={{ left: shown.x, top: shown.y, width: TIP_W }}
+        >
+          {detail?.(shown.index) ?? describe?.(shown.index) ?? labels[shown.index]}
+        </div>
+      )}
     </figure>
   );
 }

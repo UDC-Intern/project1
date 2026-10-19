@@ -559,6 +559,18 @@
   margin: 0;
 }
 
+.bank-speech {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--ui-line);
+  border-radius: 10px;
+}
+
+.bank-speech .ui-row {
+  flex-wrap: wrap;
+}
+
 .bank-choices {
   display: grid;
   gap: 8px;

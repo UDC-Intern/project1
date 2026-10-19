@@ -52,7 +52,7 @@ function PlayQuestion({
           type="button"
           className="ui-btn ui-btn-ghost sim-listen"
           aria-label={t('admin.sim.listen')}
-          onClick={() => speak(q.prompt, { voice: undefined })}
+          onClick={() => speak(q.say ?? q.prompt, { voice: undefined })}
         >
           <ShellIconSvg name="speaker" size={20} />
         </button>

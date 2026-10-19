@@ -4,6 +4,7 @@ import {
   BANK_MIN_QUESTIONS,
   SUBJECT_PRESETS,
   bankFromLevel,
+  bankFromGenerator,
   bankIssues,
   bankQuestionSchema,
   bankToLevel,
@@ -295,6 +296,87 @@ describe('bank soal menjadi level yang bisa dimainkan', () => {
     // Petunjuk kosong memakai kalimat bawaan, dan kembali kosong saat disunting.
     const blank = bankToLevel([question(1, { hint: '' }), ...bank(3)]);
     expect(bankFromLevel(blank)?.[0]?.hint).toBe('');
+  });
+
+  it('soal dikte angka menyimpan naskah suara terpisah sampai dimainkan', () => {
+    const source = {
+      generator: 'skill',
+      generatorParams: {
+        family: 'expr',
+        params: {
+          vars: { a: [20, 60] },
+          prompt: 'Dengarkan, lalu tulis angkanya.',
+          say: 'Tulis angka {w:a}.',
+          answer: 'a',
+          explain: '{w:a} ditulis {answer}.',
+          mode: 'input',
+        },
+      },
+    };
+    const items = bankFromGenerator(source, { size: 10, seed: 3 });
+    expect(items).toHaveLength(10);
+    expect(items.every((q) => q.prompt === 'Dengarkan, lalu pilih angkanya.')).toBe(true);
+    expect(items.every((q) => q.say?.startsWith('Pilih angka '))).toBe(true);
+    expect(questionBankSchema.safeParse(items).success).toBe(true);
+    const level = bankToLevel(items);
+    expect(bankFromLevel(level)).toEqual(items);
+    const round = generateRound(level, 5);
+    expect(round.every((q) => q.say?.startsWith('Pilih angka '))).toBe(true);
+    const missing = items.map((q, i) => (i === 0 ? { ...q, say: undefined } : q));
+    expect(questionBankSchema.safeParse(missing).success).toBe(false);
+  });
+
+  it('naskah suara opsional untuk soal biasa, wajib untuk soal dengar, dan tetap disaring', () => {
+    const ordinary = question(1, { say: 'Berapa hasil dua tambah satu?' });
+    expect(bankQuestionSchema.safeParse(ordinary).success).toBe(true);
+    expect(bankQuestionSchema.safeParse({ ...ordinary, say: '' }).success).toBe(false);
+    expect(bankQuestionSchema.safeParse({ ...ordinary, say: 'Kamu salah!' }).success).toBe(false);
+    const listening = question(1, { prompt: 'Dengarkan, lalu pilih jawabannya.' });
+    expect(bankQuestionSchema.safeParse(listening).success).toBe(false);
+    expect(bankQuestionSchema.safeParse({ ...listening, say: 'Pilih angka tiga.' }).success).toBe(
+      true,
+    );
+    expect(bankFromLevel(bankToLevel([ordinary, ...bank(3)]))?.[0]?.say).toBe(ordinary.say);
+    expect(generateRound(bankToLevel([ordinary, ...bank(11)]), 7).some((q) => q.say)).toBe(true);
+  });
+
+  it('naskah suara generator pilihan dan angka selain dikte tetap tersedia di bank', () => {
+    const params = {
+      family: 'expr',
+      params: {
+        vars: { a: [8, 12] },
+        prompt: 'Pilih angka {a}.',
+        say: 'Temukan angka {w:a}.',
+        answer: 'a',
+        explain: 'Angkanya {a}.',
+      },
+    };
+    const choices = bankFromGenerator(
+      { generator: 'skill', generatorParams: params },
+      { size: 4, seed: 11 },
+    );
+    expect(choices).toHaveLength(4);
+    expect(choices.every((q) => q.say?.startsWith('Temukan angka '))).toBe(true);
+    const numbers = bankFromGenerator(
+      {
+        generator: 'skill',
+        generatorParams: { ...params, params: { ...params.params, mode: 'input' } },
+      },
+      { size: 4, seed: 11 },
+    );
+    expect(numbers).toHaveLength(4);
+    expect(numbers.every((q) => q.say?.startsWith('Temukan angka '))).toBe(true);
+    const withoutScript = bankFromGenerator(
+      {
+        generator: 'skill',
+        generatorParams: {
+          ...params,
+          params: { ...params.params, prompt: 'Dengar, lalu tulis angkanya.', say: undefined },
+        },
+      },
+      { size: 4, seed: 11 },
+    );
+    expect(withoutScript).toEqual([]);
   });
 
   it('level dari generator bawaan atau tanpa soal bukan bank soal', () => {

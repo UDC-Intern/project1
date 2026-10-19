@@ -214,6 +214,20 @@ describe('Silabus Belajar: soal di semua level (API tiruan)', () => {
     expect((await startRound(AUTO)).questions).toHaveLength(10);
   });
 
+  it('naskah suara soal tersimpan dan dikirim ke ronde anak tanpa kunci jawaban', async () => {
+    const draft = await adm<LevelQuestions>(URL_OF(AUTO));
+    const voiced = draft.items.map((q, i) => ({ ...q, say: `Bacakan soal nomor ${i + 1}.` }));
+    await adm(URL_OF(AUTO), 'PUT', { items: voiced });
+    expect((await adm<LevelQuestions>(URL_OF(AUTO))).items.map((q) => q.say)).toEqual(
+      voiced.map((q) => q.say),
+    );
+    asAyu();
+    const round = await startRound(AUTO);
+    expect(round.questions).toHaveLength(10);
+    expect(round.questions.every((q) => q.say?.startsWith('Bacakan soal nomor '))).toBe(true);
+    expect(JSON.stringify(round)).not.toContain('"answer"');
+  });
+
   it('level yang sudah dikerjakan anak tetap bisa disesuaikan dan dikembalikan', async () => {
     const db = readDb();
     db.passedLevels['c-ayu'] = [AUTO];
@@ -305,6 +319,23 @@ const buttonByText = (root: HTMLElement, text: string) =>
   within(root).getByText(text).closest('button') as HTMLButtonElement;
 
 describe('Silabus Belajar: menyesuaikan soal level otomatis', () => {
+  it('editor menyediakan naskah suara, pengisian angka, dan tombol dengar', async () => {
+    renderPage();
+    fireEvent.click(await openLevel1());
+    const dialog = await screen.findByRole('dialog', { name: /^Soal level 1:/ });
+    const first = dialog.querySelector('.bank-q') as HTMLElement;
+    const toggle = within(first).getByLabelText('Teks yang didengar berbeda dari pertanyaan');
+    fireEvent.click(toggle);
+    const speech = within(first).getByLabelText('Teks yang dibacakan 1');
+    fireEvent.change(speech, { target: { value: 'Dengarkan angka tiga puluh enam.' } });
+    expect(speech).toHaveValue('Dengarkan angka tiga puluh enam.');
+    fireEvent.click(within(first).getByRole('button', { name: 'Dengarkan pratinjau' }));
+    expect(
+      within(first).getByRole('button', { name: 'Isi dari jawaban angka' }),
+    ).toBeInTheDocument();
+    fireEvent.click(within(first).getByRole('button', { name: 'Isi dari jawaban angka' }));
+    expect((speech as HTMLInputElement).value).toMatch(/^Dengarkan angka /);
+  }, 15_000);
   it('tombol di setiap level, dialog berisi 20 soal contoh, disimpan lalu bisa dikembalikan', async () => {
     renderPage();
     fireEvent.click(await openLevel1());

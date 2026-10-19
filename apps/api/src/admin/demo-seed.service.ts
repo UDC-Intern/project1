@@ -95,7 +95,7 @@ export class DemoSeedService {
     throw new Error('Kode keluarga demo belum bisa dibuat.');
   }
 
-  private demoFinishedAt(index: number) {
+  private demoFinishedAt(index: number, offset = index % 7) {
     const currentHour = Number(
       new Intl.DateTimeFormat('en-GB', {
         timeZone: 'Asia/Jakarta',
@@ -103,7 +103,7 @@ export class DemoSeedService {
         hourCycle: 'h23',
       }).format(new Date()),
     );
-    const dayOffset = index % 7 === 0 && currentHour < 8 ? 1 : index % 7;
+    const dayOffset = offset === 0 && currentHour < 8 ? 1 : offset;
     const hour = dayOffset === 0 ? Math.max(0, currentHour - 1) : 8 + ((index * 5) % 13);
     const day = jakartaDate(new Date(Date.now() - dayOffset * 86_400_000));
     return new Date(
@@ -284,6 +284,31 @@ export class DemoSeedService {
           newRounds++;
         } else if (demoParentEmail.test(family.email))
           await this.dateRound(played.roundId, finishedAt);
+        // Ronde kedua pada sebagian profil mengisi beberapa topik di laporan tanpa membuat duplikat saat seed diulang.
+        if (index % 2 === 0) {
+          const book = levels[index % levels.length]!.split(':')[0]!;
+          const prefix = book === 'matematika-kelas-1' ? 'K' : book === 'sains-kelas-1' ? 'S' : '';
+          const topic = `${prefix}${['B', 'C', 'D'][Math.floor(index / 2) % 3]!}`;
+          const extraLevel = `${book}:${topic}:1`;
+          const [extra] = await this.db
+            .select({ roundId: s.quizResults.roundId })
+            .from(s.quizResults)
+            .where(and(eq(s.quizResults.childId, child!.id), eq(s.quizResults.levelId, extraLevel)))
+            .orderBy(asc(s.quizResults.finishedAt))
+            .limit(1);
+          const extraOffset = [0, 0, 1, 2, 2, 3, 4, 4, 5][Math.floor(index / 2) % 9]!;
+          const extraFinishedAt = this.demoFinishedAt(index + 75, extraOffset);
+          if (!extra) {
+            await this.oneRound(
+              child!.id,
+              Math.max(6, profile.correct - 1),
+              extraLevel,
+              extraFinishedAt,
+            );
+            newRounds++;
+          } else if (demoParentEmail.test(family.email))
+            await this.dateRound(extra.roundId, extraFinishedAt);
+        }
       }
       familyAccess.push({ email: family.email, familyCode: parent!.familyCode, children });
     }

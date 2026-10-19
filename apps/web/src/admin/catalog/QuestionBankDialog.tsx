@@ -8,13 +8,16 @@ import {
   BANK_MIN_QUESTIONS,
   bankIssues,
   bankQuestionSchema,
+  numberWord,
   type BankQuestion,
 } from '@udakids/engine';
 import type { CatalogBook, CatalogLevel } from '../../api/adminTypes';
+import { currentSettings } from '../../api/settings';
+import { speak } from '../../audio/speech';
 import { useApiCall, useFetch } from '../../auth/useApi';
 import { t } from '../../i18n';
 import { Dialog } from '../../ui/Dialog';
-import { Badge, Button, Notice, TextField } from '../../ui/ui';
+import { Badge, Button, Checkbox, Notice, TextField } from '../../ui/ui';
 import { ActionNotice, ConfirmDialog, Icon, Loadable, useAction, useConfirm } from '../common';
 import { ImagePickerDialog } from './ImagePickerDialog';
 import { VisualEditor } from './VisualEditor';
@@ -100,6 +103,8 @@ const QuestionCard = memo(function QuestionCard({
       answer:
         question.answer === i ? 0 : question.answer > i ? question.answer - 1 : question.answer,
     });
+  const answerText = question.choices[question.answer]?.trim() ?? '';
+  const answerNumber = /^\d{1,9}$/.test(answerText) ? Number(answerText) : null;
 
   return (
     <li className={`bank-q${issues.length > 0 ? ' is-bad' : ''}`}>
@@ -149,6 +154,50 @@ const QuestionCard = memo(function QuestionCard({
           onChange={(e) => set({ prompt: e.target.value })}
         />
         <small className="ui-hint">{t('admin.bank.promptHint')}</small>
+      </div>
+      <div className="bank-speech">
+        <Checkbox
+          label={t('admin.bank.customSpeech')}
+          checked={question.say !== undefined}
+          onChange={(e) => {
+            const next = { ...question };
+            if (e.target.checked) next.say = question.prompt || 'Bacakan soal ini.';
+            else delete next.say;
+            onChange(index, next);
+          }}
+        />
+        {question.say !== undefined && (
+          <TextField
+            label={t('admin.bank.speechText')}
+            hint={t('admin.bank.speechHint')}
+            maxLength={240}
+            value={question.say}
+            aria-label={`${t('admin.bank.speechText')} ${n}`}
+            onChange={(e) => set({ say: e.target.value })}
+          />
+        )}
+        <div className="ui-row">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() =>
+              speak(question.say ?? question.prompt, { voice: currentSettings().voice })
+            }
+          >
+            {t('admin.bank.listenSpeech')}
+          </Button>
+          {answerNumber !== null && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() =>
+                set({ say: t('admin.bank.numberSpeech', { number: numberWord(answerNumber) }) })
+              }
+            >
+              {t('admin.bank.fillNumberSpeech')}
+            </Button>
+          )}
+        </div>
       </div>
       <fieldset className="bank-choices" style={{ border: 0, margin: 0, padding: 0 }}>
         <legend className="bank-choices-title">{t('admin.bank.choices')}</legend>

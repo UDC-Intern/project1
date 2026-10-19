@@ -179,7 +179,9 @@ export function DashboardPage() {
   const labels = d.days.map(shortDate);
   // Data contoh tidak dipakai untuk catatan tindak lanjut.
   const hardest = d.sample ? undefined : d.hardestSkills[0];
-  const bookMax = Math.max(1, ...s.books.map((b) => b.rounds));
+  const averageRounds = d.activity.length
+    ? d.activity.reduce((total, day) => total + day.rounds, 0) / d.activity.length
+    : 0;
 
   return (
     <>
@@ -273,13 +275,28 @@ export function DashboardPage() {
           <LineChart
             labels={labels}
             series={[
-              { label: t('admin.dash.rounds'), values: d.activity.map((a) => a.rounds) },
               {
-                label: t('admin.dash.answersTen'),
-                values: d.activity.map((a) => Math.round(a.answers / 10)),
+                label: t('admin.dash.averageRounds'),
+                values: d.activity.map(() => averageRounds),
                 color: 'var(--sawah)',
+                dashed: true,
+              },
+              {
+                label: t('admin.dash.rounds'),
+                values: d.activity.map((a) => a.rounds),
+                color: 'var(--gonjong)',
               },
             ]}
+            describe={(i) =>
+              `${longDate(d.activity[i]!.date)}: ${d.activity[i]!.rounds} ronde, rata-rata periode ${averageRounds.toFixed(1)}`
+            }
+            detail={(i) => (
+              <>
+                <strong>{longDate(d.activity[i]!.date)}</strong>
+                <span>{t('admin.dash.dailyRounds', { n: d.activity[i]!.rounds })}</span>
+                <span>{t('admin.dash.periodAverage', { n: averageRounds.toFixed(1) })}</span>
+              </>
+            )}
           />
         </Panel>
 
@@ -295,7 +312,7 @@ export function DashboardPage() {
                   <strong>{b.title}</strong>
                   <span>{b.passRate === null ? '–' : `${b.passRate}%`}</span>
                 </div>
-                <Meter value={b.rounds} max={bookMax} tone="sky" />
+                <Meter value={b.passRate ?? 0} max={100} tone="sky" />
                 <small className="ui-muted">
                   {t('admin.dash.bookMeta', {
                     rounds: b.rounds,

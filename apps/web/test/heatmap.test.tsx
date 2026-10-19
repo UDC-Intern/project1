@@ -5,7 +5,7 @@ import { DashboardPage } from '../src/admin/overview/DashboardPage';
 import { insights } from '../src/api/mock/insights';
 import { readDb, resetMockDb, writeDb, type MockRound } from '../src/api/mock/db';
 import { useSession } from '../src/auth/store';
-import { ColumnChart, Heatmap, heatLevel } from '../src/ui/adminCharts';
+import { ColumnChart, Heatmap, LineChart, heatLevel } from '../src/ui/adminCharts';
 
 const ADMIN = 'mock-admin:a-demo';
 
@@ -116,6 +116,54 @@ describe('Grafik pendapatan', () => {
     expect(screen.getByRole('tooltip')).toHaveTextContent('1 pesanan · Rp25000');
     fireEvent.blur(paid);
     expect(screen.queryByRole('tooltip')).toBeNull();
+  });
+});
+
+describe('Grafik aktivitas dan kelulusan', () => {
+  it('titik ronde harian membuka angka dan pembanding rata-rata saat difokuskan', () => {
+    render(
+      <LineChart
+        labels={['18/10', '19/10']}
+        series={[
+          { label: 'Rata-rata periode', values: [5, 5], dashed: true },
+          { label: 'Ronde', values: [3, 7] },
+        ]}
+        describe={(index) => `${index + 18} Oktober: ${index ? 7 : 3} ronde`}
+        detail={(index) => <span>{index ? 7 : 3} ronde; rata-rata 5</span>}
+      />,
+    );
+    const day = screen.getByRole('button', { name: '19 Oktober: 7 ronde' });
+    fireEvent.focus(day);
+    expect(screen.getByRole('tooltip')).toHaveTextContent('7 ronde; rata-rata 5');
+    fireEvent.blur(day);
+    expect(screen.queryByRole('tooltip')).toBeNull();
+  });
+
+  it('buku dengan ronde tetapi 0% lulus menampilkan batang kosong', async () => {
+    const db = readDb();
+    db.rounds['demo-failed'] = {
+      id: 'demo-failed',
+      childId: 'c-ayu',
+      levelId: 'sains-kelas-1:A:1',
+      seed: 1,
+      startedAt: Date.now() - 60_000,
+      stageBefore: 0,
+      answers: {},
+      finishedAt: Date.now(),
+      result: { score: 60, correct: 6, wrong: 4, durationMs: 60_000, passed: false },
+    };
+    writeDb(db);
+    render(
+      <MemoryRouter>
+        <DashboardPage />
+      </MemoryRouter>,
+    );
+    await screen.findByText('Kelulusan per buku');
+    const row = [...document.querySelectorAll('.dash-books li')].find((el) =>
+      el.textContent?.includes('Sains Kelas 1'),
+    );
+    expect(row).toHaveTextContent('0%');
+    expect(row?.querySelector('.ch-meter > span')).toHaveStyle({ width: '0%' });
   });
 });
 

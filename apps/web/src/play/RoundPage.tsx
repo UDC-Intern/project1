@@ -106,14 +106,15 @@ export function RoundPage() {
   }, [levelId, t]);
 
   const currentPrompt = round?.questions[index]?.prompt;
+  const currentSay = round?.questions[index]?.say;
   const currentAudio = round?.questions[index]?.audioUrl;
   // Suara soal otomatis diputar saat soal baru tampil (bila "bacakan otomatis" hidup).
   useEffect(() => {
     if (currentPrompt) {
-      speakAuto(currentPrompt, currentAudio);
+      speakAuto(currentSay ?? currentPrompt, currentAudio);
       return () => stopSpeaking();
     }
-  }, [index, currentPrompt, currentAudio]);
+  }, [index, currentPrompt, currentSay, currentAudio]);
 
   if (error)
     return (
@@ -208,7 +209,7 @@ export function RoundPage() {
 
       <div className="item">
         <div className="item-prompt">
-          <ListenButton text={question.prompt} audioUrl={question.audioUrl} />
+          <ListenButton text={question.say ?? question.prompt} audioUrl={question.audioUrl} />
           <p>{question.prompt}</p>
         </div>
         {question.visual && <CountObjects visual={question.visual} />}

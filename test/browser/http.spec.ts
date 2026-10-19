@@ -104,6 +104,11 @@ test('admin membuka setiap menu dengan API dan dialog sertifikat', async ({ page
   await firstDay.hover();
   await expect(page.getByRole('tooltip')).toContainText('pesanan');
   await expect(page.getByRole('tooltip')).toContainText('Rp');
+  const activityHeading = page.getByRole('heading', { name: 'Aktivitas belajar' });
+  await activityHeading.scrollIntoViewIfNeeded();
+  const activityPanel = page.locator('section').filter({ has: activityHeading }).first();
+  await activityPanel.locator('g[role="button"]').first().hover();
+  await expect(page.getByRole('tooltip')).toContainText('Rata-rata');
   for (const path of [
     '/admin',
     '/admin/konten',

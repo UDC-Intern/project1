@@ -5,6 +5,8 @@ import type { Rng } from '../rng.js';
 export type GeneratedQuestion = {
   type: QuestionType;
   prompt: string;
+  /** Teks yang diucapkan bila berbeda dari teks yang terlihat, misalnya soal dikte angka. */
+  say?: string;
   visual: Visual;
   options: string[] | null;
   answer: string;

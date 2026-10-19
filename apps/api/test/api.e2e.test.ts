@@ -615,7 +615,7 @@ describe('fondasi API dan akun', () => {
         .set('Authorization', admin)
         .send({ parents, staff })
         .expect(201);
-      expect(first.body.newRounds).toBe(28);
+      expect(first.body.newRounds).toBe(42);
       expect(first.body.familyAccess).toHaveLength(24);
       expect(first.body.familyAccess[0].children).toHaveLength(5);
       const overview = await http()
@@ -639,6 +639,16 @@ describe('fondasi API dan akun', () => {
         stages.every((value: number, index: number) => index === 0 || value <= stages[index - 1]),
       ).toBe(true);
       expect(stages[3]).toBeGreaterThanOrEqual(8);
+      const levelsWithRounds = await http()
+        .get('/admin/reports/levels')
+        .set('Authorization', admin)
+        .expect(200);
+      expect(
+        levelsWithRounds.body.filter(
+          (row: { bookSlug: string; rounds: number }) =>
+            row.bookSlug === 'sains-kelas-1' && row.rounds > 0,
+        ).length,
+      ).toBeGreaterThanOrEqual(4);
 
       const demoAdmin = await http()
         .post('/auth/staff/login')
@@ -653,6 +663,15 @@ describe('fondasi API dan akun', () => {
         .post('/auth/child/login')
         .send({ childId, pin: ['apple', 'star', 'fish'] })
         .expect(201);
+      const listening = await http()
+        .post('/practice/rounds')
+        .set('Authorization', `Bearer ${demoChild.body.token}`)
+        .send({ levelId: 'matematika-kelas-1:KB:1' })
+        .expect(201);
+      expect(
+        listening.body.questions.some((q: { say?: string }) => q.say?.startsWith('Tulis angka ')),
+      ).toBe(true);
+      expect(JSON.stringify(listening.body)).not.toContain('"answer"');
       const oldAdmin = `Bearer ${demoAdmin.body.token}`;
       const oldParent = `Bearer ${demoParent.body.token}`;
       const oldChild = `Bearer ${demoChild.body.token}`;
