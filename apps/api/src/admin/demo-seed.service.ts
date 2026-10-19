@@ -17,6 +17,10 @@ import { jakartaDate } from '../common/dates.js';
 import { PracticeService } from '../practice/practice.service.js';
 import { BillingService } from '../billing/billing.service.js';
 import { LearningService } from '../catalog/learning.service.js';
+import { AuthGuard } from '../auth/auth.guard.js';
+
+const demoParentEmail = /^demo\.keluarga(?:[1-9]|1\d|2[0-4])@example\.test$/;
+const demoAdminEmail = /^demo\.admin[1-5]@example\.test$/;
 
 const inputSchema = z.object({
   parents: z
@@ -70,6 +74,7 @@ export class DemoSeedService {
     private practice: PracticeService,
     private billing: BillingService,
     private learning: LearningService,
+    private guard: AuthGuard,
   ) {}
 
   private async code() {
@@ -125,8 +130,22 @@ export class DemoSeedService {
   async seed(input: unknown, admin: { id: string; name: string }) {
     const data = inputSchema.parse(input);
     const maxChildren = (await this.learning.settings.get()).family.maxChildren;
-    if (data.parents.some((family) => family.children.length > maxChildren))
-      throw new Error(`Data demo melebihi batas ${maxChildren} anak per keluarga.`);
+    for (const family of data.parents) {
+      const [parent] = await this.db
+        .select({ id: s.parents.id })
+        .from(s.parents)
+        .where(eq(s.parents.email, family.email));
+      const existing = parent
+        ? await this.db
+            .select({ nickname: s.children.nickname })
+            .from(s.children)
+            .where(eq(s.children.parentId, parent.id))
+        : [];
+      const names = new Set(existing.map((child) => child.nickname));
+      const newChildren = family.children.filter((child) => !names.has(child.nickname)).length;
+      if (newChildren && existing.length + newChildren > maxChildren)
+        throw new Error(`Data demo melebihi batas ${maxChildren} anak per keluarga.`);
+    }
     let newRounds = 0;
     const familyAccess: {
       email: string;
@@ -141,8 +160,15 @@ export class DemoSeedService {
         .select()
         .from(s.staffUsers)
         .where(eq(s.staffUsers.email, person.email));
-      if (existing && !(await verifySecret(person.password, existing.passwordHash)))
-        throw new Error(`Kata sandi admin demo ${person.email} tidak sesuai dengan database.`);
+      if (existing && !(await verifySecret(person.password, existing.passwordHash))) {
+        if (!demoAdminEmail.test(person.email))
+          throw new Error(`Kata sandi admin demo ${person.email} tidak sesuai dengan database.`);
+        await this.db
+          .update(s.staffUsers)
+          .set({ passwordHash: await hashSecret(person.password), passwordChangedAt: new Date() })
+          .where(eq(s.staffUsers.id, existing.id));
+        this.guard.forget(existing.id);
+      }
       if (!existing)
         await this.db.insert(s.staffUsers).values({
           name: person.name,
@@ -157,8 +183,16 @@ export class DemoSeedService {
         .select()
         .from(s.parents)
         .where(eq(s.parents.email, family.email));
-      if (parent && !(await verifySecret(family.password, parent.passwordHash)))
-        throw new Error(`Kata sandi keluarga demo ${family.email} tidak sesuai dengan database.`);
+      if (parent && !(await verifySecret(family.password, parent.passwordHash))) {
+        if (!demoParentEmail.test(family.email))
+          throw new Error(`Kata sandi keluarga demo ${family.email} tidak sesuai dengan database.`);
+        [parent] = await this.db
+          .update(s.parents)
+          .set({ passwordHash: await hashSecret(family.password), passwordChangedAt: new Date() })
+          .where(eq(s.parents.id, parent.id))
+          .returning();
+        this.guard.forget(parent!.id);
+      }
       if (!parent) {
         [parent] = await this.db
           .insert(s.parents)
@@ -181,8 +215,22 @@ export class DemoSeedService {
           .where(
             and(eq(s.children.parentId, parent!.id), eq(s.children.nickname, profile.nickname)),
           );
-        if (child && !(await verifySecret(pinSecret(profile.pin), child.picturePinHash)))
-          throw new Error(`Sandi gambar ${profile.nickname} tidak sesuai dengan database.`);
+        if (child && !(await verifySecret(pinSecret(profile.pin), child.picturePinHash))) {
+          if (!demoParentEmail.test(family.email))
+            throw new Error(`Sandi gambar ${profile.nickname} tidak sesuai dengan database.`);
+          [child] = await this.db
+            .update(s.children)
+            .set({
+              picturePinHash: await hashSecret(pinSecret(profile.pin)),
+              pinChangedAt: new Date(),
+              failedPinAttempts: 0,
+              pinLockCount: 0,
+              pinLockedUntil: null,
+            })
+            .where(eq(s.children.id, child.id))
+            .returning();
+          this.guard.forget(child!.id);
+        }
         if (!child) {
           [child] = await this.db
             .insert(s.children)

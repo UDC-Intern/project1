@@ -582,4 +582,128 @@ describe('fondasi API dan akun', () => {
     expect(sent.length).toBeGreaterThan(0);
     expect(sent.every((r) => r.html === null && r.text === null)).toBe(true);
   });
+  it('seed demo dapat diulang saat batas anak turun dan mencabut sesi dengan sandi lama', async () => {
+    const http = () => request(ctx.app.getHttpServer());
+    const adminLogin = await http()
+      .post('/auth/staff/login')
+      .send({ email: 'admin@udakids.local', password: 'tes-admin-aman-123' })
+      .expect(201);
+    const admin = `Bearer ${adminLogin.body.token}`;
+    const parents = Array.from({ length: 24 }, (_, index) => ({
+      name: `Keluarga Demo ${index + 1}`,
+      email: `demo.keluarga${index + 1}@example.test`,
+      password: 'sandi-lama-123',
+      children: (index === 0 ? ['Ayu', 'Bima', 'Caca', 'Danu', 'Eka'] : [`Anak ${index + 1}`]).map(
+        (nickname) => ({
+          nickname,
+          momoColor: 'blue',
+          pin: ['apple', 'star', 'fish'],
+          correct: 8,
+        }),
+      ),
+    }));
+    const staff = Array.from({ length: 5 }, (_, index) => ({
+      name: `Admin Demo ${index + 1}`,
+      email: `demo.admin${index + 1}@example.test`,
+      password: 'admin-lama-123',
+    }));
+    const previousDriver = process.env.DATABASE_DRIVER;
+    process.env.DATABASE_DRIVER = 'pglite';
+    try {
+      const first = await http()
+        .post('/admin/demo-data')
+        .set('Authorization', admin)
+        .send({ parents, staff })
+        .expect(201);
+      expect(first.body.newRounds).toBe(28);
+      expect(first.body.familyAccess).toHaveLength(24);
+      expect(first.body.familyAccess[0].children).toHaveLength(5);
+
+      const demoAdmin = await http()
+        .post('/auth/staff/login')
+        .send({ email: staff[0]!.email, password: staff[0]!.password })
+        .expect(201);
+      const demoParent = await http()
+        .post('/auth/parent/login')
+        .send({ email: parents[0]!.email, password: parents[0]!.password })
+        .expect(201);
+      const childId: string = first.body.familyAccess[0].children[0].id;
+      const demoChild = await http()
+        .post('/auth/child/login')
+        .send({ childId, pin: ['apple', 'star', 'fish'] })
+        .expect(201);
+      const oldAdmin = `Bearer ${demoAdmin.body.token}`;
+      const oldParent = `Bearer ${demoParent.body.token}`;
+      const oldChild = `Bearer ${demoChild.body.token}`;
+      await http().get('/admin/settings').set('Authorization', oldAdmin).expect(200);
+      await http().get('/parent/children').set('Authorization', oldParent).expect(200);
+      await http().get('/child/profile').set('Authorization', oldChild).expect(200);
+
+      await http()
+        .put('/admin/settings/family')
+        .set('Authorization', admin)
+        .send({ maxChildren: 2 })
+        .expect(200);
+      const revised = {
+        parents: parents.map((family) => ({
+          ...family,
+          password: '12345678',
+          children: family.children.map((child) => ({
+            ...child,
+            pin: ['apple', 'apple', 'apple'],
+          })),
+        })),
+        staff: staff.map((person) => ({ ...person, password: 'admin123' })),
+      };
+      const second = await http()
+        .post('/admin/demo-data')
+        .set('Authorization', admin)
+        .send(revised)
+        .expect(201);
+      expect(second.body).toMatchObject({
+        families: first.body.families,
+        children: first.body.children,
+        admins: first.body.admins,
+        rounds: first.body.rounds,
+        orders: first.body.orders,
+        newRounds: 0,
+      });
+      expect(second.body.familyAccess[0].children).toHaveLength(5);
+      expect(second.body.familyAccess[0].children[0].id).toBe(childId);
+      await http().get('/admin/settings').set('Authorization', oldAdmin).expect(401);
+      await http().get('/parent/children').set('Authorization', oldParent).expect(401);
+      await http().get('/child/profile').set('Authorization', oldChild).expect(401);
+      await http()
+        .post('/auth/staff/login')
+        .send({ email: staff[0]!.email, password: staff[0]!.password })
+        .expect(401);
+      await http()
+        .post('/auth/parent/login')
+        .send({ email: parents[0]!.email, password: parents[0]!.password })
+        .expect(401);
+      await http()
+        .post('/auth/staff/login')
+        .send({ email: staff[0]!.email, password: 'admin123' })
+        .expect(201);
+      await http()
+        .post('/auth/parent/login')
+        .send({ email: parents[0]!.email, password: '12345678' })
+        .expect(201);
+      await http()
+        .post('/auth/child/login')
+        .send({ childId, pin: ['apple', 'apple', 'apple'] })
+        .expect(201);
+    } finally {
+      try {
+        await http()
+          .put('/admin/settings/family')
+          .set('Authorization', admin)
+          .send({ maxChildren: 5 })
+          .expect(200);
+      } finally {
+        if (previousDriver === undefined) delete process.env.DATABASE_DRIVER;
+        else process.env.DATABASE_DRIVER = previousDriver;
+      }
+    }
+  }, 180_000);
 });

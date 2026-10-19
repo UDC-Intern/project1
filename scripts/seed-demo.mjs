@@ -1,4 +1,3 @@
-import { randomBytes, randomInt } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { setTimeout } from 'node:timers/promises';
@@ -95,7 +94,9 @@ const names = [
   'Hasna',
 ];
 const colors = ['blue', 'green', 'pink', 'orange', 'teal', 'yellow'];
-const pictures = ['apple', 'ball', 'star', 'fish', 'leaf', 'flower', 'cat', 'house', 'cloud'];
+const demoPin = ['apple', 'apple', 'apple'];
+const parentPassword = '12345678';
+const adminPassword = 'admin123';
 
 async function api(path, { method = 'GET', token, body } = {}) {
   let response;
@@ -122,8 +123,6 @@ async function api(path, { method = 'GET', token, body } = {}) {
   return result;
 }
 
-const pin = () => Array.from({ length: 3 }, () => pictures[randomInt(pictures.length)]);
-const password = () => randomBytes(18).toString('base64url');
 const save = (access) =>
   writeFile(accessPath, `${JSON.stringify(access, null, 2)}\n`, { mode: 0o600 });
 
@@ -140,7 +139,7 @@ async function loadAccess() {
     access.parents[family] ??= {
       name: `Orang Tua Demo ${String(family + 1).padStart(2, '0')}`,
       email: `demo.keluarga${family + 1}@example.test`,
-      password: password(),
+      password: parentPassword,
       children: [],
     };
     for (let slot = 0; slot < (family === 0 ? 5 : 3); slot++) {
@@ -149,16 +148,15 @@ async function loadAccess() {
         nickname: family === 0 && slot >= 3 ? ['Nina', 'Rafi'][slot - 3] : names[index],
         momoColor: colors[index % colors.length],
         correct: 10 - (index % 5),
-        pin: pin(),
+        pin: demoPin,
       };
     }
   }
   access.staff ??= Array.from({ length: 5 }, (_, index) => ({
     name: `Admin Demo ${index + 1}`,
     email: `demo.admin${index + 1}@example.test`,
-    password: password(),
+    password: adminPassword,
   }));
-  await save(access);
   return access;
 }
 
@@ -172,8 +170,20 @@ const admin = await api('/auth/staff/login', {
 const result = await api('/admin/demo-data', {
   method: 'POST',
   token: admin.token,
-  body: { parents: access.parents, staff: access.staff },
+  body: {
+    parents: access.parents.map((family) => ({
+      ...family,
+      password: parentPassword,
+      children: family.children.map((child) => ({ ...child, pin: demoPin })),
+    })),
+    staff: access.staff.map((person) => ({ ...person, password: adminPassword })),
+  },
 });
+for (const family of access.parents) {
+  family.password = parentPassword;
+  for (const child of family.children) child.pin = demoPin;
+}
+for (const person of access.staff) person.password = adminPassword;
 for (const family of result.familyAccess) {
   const saved = access.parents.find((parent) => parent.email === family.email);
   saved.familyCode = family.familyCode;
