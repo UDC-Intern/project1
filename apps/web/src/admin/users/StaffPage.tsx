@@ -10,6 +10,7 @@ import {
   Card,
   formatDate,
   PageHeader,
+  PasswordField,
   Table,
   TextField,
   type Column,
@@ -70,10 +71,9 @@ function CreateStaff({ onCreated }: { onCreated: (u: StaffUser) => void }) {
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
           />
-          <TextField
+          <PasswordField
             label={t('admin.user.password')}
             hint={t('admin.user.passwordHint', { n: MIN_PASSWORD })}
-            type="password"
             autoComplete="new-password"
             required
             minLength={MIN_PASSWORD}

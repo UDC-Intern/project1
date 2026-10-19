@@ -758,7 +758,6 @@
   "catalog.access.saved": "Aturan akses disimpan.",
   "catalog.book.grade": "Kelas {n}",
   "catalog.book.counts": "{topics} topik · {levels} level",
-  "catalog.book.custom": "Buatan admin",
   "catalog.book.toggle": "Buka atau tutup {title}",
   "catalog.book.delete": "Hapus buku",
   "catalog.book.deleteLabel": "Hapus buku {title}",

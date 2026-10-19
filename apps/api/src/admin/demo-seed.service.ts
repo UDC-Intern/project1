@@ -441,7 +441,8 @@ export class DemoSeedService {
       .from(s.levels)
       .innerJoin(s.topics, eq(s.topics.id, s.levels.topicId))
       .where(eq(s.topics.bookSlug, book!.slug));
-    for (const child of childRows.slice(0, 3)) {
+    // Sepuluh profil sudah menuntaskan buku pertama agar keluarga demo dapat meninjau sertifikat sungguhan.
+    for (const child of childRows.slice(0, 10)) {
       const [existing] = await this.db
         .select({ id: s.certificates.id })
         .from(s.certificates)
@@ -458,7 +459,15 @@ export class DemoSeedService {
             attempts: 1,
             firstPassedAt: new Date(),
           })
-          .onConflictDoNothing();
+          .onConflictDoUpdate({
+            target: [s.levelProgress.childId, s.levelProgress.levelId],
+            set: {
+              bestScore: sql`greatest(${s.levelProgress.bestScore}, 80)`,
+              passed: true,
+              firstPassedAt: sql`coalesce(${s.levelProgress.firstPassedAt}, now())`,
+              updatedAt: new Date(),
+            },
+          });
       }
       await this.learning.issue(child.id, book!.slug, 'admin');
     }

@@ -198,7 +198,7 @@ if (
   result.admins < 5 ||
   result.rounds < 70 ||
   result.orders < 24 ||
-  result.certificates < 3 ||
+  result.certificates < 10 ||
   result.illustrations < 12
 ) {
   throw new Error(

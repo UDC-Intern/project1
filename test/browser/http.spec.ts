@@ -132,6 +132,13 @@ test('admin membuka setiap menu dengan API dan dialog sertifikat', async ({ page
       `${path} -> ${page.url()} | ${await page.locator('body').innerText()} | ${problems.join('; ')}`,
     ).toBeVisible();
   }
+  await page.goto('/admin/staf');
+  const staffPassword = page.getByLabel('Password', { exact: true });
+  await expect(staffPassword).toHaveAttribute('type', 'password');
+  await page.getByRole('button', { name: 'Tampilkan password' }).click();
+  await expect(staffPassword).toHaveAttribute('type', 'text');
+  await page.getByRole('button', { name: 'Sembunyikan password' }).click();
+  await expect(staffPassword).toHaveAttribute('type', 'password');
   await page.goto('/admin/sertifikat');
   await page.getByRole('button', { name: /Atur isi lembar/ }).click();
   await expect(page.getByRole('dialog')).toBeVisible();

@@ -618,6 +618,16 @@ describe('fondasi API dan akun', () => {
       expect(first.body.newRounds).toBe(42);
       expect(first.body.familyAccess).toHaveLength(24);
       expect(first.body.familyAccess[0].children).toHaveLength(5);
+      expect(first.body.certificates).toBeGreaterThanOrEqual(10);
+      const issued = await http()
+        .get('/admin/certificates')
+        .set('Authorization', admin)
+        .expect(200);
+      expect(
+        issued.body.certificates.filter((cert: { parentEmail: string }) =>
+          cert.parentEmail.startsWith('demo.keluarga'),
+        ),
+      ).toHaveLength(10);
       const overview = await http()
         .get('/admin/insights?range=7d')
         .set('Authorization', admin)
@@ -658,11 +668,27 @@ describe('fondasi API dan akun', () => {
         .post('/auth/parent/login')
         .send({ email: parents[0]!.email, password: parents[0]!.password })
         .expect(201);
+      const parentCertificates = await http()
+        .get('/parent/certificates')
+        .set('Authorization', `Bearer ${demoParent.body.token}`)
+        .expect(200);
+      expect(
+        parentCertificates.body.children.filter((child: { books: { status: string }[] }) =>
+          child.books.some((book) => book.status === 'issued'),
+        ),
+      ).toHaveLength(5);
       const childId: string = first.body.familyAccess[0].children[0].id;
       const demoChild = await http()
         .post('/auth/child/login')
         .send({ childId, pin: ['apple', 'star', 'fish'] })
         .expect(201);
+      const childCertificates = await http()
+        .get('/certificates')
+        .set('Authorization', `Bearer ${demoChild.body.token}`)
+        .expect(200);
+      expect(
+        childCertificates.body.books.some((book: { status: string }) => book.status === 'issued'),
+      ).toBe(true);
       const listening = await http()
         .post('/practice/rounds')
         .set('Authorization', `Bearer ${demoChild.body.token}`)

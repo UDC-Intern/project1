@@ -482,7 +482,7 @@ describe('Silabus Belajar: halaman', () => {
     ).toBeInTheDocument();
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
     const row = within(book).getByRole('button', { name: 'Ubah topik Mengenal bentuk' });
-    expect(within(row).getByText('Buatan admin')).toBeInTheDocument();
+    expect(within(row).queryByText('Buatan admin')).toBeNull();
     expect(row).toHaveTextContent('2 level · 2 gratis');
     expect(readDb().contentEdits.added?.topics[0]?.topic).toMatchObject({
       code: 'T1',
@@ -601,10 +601,7 @@ describe('Silabus Belajar: halaman', () => {
     ).toBeInTheDocument();
     const made = await screen.findByRole('button', { name: 'Buka atau tutup Sains Kelas 4' });
     expect(made).toHaveAttribute('aria-expanded', 'true');
-    // Lencana "Buatan admin" ada di buku dan di topik pertamanya.
-    expect(
-      within(made.closest('.syl-book') as HTMLElement).getAllByText('Buatan admin').length,
-    ).toBeGreaterThan(0);
+    expect(within(made.closest('.syl-book') as HTMLElement).queryByText('Buatan admin')).toBeNull();
     expect(readDb().contentEdits.added?.books[0]).toMatchObject({ slug: 'sains-kelas-4' });
   });
 

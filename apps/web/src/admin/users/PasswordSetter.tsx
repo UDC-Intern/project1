@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { t } from '../../i18n';
-import { Button, TextField } from '../../ui/ui';
+import { Button, PasswordField } from '../../ui/ui';
 
 export const MIN_PASSWORD = 8;
 
@@ -32,9 +32,8 @@ export function PasswordSetter({
   }
   return (
     <form className="adm-inline-form" onSubmit={submit}>
-      <TextField
+      <PasswordField
         label={t('admin.user.newPassword')}
-        type="password"
         autoComplete="new-password"
         minLength={MIN_PASSWORD}
         required

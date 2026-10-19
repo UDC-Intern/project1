@@ -47,10 +47,7 @@ function TopicRow({
         </span>
         <span className="syl-topic-title">
           <strong>{topic.title}</strong>
-          <small>
-            {t('admin.catalog.topic.counts', { levels: topic.levels.length, free })}
-            {topic.custom && <Badge tone="info">{t('admin.catalog.book.custom')}</Badge>}
-          </small>
+          <small>{t('admin.catalog.topic.counts', { levels: topic.levels.length, free })}</small>
         </span>
         <LevelPills levels={topic.levels} />
         <svg className="syl-chevron" viewBox="0 0 24 24" aria-hidden>
@@ -149,7 +146,6 @@ export function BookCard({
               <span className="ui-muted">
                 {t('admin.catalog.book.counts', { topics: book.topics.length, levels })}
               </span>
-              {book.custom && <Badge tone="info">{t('admin.catalog.book.custom')}</Badge>}
             </span>
           </span>
         </button>
