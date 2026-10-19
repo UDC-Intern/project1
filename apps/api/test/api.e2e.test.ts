@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import request from 'supertest';
 import { eq } from 'drizzle-orm';
 import { MailService } from '../src/mail/mail.service.js';
+import { template } from '../src/mail/templates.js';
 import { VoiceService } from '../src/voice/voice.service.js';
 import { setup } from './e2e-setup.js';
 import { seed } from '../src/cli/seed.js';
@@ -65,6 +66,38 @@ describe('fondasi API dan akun', () => {
     );
     expect(responses.map((r) => r.status).sort()).toEqual([201, 409]);
     expect(await ctx.db.select().from(parents)).toHaveLength(1);
+  });
+  it('pendaftaran dengan verifikasi email meminta kode sebelum akun bisa masuk', async () => {
+    const previous = process.env.EMAIL_VERIFICATION;
+    process.env.EMAIL_VERIFICATION = 'on';
+    try {
+      const email = 'verifikasi@example.test';
+      const registered = await request(ctx.app.getHttpServer())
+        .post('/auth/parent/register')
+        .send({ name: 'Orang Tua Baru', email, password: 'kata-sandi-123', consent: true })
+        .expect(201);
+      expect(registered.body).toEqual({ verificationRequired: true, email });
+      const blocked = await request(ctx.app.getHttpServer())
+        .post('/auth/parent/login')
+        .send({ email, password: 'kata-sandi-123' })
+        .expect(403);
+      expect(blocked.body.error.reason).toBe('email_not_verified');
+      const [mail] = await ctx.db.select().from(emailOutbox).where(eq(emailOutbox.toEmail, email));
+      const code = mail?.text?.match(/\b\d{6}\b/)?.[0];
+      expect(code).toMatch(/^\d{6}$/);
+      await request(ctx.app.getHttpServer())
+        .post('/auth/parent/verify')
+        .send({ email, code: '000000' })
+        .expect(400);
+      const verified = await request(ctx.app.getHttpServer())
+        .post('/auth/parent/verify')
+        .send({ email, code })
+        .expect(201);
+      expect(verified.body.token).toBeTruthy();
+    } finally {
+      if (previous === undefined) delete process.env.EMAIL_VERIFICATION;
+      else process.env.EMAIL_VERIFICATION = previous;
+    }
   });
   it('akun orang tua dan staf memakai jalur masuk terpisah', async () => {
     await request(ctx.app.getHttpServer())
@@ -576,8 +609,11 @@ describe('fondasi API dan akun', () => {
       .expect('Cache-Control', 'public, max-age=31536000, immutable');
   });
   it('email dikirim melalui outbox dan isinya dihapus setelah terkirim', async () => {
-    await ctx.app.get(MailService).flush();
+    const mail = ctx.app.get(MailService);
+    await mail.enqueue('penerima@example.test', template('Uji pengiriman', 'Pesan uji.'), 'test');
+    await mail.flush();
     expect(ctx.mails.length).toBeGreaterThan(0);
+    expect(ctx.mails[0]?.from).toBe(process.env.MAIL_FROM ?? process.env.SMTP_USER);
     const sent = await ctx.db.select().from(emailOutbox).where(eq(emailOutbox.status, 'sent'));
     expect(sent.length).toBeGreaterThan(0);
     expect(sent.every((r) => r.html === null && r.text === null)).toBe(true);

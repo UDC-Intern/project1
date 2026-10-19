@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { generateRound, seedFrom, type Pin } from '@udakids/engine';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { childLogin, familyProfiles, parentLogin, parentRegister } from '../src/api/auth';
 import { ApiError } from '../src/api/client';
 import { readDb, resetMockDb, writeDb } from '../src/api/mock/db';
@@ -19,6 +19,7 @@ import { useSession } from '../src/auth/store';
 import { ChildForm } from '../src/parent/ChildForm';
 import { Dashboard } from '../src/parent/Dashboard';
 import { ParentRegister } from '../src/parent/ParentRegister';
+import { ParentVerify } from '../src/parent/ParentVerify';
 
 const PIN: Pin = ['cat', 'house', 'leaf'];
 
@@ -33,6 +34,7 @@ async function errorOf(p: Promise<unknown>): Promise<ApiError> {
 
 async function registerAs(email: string, name = 'Bu Sari') {
   const res = await parentRegister({ name, email, password: 'rahasia123', consent: true });
+  if ('verificationRequired' in res) throw new Error('Mock pendaftaran seharusnya langsung masuk');
   useSession.setState({ session: { token: res.token, role: 'parent', name } });
   return res;
 }
@@ -163,6 +165,38 @@ describe('mock anak dan laporan', () => {
 });
 
 describe('halaman orang tua', () => {
+  it('kode email enam angka membuka halaman tambah anak', async () => {
+    const fetch = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          token: 'sesi-uji',
+          user: { id: 'orang-tua-uji', role: 'parent', name: 'Bu Sari', familyCode: 'ABCDEF' },
+        }),
+        { status: 201, headers: { 'Content-Type': 'application/json' } },
+      ),
+    );
+    try {
+      render(
+        <MemoryRouter initialEntries={['/orang-tua/verifikasi?email=sari%40contoh.id']}>
+          <Routes>
+            <Route path="/orang-tua/verifikasi" element={<ParentVerify />} />
+            <Route path="/orang-tua/anak/baru" element={<p>Halaman tambah anak</p>} />
+          </Routes>
+        </MemoryRouter>,
+      );
+      fireEvent.change(screen.getByLabelText('Kode verifikasi'), { target: { value: '123456' } });
+      fireEvent.click(screen.getByRole('button', { name: 'Verifikasi' }));
+      expect(await screen.findByText('Halaman tambah anak')).toBeInTheDocument();
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining('/auth/parent/verify'),
+        expect.objectContaining({
+          body: JSON.stringify({ email: 'sari@contoh.id', code: '123456' }),
+        }),
+      );
+    } finally {
+      fetch.mockRestore();
+    }
+  });
   it('daftar tanpa centang persetujuan menampilkan pesan', async () => {
     render(
       <MemoryRouter initialEntries={['/orang-tua/daftar']}>

@@ -1130,6 +1130,12 @@
   font-weight: 700;
   cursor: pointer;
 }
+.auth-parent .auth-verify-code {
+  text-align: center;
+  letter-spacing: 0.35em;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
 @media (max-width: 380px) {
   .auth-parent .auth-card .ui-eye-text {
     display: none;

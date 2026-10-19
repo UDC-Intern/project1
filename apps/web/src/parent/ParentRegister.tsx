@@ -71,6 +71,13 @@ export function ParentRegister() {
         consent: true,
         ...(ref ? { referralCode: ref } : {}),
       });
+      if ('verificationRequired' in res) {
+        navigate(`/orang-tua/verifikasi?email=${encodeURIComponent(res.email)}`, {
+          replace: true,
+          state: { sent: true },
+        });
+        return;
+      }
       setSession('parent', {
         token: res.token,
         user: res.user,

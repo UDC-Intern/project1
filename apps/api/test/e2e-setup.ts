@@ -20,7 +20,7 @@ export async function setup() {
   const db = drizzle(client, { schema });
   await migrate(db, { migrationsFolder: join(process.cwd(), 'drizzle') });
   await seed(db);
-  const mails: { to: string; subject: string; html: string; text: string }[] = [];
+  const mails: { from?: string; to: string; subject: string; html: string; text: string }[] = [];
   const speech: string[] = [];
   const pictures: string[] = [];
   const module = await Test.createTestingModule({ imports: [AppModule] })

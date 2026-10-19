@@ -216,6 +216,8 @@ describe('mock sertifikat: orang tua', () => {
       password: 'rahasia123',
       consent: true,
     });
+    if ('verificationRequired' in other)
+      throw new Error('Mock pendaftaran seharusnya langsung masuk');
     expect(
       (await errorOf(handle(`/parent/certificates/${cert.id}`, 'GET', undefined, other.token)))
         .status,

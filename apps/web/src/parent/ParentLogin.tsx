@@ -63,6 +63,12 @@ export function ParentLogin() {
       });
       navigate('/orang-tua', { replace: true });
     } catch (err) {
+      if (err instanceof ApiError && err.body.reason === 'email_not_verified') {
+        navigate(`/orang-tua/verifikasi?email=${encodeURIComponent(email.trim().toLowerCase())}`, {
+          replace: true,
+        });
+        return;
+      }
       setError(err instanceof ApiError ? err.message : t('error.generic'));
     } finally {
       setBusy(false);

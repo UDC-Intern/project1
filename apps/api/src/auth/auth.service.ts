@@ -123,7 +123,9 @@ export class AuthService {
         'emailVerifiedAt' in row &&
         !row.emailVerifiedAt
       )
-        fail(403, 'FORBIDDEN', 'Verifikasi email terlebih dahulu.');
+        fail(403, 'FORBIDDEN', 'Verifikasi email terlebih dahulu.', {
+          reason: 'email_not_verified',
+        });
       await this.db.update(parents).set({ lastLoginAt: new Date() }).where(eq(parents.id, row.id));
     }
     return this.session(row, kind === 'staff' ? 'admin' : 'parent');
@@ -163,7 +165,10 @@ export class AuthService {
     if (!created) fail(409, 'CONFLICT', 'Email sudah terdaftar. Silakan masuk.');
     await this.mail.enqueue(
       created.email,
-      template('Selamat datang di UdaKids', `Halo ${created.name}. Kode keluarga: ${created.familyCode}.`),
+      template(
+        'Selamat datang di UdaKids',
+        `Halo ${created.name}. Kode keluarga: ${created.familyCode}.`,
+      ),
       'welcome',
       created.id,
     );

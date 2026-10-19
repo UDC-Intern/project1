@@ -12,7 +12,13 @@ import { emailOutbox } from '../db/schema.js';
 import type { Mail } from './templates.js';
 export const MAIL_TRANSPORT = Symbol('MAIL_TRANSPORT');
 export type MailTransport = {
-  sendMail(mail: { to: string; subject: string; html: string; text: string }): Promise<unknown>;
+  sendMail(mail: {
+    from?: string;
+    to: string;
+    subject: string;
+    html: string;
+    text: string;
+  }): Promise<unknown>;
   close?: () => void;
 };
 const BACKOFF = [60_000, 300_000, 1_800_000, 7_200_000, 43_200_000];
@@ -37,7 +43,6 @@ export class MailService implements OnModuleInit, OnModuleDestroy {
             port,
             secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === 'true' : port === 465,
             auth: { user, pass },
-            from: process.env.MAIL_FROM ?? user,
             pool: true,
             maxConnections: 1,
             requireTLS: port !== 465,
@@ -100,6 +105,7 @@ export class MailService implements OnModuleInit, OnModuleDestroy {
       }
       try {
         await this.transport.sendMail({
+          from: process.env.MAIL_FROM ?? process.env.SMTP_USER,
           to: row.toEmail,
           subject: row.subject,
           html: row.html ?? '',

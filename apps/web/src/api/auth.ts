@@ -19,6 +19,8 @@ export const parentLogin = (body: LoginBody) =>
   isMocked('auth') ? accounts.parentLogin(body) : http.parentLogin(body);
 
 export const parentGoogle = http.parentGoogle;
+export const parentVerify = http.parentVerify;
+export const parentResend = http.parentResend;
 
 export const staffLogin = (body: LoginBody) =>
   isMocked('auth') ? staff.staffLogin(body) : http.staffLogin(body);

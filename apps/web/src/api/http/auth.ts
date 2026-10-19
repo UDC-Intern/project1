@@ -15,7 +15,16 @@ export const childLogin = (body: ChildLoginBody) =>
   request<ChildLoginResult>('/auth/child/login', { method: 'POST', body });
 
 export const parentRegister = (body: RegisterParentBody) =>
-  request<AuthResult>('/auth/parent/register', { method: 'POST', body });
+  request<AuthResult | { verificationRequired: true; email: string }>('/auth/parent/register', {
+    method: 'POST',
+    body,
+  });
+
+export const parentVerify = (body: { email: string; code: string }) =>
+  request<AuthResult>('/auth/parent/verify', { method: 'POST', body });
+
+export const parentResend = (body: { email: string }) =>
+  request<{ ok: true }>('/auth/parent/resend', { method: 'POST', body });
 
 export const parentLogin = (body: LoginBody) =>
   request<AuthResult>('/auth/parent/login', { method: 'POST', body });

@@ -14,6 +14,7 @@ import { OrderPage, OrdersPage } from './Orders';
 import { PackagesPage } from './PackagesPage';
 import { ParentLogin } from './ParentLogin';
 import { ParentRegister } from './ParentRegister';
+import { ParentVerify } from './ParentVerify';
 import './parent.css';
 
 /** Hanya untuk orang tua yang sudah masuk; selain itu ke /orang-tua/masuk. */
@@ -123,6 +124,14 @@ export function ParentApp() {
         element={
           <GuestOnly>
             <ParentRegister />
+          </GuestOnly>
+        }
+      />
+      <Route
+        path="verifikasi"
+        element={
+          <GuestOnly>
+            <ParentVerify />
           </GuestOnly>
         }
       />
