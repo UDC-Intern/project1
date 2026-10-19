@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import type { AuthResult } from '@udakids/engine';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { parentGoogle, parentRegister } from '../api/auth';
 import { ApiError } from '../api/client';
@@ -8,6 +9,7 @@ import { useT } from '../i18n';
 import { AuthLayout } from '../site/AuthLayout';
 import { FormField, PasswordField } from '../ui/FormField';
 import { GoogleButton } from './GoogleButton';
+import { GoogleConsent, type PendingGoogle } from './GoogleConsent';
 
 export function ParentRegister() {
   const t = useT('parent');
@@ -23,19 +25,27 @@ export function ParentRegister() {
   const [consent, setConsent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [pendingGoogle, setPendingGoogle] = useState<PendingGoogle | null>(null);
+
+  function finishGoogle(res: AuthResult) {
+    setSession('parent', {
+      token: res.token,
+      user: res.user,
+      familyCode: res.user.familyCode ?? undefined,
+    });
+    navigate('/orang-tua', { replace: true });
+  }
 
   async function onGoogle(credential: string) {
-    if (!consent) {
-      setError(t('register.needConsent'));
-      return;
-    }
     setBusy(true);
     setError(null);
     try {
-      const res = await parentGoogle({ credential, consent: true, name, ...(ref ? { referralCode: ref } : {}) });
-      if ('needsConsent' in res) throw new Error(t('register.needConsent'));
-      setSession('parent', { token: res.token, user: res.user, familyCode: res.user.familyCode ?? undefined });
-      navigate('/orang-tua', { replace: true });
+      const res = await parentGoogle({ credential });
+      if ('needsConsent' in res) {
+        setPendingGoogle({ credential, email: res.email, name: res.name });
+        return;
+      }
+      finishGoogle(res);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : t('error.generic'));
     } finally {
@@ -76,50 +86,67 @@ export function ParentRegister() {
 
   return (
     <AuthLayout variant="parent" title={t('register.title')} text={t('auth.text')}>
-      <h1>{t('register.title')}</h1>
-      {ref && <p>{t('register.referral', { code: ref })}</p>}
-      <form className="uk-stack" onSubmit={(e) => void onSubmit(e)} noValidate>
-        <GoogleButton text="signup_with" onCredential={(credential) => void onGoogle(credential)} />
-        <FormField
-          label={t('register.name')}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          autoComplete="name"
-          maxLength={60}
-          required
+      {pendingGoogle ? (
+        <GoogleConsent
+          pending={pendingGoogle}
+          onDone={finishGoogle}
+          onCancel={() => setPendingGoogle(null)}
         />
-        <FormField
-          label={t('register.email')}
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          autoComplete="email"
-          required
-        />
-        <PasswordField
-          label={t('register.password')}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          autoComplete="new-password"
-          minLength={8}
-          required
-        />
-        <label className="uk-check">
-          <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
-          <span>{t('register.consent')}</span>
-        </label>
-        {error && (
-          <p role="alert" style={{ color: 'var(--bahaya)', margin: 0 }}>
-            {error}
-          </p>
-        )}
-        <button type="submit" className="uk-btn" disabled={busy}>
-          {t('register.submit')}
-        </button>
-        <p style={{ margin: 0 }}>
-          {t('register.haveAccount')} <Link to="/orang-tua/masuk">{t('login.submit')}</Link>
-        </p>
-      </form>
+      ) : (
+        <>
+          <h1>{t('register.title')}</h1>
+          {ref && <p>{t('register.referral', { code: ref })}</p>}
+          <form className="uk-stack" onSubmit={(e) => void onSubmit(e)} noValidate>
+            <GoogleButton
+              text="signup_with"
+              onCredential={(credential) => void onGoogle(credential)}
+            />
+            <FormField
+              label={t('register.name')}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              autoComplete="name"
+              maxLength={60}
+              required
+            />
+            <FormField
+              label={t('register.email')}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+              required
+            />
+            <PasswordField
+              label={t('register.password')}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="new-password"
+              minLength={8}
+              required
+            />
+            <label className="uk-check">
+              <input
+                type="checkbox"
+                checked={consent}
+                onChange={(e) => setConsent(e.target.checked)}
+              />
+              <span>{t('register.consent')}</span>
+            </label>
+            {error && (
+              <p role="alert" style={{ color: 'var(--bahaya)', margin: 0 }}>
+                {error}
+              </p>
+            )}
+            <button type="submit" className="uk-btn" disabled={busy}>
+              {t('register.submit')}
+            </button>
+            <p style={{ margin: 0 }}>
+              {t('register.haveAccount')} <Link to="/orang-tua/masuk">{t('login.submit')}</Link>
+            </p>
+          </form>
+        </>
+      )}
     </AuthLayout>
   );
 }

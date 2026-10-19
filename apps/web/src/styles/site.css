@@ -1080,64 +1080,49 @@
   flex-direction: column;
   gap: 16px;
 }
-.auth-card {
+.auth-parent .auth-card {
   width: 100%;
-  display: grid;
-  gap: 22px;
+  min-width: 0;
+  padding: clamp(20px, 4vw, 32px);
+  border: 1px solid var(--garis);
+  border-radius: var(--radius-lg);
+  background: var(--kertas);
+  box-shadow: var(--shadow-kartu);
 }
-.auth-card h1 {
-  margin: 0;
-  font-size: clamp(1.8rem, 3vw, 2.35rem);
-  letter-spacing: 0.01em;
+.auth-parent .auth-card h1 {
+  margin: 0 0 20px;
 }
-.auth-card .uk-stack {
-  gap: 18px;
+.auth-parent .auth-card .uk-stack {
+  gap: 16px;
 }
-.auth-card .uk-btn {
+.auth-parent .auth-card .uk-field input {
   width: 100%;
-  min-height: 54px;
-  border-radius: 18px;
-  font-size: 1.05rem;
+}
+.auth-parent .auth-card .ui-input-wrap input {
+  min-width: 0;
+}
+.auth-parent .auth-card .uk-btn {
+  width: 100%;
+  min-height: 50px;
 }
 .auth-google {
-  min-height: 52px;
+  display: grid;
+  gap: 12px;
+  margin: 4px 0;
+}
+.auth-google-button {
   display: flex;
   justify-content: center;
-  align-items: center;
-  border: 2px solid #1769aa;
-  border-radius: 7px;
-  background: #eef5ff;
-  overflow: hidden;
-}
-.auth-google > div {
-  min-width: 320px;
-}
-.auth-card .uk-field {
-  gap: 7px;
-  font-size: 1rem;
-}
-.auth-card .uk-field input {
+  min-height: 44px;
   width: 100%;
-  min-height: 52px;
-  border-radius: 18px;
-  border-color: #7f8b9e;
-  padding-inline: 16px;
-  font-size: 1rem;
 }
-.auth-card .ui-input-wrap {
-  position: relative;
+.auth-google-loading {
+  text-align: center;
+  color: var(--malam-muted);
+  font-size: 0.92rem;
 }
-.auth-card .ui-input-wrap input {
-  padding-right: 92px;
-}
-.auth-card .ui-eye {
-  position: absolute;
-  top: 50%;
-  right: 12px;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  transform: translateY(-50%);
+.auth-back {
+  min-height: 44px;
   border: 0;
   background: transparent;
   color: var(--gonjong);
@@ -1145,17 +1130,13 @@
   font-weight: 700;
   cursor: pointer;
 }
-.auth-card .ui-eye:hover {
-  color: var(--gonjong-tekan);
-}
-.auth-card .ui-eye-text {
-  font-size: 0.9rem;
-}
-.auth-card .uk-check {
-  align-items: flex-start;
-}
-.auth-card p {
-  margin: 0;
+@media (max-width: 380px) {
+  .auth-parent .auth-card .ui-eye-text {
+    display: none;
+  }
+  .auth-parent .auth-card .ui-input-wrap input {
+    padding-right: 48px;
+  }
 }
 .auth-wrap .ui-card {
   border-radius: var(--radius-lg);
