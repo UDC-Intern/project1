@@ -1,7 +1,11 @@
-import { z } from 'zod';
 import { Inject, Injectable } from '@nestjs/common';
 import { eq, sql } from 'drizzle-orm';
-import { appSettingsSchema, mergeSettings, type AppSettings } from '@udakids/engine';
+import {
+  appSettingsSchema,
+  affiliateSettingsSchema,
+  mergeSettings,
+  type AppSettings,
+} from '@udakids/engine';
 import { DB, type Db, type Executor } from '../db/db.module.js';
 import { appSettings, certificates, children } from '../db/schema.js';
 import { missing } from '../common/errors.js';
@@ -30,13 +34,7 @@ export class SettingsService {
   }
   async set(part: string, input: unknown) {
     if (part === 'affiliate') {
-      const value = z
-        .strictObject({
-          enabled: z.boolean(),
-          percent: z.number().int().min(0).max(50),
-          firstOrderOnly: z.literal(true),
-        })
-        .parse(input);
+      const value = affiliateSettingsSchema.parse(input);
       await this.put(part, value);
       return value;
     }

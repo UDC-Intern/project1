@@ -12,7 +12,7 @@ pnpm install
 pnpm dev:local
 ```
 
-`dev:local` membuat `.env` hanya jika file itu belum ada, memilih PGlite lokal, mengisi migrasi dan data kurikulum, lalu menjalankan web di `http://localhost:6006` dan API di `http://localhost:7177`. Data lokal tersimpan di `.data/development`. Ganti `ADMIN_PASSWORD` dan rahasia lain di `.env` sebelum memakai akun lokal untuk demo. Akun admin memakai `ADMIN_EMAIL` dan `ADMIN_PASSWORD` dari `.env`.
+`dev:local` membuat `.env` hanya jika file itu belum ada, memilih PGlite lokal, mengisi migrasi dan data kurikulum, lalu menjalankan web di `http://localhost:6006` dan API di `http://localhost:7177`. Data lokal tersimpan di `.data/development` atau folder `PGLITE_PATH` dalam `.env`. Ganti `ADMIN_PASSWORD` dan rahasia lain di `.env` sebelum memakai akun lokal untuk demo. Akun admin memakai `ADMIN_EMAIL` dan `ADMIN_PASSWORD` dari `.env`.
 
 Untuk menyiapkan presentasi, biarkan `pnpm dev:local` berjalan lalu jalankan `pnpm db:demo` di terminal lain. Skrip hanya menerima `DATABASE_DRIVER=pglite` dan mengisi 24 keluarga, 74 anak (keluarga demo pertama berisi lima anak), lima admin demo di samping admin awal, latihan dan peringkat, transaksi, Premium, sertifikat, serta ilustrasi contoh. Batas awal lima anak per keluarga dapat diubah admin dari Pengaturan Sistem dan disimpan di tabel `app_settings` dengan kunci `family`. Semua akun keluarga demo memakai sandi `12345678`, lima admin demo memakai `admin123`, dan semua anak demo memakai sandi gambar apel–apel–apel. Contoh login: `demo.keluarga1@example.test`, kode keluarga dan profil anak di `.data/demo-access.json`, serta `demo.admin1@example.test`. Berkas akses diabaikan Git. Menjalankan ulang `pnpm db:demo` tidak menggandakan data, tetapi akan mengembalikan sandi akun demo ke sandi uji di atas, termasuk sandi yang pernah diubah. Muat ulang halaman web untuk melihat hasilnya. Jangan gunakan akun demo untuk data sungguhan.
 
@@ -24,6 +24,8 @@ pnpm dev
 ```
 
 `pnpm dev` menjalankan API dan web dalam mode HTTP. `VITE_MOCK_MODULES` kosong pada konfigurasi lokal sehingga permintaan halaman diteruskan ke API. Mode demo lama dapat diaktifkan dengan `VITE_MOCK_MODULES=*`; mode itu memakai data browser terpisah.
+
+Menu Afiliasi orang tua menampilkan kode ajakan tersendiri, tautan `/r/KODE`, anggota langsung, saldo bonus/komisi, dan pengajuan pencairan. Admin melihat analisis, rincian afiliator, koreksi saldo, pemeriksaan rekening, pemrosesan pencairan, serta aturan program melalui `/admin/afiliasi`. Kode ajakan berbeda dari kode keluarga untuk masuk anak. Data demo pertama berisi klik tautan, tujuh anggota langsung, bonus tersedia, dan komisi tertahan.
 
 ## Pengaturan layanan
 

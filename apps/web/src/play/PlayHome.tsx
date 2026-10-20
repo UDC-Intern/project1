@@ -15,6 +15,7 @@ import type { PlayStatus, Shelf } from './peta/types';
 import { SpeakButton } from './SpeakButton';
 import { AutoSpeak } from './AutoSpeak';
 import { BOOK_KEY, GRADE_KEY, remember, remembered } from './libraryChoice';
+import { restoreParent } from './parentReturn';
 
 const STATUS: Record<string, PlayStatus> = {
   passed: 'passed',
@@ -127,7 +128,7 @@ export function PlayHome() {
           aria-label={t('play.home.done')}
           onClick={() => {
             signOut();
-            navigate('/play/masuk');
+            navigate(restoreParent() ? '/orang-tua' : '/play/masuk');
           }}
         >
           <DoorIcon size={26} />

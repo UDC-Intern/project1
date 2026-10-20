@@ -64,7 +64,7 @@ export const registerParentBodySchema = z.object({
     .string()
     .trim()
     .toUpperCase()
-    .regex(/^[A-Z]{6}$/)
+    .regex(/^[A-Z2-9]{6}$/)
     .optional(),
 });
 export type RegisterParentBody = z.infer<typeof registerParentBodySchema>;

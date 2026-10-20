@@ -15,12 +15,19 @@ import { PackagesPage } from './PackagesPage';
 import { ParentLogin } from './ParentLogin';
 import { ParentRegister } from './ParentRegister';
 import { ParentVerify } from './ParentVerify';
+import { AffiliatePage } from './AffiliatePage';
+import { parentReturn, restoreParent, setParentReturn } from '../play/parentReturn';
 import './parent.css';
 
 /** Hanya untuk orang tua yang sudah masuk; selain itu ke /orang-tua/masuk. */
 function RequireParent({ children }: { children: ReactNode }) {
   const session = useSession('parent');
+  const child = useSession('child');
   const location = useLocation();
+  useEffect(() => {
+    if (!session && child && parentReturn()) restoreParent();
+  }, [session, child]);
+  if (!session && child && parentReturn()) return null;
   if (!session || session.user.role !== 'parent') {
     return <Navigate to="/orang-tua/masuk" replace state={{ from: location.pathname }} />;
   }
@@ -73,6 +80,7 @@ function ParentLayout({ children }: { children: ReactNode }) {
         { to: '/orang-tua/anak/baru', label: t('parent.dash.addChild'), icon: 'plus' },
         { to: '/orang-tua/sertifikat', label: t('parent.nav.certificates'), icon: 'award' },
         { to: '/orang-tua/paket', label: t('parent.nav.packages'), icon: 'tag' },
+        { to: '/orang-tua/afiliasi', label: t('parent.nav.affiliate'), icon: 'wallet' },
         {
           to: '/orang-tua/transaksi',
           label: t('parent.nav.orders'),
@@ -83,7 +91,12 @@ function ParentLayout({ children }: { children: ReactNode }) {
         { to: '/orang-tua/akun', label: t('parent.nav.account'), icon: 'badge' },
       ]}
       extra={
-        <Link to="/play/masuk" className="pa-side-play" title={t('parent.dash.play')}>
+        <Link
+          to="/play/masuk"
+          className="pa-side-play"
+          title={t('parent.dash.play')}
+          onClick={() => setParentReturn(true)}
+        >
           <ShellIconSvg name="play" />
           <span className="shell-label">
             <strong>{t('parent.dash.play')}</strong>
@@ -94,6 +107,7 @@ function ParentLayout({ children }: { children: ReactNode }) {
       user={{ name: session?.user.name ?? '', caption: t('parent.nav.signedIn') }}
       onLogout={() => {
         setSession('parent', null);
+        setParentReturn(false);
         navigate('/orang-tua/masuk', { replace: true });
       }}
     >
@@ -144,6 +158,7 @@ export function ParentApp() {
       <Route path="sertifikat" element={guarded(<CertificatesPage />)} />
       <Route path="sertifikat/:id" element={guarded(<CertificateView />)} />
       <Route path="paket" element={guarded(<PackagesPage />)} />
+      <Route path="afiliasi" element={guarded(<AffiliatePage />)} />
       <Route path="transaksi" element={guarded(<OrdersPage />)} />
       <Route path="transaksi/:id" element={guarded(<OrderPage />)} />
       <Route path="*" element={<Navigate to="/orang-tua" replace />} />

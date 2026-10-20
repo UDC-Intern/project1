@@ -15,7 +15,7 @@ export default defineConfig({
     command: 'pnpm dev',
     url: 'http://127.0.0.1:6006/api/health',
     timeout: 120_000,
-    reuseExistingServer: false,
+    reuseExistingServer: process.env.PLAYWRIGHT_REUSE_SERVER === '1',
     env: {
       DATABASE_DRIVER: 'pglite',
       PGLITE_PATH: ':memory:',

@@ -19,3 +19,4 @@ export * from './schemas/settings.js';
 export * from './schemas/media.js';
 export * from './view/index.js';
 export type * from './view/admin.js';
+export * from './affiliate.js';

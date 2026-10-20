@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import type { AuthResult } from '@udakids/engine';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { parentGoogle, parentRegister } from '../api/auth';
@@ -10,13 +10,17 @@ import { AuthLayout } from '../site/AuthLayout';
 import { FormField, PasswordField } from '../ui/FormField';
 import { GoogleButton } from './GoogleButton';
 import { GoogleConsent, type PendingGoogle } from './GoogleConsent';
+import { forgetReferral, readReferral, rememberReferral } from '../site/referral';
 
 export function ParentRegister() {
   const t = useT('parent');
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const refParam = params.get('ref') ?? '';
-  const ref = /^[A-Za-z]{6}$/.test(refParam) ? refParam.toUpperCase() : null;
+  const refParam = params.get('ref') ?? readReferral();
+  const ref = /^[A-Za-z2-9]{6}$/.test(refParam) ? refParam.toUpperCase() : null;
+  useEffect(() => {
+    if (ref) rememberReferral(ref);
+  }, [ref]);
   const session = useSession((s) => s.session);
 
   const [name, setName] = useState('');
@@ -34,13 +38,14 @@ export function ParentRegister() {
       familyCode: res.user.familyCode ?? undefined,
     });
     navigate('/orang-tua', { replace: true });
+    forgetReferral();
   }
 
   async function onGoogle(credential: string) {
     setBusy(true);
     setError(null);
     try {
-      const res = await parentGoogle({ credential });
+      const res = await parentGoogle({ credential, ...(ref ? { referralCode: ref } : {}) });
       if ('needsConsent' in res) {
         setPendingGoogle({ credential, email: res.email, name: res.name });
         return;
@@ -84,6 +89,7 @@ export function ParentRegister() {
         familyCode: res.user.familyCode ?? undefined,
       });
       navigate('/orang-tua', { replace: true });
+      forgetReferral();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : t('error.generic'));
     } finally {
@@ -96,6 +102,7 @@ export function ParentRegister() {
       {pendingGoogle ? (
         <GoogleConsent
           pending={pendingGoogle}
+          referralCode={ref ?? undefined}
           onDone={finishGoogle}
           onCancel={() => setPendingGoogle(null)}
         />

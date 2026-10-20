@@ -25,7 +25,15 @@ export class AuthController {
   }
   @Public() @Post('parent/google') google(@Body() body: unknown, @Req() req: Request) {
     const input = z
-      .object({ credential: z.string().min(20), consent: z.boolean().optional(), name: z.string().max(60).optional() })
+      .object({
+        credential: z.string().min(20),
+        consent: z.boolean().optional(),
+        name: z.string().max(60).optional(),
+        referralCode: z
+          .string()
+          .regex(/^[A-Za-z2-9]{6}$/)
+          .optional(),
+      })
       .parse(body);
     return this.service.parentGoogle(input, req.ip ?? 'unknown');
   }

@@ -10,10 +10,12 @@ export function GoogleConsent({
   pending,
   onDone,
   onCancel,
+  referralCode,
 }: {
   pending: PendingGoogle;
   onDone: (result: AuthResult) => void;
   onCancel: () => void;
+  referralCode?: string;
 }) {
   const [name, setName] = useState(pending.name);
   const [consent, setConsent] = useState(false);
@@ -31,6 +33,7 @@ export function GoogleConsent({
         credential: pending.credential,
         consent: true,
         name: name.trim(),
+        ...(referralCode ? { referralCode } : {}),
       });
       if ('needsConsent' in result) throw new Error('Persetujuan belum tersimpan. Coba lagi.');
       onDone(result);

@@ -8,9 +8,18 @@ import {
   type RegisterParentBody,
   type LoginBody,
   type ChildLoginBody,
+  affiliateSettingsSchema,
+  DEFAULT_AFFILIATE_SETTINGS,
 } from '@udakids/engine';
 import { DB, type Db } from '../db/db.module.js';
-import { children, parents, staffUsers, referrals } from '../db/schema.js';
+import {
+  children,
+  parents,
+  staffUsers,
+  referrals,
+  affiliateLedger,
+  appSettings,
+} from '../db/schema.js';
 import { hashSecret, verifySecret, randomCode, ipHash } from '../common/crypto.js';
 import { randomBytes } from 'node:crypto';
 import { fail, missing } from '../common/errors.js';
@@ -34,6 +43,48 @@ export class AuthService {
     readonly verification: VerificationService,
     private google: GoogleVerifier,
   ) {}
+  private async attachReferral(refereeId: string, raw: string, tx: Db) {
+    const code = raw.trim().toUpperCase();
+    const [referrer] = await tx
+      .select()
+      .from(parents)
+      .where(and(eq(parents.referralCode, code), eq(parents.active, true)));
+    if (!referrer || referrer.id === refereeId)
+      fail(400, 'VALIDATION', 'Kode ajakan tidak ditemukan.');
+    await tx.insert(referrals).values({ referrerId: referrer.id, refereeId }).onConflictDoNothing();
+    const [stored] = await tx
+      .select({ value: appSettings.value })
+      .from(appSettings)
+      .where(eq(appSettings.key, 'affiliate'));
+    const parsed = affiliateSettingsSchema.safeParse(stored?.value);
+    const rules = parsed.success ? parsed.data : DEFAULT_AFFILIATE_SETTINGS;
+    if (!rules.enabled || rules.signupBonus <= 0) return;
+    if (rules.monthlyBonusCap) {
+      const [count] = await tx
+        .select({ n: sql<number>`count(*)::int` })
+        .from(affiliateLedger)
+        .where(
+          and(
+            eq(affiliateLedger.parentId, referrer.id),
+            eq(affiliateLedger.type, 'signup_bonus'),
+            sql`${affiliateLedger.createdAt} >= date_trunc('month', now())`,
+          ),
+        );
+      if ((count?.n ?? 0) >= rules.monthlyBonusCap) return;
+    }
+    await tx
+      .insert(affiliateLedger)
+      .values({
+        parentId: referrer.id,
+        refereeId,
+        type: 'signup_bonus',
+        state: 'pending',
+        amount: rules.signupBonus,
+        availableAt: new Date(Date.now() + rules.qualifyDays * 86_400_000),
+        note: `Menunggu ${rules.qualifyRounds} ronde dari teman`,
+      })
+      .onConflictDoNothing();
+  }
   async session(
     row: { id: string; name: string; passwordChangedAt?: Date | null; familyCode?: string },
     role: 'admin' | 'parent',
@@ -76,12 +127,7 @@ export class AuthService {
         .returning();
       if (!row) fail(409, 'CONFLICT', 'Email sudah digunakan.');
       if (body.referralCode) {
-        const [referrer] = await tx
-          .select()
-          .from(parents)
-          .where(eq(parents.familyCode, body.referralCode));
-        if (referrer && referrer.id !== row.id)
-          await tx.insert(referrals).values({ referrerId: referrer.id, refereeId: row.id });
+        await this.attachReferral(row.id, body.referralCode, tx as Db);
       }
       if (process.env.EMAIL_VERIFICATION === 'on') {
         await this.verification.issue(row.id, row.email, tx);
@@ -130,7 +176,10 @@ export class AuthService {
     }
     return this.session(row, kind === 'staff' ? 'admin' : 'parent');
   }
-  async parentGoogle(input: { credential: string; consent?: boolean; name?: string }, ip: string) {
+  async parentGoogle(
+    input: { credential: string; consent?: boolean; name?: string; referralCode?: string },
+    ip: string,
+  ) {
     this.ipLimit.check(ip);
     const profile = await this.google.verify(input.credential).catch((error: unknown) => {
       this.ipLimit.fail(ip);
@@ -148,30 +197,35 @@ export class AuthService {
     if (input.consent !== true)
       return { needsConsent: true as const, email: profile.email, name: profile.name };
     this.signupLimit.take(ip);
-    const [created] = await this.db
-      .insert(parents)
-      .values({
-        name: input.name?.trim().slice(0, 60) || profile.name,
-        email: profile.email,
-        passwordHash: await hashSecret(randomBytes(32).toString('base64url')),
-        familyCode: randomCode(),
-        consentAt: new Date(),
-        emailVerifiedAt: new Date(),
-        signupIpHash: ipHash(ip),
-        lastLoginAt: new Date(),
-      })
-      .onConflictDoNothing()
-      .returning();
-    if (!created) fail(409, 'CONFLICT', 'Email sudah terdaftar. Silakan masuk.');
-    await this.mail.enqueue(
-      created.email,
-      template(
-        'Selamat datang di UdaKids',
-        `Halo ${created.name}. Kode keluarga: ${created.familyCode}.`,
-      ),
-      'welcome',
-      created.id,
-    );
+    const created = await this.db.transaction(async (tx) => {
+      const [row] = await tx
+        .insert(parents)
+        .values({
+          name: input.name?.trim().slice(0, 60) || profile.name,
+          email: profile.email,
+          passwordHash: await hashSecret(randomBytes(32).toString('base64url')),
+          familyCode: randomCode(),
+          consentAt: new Date(),
+          emailVerifiedAt: new Date(),
+          signupIpHash: ipHash(ip),
+          lastLoginAt: new Date(),
+        })
+        .onConflictDoNothing()
+        .returning();
+      if (!row) fail(409, 'CONFLICT', 'Email sudah terdaftar. Silakan masuk.');
+      if (input.referralCode) await this.attachReferral(row.id, input.referralCode, tx as Db);
+      await this.mail.enqueue(
+        row.email,
+        template(
+          'Selamat datang di UdaKids',
+          `Halo ${row.name}. Kode keluarga: ${row.familyCode}.`,
+        ),
+        'welcome',
+        row.id,
+        tx,
+      );
+      return row;
+    });
     return this.session(created, 'parent');
   }
   async family(code: string, ip: string) {

@@ -19,6 +19,7 @@ import { BillingService } from '../billing/billing.service.js';
 import { LearningService } from '../catalog/learning.service.js';
 import { AuthGuard } from '../auth/auth.guard.js';
 import { ReportsService } from '../reports/reports.service.js';
+import { AffiliateService } from '../affiliate/affiliate.service.js';
 
 const demoParentEmail = /^demo\.keluarga(?:[1-9]|1\d|2[0-4])@example\.test$/;
 const demoAdminEmail = /^demo\.admin[1-5]@example\.test$/;
@@ -77,6 +78,7 @@ export class DemoSeedService {
     private learning: LearningService,
     private guard: AuthGuard,
     private reports: ReportsService,
+    private affiliate: AffiliateService,
   ) {}
 
   private async code() {
@@ -410,6 +412,95 @@ export class DemoSeedService {
             expiresAt: new Date(Date.now() - 86_400_000),
           })
           .where(eq(s.orders.id, id));
+    }
+
+    // Tautan ajakan demo memiliki kunjungan dan bonus tersebar agar seluruh alur afiliasi dapat ditinjau.
+    const demoReferrer = parentRows[0];
+    if (demoReferrer) {
+      await this.affiliate.ensureCode(demoReferrer.id);
+      const referrals = await this.db
+        .select()
+        .from(s.referrals)
+        .where(eq(s.referrals.referrerId, demoReferrer.id));
+      for (let dayOffset = 0; dayOffset < 14; dayOffset++) {
+        await this.db
+          .insert(s.affiliateClickDays)
+          .values({
+            parentId: demoReferrer.id,
+            day: jakartaDate(new Date(Date.now() - dayOffset * 86_400_000)),
+            clicks: 2 + ((dayOffset * 7) % 9),
+          })
+          .onConflictDoNothing();
+      }
+      for (const referral of referrals) {
+        const joinedAt = new Date(Date.now() - 21 * 86_400_000);
+        await this.db
+          .update(s.parents)
+          .set({ createdAt: joinedAt })
+          .where(eq(s.parents.id, referral.refereeId));
+        await this.db
+          .update(s.referrals)
+          .set({ createdAt: joinedAt })
+          .where(eq(s.referrals.id, referral.id));
+        await this.db
+          .insert(s.affiliateLedger)
+          .values({
+            parentId: referral.referrerId,
+            refereeId: referral.refereeId,
+            type: 'signup_bonus',
+            state: 'pending',
+            amount: 3500,
+            availableAt: new Date(joinedAt.getTime() + 30 * 86_400_000),
+            note: 'Menunggu teman aktif belajar',
+          })
+          .onConflictDoNothing();
+        await this.db
+          .update(s.affiliateLedger)
+          .set({
+            availableAt: new Date(joinedAt.getTime() + 30 * 86_400_000),
+          })
+          .where(
+            and(
+              eq(s.affiliateLedger.refereeId, referral.refereeId),
+              eq(s.affiliateLedger.type, 'signup_bonus'),
+            ),
+          );
+        const [paidOrder] = await this.db
+          .select({ id: s.orders.id, price: s.orders.price, paidAt: s.orders.paidAt })
+          .from(s.orders)
+          .where(and(eq(s.orders.parentId, referral.refereeId), eq(s.orders.status, 'paid')))
+          .orderBy(asc(s.orders.createdAt))
+          .limit(1);
+        if (paidOrder) {
+          const commission = Math.floor(paidOrder.price * 0.33);
+          await this.db
+            .insert(s.affiliateLedger)
+            .values({
+              parentId: referral.referrerId,
+              refereeId: referral.refereeId,
+              orderId: paidOrder.id,
+              type: 'commission',
+              state:
+                (paidOrder.paidAt?.getTime() ?? Date.now()) + 7 * 86_400_000 <= Date.now()
+                  ? 'available'
+                  : 'pending',
+              amount: commission,
+              availableAt: new Date((paidOrder.paidAt?.getTime() ?? Date.now()) + 7 * 86_400_000),
+              note: 'Komisi paket demo',
+            })
+            .onConflictDoNothing();
+          await this.db
+            .update(s.referrals)
+            .set({
+              commission,
+              status: 'paid',
+              orderId: paidOrder.id,
+              paidAt: paidOrder.paidAt ?? new Date(),
+            })
+            .where(eq(s.referrals.id, referral.id));
+        }
+      }
+      await this.affiliate.release(demoReferrer.id);
     }
 
     for (let index = 0; index < childRows.length; index += 8) {

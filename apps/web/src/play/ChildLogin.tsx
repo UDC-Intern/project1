@@ -13,6 +13,7 @@ import { PicturePin } from '../components/PicturePin';
 import { APP_NAME } from '../config/app';
 import { useT } from '../i18n';
 import { AutoSpeak } from './AutoSpeak';
+import { parentReturn, setParentReturn } from './parentReturn';
 
 type Profile = Awaited<ReturnType<typeof familyProfiles>>['profiles'][number];
 const CODE_LENGTH = 6;
@@ -143,7 +144,11 @@ export function ChildLogin() {
           <Momo mood="happy" size={40} />
           <span>{APP_NAME}</span>
         </Link>
-        <Link to="/" className="kid-nav-back">
+        <Link
+          to={parentReturn() && getSession('parent') ? '/orang-tua' : '/'}
+          className="kid-nav-back"
+          onClick={() => setParentReturn(false)}
+        >
           <span aria-hidden="true">←</span> {t('login.home')}
         </Link>
       </header>

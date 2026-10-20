@@ -58,8 +58,9 @@ export const parents = pgTable(
     name: text('name').notNull(),
     email: text('email').notNull(),
     passwordHash: text('password_hash').notNull(),
-    /** Kode 6 huruf untuk masuk anak, sekaligus kode ajakan (referral). */
+    /** Kode 6 huruf untuk masuk anak; tidak boleh dipakai sebagai kode ajakan publik. */
     familyCode: text('family_code').notNull().unique(),
+    referralCode: text('referral_code').unique(),
     active: boolean('active').notNull().default(true),
     /** Persetujuan orang tua (UU PDP) saat mendaftar. */
     consentAt: stamp('consent_at'),
@@ -486,6 +487,121 @@ export const commissionPayouts = pgTable(
     createdAt: createdAt(),
   },
   (t) => [index('commission_payouts_parent_idx').on(t.parentId)],
+);
+
+/** Statistik klik tautan ajakan per hari, tanpa menyimpan identitas pengunjung. */
+export const affiliateClickDays = pgTable(
+  'affiliate_click_days',
+  {
+    parentId: uuid('parent_id')
+      .notNull()
+      .references(() => parents.id, { onDelete: 'cascade' }),
+    day: date('day').notNull(),
+    clicks: integer('clicks').notNull().default(0),
+  },
+  (t) => [primaryKey({ columns: [t.parentId, t.day] })],
+);
+
+/** Perubahan saldo dicatat satu kali per sumber agar permintaan berulang tidak menggandakan komisi. */
+export const affiliateLedger = pgTable(
+  'affiliate_ledger',
+  {
+    id: pk(),
+    parentId: uuid('parent_id')
+      .notNull()
+      .references(() => parents.id, { onDelete: 'cascade' }),
+    type: text('type')
+      .$type<'signup_bonus' | 'commission' | 'payout' | 'payout_return' | 'adjustment'>()
+      .notNull(),
+    state: text('state').$type<'pending' | 'available' | 'void'>().notNull(),
+    amount: integer('amount').notNull(),
+    refereeId: uuid('referee_id').references(() => parents.id, { onDelete: 'set null' }),
+    orderId: uuid('order_id').references(() => orders.id, { onDelete: 'set null' }),
+    payoutId: uuid('payout_id'),
+    availableAt: stamp('available_at'),
+    note: text('note'),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    index('affiliate_ledger_parent_idx').on(t.parentId, t.createdAt),
+    uniqueIndex('affiliate_ledger_bonus_uq')
+      .on(t.refereeId)
+      .where(sql`${t.type} = 'signup_bonus'`),
+    uniqueIndex('affiliate_ledger_commission_uq')
+      .on(t.orderId)
+      .where(sql`${t.type} = 'commission'`),
+  ],
+);
+
+/** Rekening pencairan; nomor dienkripsi sebelum disimpan. */
+export const affiliateAccounts = pgTable(
+  'affiliate_accounts',
+  {
+    parentId: uuid('parent_id')
+      .primaryKey()
+      .references(() => parents.id, { onDelete: 'cascade' }),
+    providerId: text('provider_id').notNull(),
+    providerName: text('provider_name').notNull(),
+    kind: text('kind').$type<'bank' | 'ewallet'>().notNull(),
+    accountEncrypted: text('account_encrypted').notNull(),
+    accountHash: text('account_hash').notNull(),
+    accountLast4: text('account_last4').notNull(),
+    holderName: text('holder_name').notNull(),
+    status: text('status')
+      .$type<'pending' | 'verified' | 'rejected'>()
+      .notNull()
+      .default('pending'),
+    reviewNote: text('review_note'),
+    changedAt: stamp('changed_at').notNull().defaultNow(),
+  },
+  (t) => [index('affiliate_accounts_hash_idx').on(t.accountHash)],
+);
+
+export const affiliateActionCodes = pgTable(
+  'affiliate_action_codes',
+  {
+    id: pk(),
+    parentId: uuid('parent_id')
+      .notNull()
+      .references(() => parents.id, { onDelete: 'cascade' }),
+    codeHash: text('code_hash').notNull(),
+    expiresAt: stamp('expires_at').notNull(),
+    attempts: integer('attempts').notNull().default(0),
+    consumedAt: stamp('consumed_at'),
+    createdAt: createdAt(),
+  },
+  (t) => [index('affiliate_action_codes_parent_idx').on(t.parentId, t.createdAt)],
+);
+
+/** Pengajuan transfer manual. Satu permintaan terbuka per orang tua. */
+export const affiliatePayoutRequests = pgTable(
+  'affiliate_payout_requests',
+  {
+    id: pk(),
+    parentId: uuid('parent_id')
+      .notNull()
+      .references(() => parents.id, { onDelete: 'cascade' }),
+    amount: integer('amount').notNull(),
+    providerName: text('provider_name').notNull(),
+    accountLast4: text('account_last4').notNull(),
+    accountEncrypted: text('account_encrypted').notNull(),
+    holderName: text('holder_name').notNull(),
+    status: text('status')
+      .$type<'requested' | 'paid' | 'rejected' | 'cancelled'>()
+      .notNull()
+      .default('requested'),
+    note: text('note'),
+    transferRef: text('transfer_ref'),
+    reviewedBy: uuid('reviewed_by').references(() => staffUsers.id, { onDelete: 'set null' }),
+    requestedAt: stamp('requested_at').notNull().defaultNow(),
+    reviewedAt: stamp('reviewed_at'),
+  },
+  (t) => [
+    index('affiliate_payout_requests_parent_idx').on(t.parentId, t.requestedAt),
+    uniqueIndex('affiliate_payout_requests_open_uq')
+      .on(t.parentId)
+      .where(sql`${t.status} = 'requested'`),
+  ],
 );
 
 // ---- Pengaturan, media, ilustrasi, suara ----

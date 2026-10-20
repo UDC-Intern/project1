@@ -29,6 +29,12 @@ import { AiController } from './ai/ai.controller.js';
 import { IMAGE_PROVIDER, imageFromEnv } from './ai/image.provider.js';
 import { FinanceController } from './billing/finance.controller.js';
 import { MailController } from './mail/mail.controller.js';
+import { AffiliateService } from './affiliate/affiliate.service.js';
+import {
+  AdminAffiliateController,
+  ParentAffiliateController,
+  ReferralController,
+} from './affiliate/affiliate.controller.js';
 @Module({
   imports: [DbModule, AuthModule],
   controllers: [
@@ -47,6 +53,9 @@ import { MailController } from './mail/mail.controller.js';
     AiController,
     FinanceController,
     MailController,
+    AdminAffiliateController,
+    ParentAffiliateController,
+    ReferralController,
   ],
   providers: [
     SettingsService,
@@ -56,6 +65,7 @@ import { MailController } from './mail/mail.controller.js';
     ParentService,
     AccountService,
     BillingService,
+    AffiliateService,
     ContentService,
     DirectoryService,
     DemoSeedService,

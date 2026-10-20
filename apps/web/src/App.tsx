@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes, useParams } from 'react-router-dom';
 import { AdminLayout } from './admin/AdminLayout';
+import { AffiliateAdminPage } from './admin/affiliate/AffiliateAdminPage';
 import { OrdersPage } from './admin/billing/OrdersPage';
 import { PackagesPage } from './admin/billing/PackagesPage';
 import { PaymentMethodsPage } from './admin/billing/PaymentMethodsPage';
@@ -29,6 +30,7 @@ import { ResultPage } from './play/ResultPage';
 import { RoundPage } from './play/RoundPage';
 import { TopicPage } from './play/TopicPage';
 import { Landing } from './site/Landing';
+import { ReferralLanding } from './site/ReferralLanding';
 import { NotFound } from './site/NotFound';
 import { StylePage } from './site/StylePage';
 import { VerifyCertificate } from './site/VerifyCertificate';
@@ -50,6 +52,7 @@ export function App() {
     <>
       <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="/r/:code" element={<ReferralLanding />} />
         {import.meta.env.DEV && <Route path="/gaya" element={<StylePage />} />}
         <Route path="/sertifikat/cek" element={<VerifyCertificate />} />
         <Route path="/sertifikat/cek/:id" element={<VerifyCertificate />} />
@@ -90,6 +93,7 @@ export function App() {
             <Route path="transaksi" element={<OrdersPage />} />
             <Route path="paket" element={<PackagesPage />} />
             <Route path="rekening" element={<PaymentMethodsPage />} />
+            <Route path="afiliasi" element={<AffiliateAdminPage />} />
             <Route path="pengaturan" element={<SettingsPage />} />
           </Route>
         </Route>

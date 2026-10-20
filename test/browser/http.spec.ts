@@ -13,6 +13,66 @@ function watch(page: Page) {
   return problems;
 }
 
+test('tautan afiliasi terpisah dan anak kembali ke dashboard orang tua', async ({
+  page,
+  request,
+}) => {
+  const email = `browser-affiliate-${Date.now()}@example.test`;
+  const registered = await request.post('/api/auth/parent/register', {
+    data: { name: 'Orang Tua Afiliasi', email, password: 'browser-password-123', consent: true },
+  });
+  expect(registered.status()).toBe(201);
+  const parent = (await registered.json()) as { token: string; user: { familyCode: string } };
+  const created = await request.post('/api/parent/children', {
+    headers: { Authorization: `Bearer ${parent.token}` },
+    data: { nickname: 'Anak Afiliasi', momoColor: 'blue', pin: ['apple', 'star', 'fish'] },
+  });
+  expect(created.status()).toBe(201);
+  await page.goto('/orang-tua/masuk');
+  await page.getByLabel('Email', { exact: true }).fill(email);
+  await page.getByLabel(/Kata sandi/).fill('browser-password-123');
+  await page.getByRole('button', { name: 'Masuk', exact: true }).click();
+  await page.getByRole('link', { name: 'Afiliasi' }).click();
+  await expect(page.getByRole('heading', { name: 'Bagikan tautan ajakan' })).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 850 });
+  expect(await page.locator('body').evaluate((el) => el.scrollWidth > el.clientWidth + 1)).toBe(
+    false,
+  );
+  await page.setViewportSize({ width: 1366, height: 900 });
+  const link = await page.getByRole('textbox', { name: 'Tautan ajakan' }).inputValue();
+  expect(link).toMatch(/\/r\/[A-Z2-9]{6}$/);
+  expect(link.endsWith(parent.user.familyCode)).toBe(false);
+  await page.goto(link);
+  await expect(page.getByRole('link', { name: 'Daftar sekarang' })).toBeVisible();
+  await page.goto('/orang-tua');
+  await page.locator('.pa-side-play').click();
+  await page.getByRole('button', { name: 'Anak Afiliasi' }).click();
+  for (const name of ['Apel', 'Bintang', 'Ikan'])
+    await page.getByRole('button', { name, exact: true }).click();
+  await expect(page).toHaveURL(/\/play$/);
+  await page.goBack();
+  await expect(page).toHaveURL(/\/orang-tua$/);
+  await page.locator('.pa-side-play').click();
+  await page.getByRole('button', { name: 'Anak Afiliasi' }).click();
+  for (const name of ['Apel', 'Bintang', 'Ikan'])
+    await page.getByRole('button', { name, exact: true }).click();
+  await expect(page).toHaveURL(/\/play$/);
+  await page
+    .getByRole('button', { name: /Selesai|Keluar/ })
+    .first()
+    .click();
+  await expect(page).toHaveURL(/\/orang-tua$/);
+  await page.goto('/play/masuk');
+  await page.getByRole('button', { name: 'Anak Afiliasi' }).click();
+  for (const name of ['Apel', 'Bintang', 'Ikan'])
+    await page.getByRole('button', { name, exact: true }).click();
+  await page
+    .getByRole('button', { name: /Selesai|Keluar/ })
+    .first()
+    .click();
+  await expect(page).toHaveURL(/\/play\/masuk$/);
+});
+
 test('orang tua mendaftar dan membaca data keluarga melalui HTTP', async ({ page, request }) => {
   const problems = watch(page);
   const email = `browser-parent-${Date.now()}@example.test`;

@@ -30,8 +30,12 @@ export const parentLogin = (body: LoginBody) =>
   request<AuthResult>('/auth/parent/login', { method: 'POST', body });
 
 export type GoogleAuthResult = AuthResult | { needsConsent: true; email: string; name: string };
-export const parentGoogle = (body: { credential: string; consent?: boolean; name?: string }) =>
-  request<GoogleAuthResult>('/auth/parent/google', { method: 'POST', body });
+export const parentGoogle = (body: {
+  credential: string;
+  consent?: boolean;
+  name?: string;
+  referralCode?: string;
+}) => request<GoogleAuthResult>('/auth/parent/google', { method: 'POST', body });
 
 export const staffLogin = (body: LoginBody) =>
   request<AuthResult>('/auth/staff/login', { method: 'POST', body });

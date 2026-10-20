@@ -57,48 +57,4 @@ export class FinanceController {
     if (row.orderId) fail(409, 'CONFLICT', 'Pemasukan dari pesanan tidak bisa dihapus.');
     await this.db.delete(s.cashEntries).where(eq(s.cashEntries.id, id));
   }
-  @Get('affiliate') async affiliate() {
-    return this.db
-      .select({
-        parentId: s.parents.id,
-        name: s.parents.name,
-        registered: sql<number>`(select count(*) from referrals r where r.referrer_id=${s.parents.id})::int`,
-        paid: sql<number>`(select count(*) from referrals r where r.referrer_id=${s.parents.id} and r.status='paid')::int`,
-        earned: sql<number>`coalesce((select sum(r.commission) from referrals r where r.referrer_id=${s.parents.id}),0)::int`,
-        balance: sql<number>`(coalesce((select sum(r.commission) from referrals r where r.referrer_id=${s.parents.id}),0)-coalesce((select sum(p.amount) from commission_payouts p where p.parent_id=${s.parents.id}),0))::int`,
-      })
-      .from(s.parents)
-      .where(sql`exists(select 1 from referrals r where r.referrer_id=${s.parents.id})`)
-      .limit(500);
-  }
-  @Post('affiliate/payouts') async payout(@CurrentUser() u: User, @Body() input: unknown) {
-    const b = z
-      .strictObject({
-        parentId: z.uuid(),
-        amount: z.number().int().min(1),
-        note: z.string().trim().max(200).default(''),
-      })
-      .parse(input);
-    return this.db.transaction(async (tx) => {
-      if (
-        !(await tx.select().from(s.parents).where(eq(s.parents.id, b.parentId)).for('update'))
-          .length
-      )
-        missing();
-      const [earned] = await tx
-        .select({ n: sql<number>`coalesce(sum(${s.referrals.commission}),0)::int` })
-        .from(s.referrals)
-        .where(eq(s.referrals.referrerId, b.parentId));
-      const [paid] = await tx
-        .select({ n: sql<number>`coalesce(sum(${s.commissionPayouts.amount}),0)::int` })
-        .from(s.commissionPayouts)
-        .where(eq(s.commissionPayouts.parentId, b.parentId));
-      if (b.amount > earned!.n - paid!.n) fail(409, 'CONFLICT', 'Jumlah melebihi saldo komisi.');
-      const [row] = await tx
-        .insert(s.commissionPayouts)
-        .values({ ...b, createdBy: u.id })
-        .returning();
-      return row;
-    });
-  }
 }

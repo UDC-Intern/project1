@@ -28,6 +28,7 @@ const NAV: (NavItem | { group: MessageKey })[] = [
   { to: '/admin/transaksi', label: 'admin.nav.orders', icon: 'receipt', badge: 'orders' },
   { to: '/admin/paket', label: 'admin.nav.packages', icon: 'tag' },
   { to: '/admin/rekening', label: 'admin.nav.paymentMethods', icon: 'bank' },
+  { to: '/admin/afiliasi', label: 'admin.nav.affiliate', icon: 'wallet' },
   { to: '/admin/pengaturan', label: 'admin.nav.settings', icon: 'gear' },
 ];
 

@@ -15,6 +15,9 @@ import {
   UNIQUE_CODE_MAX,
   uploadProofBodySchema,
   type OrderStatus,
+  DEFAULT_AFFILIATE_SETTINGS,
+  affiliateSettingsSchema,
+  commissionFor,
 } from '@udakids/engine';
 import { DB, type Db, type Executor } from '../db/db.module.js';
 import * as s from '../db/schema.js';
@@ -312,22 +315,48 @@ export class BillingService {
             createdBy: adminId,
           })
           .onConflictDoNothing();
-        const affiliate = (await this.settings.value('affiliate', tx)) as
-          { enabled?: boolean; percent?: number } | undefined;
+        const storedAffiliate = await this.settings.value('affiliate', tx);
+        const parsedAffiliate = affiliateSettingsSchema.safeParse(storedAffiliate);
+        const legacyAffiliate = storedAffiliate as { enabled?: boolean; percent?: number } | null;
+        const affiliate = parsedAffiliate.success
+          ? parsedAffiliate.data
+          : {
+              ...DEFAULT_AFFILIATE_SETTINGS,
+              enabled: legacyAffiliate?.enabled ?? true,
+              commissionBp:
+                typeof legacyAffiliate?.percent === 'number'
+                  ? legacyAffiliate.percent * 100
+                  : DEFAULT_AFFILIATE_SETTINGS.commissionBp,
+            };
         const [referral] = await tx
           .select()
           .from(s.referrals)
-          .where(and(eq(s.referrals.refereeId, parent.id), eq(s.referrals.status, 'registered')));
-        if (referral)
+          .where(eq(s.referrals.refereeId, parent.id));
+        if (referral && affiliate.enabled) {
+          const commission = commissionFor(row.price, affiliate.commissionBp);
+          if (commission > 0)
+            await tx
+              .insert(s.affiliateLedger)
+              .values({
+                parentId: referral.referrerId,
+                refereeId: parent.id,
+                orderId: id,
+                type: 'commission',
+                amount: commission,
+                state: affiliate.holdDays ? 'pending' : 'available',
+                availableAt: new Date(Date.now() + affiliate.holdDays * 86_400_000),
+                note: affiliate.holdDays ? `Tertahan ${affiliate.holdDays} hari` : null,
+              })
+              .onConflictDoNothing();
+        }
+        if (referral?.status === 'registered')
           await tx
             .update(s.referrals)
             .set({
               status: 'paid',
               orderId: id,
               paidAt: new Date(),
-              commission: affiliate?.enabled
-                ? Math.floor((row.price * Math.min(50, Math.max(0, affiliate.percent ?? 0))) / 100)
-                : 0,
+              commission: affiliate.enabled ? commissionFor(row.price, affiliate.commissionBp) : 0,
             })
             .where(eq(s.referrals.id, referral.id));
       }

@@ -95,7 +95,7 @@ describe('navigasi dan kerangka', () => {
       </MemoryRouter>,
     );
     expect(screen.getAllByRole('link', { name: 'Paket & Pembayaran' }).length).toBeGreaterThan(0);
-    expect(screen.queryByRole('link', { name: /Afiliasi/ })).toBeNull();
+    expect(screen.getByRole('link', { name: 'Afiliasi' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /mode gelap/i })).toBeNull();
     expect(await screen.findByRole('link', { name: /Riwayat Transaksi, 1/ })).toBeInTheDocument();
     expect(screen.getAllByText('Ridho Dwi Syahputra').length).toBeGreaterThan(0);

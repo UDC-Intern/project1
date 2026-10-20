@@ -168,6 +168,10 @@ apa pun. Pilihan desain ada di halaman yang sama. Pengecualian per level ada di 
    langsung melihat perubahannya. Admin menonaktifkan akun anak atau keluarga; akun itu tidak bisa masuk dan tersembunyi dari pilihan
    profil sampai diaktifkan lagi.
 
+8. Orang tua membagikan kode afiliasi yang berbeda dari kode keluarga. Pendaftaran lewat tautan dicatat sebagai anggota langsung;
+   bonus ajakan tersedia setelah teman aktif belajar, sedangkan komisi paket mengikuti pembelian yang disetujui admin. Orang tua
+   memverifikasi rekening melalui email sebelum mengajukan pencairan. Admin memeriksa rekening dan transfer serta mengatur aturan program.
+
 ## 5. Peta Jalan (setelah rilis 1.0)
 
 Hal berikut **tidak** dibangun di rilis 1.0. Struktur data dan modul disiapkan agar bisa ditambah nanti.
@@ -175,7 +179,7 @@ Hal berikut **tidak** dibangun di rilis 1.0. Struktur data dan modul disiapkan a
 - Jenjang lain (PAUD, TK, Kelas 5 dan 6, olimpiade), Sains Kelas 2 sampai 4, dan mapel lain (literasi).
 - Mock test (mode peringkatnya sudah disiapkan) dan buku 10 level per topik.
 - Petualangan Momo (puzzle kartu perintah), lab, simulasi, dan game.
-- Payment gateway dan perpanjangan otomatis. Halaman afiliasi (endpoint referral sudah ada, menunya dihapus).
+- Payment gateway dan perpanjangan otomatis.
 - Fasilitator, kelas, dan lomba live.
 - Login Google dan lupa kata sandi. Verifikasi email saat daftar disiapkan di backend, bawaan mati; UI verifikasi belum masuk rilis. Email transaksi memakai outbox server.
 - Mode offline/PWA dan antrean sinkronisasi (outbox).

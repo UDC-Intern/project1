@@ -15,6 +15,20 @@
       "when": 1792327336179,
       "tag": "0001_short_mach_iv",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792483796418,
+      "tag": "0002_past_skullbuster",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792484587896,
+      "tag": "0003_wakeful_wild_pack",
+      "breakpoints": true
     }
   ]
 }
