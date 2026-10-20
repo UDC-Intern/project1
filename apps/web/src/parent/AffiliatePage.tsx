@@ -88,7 +88,7 @@ export function AffiliatePage() {
           Program afiliasi sedang tidak aktif. Riwayat dan saldomu tetap tersimpan.
         </Notice>
       )}
-      <Card className="aff-share">
+      <Card className="afp-share">
         <div>
           <h2>Bagikan tautan ajakan</h2>
           <p>
@@ -96,7 +96,7 @@ export function AffiliatePage() {
           </p>
           <p>Teman yang mendaftar lewat tautan ini otomatis tercatat sebagai anggota langsungmu.</p>
         </div>
-        <div className="aff-share-actions">
+        <div className="afp-share-actions">
           <input aria-label="Tautan ajakan" readOnly value={data.link} />
           <Button
             onClick={() => {
@@ -133,10 +133,10 @@ export function AffiliatePage() {
           <strong>{money(data.balance.paid)}</strong>
         </Card>
       </div>
-      <div className="aff-grid">
+      <div className="afp-grid">
         <Card>
           <h2>Perjalanan ajakan</h2>
-          <div className="aff-funnel">
+          <div className="afp-funnel">
             {(
               [
                 ['Tautan dibuka', data.counts.clicks],
@@ -171,7 +171,7 @@ export function AffiliatePage() {
           </p>
         </Card>
       </div>
-      <nav className="aff-tabs" aria-label="Rincian afiliasi">
+      <nav className="afp-tabs" aria-label="Rincian afiliasi">
         {(
           [
             ['members', 'Anggota'],
@@ -395,7 +395,7 @@ function PayoutPanel({ data, reload }: { data: Overview; reload: () => void }) {
     );
   }
   return (
-    <div className="aff-grid">
+    <div className="afp-grid">
       <Card>
         <h2>Rekening pencairan</h2>
         {data.account && (
@@ -438,7 +438,7 @@ function PayoutPanel({ data, reload }: { data: Overview; reload: () => void }) {
             onChange={(event) => setHolderName(event.target.value)}
             required
           />
-          <div className="aff-code">
+          <div className="afp-otp">
             <TextField
               label="Kode verifikasi email"
               inputMode="numeric"
@@ -489,7 +489,7 @@ function PayoutPanel({ data, reload }: { data: Overview; reload: () => void }) {
           <p>Belum ada pencairan.</p>
         ) : (
           list.data.map((p) => (
-            <div className="aff-payout" key={p.id}>
+            <div className="afp-payout" key={p.id}>
               <span>
                 {date(p.requestedAt)} · {p.providerName} •••• {p.last4}
                 <br />

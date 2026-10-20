@@ -311,6 +311,19 @@ export class DemoSeedService {
           } else if (demoParentEmail.test(family.email))
             await this.dateRound(extra.roundId, extraFinishedAt);
         }
+        // Sebagian anak ajakan menyelesaikan tiga ronde agar bonus afiliasi benar-benar tersedia.
+        if (parentRows.length > 1 && (parentRows.length - 1) % 2 === 0) {
+          const bonusLevel = levels[index % levels.length]!;
+          const [roundCount] = await this.db
+            .select({ n: sql<number>`count(*)::int` })
+            .from(s.quizResults)
+            .where(eq(s.quizResults.childId, child!.id));
+          const bonusFinishedAt = this.demoFinishedAt(index + 120, (index % 4) + 1);
+          if (Number(roundCount?.n ?? 0) < 3) {
+            await this.oneRound(child!.id, profile.correct, bonusLevel, bonusFinishedAt);
+            newRounds++;
+          }
+        }
       }
       familyAccess.push({ email: family.email, familyCode: parent!.familyCode, children });
     }
@@ -328,19 +341,19 @@ export class DemoSeedService {
 
     for (let index = 0; index < parentRows.length; index++) {
       const parent = parentRows[index]!;
-      if (
-        index > 0 &&
-        index % 3 === 0 &&
-        !(
-          await this.db
-            .select({ id: s.referrals.id })
-            .from(s.referrals)
-            .where(eq(s.referrals.refereeId, parent.id))
-        ).length
-      )
-        await this.db
-          .insert(s.referrals)
-          .values({ referrerId: parentRows[0]!.id, refereeId: parent.id });
+      if (index > 0) {
+        const [existingReferral] = await this.db
+          .select({ id: s.referrals.id })
+          .from(s.referrals)
+          .where(eq(s.referrals.refereeId, parent.id));
+        if (!existingReferral) {
+          const referrerIndex = index < 11 ? 0 : index < 16 ? 1 : index < 20 ? 2 : 3;
+          await this.db.insert(s.referrals).values({
+            referrerId: parentRows[referrerIndex]!.id,
+            refereeId: parent.id,
+          });
+        }
+      }
       const status = index % 6;
       const shouldPaid = status === 0 || ((status === 1 || status === 2) && index < 12);
       const [existingOrder] = await this.db
@@ -414,9 +427,8 @@ export class DemoSeedService {
           .where(eq(s.orders.id, id));
     }
 
-    // Tautan ajakan demo memiliki kunjungan dan bonus tersebar agar seluruh alur afiliasi dapat ditinjau.
-    const demoReferrer = parentRows[0];
-    if (demoReferrer) {
+    // Seluruh keluarga demo memiliki kode dan kunjungan; hubungan ajakan tersebar di beberapa pengajak.
+    for (const [referrerIndex, demoReferrer] of parentRows.entries()) {
       await this.affiliate.ensureCode(demoReferrer.id);
       const referrals = await this.db
         .select()
@@ -428,7 +440,7 @@ export class DemoSeedService {
           .values({
             parentId: demoReferrer.id,
             day: jakartaDate(new Date(Date.now() - dayOffset * 86_400_000)),
-            clicks: 2 + ((dayOffset * 7) % 9),
+            clicks: 1 + ((dayOffset * 7 + referrerIndex * 3) % (referrals.length ? 10 : 4)),
           })
           .onConflictDoNothing();
       }

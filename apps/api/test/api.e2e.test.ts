@@ -9,7 +9,7 @@ import { seed } from '../src/cli/seed.js';
 import {
   books,
   levels,
-  parents,
+  parents as parentTable,
   children,
   rounds,
   cashEntries,
@@ -17,6 +17,7 @@ import {
   quizResults,
   emailOutbox,
   appSettings,
+  referrals,
 } from '../src/db/schema.js';
 import {
   generateRound,
@@ -65,7 +66,7 @@ describe('fondasi API dan akun', () => {
       [1, 2].map(() => request(ctx.app.getHttpServer()).post('/auth/parent/register').send(data)),
     );
     expect(responses.map((r) => r.status).sort()).toEqual([201, 409]);
-    expect(await ctx.db.select().from(parents)).toHaveLength(1);
+    expect(await ctx.db.select().from(parentTable)).toHaveLength(1);
   });
   it('pendaftaran dengan verifikasi email meminta kode sebelum akun bisa masuk', async () => {
     const previous = process.env.EMAIL_VERIFICATION;
@@ -651,7 +652,22 @@ describe('fondasi API dan akun', () => {
         .set('Authorization', admin)
         .send({ parents, staff })
         .expect(201);
-      expect(first.body.newRounds).toBe(42);
+      expect(first.body.newRounds).toBeGreaterThanOrEqual(42);
+      expect((await ctx.db.select().from(referrals)).length).toBeGreaterThanOrEqual(23);
+      expect(
+        (await ctx.db.select().from(parentTable)).filter((row) => row.referralCode),
+      ).toHaveLength(24);
+      const affiliateSummary = await http()
+        .get('/admin/affiliate')
+        .set('Authorization', admin)
+        .expect(200);
+      expect(affiliateSummary.body.affiliates).toBe(24);
+      const affiliateAnalytics = await http()
+        .get('/admin/affiliate/analytics')
+        .set('Authorization', admin)
+        .expect(200);
+      expect(affiliateAnalytics.body.funnel.signups).toBe(23);
+      expect(affiliateAnalytics.body.funnel.active).toBeGreaterThanOrEqual(10);
       expect(first.body.familyAccess).toHaveLength(24);
       expect(first.body.familyAccess[0].children).toHaveLength(5);
       expect(first.body.certificates).toBeGreaterThanOrEqual(10);

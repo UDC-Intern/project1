@@ -35,9 +35,20 @@ test('tautan afiliasi terpisah dan anak kembali ke dashboard orang tua', async (
   await page.getByRole('link', { name: 'Afiliasi' }).click();
   await expect(page.getByRole('heading', { name: 'Bagikan tautan ajakan' })).toBeVisible();
   await page.setViewportSize({ width: 390, height: 850 });
+  await page.getByRole('button', { name: 'Pencairan', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Rekening pencairan' })).toBeVisible();
   expect(await page.locator('body').evaluate((el) => el.scrollWidth > el.clientWidth + 1)).toBe(
     false,
   );
+  await page.setViewportSize({ width: 1129, height: 850 });
+  expect(await page.locator('body').evaluate((el) => el.scrollWidth > el.clientWidth + 1)).toBe(
+    false,
+  );
+  expect(
+    await page
+      .getByText('Kode verifikasi email')
+      .evaluate((el) => Number.parseFloat(getComputedStyle(el).fontSize)),
+  ).toBeLessThan(24);
   await page.setViewportSize({ width: 1366, height: 900 });
   const link = await page.getByRole('textbox', { name: 'Tautan ajakan' }).inputValue();
   expect(link).toMatch(/\/r\/[A-Z2-9]{6}$/);

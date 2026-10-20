@@ -25,7 +25,7 @@ pnpm dev
 
 `pnpm dev` menjalankan API dan web dalam mode HTTP. `VITE_MOCK_MODULES` kosong pada konfigurasi lokal sehingga permintaan halaman diteruskan ke API. Mode demo lama dapat diaktifkan dengan `VITE_MOCK_MODULES=*`; mode itu memakai data browser terpisah.
 
-Menu Afiliasi orang tua menampilkan kode ajakan tersendiri, tautan `/r/KODE`, anggota langsung, saldo bonus/komisi, dan pengajuan pencairan. Admin melihat analisis, rincian afiliator, koreksi saldo, pemeriksaan rekening, pemrosesan pencairan, serta aturan program melalui `/admin/afiliasi`. Kode ajakan berbeda dari kode keluarga untuk masuk anak. Data demo pertama berisi klik tautan, tujuh anggota langsung, bonus tersedia, dan komisi tertahan.
+Menu Afiliasi orang tua menampilkan kode ajakan tersendiri, tautan `/r/KODE`, anggota langsung, saldo bonus/komisi, dan pengajuan pencairan. Admin melihat analisis, rincian afiliator, koreksi saldo, pemeriksaan rekening, pemrosesan pencairan, serta aturan program melalui `/admin/afiliasi`. Kode ajakan berbeda dari kode keluarga untuk masuk anak. Data demo mengaktifkan kode ajakan pada 24 keluarga, menghubungkan 23 anggota, dan menyebarkan klik, aktivitas belajar, bonus, serta komisi pada beberapa afiliator.
 
 ## Pengaturan layanan
 

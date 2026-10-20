@@ -3,6 +3,12 @@
   gap: 1.4rem;
   min-width: 0;
 }
+.aff-page .ui-card,
+.aff-page .ui-field,
+.aff-page .aff-form,
+.aff-page .afp-grid > * {
+  min-width: 0;
+}
 .aff-page h2 {
   margin: 0 0 0.75rem;
   font-size: 1.25rem;
@@ -13,22 +19,22 @@
 .aff-page p {
   line-height: 1.55;
 }
-.aff-share {
+.afp-share {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 1.5rem;
 }
-.aff-share > * {
+.afp-share > * {
   flex: 1;
   min-width: 0;
 }
-.aff-share-actions {
+.afp-share-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem;
 }
-.aff-share-actions input {
+.afp-share-actions input {
   min-width: 0;
   width: 100%;
   flex: 1 1 100%;
@@ -59,17 +65,17 @@
   font-size: clamp(1.25rem, 2vw, 1.7rem);
   overflow-wrap: anywhere;
 }
-.aff-grid {
+.afp-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
   align-items: start;
 }
-.aff-funnel {
+.afp-funnel {
   display: grid;
   gap: 0.55rem;
 }
-.aff-funnel > div {
+.afp-funnel > div {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -77,17 +83,17 @@
   border-bottom: 1px solid #e0e5eb;
   padding: 0.55rem 0;
 }
-.aff-funnel strong {
+.afp-funnel strong {
   color: #c63622;
   font-size: 1.25rem;
 }
-.aff-tabs {
+.afp-tabs {
   display: flex;
   gap: 0.5rem;
   border-bottom: 1px solid #d8dfe7;
   overflow-x: auto;
 }
-.aff-tabs button {
+.afp-tabs button {
   flex: 0 0 auto;
   border: 0;
   border-bottom: 3px solid transparent;
@@ -98,7 +104,7 @@
   font-weight: 700;
   cursor: pointer;
 }
-.aff-tabs button.is-active {
+.afp-tabs button.is-active {
   color: #c63622;
   border-bottom-color: #c63622;
 }
@@ -134,16 +140,19 @@
   gap: 0.35rem;
   font-weight: 700;
 }
-.aff-code {
+.afp-otp {
   display: flex;
   gap: 0.7rem;
   align-items: end;
   flex-wrap: wrap;
 }
-.aff-code .ui-field {
-  flex: 1;
+.afp-otp .ui-field {
+  flex: 1 1 12rem;
 }
-.aff-payout {
+.afp-otp .ui-btn {
+  flex: 0 0 auto;
+}
+.afp-payout {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
@@ -228,13 +237,13 @@
   margin-top: 1rem;
 }
 @media (max-width: 850px) {
-  .aff-share {
+  .afp-share {
     display: block;
   }
   .aff-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .aff-grid {
+  .afp-grid {
     grid-template-columns: 1fr;
   }
 }

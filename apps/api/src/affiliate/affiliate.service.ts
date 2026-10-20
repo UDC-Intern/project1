@@ -575,8 +575,9 @@ export class AffiliateService {
 
   async adminOverview() {
     const [members] = await this.db
-      .select({ n: sql<number>`count(distinct ${s.referrals.referrerId})::int` })
-      .from(s.referrals);
+      .select({ n: sql<number>`count(*)::int` })
+      .from(s.parents)
+      .where(sql`${s.parents.referralCode} is not null`);
     const [payouts] = await this.db
       .select({ n: sql<number>`count(*)::int` })
       .from(s.affiliatePayoutRequests)

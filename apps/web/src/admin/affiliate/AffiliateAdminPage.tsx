@@ -81,7 +81,7 @@ export function AffiliateAdminPage() {
         title="Afiliasi"
         subtitle="Pantau ajakan, verifikasi rekening, dan proses pencairan komisi."
       />
-      <nav className="aff-tabs" aria-label="Pengelolaan afiliasi">
+      <nav className="afp-tabs" aria-label="Pengelolaan afiliasi">
         {(
           [
             ['overview', 'Ringkasan'],
@@ -108,7 +108,7 @@ export function AffiliateAdminPage() {
         ) : overview.data ? (
           <div className="aff-stats">
             <Card>
-              <small>Afiliator aktif</small>
+              <small>Pengguna afiliasi</small>
               <strong>{overview.data.affiliates}</strong>
             </Card>
             <Card>
@@ -148,7 +148,7 @@ function AffiliateAnalytics() {
     ['Berlangganan', data.funnel.subscribers],
   ] as const;
   return (
-    <div className="aff-grid">
+    <div className="afp-grid">
       <Card>
         <h2>Perjalanan anggota</h2>
         <p>
@@ -209,8 +209,10 @@ function Affiliates() {
       </Notice>
     );
   const rows = data
-    .filter((x) => x.members > 0 || x.balance.earned > 0)
-    .filter((x) => `${x.name} ${x.email} ${x.code}`.toLowerCase().includes(query.toLowerCase()));
+    .filter(
+      (x) => x.code && `${x.name} ${x.email} ${x.code}`.toLowerCase().includes(query.toLowerCase()),
+    )
+    .sort((a, b) => b.members - a.members || b.balance.earned - a.balance.earned);
   return (
     <Card>
       <h2>Afiliator</h2>
