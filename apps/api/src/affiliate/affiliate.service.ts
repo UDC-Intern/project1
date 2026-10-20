@@ -948,8 +948,8 @@ export class AffiliateService {
     };
   }
 
-  adminPayouts() {
-    return this.db
+  async adminPayouts() {
+    const rows = await this.db
       .select({
         request: {
           id: s.affiliatePayoutRequests.id,
@@ -957,6 +957,7 @@ export class AffiliateService {
           amount: s.affiliatePayoutRequests.amount,
           providerName: s.affiliatePayoutRequests.providerName,
           accountLast4: s.affiliatePayoutRequests.accountLast4,
+          accountEncrypted: s.affiliatePayoutRequests.accountEncrypted,
           holderName: s.affiliatePayoutRequests.holderName,
           status: s.affiliatePayoutRequests.status,
           requestedAt: s.affiliatePayoutRequests.requestedAt,
@@ -968,6 +969,13 @@ export class AffiliateService {
       .innerJoin(s.parents, eq(s.parents.id, s.affiliatePayoutRequests.parentId))
       .orderBy(desc(s.affiliatePayoutRequests.requestedAt))
       .limit(200);
+    return rows.map(({ request: { accountEncrypted, ...request }, ...row }) => ({
+      ...row,
+      request: {
+        ...request,
+        accountNumber: open(accountEncrypted),
+      },
+    }));
   }
 
   async payoutAccount(id: string) {
@@ -983,13 +991,14 @@ export class AffiliateService {
     };
   }
 
-  adminAccounts() {
-    return this.db
+  async adminAccounts() {
+    const rows = await this.db
       .select({
         account: {
           parentId: s.affiliateAccounts.parentId,
           providerName: s.affiliateAccounts.providerName,
           accountLast4: s.affiliateAccounts.accountLast4,
+          accountEncrypted: s.affiliateAccounts.accountEncrypted,
           holderName: s.affiliateAccounts.holderName,
           status: s.affiliateAccounts.status,
           reviewNote: s.affiliateAccounts.reviewNote,
@@ -999,6 +1008,13 @@ export class AffiliateService {
       .from(s.affiliateAccounts)
       .innerJoin(s.parents, eq(s.parents.id, s.affiliateAccounts.parentId))
       .limit(200);
+    return rows.map(({ account: { accountEncrypted, ...account }, ...row }) => ({
+      ...row,
+      account: {
+        ...account,
+        accountNumber: open(accountEncrypted),
+      },
+    }));
   }
 
   async reviewAccount(parentId: string, approved: boolean, note: string) {

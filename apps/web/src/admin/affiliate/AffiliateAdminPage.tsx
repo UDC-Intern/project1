@@ -2,7 +2,16 @@ import { useRef, useState, type FormEvent } from 'react';
 import { formatRupiah, type AffiliateSettings } from '@udakids/engine';
 import { errorMessage } from '../../api/client';
 import { useApiCall, useFetch } from '../../auth/useApi';
-import { Button, Card, Notice, PageHeader, Spinner, TextField } from '../../ui/ui';
+import {
+  Button,
+  Card,
+  Dialog,
+  Notice,
+  PageHeader,
+  Spinner,
+  TextArea,
+  TextField,
+} from '../../ui/ui';
 import '../../parent/affiliate.css';
 
 type Overview = {
@@ -48,7 +57,7 @@ type Payout = {
     parentId: string;
     amount: number;
     providerName: string;
-    accountLast4: string;
+    accountNumber: string;
     holderName: string;
     status: string;
     requestedAt: string;
@@ -60,7 +69,7 @@ type Account = {
   account: {
     parentId: string;
     providerName: string;
-    accountLast4: string;
+    accountNumber: string;
     holderName: string;
     status: string;
     reviewNote: string | null;
@@ -393,10 +402,15 @@ function Payouts({ onChange }: { onChange: () => void }) {
   const lock = useRef(false);
   const [busy, setBusy] = useState('');
   const [message, setMessage] = useState('');
-  const [revealed, setRevealed] = useState<Record<string, string>>({});
-  const [references, setReferences] = useState<Record<string, string>>({});
+  const [decisionError, setDecisionError] = useState('');
+  const [decision, setDecision] = useState<{
+    request: Payout['request'];
+    name: string;
+    action: 'paid' | 'reject';
+    reason: string;
+  } | null>(null);
   async function run(id: string, action: () => Promise<unknown>) {
-    if (lock.current) return;
+    if (lock.current) return false;
     lock.current = true;
     setBusy(id);
     setMessage('');
@@ -405,8 +419,11 @@ function Payouts({ onChange }: { onChange: () => void }) {
       list.reload();
       onChange();
       setMessage('Perubahan berhasil disimpan.');
+      return true;
     } catch (error) {
       setMessage(errorMessage(error));
+      setDecisionError(errorMessage(error));
+      return false;
     } finally {
       lock.current = false;
       setBusy('');
@@ -422,13 +439,15 @@ function Payouts({ onChange }: { onChange: () => void }) {
         <p>Belum ada pengajuan.</p>
       ) : (
         <div className="aff-table-wrap">
-          <table className="aff-table">
+          <table className="aff-table afp-payout-table">
             <thead>
               <tr>
                 <th>Orang tua</th>
                 <th>Tanggal</th>
                 <th>Jumlah</th>
-                <th>Rekening</th>
+                <th>Bank / e-wallet</th>
+                <th>Nama rekening</th>
+                <th>No. rekening</th>
                 <th>Status</th>
                 <th>Tindakan</th>
               </tr>
@@ -439,55 +458,22 @@ function Payouts({ onChange }: { onChange: () => void }) {
                   <td>{name}</td>
                   <td>{date(r.requestedAt)}</td>
                   <td>{money(r.amount)}</td>
-                  <td>
-                    {r.providerName} •••• {r.accountLast4}
-                    <br />
-                    {r.holderName}
-                  </td>
+                  <td>{r.providerName}</td>
+                  <td>{r.holderName}</td>
+                  <td className="afp-account-number">{r.accountNumber}</td>
                   <td>
                     {r.status}
                     {r.note && <small> · {r.note}</small>}
                   </td>
                   <td>
                     {r.status === 'requested' && (
-                      <div className="aff-actions">
+                      <div className="afp-payout-actions">
                         <Button
                           size="sm"
-                          variant="ghost"
                           disabled={!!busy}
-                          onClick={() =>
-                            void run(r.id, async () => {
-                              const account = await call<{ accountNumber: string }>(
-                                `/admin/affiliate/payouts/${r.id}/account`,
-                              );
-                              setRevealed((v) => ({ ...v, [r.id]: account.accountNumber }));
-                            })
-                          }
-                        >
-                          Lihat nomor
-                        </Button>
-                        {revealed[r.id] && <strong>{revealed[r.id]}</strong>}
-                        <input
-                          aria-label={`Referensi transfer ${name}`}
-                          placeholder="Referensi transfer"
-                          value={references[r.id] ?? ''}
-                          onChange={(e) => setReferences((v) => ({ ...v, [r.id]: e.target.value }))}
-                        />
-                        <Button
-                          size="sm"
-                          disabled={!!busy || !revealed[r.id]}
                           onClick={() => {
-                            if (
-                              window.confirm(
-                                `Tandai ${money(r.amount)} untuk ${name} sudah ditransfer?`,
-                              )
-                            )
-                              void run(r.id, () =>
-                                call(`/admin/affiliate/payouts/${r.id}/paid`, {
-                                  method: 'POST',
-                                  body: { transferRef: references[r.id] ?? '' },
-                                }),
-                              );
+                            setDecisionError('');
+                            setDecision({ request: r, name, action: 'paid', reason: '' });
                           }}
                         >
                           Sudah dibayar
@@ -497,14 +483,8 @@ function Payouts({ onChange }: { onChange: () => void }) {
                           variant="danger"
                           disabled={!!busy}
                           onClick={() => {
-                            const reason = window.prompt('Alasan penolakan');
-                            if (reason?.trim())
-                              void run(r.id, () =>
-                                call(`/admin/affiliate/payouts/${r.id}/reject`, {
-                                  method: 'POST',
-                                  body: { reason },
-                                }),
-                              );
+                            setDecisionError('');
+                            setDecision({ request: r, name, action: 'reject', reason: '' });
                           }}
                         >
                           Tolak
@@ -518,10 +498,81 @@ function Payouts({ onChange }: { onChange: () => void }) {
           </table>
         </div>
       )}
+      <Dialog
+        open={!!decision}
+        title={decision?.action === 'paid' ? 'Konfirmasi pencairan' : 'Tolak pencairan'}
+        tone="warning"
+        onClose={() => !busy && setDecision(null)}
+        actions={
+          <>
+            <Button variant="ghost" disabled={!!busy} onClick={() => setDecision(null)}>
+              Batal
+            </Button>
+            <Button
+              variant={decision?.action === 'reject' ? 'danger' : 'primary'}
+              disabled={
+                !!busy || (decision?.action === 'reject' && decision.reason.trim().length < 3)
+              }
+              onClick={() => {
+                if (!decision) return;
+                const current = decision;
+                const action =
+                  current.action === 'paid'
+                    ? () =>
+                        call('/admin/affiliate/payouts/' + current.request.id + '/paid', {
+                          method: 'POST',
+                          body: {},
+                        })
+                    : () =>
+                        call('/admin/affiliate/payouts/' + current.request.id + '/reject', {
+                          method: 'POST',
+                          body: { reason: current.reason.trim() },
+                        });
+                void run(current.request.id, action).then((saved) => {
+                  if (saved) setDecision(null);
+                });
+              }}
+            >
+              {busy
+                ? 'Menyimpan…'
+                : decision?.action === 'paid'
+                  ? 'Ya, sudah dibayar'
+                  : 'Tolak pencairan'}
+            </Button>
+          </>
+        }
+      >
+        {decision?.action === 'paid' ? (
+          <p>
+            Tandai {money(decision.request.amount)} untuk {decision.name} sudah ditransfer ke{' '}
+            {decision.request.holderName}?
+          </p>
+        ) : (
+          <>
+            {decisionError && <Notice tone="error">{decisionError}</Notice>}
+            <p>
+              Saldo pengajuan {money(decision?.request.amount ?? 0)} akan dikembalikan kepada{' '}
+              {decision?.name}.
+            </p>
+            <TextArea
+              label="Alasan penolakan"
+              hint="Minimal 3 karakter."
+              required
+              autoFocus
+              maxLength={200}
+              value={decision?.reason ?? ''}
+              onChange={(event) =>
+                setDecision((current) =>
+                  current ? { ...current, reason: event.target.value } : current,
+                )
+              }
+            />
+          </>
+        )}
+      </Dialog>
     </Card>
   );
 }
-
 function Accounts({ onChange }: { onChange: () => void }) {
   const list = useFetch<Account[]>('staff', '/admin/affiliate/accounts');
   const call = useApiCall('staff');
@@ -563,8 +614,9 @@ function Accounts({ onChange }: { onChange: () => void }) {
             <thead>
               <tr>
                 <th>Orang tua</th>
-                <th>Tujuan</th>
+                <th>Bank / e-wallet</th>
                 <th>Nama rekening</th>
+                <th>No. rekening</th>
                 <th>Status</th>
                 <th>Tindakan</th>
               </tr>
@@ -573,10 +625,9 @@ function Accounts({ onChange }: { onChange: () => void }) {
               {list.data.map(({ account: a, name }) => (
                 <tr key={a.parentId}>
                   <td>{name}</td>
-                  <td>
-                    {a.providerName} •••• {a.accountLast4}
-                  </td>
+                  <td>{a.providerName}</td>
                   <td>{a.holderName}</td>
+                  <td className="afp-account-number">{a.accountNumber}</td>
                   <td>
                     {a.status}
                     {a.reviewNote && ` · ${a.reviewNote}`}
