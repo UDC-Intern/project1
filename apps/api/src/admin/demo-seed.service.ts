@@ -230,6 +230,13 @@ export class DemoSeedService {
           })
           .returning();
       }
+      if (demoParentEmail.test(family.email) && parent!.name !== family.name) {
+        [parent] = await this.db
+          .update(s.parents)
+          .set({ name: family.name })
+          .where(eq(s.parents.id, parent!.id))
+          .returning();
+      }
       parentRows.push(parent!);
       const children: { nickname: string; id: string }[] = [];
       for (const profile of family.children) {
@@ -514,6 +521,11 @@ export class DemoSeedService {
       }
       await this.affiliate.release(demoReferrer.id);
     }
+
+    await this.affiliate.seedDemoPayouts(
+      parentRows.map(({ id, name }) => ({ id, name })),
+      admin.id,
+    );
 
     for (let index = 0; index < childRows.length; index += 8) {
       const child = childRows[index]!;

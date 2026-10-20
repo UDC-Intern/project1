@@ -99,6 +99,201 @@ export class AffiliateService {
     fail(409, 'CONFLICT', 'Kode afiliasi belum bisa dibuat. Coba lagi.');
   }
 
+  async seedDemoPayouts(parents: { id: string; name: string }[], adminId: string) {
+    const accountNames = [
+      'Bank Central Asia',
+      'Bank Mandiri',
+      'Bank Negara Indonesia',
+      'Bank Rakyat Indonesia',
+      'Bank Syariah Indonesia',
+      'Bank Central Asia',
+      'Bank Mandiri',
+      'DANA',
+      'Bank Negara Indonesia',
+      'Bank Rakyat Indonesia',
+      'Bank Central Asia',
+      'GoPay',
+    ];
+    const accountIds = [
+      'bca',
+      'mandiri',
+      'bni',
+      'bri',
+      'bsi',
+      'bca',
+      'mandiri',
+      'dana',
+      'bni',
+      'bri',
+      'bca',
+      'gopay',
+    ];
+    const accountStatuses = [
+      'verified',
+      'verified',
+      'verified',
+      'verified',
+      'verified',
+      'verified',
+      'verified',
+      'verified',
+      'pending',
+      'pending',
+      'rejected',
+      'rejected',
+    ] as const;
+    const accountNotes = [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      'Menunggu pemeriksaan data rekening.',
+      'Menunggu pemeriksaan data rekening.',
+      'Nama pemilik rekening perlu diperbaiki.',
+      'Data rekening belum sesuai.',
+    ];
+
+    for (const [index, parent] of parents.slice(0, 12).entries()) {
+      const number = String(880_000_000_000 + index * 1_234_567);
+      const status = accountStatuses[index]!;
+      await this.db
+        .insert(s.affiliateAccounts)
+        .values({
+          parentId: parent.id,
+          providerId: accountIds[index]!,
+          providerName: accountNames[index]!,
+          kind: index === 7 || index === 11 ? 'ewallet' : 'bank',
+          accountEncrypted: seal(number),
+          accountHash: accountHash(number),
+          accountLast4: number.slice(-4),
+          holderName: parent.name,
+          status,
+          reviewNote: accountNotes[index] ?? null,
+          changedAt: new Date(Date.now() - 14 * 86_400_000),
+        })
+        .onConflictDoNothing();
+    }
+
+    const samples = [
+      {
+        parentIndex: 0,
+        amount: 15_000,
+        status: 'requested' as const,
+        note: 'Menunggu pemeriksaan admin.',
+      },
+      {
+        parentIndex: 1,
+        amount: 20_000,
+        status: 'paid' as const,
+        note: 'Pencairan telah diproses.',
+      },
+      {
+        parentIndex: 2,
+        amount: 15_000,
+        status: 'rejected' as const,
+        note: 'Contoh penolakan; saldo dikembalikan.',
+      },
+      {
+        parentIndex: 3,
+        amount: 15_000,
+        status: 'cancelled' as const,
+        note: 'Contoh pembatalan; saldo dikembalikan.',
+      },
+      {
+        parentIndex: 4,
+        amount: 25_000,
+        status: 'requested' as const,
+        note: 'Menunggu pemeriksaan admin.',
+      },
+    ];
+
+    for (const [sampleIndex, sample] of samples.entries()) {
+      const parent = parents[sample.parentIndex]!;
+      await this.db.transaction(async (tx) => {
+        const [existing] = await tx
+          .select({ id: s.affiliatePayoutRequests.id })
+          .from(s.affiliatePayoutRequests)
+          .where(eq(s.affiliatePayoutRequests.parentId, parent.id));
+        if (existing) return;
+
+        const [account] = await tx
+          .select()
+          .from(s.affiliateAccounts)
+          .where(eq(s.affiliateAccounts.parentId, parent.id));
+        if (!account || account.status !== 'verified') return;
+
+        const [balance] = await tx
+          .select({ amount: sql<number>`coalesce(sum(${s.affiliateLedger.amount}), 0)::int` })
+          .from(s.affiliateLedger)
+          .where(
+            and(
+              eq(s.affiliateLedger.parentId, parent.id),
+              eq(s.affiliateLedger.state, 'available'),
+            ),
+          );
+        const shortfall = sample.amount - Number(balance?.amount ?? 0);
+        if (shortfall > 0)
+          await tx.insert(s.affiliateLedger).values({
+            parentId: parent.id,
+            type: 'adjustment',
+            state: 'available',
+            amount: shortfall,
+            note: 'Saldo contoh untuk simulasi pencairan.',
+          });
+
+        const requestedAt = new Date(Date.now() - (samples.length - sampleIndex) * 86_400_000);
+        const [payout] = await tx
+          .insert(s.affiliatePayoutRequests)
+          .values({
+            parentId: parent.id,
+            amount: sample.amount,
+            providerName: account.providerName,
+            accountLast4: account.accountLast4,
+            accountEncrypted: account.accountEncrypted,
+            holderName: account.holderName,
+            status: sample.status,
+            note: sample.note,
+            transferRef: sample.status === 'paid' ? 'TRF-2026-00128' : null,
+            reviewedBy: sample.status === 'requested' ? null : adminId,
+            requestedAt,
+            reviewedAt: sample.status === 'requested' ? null : requestedAt,
+          })
+          .returning({ id: s.affiliatePayoutRequests.id });
+        await tx.insert(s.affiliateLedger).values({
+          parentId: parent.id,
+          type: 'payout',
+          state: 'available',
+          amount: -sample.amount,
+          payoutId: payout!.id,
+          note: 'Pengajuan pencairan',
+          createdAt: requestedAt,
+        });
+        if (sample.status === 'rejected' || sample.status === 'cancelled')
+          await tx.insert(s.affiliateLedger).values({
+            parentId: parent.id,
+            type: 'payout_return',
+            state: 'available',
+            amount: sample.amount,
+            payoutId: payout!.id,
+            note: sample.note,
+            createdAt: requestedAt,
+          });
+        if (sample.status === 'paid')
+          await tx.insert(s.commissionPayouts).values({
+            parentId: parent.id,
+            amount: sample.amount,
+            note: 'Pencairan komisi',
+            createdBy: adminId,
+            createdAt: requestedAt,
+          });
+      });
+    }
+  }
+
   async preview(raw: string) {
     const code = raw.trim().toUpperCase();
     if (!isReferralCode(code)) return { valid: false };

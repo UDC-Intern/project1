@@ -93,6 +93,32 @@ const names = [
   'Kia',
   'Hasna',
 ];
+const parentNames = [
+  'Ridho Dwi Syahputra',
+  'Siti Aisyah Rahmawati',
+  'Bima Pratama',
+  'Dewi Anggraini',
+  'Andi Saputra',
+  'Nadia Putri Lestari',
+  'Rizky Ramadhan',
+  'Maya Puspitasari',
+  'Fajar Nugroho',
+  'Intan Permata Sari',
+  'Aditya Kurniawan',
+  'Rina Marlina',
+  'Dimas Setiawan',
+  'Nurul Hidayah',
+  'Rafi Ahmad Fauzi',
+  'Lina Wulandari',
+  'Arif Hidayat',
+  'Citra Maharani',
+  'Yoga Pratama',
+  'Fitri Handayani',
+  'Bayu Pamungkas',
+  'Dian Kartika',
+  'Ilham Maulana',
+  'Putri Amelia',
+];
 const colors = ['blue', 'green', 'pink', 'orange', 'teal', 'yellow'];
 const demoPin = ['apple', 'apple', 'apple'];
 const parentPassword = '12345678';
@@ -137,11 +163,12 @@ async function loadAccess() {
   }
   for (let family = 0; family < 24; family++) {
     access.parents[family] ??= {
-      name: `Orang Tua Demo ${String(family + 1).padStart(2, '0')}`,
+      name: parentNames[family],
       email: `demo.keluarga${family + 1}@example.test`,
       password: parentPassword,
       children: [],
     };
+    access.parents[family].name = parentNames[family];
     for (let slot = 0; slot < (family === 0 ? 5 : 3); slot++) {
       const index = family * 3 + slot;
       access.parents[family].children[slot] ??= {
