@@ -23,10 +23,13 @@ export function useDebounced<T>(value: T, ms = 300): T {
 /** Jalankan aksi API dengan status sibuk serta pesan galat atau berhasil. */
 export function useAction() {
   const [busy, setBusy] = useState(false);
+  const busyRef = useRef(false);
   const [error, setError] = useState<unknown>();
   const [done, setDone] = useState<string>();
   const run = useCallback(
     async <T,>(fn: () => Promise<T>, success?: string): Promise<T | undefined> => {
+      if (busyRef.current) return undefined;
+      busyRef.current = true;
       setBusy(true);
       setError(undefined);
       setDone(undefined);
@@ -38,6 +41,7 @@ export function useAction() {
         setError(err);
         return undefined;
       } finally {
+        busyRef.current = false;
         setBusy(false);
       }
     },

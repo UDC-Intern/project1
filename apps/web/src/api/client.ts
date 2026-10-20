@@ -51,20 +51,49 @@ export function errorMessage(err: unknown): string {
 
 type Options = { method?: string; body?: unknown; token?: string | null; signal?: AbortSignal };
 
+/** Permintaan perubahan yang sama hanya dikirim sekali selama masih berjalan. */
+const inFlightMutations = new Map<string, Promise<unknown>>();
+
 /** Satu-satunya tempat fetch dipanggil. Halaman memakai fungsi di src/api/<modul>.ts. */
 export async function request<T>(path: string, options: Options = {}): Promise<T> {
+  const method = (options.method ?? (options.body !== undefined ? 'POST' : 'GET')).toUpperCase();
+  const token = options.token !== undefined ? options.token : useSession.getState().session?.token;
+  const body = options.body === undefined ? undefined : JSON.stringify(options.body);
+  const mutationKey =
+    method === 'GET' || method === 'HEAD'
+      ? undefined
+      : JSON.stringify([method, `${API_URL}${path}`, token ?? '', body ?? '']);
+  const existing = mutationKey ? inFlightMutations.get(mutationKey) : undefined;
+  if (existing) return existing as Promise<T>;
+
+  const pending = send<T>(path, options, method, token, body);
+  if (mutationKey) inFlightMutations.set(mutationKey, pending);
+  try {
+    return await pending;
+  } finally {
+    if (mutationKey && inFlightMutations.get(mutationKey) === pending)
+      inFlightMutations.delete(mutationKey);
+  }
+}
+
+async function send<T>(
+  path: string,
+  options: Options,
+  method: string,
+  token: string | null | undefined,
+  body: string | undefined,
+): Promise<T> {
   const headers: Record<string, string> = {};
   if (options.body !== undefined) headers['Content-Type'] = 'application/json';
-  const token = options.token !== undefined ? options.token : useSession.getState().session?.token;
   if (token) headers.Authorization = `Bearer ${token}`;
 
   let res: Response;
   try {
     res = await fetch(`${API_URL}${path}`, {
-      method: options.method ?? (options.body !== undefined ? 'POST' : 'GET'),
+      method,
       headers,
       signal: options.signal,
-      body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
+      body,
     });
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') throw error;

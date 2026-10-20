@@ -1637,11 +1637,16 @@
   list-style: none;
 }
 
+.gal-grid > li {
+  min-width: 0;
+}
+
 .gal-tile {
   display: grid;
   justify-items: center;
   gap: 4px;
   width: 100%;
+  min-width: 0;
   height: 100%;
   padding: 12px 10px;
   border: 1px solid var(--ui-line);
@@ -1674,6 +1679,13 @@
 
 .gal-preview .cert-sheet {
   box-shadow: none;
+}
+
+.gal-tile .adm-code-small {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .gal-big {
